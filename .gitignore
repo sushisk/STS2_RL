@@ -7,11 +7,14 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Environments
-.venv/
-venv/
-env/
-.conda/
+# Environments (anchored to repo root only - unanchored "env/"/"bin/" etc. would
+# also match unrelated same-named SOURCE directories elsewhere in the tree, e.g.
+# Combat/env/ which holds combat_env.py; found by this exact collision breaking
+# `from combat_env import CombatEnv` after the initial baseline commit)
+/.venv/
+/venv/
+/env/
+/.conda/
 
 # IDE / tool runtime
 .vscode/
@@ -28,9 +31,9 @@ env/
 credentials*.json
 secrets*.json
 
-# Build and binaries
-bin/
-obj/
+# Build and binaries (anchored - see the Environments section note above for why)
+/bin/
+/obj/
 *.dll
 *.pdb
 
@@ -40,8 +43,8 @@ obj/
 *.temp
 *.bak
 ~$*
-tmp/
-temp/
+/tmp/
+/temp/
 
 # Generated outputs
 Outputs/backups/
