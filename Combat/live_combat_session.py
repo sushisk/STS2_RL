@@ -63,6 +63,7 @@ from emulator_bridge import (
     shared_game_instance,
     to_plain,
     validate_restore_snapshot as bridge_validate_restore_snapshot,
+    validate_restore_snapshot_json as bridge_validate_restore_snapshot_json,
 )
 
 MAX_CONTINUATION_STEPS = 50
@@ -444,6 +445,11 @@ class LiveCombatSession:
         """Side-effect-free Restore dry run through the public CLR API."""
         game = self._game or shared_game_instance(self._repo_root)
         return _restore_validation_result_from_clr(bridge_validate_restore_snapshot(game, snapshot))
+
+    def validate_restore_snapshot_json(self, json_text: str) -> RestoreValidationResult:
+        """Side-effect-free Restore dry run through the public CLR JSON API."""
+        game = self._game or shared_game_instance(self._repo_root)
+        return _restore_validation_result_from_clr(bridge_validate_restore_snapshot_json(game, json_text))
 
     def get_restore_capabilities(self) -> RestoreCapabilities:
         """Returns the live CLR Restore capability contract as a Python dataclass."""

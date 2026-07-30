@@ -205,7 +205,7 @@ def test_reference_validator_synthetic_dangling():
     mutated = copy.deepcopy(d)
     mutated["CombatHistory"]["Entries"].append({
         "EntryType": "DamageReceivedEntry", "RoundNumber": 1, "CurrentSide": "player",
-        "ActorInstanceId": "card-999999999", "Fields": {},
+        "ActorInstanceId": "card-999999999", "PlayerTurnNumbers": {}, "Fields": {},
     })
     snap = CombatStateSnapshot.from_dict(mutated)
     report = css.validate_snapshot_references(snap)
