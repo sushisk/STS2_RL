@@ -28,7 +28,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-KNOWN_SCHEMA_VERSIONS = frozenset({"phase2a.1", "phase2b.1", "phase2b.2"})
+KNOWN_SCHEMA_VERSIONS = frozenset({"phase2a.1", "phase2b.1", "phase2b.2", "phase3c.3", "phase3c.4"})
 COMPLETENESS_VALUES = frozenset({"complete", "partial_known_gaps", "unsupported_state", "capture_failed"})
 CAPTURE_BOUNDARY_VALUES = frozenset({"normal_player_decision", "published_choice", "published_target", "terminal"})
 
@@ -367,15 +367,16 @@ class CombatHistoryEntrySnapshot:
     EntryType: str
     RoundNumber: int
     CurrentSide: str
+    PlayerTurnNumbers: dict
     Fields: dict
     ActorInstanceId: "str | None" = None
 
     @classmethod
     def from_dict(cls, d: dict) -> "CombatHistoryEntrySnapshot":
-        _require(d, ["EntryType", "RoundNumber", "CurrentSide", "Fields"], "CombatHistoryEntrySnapshot")
+        _require(d, ["EntryType", "RoundNumber", "CurrentSide", "PlayerTurnNumbers", "Fields"], "CombatHistoryEntrySnapshot")
         return cls(
             EntryType=d["EntryType"], RoundNumber=int(d["RoundNumber"]), CurrentSide=d["CurrentSide"],
-            Fields=d["Fields"], ActorInstanceId=d.get("ActorInstanceId"),
+            PlayerTurnNumbers=dict(d["PlayerTurnNumbers"]), Fields=d["Fields"], ActorInstanceId=d.get("ActorInstanceId"),
         )
 
 

@@ -221,5 +221,9 @@ def validate_restore_snapshot(game, snapshot):
     return game.ValidateRestoreSnapshot(snapshot_to_clr(snapshot))
 
 
+def validate_restore_snapshot_json(game, json_text: str):
+    return game.ValidateRestoreSnapshotJson(json_text)
+
+
 def get_restore_capabilities(game):
     return game.GetRestoreCapabilities()
