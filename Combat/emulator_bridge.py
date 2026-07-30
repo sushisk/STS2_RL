@@ -15,6 +15,7 @@ package, shadowing the CLR-backed "Sts2Emulator.Api" module the clr importer pro
 
 from __future__ import annotations
 
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +57,8 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
         FaultedCombatSessionException,
         GameInstance,
         QuiescentBoundaryViolationException,
+        SnapshotRestoreFailedException,
+        SnapshotRestoreRejectedException,
     )
     from Sts2Emulator.Dto import (  # noqa: E402
         CardInstanceScenario,
@@ -66,14 +69,18 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
         PotionScenario,
         PowerStack,
     )
+    from Sts2Emulator.Dto.Snapshot import CombatStateSnapshot as ClrCombatStateSnapshot  # noqa: E402
     from System.Collections.Generic import List  # noqa: E402
     from System import Decimal, String  # noqa: E402
+    from System.Text.Json import JsonSerializer  # noqa: E402
 
     _types = {
         "GameInstance": GameInstance,
         "QuiescentBoundaryViolationException": QuiescentBoundaryViolationException,
         "ActionFaultedException": ActionFaultedException,
         "FaultedCombatSessionException": FaultedCombatSessionException,
+        "SnapshotRestoreRejectedException": SnapshotRestoreRejectedException,
+        "SnapshotRestoreFailedException": SnapshotRestoreFailedException,
         "CombatScenario": CombatScenario,
         "EnemyScenario": EnemyScenario,
         "OrbScenario": OrbScenario,
@@ -81,9 +88,11 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
         "PowerStack": PowerStack,
         "CardInstanceScenario": CardInstanceScenario,
         "PotionScenario": PotionScenario,
+        "ClrCombatStateSnapshot": ClrCombatStateSnapshot,
         "List": List,
         "Decimal": Decimal,
         "String": String,
+        "JsonSerializer": JsonSerializer,
     }
     return _types
 
@@ -154,3 +163,63 @@ def observation_to_dict(obs) -> dict:
         "outcome": str(obs.Outcome),
         "state": to_plain(obs.State),
     }
+
+
+def _strip_python_snapshot_only_fields(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            k: _strip_python_snapshot_only_fields(v)
+            for k, v in value.items()
+            if k != "unknown_fields"
+        }
+    if isinstance(value, list):
+        return [_strip_python_snapshot_only_fields(v) for v in value]
+    return value
+
+
+def _snapshot_to_json_text(snapshot: Any) -> str | None:
+    if isinstance(snapshot, str):
+        return snapshot
+    if is_dataclass(snapshot):
+        snapshot = asdict(snapshot)
+    if isinstance(snapshot, dict):
+        from combat_state_snapshot import canonical_json
+
+        return canonical_json(
+            _strip_python_snapshot_only_fields(snapshot),
+            exclude_volatile=False,
+        )
+    return None
+
+
+def snapshot_to_clr(snapshot: Any) -> Any:
+    """Returns a CLR CombatStateSnapshot, reusing the existing Python DTO serializer.
+
+    Raw pythonnet-wrapped snapshots are passed through unchanged. Python
+    CombatStateSnapshot dataclasses or plain snapshot dicts are serialized with the
+    established canonical JSON helper, then deserialized into the C# DTO.
+    """
+    types = ensure_loaded()
+    if hasattr(snapshot, "GetType") and str(snapshot.GetType().FullName) == "Sts2Emulator.Dto.Snapshot.CombatStateSnapshot":
+        return snapshot
+
+    json_text = _snapshot_to_json_text(snapshot)
+    if json_text is None:
+        return snapshot
+    return types["JsonSerializer"].Deserialize[types["ClrCombatStateSnapshot"]](json_text)
+
+
+def restore_snapshot(game, snapshot):
+    return game.RestoreSnapshot(snapshot_to_clr(snapshot))
+
+
+def restore_snapshot_json(game, json_text: str):
+    return game.RestoreSnapshotJson(json_text)
+
+
+def validate_restore_snapshot(game, snapshot):
+    return game.ValidateRestoreSnapshot(snapshot_to_clr(snapshot))
+
+
+def get_restore_capabilities(game):
+    return game.GetRestoreCapabilities()

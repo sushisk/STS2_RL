@@ -54,7 +54,16 @@ from battle_emulator import (
     build_scenario_from_state,
     is_action_continuation_pending_choice,
 )
-from emulator_bridge import ensure_loaded, legal_actions_to_list, shared_game_instance, to_plain
+from emulator_bridge import (
+    ensure_loaded,
+    get_restore_capabilities as bridge_get_restore_capabilities,
+    legal_actions_to_list,
+    restore_snapshot as bridge_restore_snapshot,
+    restore_snapshot_json as bridge_restore_snapshot_json,
+    shared_game_instance,
+    to_plain,
+    validate_restore_snapshot as bridge_validate_restore_snapshot,
+)
 
 MAX_CONTINUATION_STEPS = 50
 
@@ -83,6 +92,14 @@ def _action_faulted_exception_type():
 
 def _faulted_combat_session_exception_type():
     return ensure_loaded()["FaultedCombatSessionException"]
+
+
+def _snapshot_restore_rejected_exception_type():
+    return ensure_loaded()["SnapshotRestoreRejectedException"]
+
+
+def _snapshot_restore_failed_exception_type():
+    return ensure_loaded()["SnapshotRestoreFailedException"]
 
 
 # Phase 3A.3 (Canonical CombatStateSnapshot contract - Action fault propagation):
@@ -215,6 +232,161 @@ class FaultedCombatSessionError(RuntimeError):
         super().__init__(message)
 
 
+def _str_or_none(value) -> "str | None":
+    return None if value is None else str(value)
+
+
+def _str_list(value) -> list[str]:
+    if value is None:
+        return []
+    return [str(item) for item in value]
+
+
+@dataclass(frozen=True)
+class RestoreValidationResult:
+    eligible: bool
+    rejection_codes: list[str]
+    unsupported_field_paths: list[str]
+
+
+@dataclass(frozen=True)
+class RestoreCapabilities:
+    restore_api_version: str
+    milestone: str
+    contract_version: str
+    contract_sha256: str
+    snapshot_schema_version: str
+    snapshot_schema_sha256: str
+    supported_completeness: list[str]
+    supports_combat_history: bool
+    supports_pets: bool
+    supports_pending_choice: bool
+    supports_pending_target: bool
+    supports_action_continuation: bool
+    supported_power_scope: list[str]
+    unsupported_power_internal_data_classes: list[str]
+    rejection_codes: list[str]
+    transaction_model: str
+    rollback_after_teardown: bool
+    issues_new_combat_session: bool
+    preserves_stable_ids: bool
+
+
+@dataclass(frozen=True)
+class SnapshotRestoreRejectedContext:
+    rejection_codes: list[str]
+    unsupported_field_paths: list[str]
+    clr_exception_type: str
+    raw_message: str
+
+
+@dataclass(frozen=True)
+class SnapshotRestoreFailedContext:
+    restore_phase: "str | None"
+    combat_session_id: "str | None"
+    schema_version: "str | None"
+    contract_version: "str | None"
+    snapshot_id: "str | None"
+    original_exception_type: "str | None"
+    original_exception_message: "str | None"
+    clr_exception_type: str
+    raw_message: str
+
+
+class SnapshotRestoreRejectedError(RuntimeError):
+    """Python-side counterpart to `SnapshotRestoreRejectedException`.
+
+    Rejections happen before teardown and therefore do not fault or replace the current
+    live session. The structured reasons are read directly from CLR properties.
+    """
+
+    def __init__(self, context: SnapshotRestoreRejectedContext):
+        self.context = context
+        self.rejection_codes = context.rejection_codes
+        self.unsupported_field_paths = context.unsupported_field_paths
+        super().__init__(
+            "Snapshot restore rejected: "
+            f"rejection_codes={context.rejection_codes} "
+            f"unsupported_field_paths={context.unsupported_field_paths}"
+        )
+
+
+class SnapshotRestoreFailedError(RuntimeError):
+    """Python-side counterpart to `SnapshotRestoreFailedException`.
+
+    This means validation already passed, teardown already happened, and construction
+    failed. The LiveCombatSession is faulted until a successful start/resume/restore.
+    """
+
+    def __init__(self, context: SnapshotRestoreFailedContext):
+        self.context = context
+        super().__init__(
+            "Snapshot restore failed after teardown: "
+            f"restore_phase={context.restore_phase} "
+            f"combat_session_id={context.combat_session_id} "
+            f"schema_version={context.schema_version} "
+            f"contract_version={context.contract_version} "
+            f"snapshot_id={context.snapshot_id} "
+            f"original_exception_type={context.original_exception_type} "
+            f"original_exception_message={context.original_exception_message}"
+        )
+
+
+def _build_restore_rejected_context(clr_exc) -> SnapshotRestoreRejectedContext:
+    return SnapshotRestoreRejectedContext(
+        rejection_codes=_str_list(getattr(clr_exc, "Reasons", None)),
+        unsupported_field_paths=_str_list(getattr(clr_exc, "UnsupportedFieldPaths", None)),
+        clr_exception_type=str(clr_exc.GetType().FullName) if hasattr(clr_exc, "GetType") else type(clr_exc).__name__,
+        raw_message=str(getattr(clr_exc, "Message", clr_exc)),
+    )
+
+
+def _build_restore_failed_context(clr_exc) -> SnapshotRestoreFailedContext:
+    return SnapshotRestoreFailedContext(
+        restore_phase=_str_or_none(getattr(clr_exc, "RestorePhase", None)),
+        combat_session_id=_str_or_none(getattr(clr_exc, "CombatSessionId", None)),
+        schema_version=_str_or_none(getattr(clr_exc, "SchemaVersion", None)),
+        contract_version=_str_or_none(getattr(clr_exc, "ContractVersion", None)),
+        snapshot_id=_str_or_none(getattr(clr_exc, "SnapshotId", None)),
+        original_exception_type=_str_or_none(getattr(clr_exc, "OriginalExceptionType", None)),
+        original_exception_message=_str_or_none(getattr(clr_exc, "OriginalExceptionMessage", None)),
+        clr_exception_type=str(clr_exc.GetType().FullName) if hasattr(clr_exc, "GetType") else type(clr_exc).__name__,
+        raw_message=str(getattr(clr_exc, "Message", clr_exc)),
+    )
+
+
+def _restore_validation_result_from_clr(result) -> RestoreValidationResult:
+    return RestoreValidationResult(
+        eligible=bool(result.Eligible),
+        rejection_codes=_str_list(result.RejectionCodes),
+        unsupported_field_paths=_str_list(result.UnsupportedFieldPaths),
+    )
+
+
+def _restore_capabilities_from_clr(result) -> RestoreCapabilities:
+    return RestoreCapabilities(
+        restore_api_version=str(result.RestoreApiVersion),
+        milestone=str(result.Milestone),
+        contract_version=str(result.ContractVersion),
+        contract_sha256=str(result.ContractSha256),
+        snapshot_schema_version=str(result.SnapshotSchemaVersion),
+        snapshot_schema_sha256=str(result.SnapshotSchemaSha256),
+        supported_completeness=_str_list(result.SupportedCompleteness),
+        supports_combat_history=bool(result.SupportsCombatHistory),
+        supports_pets=bool(result.SupportsPets),
+        supports_pending_choice=bool(result.SupportsPendingChoice),
+        supports_pending_target=bool(result.SupportsPendingTarget),
+        supports_action_continuation=bool(result.SupportsActionContinuation),
+        supported_power_scope=_str_list(result.SupportedPowerScope),
+        unsupported_power_internal_data_classes=_str_list(result.UnsupportedPowerInternalDataClasses),
+        rejection_codes=_str_list(result.RejectionCodes),
+        transaction_model=str(result.TransactionModel),
+        rollback_after_teardown=bool(result.RollbackAfterTeardown),
+        issues_new_combat_session=bool(result.IssuesNewCombatSession),
+        preserves_stable_ids=bool(result.PreservesStableIds),
+    )
+
+
 class LiveCombatSession:
     """One instance per episode. Holds the shared GameInstance's live progress across
     every real (committed) decision. Construct one per episode (mirrors CombatEnv's own
@@ -242,7 +414,8 @@ class LiveCombatSession:
                 f"Rejected: this LiveCombatSession's combat session "
                 f"(combat_session_id={self._current_frame.combat_session_id if self._current_frame else None}) "
                 "faulted on a previous action and must not be read from or continued - its state may be partially "
-                "updated. Call start_combat()/resume_from() to start a new combat.",
+                "updated. Call start_combat()/resume_from()/restore_snapshot()/restore_snapshot_json() "
+                "to start a new combat.",
                 combat_session_id=self._current_frame.combat_session_id if self._current_frame else None,
             )
 
@@ -265,6 +438,71 @@ class LiveCombatSession:
         )
         self._current_frame = battle_state.decision_frame
         self._session_faulted = False  # only on this success path - see _ensure_session_not_faulted's docstring note
+        return battle_state
+
+    def validate_restore_snapshot(self, snapshot) -> RestoreValidationResult:
+        """Side-effect-free Restore dry run through the public CLR API."""
+        game = self._game or shared_game_instance(self._repo_root)
+        return _restore_validation_result_from_clr(bridge_validate_restore_snapshot(game, snapshot))
+
+    def get_restore_capabilities(self) -> RestoreCapabilities:
+        """Returns the live CLR Restore capability contract as a Python dataclass."""
+        game = self._game or shared_game_instance(self._repo_root)
+        return _restore_capabilities_from_clr(bridge_get_restore_capabilities(game))
+
+    def _wrap_restore_result(self, result) -> BattleState:
+        obs = result.Observation
+        enemy_max_hps = {e["index"]: e["maxHp"] for e in to_plain(obs.State).get("enemies") or []}
+        legal_actions = legal_actions_to_list(result.LegalActions)
+        return self._emulator._wrap(  # noqa: SLF001 - established LiveCombatSession integration point
+            obs,
+            turn=int(getattr(obs, "Turn", 1) or 1),
+            enemy_max_hps=enemy_max_hps,
+            legal_actions=legal_actions,
+        )
+
+    def _handle_restore_failed(self, clr_exc) -> "None":
+        context = _build_restore_failed_context(clr_exc)
+        self._session_faulted = True
+        raise SnapshotRestoreFailedError(context) from clr_exc
+
+    def restore_snapshot(self, snapshot) -> BattleState:
+        """Restores a clean snapshot and establishes a fresh live session identity.
+
+        Raw CLR `CombatStateSnapshot` objects use the object API. Python
+        `CombatStateSnapshot` DTOs are converted by the bridge through the existing
+        canonical JSON serializer rather than a second parser.
+        """
+        self._game = shared_game_instance(self._repo_root)
+        try:
+            result = bridge_restore_snapshot(self._game, snapshot)
+        except _snapshot_restore_rejected_exception_type() as exc:  # noqa: BLE001
+            raise SnapshotRestoreRejectedError(_build_restore_rejected_context(exc)) from exc
+        except _snapshot_restore_failed_exception_type() as exc:  # noqa: BLE001
+            self._handle_restore_failed(exc)
+        except _quiescent_exception_type() as exc:  # noqa: BLE001
+            raise QuiescentBoundaryViolation(str(exc)) from exc
+
+        battle_state = self._wrap_restore_result(result)
+        self._current_frame = battle_state.decision_frame
+        self._session_faulted = False
+        return battle_state
+
+    def restore_snapshot_json(self, json_text: str) -> BattleState:
+        """Restores from canonical Snapshot JSON through the public CLR JSON API."""
+        self._game = shared_game_instance(self._repo_root)
+        try:
+            result = bridge_restore_snapshot_json(self._game, json_text)
+        except _snapshot_restore_rejected_exception_type() as exc:  # noqa: BLE001
+            raise SnapshotRestoreRejectedError(_build_restore_rejected_context(exc)) from exc
+        except _snapshot_restore_failed_exception_type() as exc:  # noqa: BLE001
+            self._handle_restore_failed(exc)
+        except _quiescent_exception_type() as exc:  # noqa: BLE001
+            raise QuiescentBoundaryViolation(str(exc)) from exc
+
+        battle_state = self._wrap_restore_result(result)
+        self._current_frame = battle_state.decision_frame
+        self._session_faulted = False
         return battle_state
 
     def resume_from(self, battle_state: BattleState) -> BattleState:
