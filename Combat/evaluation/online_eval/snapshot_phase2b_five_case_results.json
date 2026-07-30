@@ -8,7 +8,7 @@
     "duplicate_ids": [],
     "restore_input_eligible": true,
     "restore_ineligible_reasons": [],
-    "canonical_json_sha256": "cc7759ec38711c4c9843ce36a72cc7cc7b86d26048526bfd49e620074e7b67bd"
+    "canonical_json_sha256": "139710b5627eb70c2b18af94e7322f8cadae45ac7ea5ca6ff146abda6cdc006f"
   },
   "case2_reset_from_scenario": {
     "completeness": "complete",
@@ -23,7 +23,7 @@
     "restore_ineligible_reasons": [
       "dangling_references=5 (see validate_snapshot_references for detail)"
     ],
-    "canonical_json_sha256": "e1915ca3be228b823a5011bc35f45b70a01ef9f7201d6157855fcf0821fb70a1"
+    "canonical_json_sha256": "fe7312c39ffa9a81dd9a76355b52a1fd1d7a7f34bc87f2eaaade6f89becc149b"
   },
   "case3_scenario_6546_21": {
     "completeness": "complete",
@@ -38,7 +38,7 @@
     "restore_ineligible_reasons": [
       "dangling_references=3 (see validate_snapshot_references for detail)"
     ],
-    "canonical_json_sha256": "3afd40bd5f447852a13217d0b1144677fac460d4580f32723891ab0d060390e3"
+    "canonical_json_sha256": "cd63ea344d067c3cbbb6464951153d923be39fecb3b215a09c5430ba6ece8c4b"
   },
   "case4_natural_draw": {
     "completeness": "complete",
@@ -53,7 +53,7 @@
     "restore_ineligible_reasons": [
       "dangling_references=5 (see validate_snapshot_references for detail)"
     ],
-    "canonical_json_sha256": "2a483f75c695457f195808664a9015821325e67ce16e5adf4299f69028f745b9",
+    "canonical_json_sha256": "b70b1fcc12ee96309838dc36caa8957b6ea40a74e8f4b8d3d46fd8311e899191",
     "card_drawn_entry_count": 5
   },
   "case5_double_capture_a": {
@@ -69,7 +69,7 @@
     "restore_ineligible_reasons": [
       "dangling_references=5 (see validate_snapshot_references for detail)"
     ],
-    "canonical_json_sha256": "88062e7fe23bb873de2409bfcefb5ed2269e5c5434992631a985d385ef037e31"
+    "canonical_json_sha256": "53a613e453d58c673164a0999ad9a120f5eee0a9b48361d6bb8b6830566e2b07"
   },
   "case5_double_capture_b": {
     "completeness": "complete",
@@ -84,6 +84,6 @@
     "restore_ineligible_reasons": [
       "dangling_references=5 (see validate_snapshot_references for detail)"
     ],
-    "canonical_json_sha256": "88062e7fe23bb873de2409bfcefb5ed2269e5c5434992631a985d385ef037e31"
+    "canonical_json_sha256": "53a613e453d58c673164a0999ad9a120f5eee0a9b48361d6bb8b6830566e2b07"
   }
 }

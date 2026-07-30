@@ -1,13 +1,13 @@
 {
   "Metadata": {
     "SchemaVersion": "phase2b.2",
-    "SnapshotId": "1cf590be88c64856b8399f496d32bbe8",
+    "SnapshotId": "c000f4df2dc646b8ba4434ded51108f4",
     "StepIndex": 0,
     "CaptureBoundary": "published_choice",
     "Completeness": "complete",
     "UnsupportedFields": [],
-    "CapturedAtUtc": "2026-07-28T17:44:32.2433794Z",
-    "CombatSessionId": "0ed94c96374345588f1e49a1adbfbe11",
+    "CapturedAtUtc": "2026-07-30T04:05:59.0295508Z",
+    "CombatSessionId": "b3d795abcb034829a3a5b479fcc9bc7b",
     "ContinuationStepIndex": null,
     "EmulatorCommit": null
   },
