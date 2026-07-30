@@ -72,6 +72,77 @@ def _eligible_snapshot(seed=123):
     return snapshot, _snapshot_sig(snapshot)
 
 
+def _pet_restore_snapshot():
+    session = LiveCombatSession()
+    session.start_combat({
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand": ["STRIKE_IRONCLAD", "DEFEND_IRONCLAD"],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": ["BOUND_PHYLACTERY"], "potions": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    })
+    snapshot = _make_eligible(session._game.CaptureSnapshot())  # noqa: SLF001
+    assert len(snapshot.Player.Pets) == 1, [p.MonsterId for p in snapshot.Player.Pets]
+    pet = snapshot.Player.Pets[0]
+    assert str(pet.Kind) == "pet", pet.Kind
+    assert str(pet.MonsterId).upper() == "OSTY", pet.MonsterId
+    assert len(snapshot.CombatHistory.Entries) == 0
+    return snapshot
+
+
+def _str_none(value):
+    return None if value is None else str(value)
+
+
+def _pet_power_sig(power):
+    return (
+        str(power.InstanceId),
+        str(power.PowerId),
+        str(power.OwnerInstanceId),
+        _str_none(power.ApplierInstanceId),
+        _str_none(power.TargetInstanceId),
+        int(power.Amount),
+        int(power.AmountOnTurnStart),
+        bool(power.SkipNextDurationTick),
+        str(power.StackType),
+    )
+
+
+def _single_pet(snapshot):
+    pets = list(snapshot.Player.Pets)
+    assert len(pets) == 1, [p.MonsterId for p in pets]
+    return pets[0]
+
+
+def _pet_sig(snapshot):
+    pet = _single_pet(snapshot)
+    return (
+        str(pet.InstanceId),
+        str(pet.Kind),
+        str(pet.MonsterId),
+        _str_none(pet.OwnerInstanceId),
+        None if pet.CombatId is None else int(pet.CombatId),
+        int(pet.Hp),
+        int(pet.MaxHp),
+        int(pet.Block),
+        bool(pet.IsAlive),
+        tuple(_pet_power_sig(power) for power in pet.Powers),
+    )
+
+
+def _assert_restored_pet_matches(expected_snapshot, restored_snapshot):
+    expected = _single_pet(expected_snapshot)
+    restored = _single_pet(restored_snapshot)
+    assert restored.InstanceId == expected.InstanceId
+    assert restored.MonsterId == expected.MonsterId
+    assert restored.Hp == expected.Hp
+    assert restored.MaxHp == expected.MaxHp
+    assert restored.Block == expected.Block
+    assert restored.CombatId == expected.CombatId
+    assert restored.OwnerInstanceId == restored_snapshot.Player.InstanceId
+    assert _pet_sig(restored_snapshot) == _pet_sig(expected_snapshot)
+
+
 def _capture_sig(session: LiveCombatSession):
     return _snapshot_sig(_make_eligible(session._game.CaptureSnapshot()))  # noqa: SLF001
 
@@ -164,19 +235,25 @@ def _force_restore_failure(session: LiveCombatSession, snapshot):
 def test_get_restore_capabilities_hashes():
     session = LiveCombatSession()
     caps = session.get_restore_capabilities()
-    assert caps.restore_api_version == "phase3c.1", caps
-    assert caps.milestone == "phase3c.1", caps
+    assert caps.restore_api_version == "phase3c.2", caps
+    assert caps.milestone == "phase3c.2", caps
     assert caps.contract_version == "0.5", caps
     assert caps.snapshot_schema_version == "phase2b.2", caps
     assert caps.snapshot_schema_sha256 == schema_sha256(), caps
 
     import hashlib
 
+    # Normalize CRLF -> LF before hashing: the Emulator's own ContractSha256 reflects
+    # the canonical LF-stored git blob content, but a local worktree checkout with
+    # core.autocrlf=true checks this file out with CRLF line endings - comparing raw
+    # bytes read here would then depend on which worktree/checkout ran the test rather
+    # than the file's actual (logically identical) content.
     contract_path = Path(__file__).resolve().parents[2] / "Common" / "contracts" / "combat_state_contract.v0.5.md"
-    assert caps.contract_sha256 == hashlib.sha256(contract_path.read_bytes()).hexdigest(), caps
+    contract_bytes = contract_path.read_bytes().replace(b"\r\n", b"\n")
+    assert caps.contract_sha256 == hashlib.sha256(contract_bytes).hexdigest(), caps
     assert caps.supported_completeness == ["complete"], caps
     assert caps.supports_combat_history is False
-    assert caps.supports_pets is False
+    assert caps.supports_pets is True
     assert caps.supports_pending_choice is False
     assert caps.supports_pending_target is False
     assert caps.supports_action_continuation is False
@@ -194,6 +271,18 @@ def test_object_restore_round_trip():
     assert isinstance(state, BattleState)
     assert state.decision_frame.combat_session_id != str(snapshot.Metadata.CombatSessionId)
     assert _capture_sig(session) == sig_a
+    assert session._session_faulted is False  # noqa: SLF001
+
+
+def test_pet_object_restore_round_trip():
+    snapshot = _pet_restore_snapshot()
+    session = LiveCombatSession()
+    validation = session.validate_restore_snapshot(snapshot)
+    assert validation.eligible is True, validation.rejection_codes
+    state = session.restore_snapshot(snapshot)
+    assert isinstance(state, BattleState)
+    restored = _make_eligible(session._game.CaptureSnapshot())  # noqa: SLF001
+    _assert_restored_pet_matches(snapshot, restored)
     assert session._session_faulted is False  # noqa: SLF001
 
 
@@ -223,6 +312,19 @@ def test_object_vs_json_restore_equivalent():
     session.restore_snapshot_json(json_text)
     sig_json = _capture_sig(session)
     assert sig_object == sig_json
+
+
+def test_pet_json_restore_round_trip_matches_object_restore():
+    snapshot = _pet_restore_snapshot()
+    json_text = _clr_snapshot_json(snapshot)
+    session = LiveCombatSession()
+    session.restore_snapshot(snapshot)
+    object_capture = _make_eligible(session._game.CaptureSnapshot())  # noqa: SLF001
+    session.restore_snapshot_json(json_text)
+    json_capture = _make_eligible(session._game.CaptureSnapshot())  # noqa: SLF001
+    _assert_restored_pet_matches(snapshot, json_capture)
+    assert _snapshot_sig(object_capture) == _snapshot_sig(json_capture)
+    assert _pet_sig(object_capture) == _pet_sig(json_capture)
 
 
 def _strip_known_restore_boundary_diffs(node, top=True):
@@ -263,6 +365,18 @@ def _strip_known_restore_boundary_diffs(node, top=True):
 
 def test_canonical_json_round_trip():
     snapshot, _ = _eligible_snapshot()
+    py_snapshot = CombatStateSnapshot.from_json(_clr_snapshot_json(snapshot))
+    json_text = canonical_json(_snapshot_dict(py_snapshot), exclude_volatile=False)
+    session = LiveCombatSession()
+    session.restore_snapshot_json(json_text)
+    captured = CombatStateSnapshot.from_json(_clr_snapshot_json(_make_eligible(session._game.CaptureSnapshot())))  # noqa: SLF001
+    original = _strip_known_restore_boundary_diffs(_snapshot_dict(py_snapshot))
+    restored = _strip_known_restore_boundary_diffs(_snapshot_dict(captured))
+    assert canonical_json(original) == canonical_json(restored)
+
+
+def test_pet_canonical_json_round_trip():
+    snapshot = _pet_restore_snapshot()
     py_snapshot = CombatStateSnapshot.from_json(_clr_snapshot_json(snapshot))
     json_text = canonical_json(_snapshot_dict(py_snapshot), exclude_volatile=False)
     session = LiveCombatSession()
@@ -355,6 +469,24 @@ def test_restore_step_determinism_reselects_fresh_action():
     assert sig1 == sig2
 
 
+def test_pet_restore_step_determinism_reselects_fresh_action():
+    snapshot = _pet_restore_snapshot()
+    session = LiveCombatSession()
+    state1 = session.restore_snapshot(snapshot)
+    logical = _first_logical_action(state1)
+    next1 = session.step(state1, _find_logical_action(state1, logical), target_enemy_index=0)
+    captured1 = session._game.CaptureSnapshot()  # noqa: SLF001
+    sig1 = (_snapshot_sig(captured1), _pet_sig(captured1))
+
+    state2 = session.restore_snapshot(snapshot)
+    next2 = session.step(state2, _find_logical_action(state2, logical), target_enemy_index=0)
+    captured2 = session._game.CaptureSnapshot()  # noqa: SLF001
+    sig2 = (_snapshot_sig(captured2), _pet_sig(captured2))
+
+    assert next1.engine_state == next2.engine_state
+    assert sig1 == sig2
+
+
 def test_rejection_categories_via_public_python_api():
     ensure_loaded()
     from System import Array
@@ -364,7 +496,10 @@ def test_rejection_categories_via_public_python_api():
     _assert_rejected(source.CaptureSnapshot(), "combat_history_non_empty")
 
     pet_snapshot = _scenario_6546_21_snapshot()
-    _assert_rejected(pet_snapshot, "pet_count")
+    pet_validation = LiveCombatSession().validate_restore_snapshot(pet_snapshot)
+    assert pet_validation.eligible is False, pet_validation
+    assert any("reference_integrity" in r for r in pet_validation.rejection_codes), pet_validation.rejection_codes
+    assert not any("pet_count" in r for r in pet_validation.rejection_codes), pet_validation.rejection_codes
 
     toolbox = LiveCombatSession()
     toolbox.start_combat({
