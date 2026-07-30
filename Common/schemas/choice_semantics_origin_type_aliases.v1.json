@@ -1,0 +1,20 @@
+{
+  "table_version": "choice_semantics_origin_type_aliases.v1",
+  "generated": "2026-07-24",
+  "generated_by": "RL online-eval role (Combat/choice_semantics.py) - empirically confirmed via live 0d16130 Emulator observation, NOT derived from source reading or guessed from a naming convention.",
+  "note": "Maps the raw C# class name Sts2Emulator.Api.GameInstance reports as pendingChoice.originEntityType, for entities where that value is NOT one of choice_semantics_schema.json's documented lowercase origin_entity_type values (card/relic/power/potion/monster) - observed so far only for potions, which report their own PascalCase class name instead of the generic 'potion' category card/relic/power consistently use. This is a DELIBERATE, CLOSED enumeration keyed on the exact (raw_origin_entity_type, origin_entity_id) pair - not a generic '*Potion suffix -> potion' string-matching rule. Any raw origin type not listed here resolves to normalizedOriginEntityType='unknown', even if it superficially looks like a similarly-shaped class name - see this task's prohibition on guessing at unregistered classes. This is a separate concern from choice_semantics_lookup.v1.json (which normalizes the CHOICE OPERATION, keyed by canonical origin_entity_type) - raw originEntityType/originEntityId are never overwritten anywhere; this table only supplies an additional normalizedOriginEntityType value alongside them, used internally by Combat/choice_semantics.py to build the Tier-2 lookup key against choice_semantics_lookup.v1.json's canonical 'potion' rows.",
+  "confirmed_via": [
+    "Outputs/reports/rl_choice_semantics_stage_a_report_20260724.md (live choice_log.jsonl observations)",
+    "Combat/evaluation/online_eval/probe_gambling_chip_and_potions.py (standalone empirical probe)",
+    "Outputs/reports/rl_choice_semantics_stage_b_report_20260724.md (corrected count - the Stage A report's claim of 11 distinct confirmed potion classes was a counting error: 5 of the Stage-A-observed classes overlapped with the probe's re-tested set. The true, deduplicated count from all live observations to date is 7, listed below.)"
+  ],
+  "entries": [
+    {"raw_origin_entity_type": "AttackPotion", "origin_entity_id": "ATTACK_POTION", "normalized_origin_entity_type": "potion"},
+    {"raw_origin_entity_type": "Ashwater", "origin_entity_id": "ASHWATER", "normalized_origin_entity_type": "potion"},
+    {"raw_origin_entity_type": "ColorlessPotion", "origin_entity_id": "COLORLESS_POTION", "normalized_origin_entity_type": "potion"},
+    {"raw_origin_entity_type": "GamblersBrew", "origin_entity_id": "GAMBLERS_BREW", "normalized_origin_entity_type": "potion"},
+    {"raw_origin_entity_type": "PowerPotion", "origin_entity_id": "POWER_POTION", "normalized_origin_entity_type": "potion"},
+    {"raw_origin_entity_type": "SkillPotion", "origin_entity_id": "SKILL_POTION", "normalized_origin_entity_type": "potion"},
+    {"raw_origin_entity_type": "TouchOfInsanity", "origin_entity_id": "TOUCH_OF_INSANITY", "normalized_origin_entity_type": "potion"}
+  ]
+}

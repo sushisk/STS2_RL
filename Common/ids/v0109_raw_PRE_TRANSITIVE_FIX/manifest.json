@@ -1,0 +1,26 @@
+{
+  "counts": {
+    "acts": 4,
+    "cards": 596,
+    "encounters": 88,
+    "monster_moves": 340,
+    "monsters": 120,
+    "powers": 268,
+    "relics": 299,
+    "warnings": 0
+  },
+  "extractor": {
+    "method": "source_text_static_pass",
+    "name": "sts2-static-extractor",
+    "version": "0.1.0"
+  },
+  "generated_at_utc": "2026-07-20T10:56:56.223148+00:00",
+  "output_root": "C:\\STS2_RL\\Common\\ids\\v0109_raw",
+  "policy": {
+    "ascension_level_for_monster_hp": 10,
+    "does_not_guess_unresolved_values": true,
+    "does_not_modify_decompiled_source": true,
+    "enemy_moves_extracted": true
+  },
+  "source_root": "C:\\STS2_Decompiled_v0109"
+}

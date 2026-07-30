@@ -1,0 +1,8897 @@
+[
+  {
+    "character_id": "REGENT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "ROYAL_GAMBLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SOLAR_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPORE_MIND",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HEGEMONY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DYING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HEAVENLY_DRILL",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PATTER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUMMON_FORTH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GUIDING_STAR",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "DIVINE_RIGHT",
+      "PRECISE_SCISSORS",
+      "BOOK_OF_FIVE_RINGS",
+      "ORNAMENTAL_FAN"
+    ],
+    "energy": 3,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1285002850,
+    "enemies": [
+      {
+        "monster_id": "CORPSE_SLUG",
+        "hp": 29,
+        "max_hp": 29,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "RAVENOUS_POWER",
+            "amount": 4
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "299",
+      "fixed50_trajectory_id": "fixed50:299-0",
+      "fixed50_index": 0,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "GUIDING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "KINGLY_KICK",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "BLACK_HOLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BEGONE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REFLECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "AUTOMATION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "QUASAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HEAVENLY_DRILL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "DIVINE_RIGHT",
+      "LEAD_PAPERWEIGHT",
+      "LIZARD_TAIL",
+      "ODDLY_SMOOTH_STONE",
+      "ROYAL_STAMP"
+    ],
+    "energy": 3,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 558140353,
+    "enemies": [
+      {
+        "monster_id": "SLUDGE_SPINNER",
+        "hp": 42,
+        "max_hp": 42,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "2200",
+      "fixed50_trajectory_id": "fixed50:2200-1",
+      "fixed50_index": 1,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "IRONCLAD",
+    "player_hp": 87,
+    "player_max_hp": 87,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPITE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "FORGOTTEN_RITUAL",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "IMPERVIOUS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLOOD_WALL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "BURNING_BLOOD",
+      "NEW_LEAF",
+      "STRAWBERRY",
+      "LETTER_OPENER",
+      "PENDULUM"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 897480880,
+    "enemies": [
+      {
+        "monster_id": "SEAPUNK",
+        "hp": 49,
+        "max_hp": 49,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "1088",
+      "fixed50_trajectory_id": "fixed50:1088-2",
+      "fixed50_index": 2,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "SILENT",
+    "player_hp": 70,
+    "player_max_hp": 70,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "BACKSTAB",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DAGGER_SPRAY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "PIERCING_WAIL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PREDATOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SURVIVOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEUTRALIZE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHADOWMELD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLOAK_AND_DAGGER",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      }
+    ],
+    "relics": [
+      "RING_OF_THE_SNAKE",
+      "SCROLL_BOXES",
+      "GORGET"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 597060403,
+    "enemies": [
+      {
+        "monster_id": "FUZZY_WURM_CRAWLER",
+        "hp": 59,
+        "max_hp": 59,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "708",
+      "fixed50_trajectory_id": "fixed50:708-3",
+      "fixed50_index": 3,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 66,
+    "player_max_hp": 66,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEATHBRINGER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REAP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "THE_SCYTHE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CAPTURE_SPIRIT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEMESNE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FRIENDSHIP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "INVOKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ENFEEBLING_TOUCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HIDDEN_GEM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DRAIN_POWER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GRAVE_WARDEN",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHOCKWAVE",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "FLEX_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "NEOWS_BONES",
+      "NEOWS_TORMENT",
+      "SILVER_CRUCIBLE",
+      "FRESNEL_LENS",
+      "BOWLER_HAT",
+      "PEN_NIB",
+      "RIPPLE_BASIN",
+      "PENDULUM",
+      "VAJRA",
+      "PAELS_LEGION",
+      "DAUGHTER_OF_THE_WIND",
+      "CHOSEN_CHEESE",
+      "VENERABLE_TEA_SET",
+      "AMETHYST_AUBERGINE",
+      "LETTER_OPENER",
+      "MEAT_CLEAVER",
+      "BAG_OF_PREPARATION",
+      "POTION_BELT",
+      "GREMLIN_HORN"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1723432670,
+    "enemies": [
+      {
+        "monster_id": "TOADPOLE",
+        "hp": 26,
+        "max_hp": 26,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "3357",
+      "fixed50_trajectory_id": "fixed50:3357-4",
+      "fixed50_index": 4,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "SILENT",
+    "player_hp": 70,
+    "player_max_hp": 70,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "PRECISE_CUT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DAGGER_THROW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PREPARED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DAGGER_SPRAY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TACTICIAN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ESCAPE_PLAN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "RICOCHET",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEUTRALIZE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BACKFLIP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SURVIVOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "RING_OF_THE_SNAKE",
+      "SCROLL_BOXES",
+      "CAPTAINS_WHEEL",
+      "REGAL_PILLOW"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 718436136,
+    "enemies": [
+      {
+        "monster_id": "CALCIFIED_CULTIST",
+        "hp": 42,
+        "max_hp": 42,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "DAMP_CULTIST",
+        "hp": 54,
+        "max_hp": 54,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "236",
+      "fixed50_trajectory_id": "fixed50:236-5",
+      "fixed50_index": 5,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MANIFEST_AUTHORITY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COSMIC_INDIFFERENCE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WROUGHT_IN_WAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ROYALTIES",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BYRD_SWOOP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GUIDING_STAR",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "KNOW_THY_PLACE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "AUTOMATION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CATASTROPHE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SHINING_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COSMIC_INDIFFERENCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHILD_OF_THE_STARS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BOMBARDMENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HEGEMONY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MONOLOGUE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CONQUEROR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PHOTON_CUT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "DIVINE_RIGHT",
+      "LEAD_PAPERWEIGHT",
+      "BYRDPIP",
+      "BOOK_OF_FIVE_RINGS",
+      "MOLTEN_EGG",
+      "PENDULUM",
+      "PAELS_EYE",
+      "BONE_TEA",
+      "GHOST_SEED",
+      "VENERABLE_TEA_SET",
+      "RAZOR_TOOTH"
+    ],
+    "energy": 3,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1795245074,
+    "enemies": [
+      {
+        "monster_id": "FOSSIL_STALKER",
+        "hp": 56,
+        "max_hp": 56,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "SUCK_POWER",
+            "amount": 3
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "1141",
+      "fixed50_trajectory_id": "fixed50:1141-6",
+      "fixed50_index": 6,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 66,
+    "player_max_hp": 66,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "AFTERLIFE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MELANCHOLY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "NEGATIVE_PULSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FRIENDSHIP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PULL_AGGRO",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLASH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFILE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LANTERN_KEY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GRAVEBLAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REAPER_FORM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ERADICATE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COUNTDOWN",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BONE_SHARDS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      }
+    ],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "ARCANE_SCROLL",
+      "LAVA_LAMP",
+      "VAJRA",
+      "CENTENNIAL_PUZZLE",
+      "PAELS_LEGION",
+      "BRONZE_SCALES",
+      "WHETSTONE",
+      "MERCURY_HOURGLASS",
+      "FESTIVE_POPPER",
+      "CHEMICAL_X"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1146686042,
+    "enemies": [
+      {
+        "monster_id": "NIBBIT",
+        "hp": 48,
+        "max_hp": 48,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "7092",
+      "fixed50_trajectory_id": "fixed50:7092-7",
+      "fixed50_index": 7,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 66,
+    "player_max_hp": 66,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SIC_EM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLATTEN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "STRENGTH_POTION"
+      }
+    ],
+    "player_powers": [],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "POMANDER",
+      "SWORD_OF_STONE",
+      "FRESNEL_LENS"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 728758466,
+    "enemies": [
+      {
+        "monster_id": "LEAF_SLIME_M",
+        "hp": 36,
+        "max_hp": 36,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "LEAF_SLIME_S",
+        "hp": 16,
+        "max_hp": 16,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "SLITHERING_STRANGLER",
+        "hp": 56,
+        "max_hp": 56,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "SNAPPING_JAXFRUIT",
+        "hp": 36,
+        "max_hp": 36,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "TWIG_SLIME_M",
+        "hp": 29,
+        "max_hp": 29,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "TWIG_SLIME_S",
+        "hp": 12,
+        "max_hp": 12,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "1613",
+      "fixed50_trajectory_id": "fixed50:1613-8",
+      "fixed50_index": 8,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 63,
+    "player_max_hp": 78,
+    "player_block": 19,
+    "hand_cards": [
+      {
+        "card_id": "CHARGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BOMBARDMENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLOW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CONVERGENCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "RESONANCE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLOW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASTRAL_PULSE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MAD_SCIENCE",
+        "is_upgraded": false,
+        "tinker_time_type": "Attack",
+        "tinker_time_rider": "Choking"
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SOLAR_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PHOTON_CUT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COSMIC_INDIFFERENCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MONOLOGUE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ALIGNMENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHILD_OF_THE_STARS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "DUPLICATOR"
+      },
+      {
+        "slot": 3,
+        "potion_id": "ENERGY_POTION"
+      },
+      {
+        "slot": 4,
+        "potion_id": "STRENGTH_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "DIVINE_RIGHT",
+      "LARGE_CAPSULE",
+      "GALACTIC_DUST",
+      "RAINBOW_RING",
+      "BOWLER_HAT",
+      "POTION_BELT",
+      "CENTENNIAL_PUZZLE",
+      "PAELS_GROWTH",
+      "BAG_OF_MARBLES",
+      "CHOSEN_CHEESE",
+      "VAJRA",
+      "FAKE_MANGO",
+      "FAKE_VENERABLE_TEA_SET",
+      "FAKE_HAPPY_FLOWER",
+      "FAKE_LEES_WAFFLE",
+      "FAKE_ANCHOR",
+      "WHISPERING_EARRING",
+      "FRAGRANT_MUSHROOM",
+      "PERMAFROST",
+      "WHETSTONE"
+    ],
+    "energy": 0,
+    "stars": 5,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1904146213,
+    "enemies": [
+      {
+        "monster_id": "FLYCONID",
+        "hp": 53,
+        "max_hp": 53,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "VULNERABLE_POWER",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "monster_id": "LEAF_SLIME_M",
+        "hp": 36,
+        "max_hp": 36,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "VULNERABLE_POWER",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "monster_id": "TWIG_SLIME_M",
+        "hp": 29,
+        "max_hp": 29,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "VULNERABLE_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "3315",
+      "fixed50_trajectory_id": "fixed50:3315-9",
+      "fixed50_index": 9,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "BULWARK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUMMON_FORTH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "PATTER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GUIDING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLOW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SWORD_SAGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SOLAR_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "STAR_POTION"
+      }
+    ],
+    "player_powers": [],
+    "relics": [
+      "DIVINE_RIGHT",
+      "NEW_LEAF",
+      "PENDULUM",
+      "BEATING_REMNANT"
+    ],
+    "energy": 3,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1590209104,
+    "enemies": [
+      {
+        "monster_id": "PHROG_PARASITE",
+        "hp": 68,
+        "max_hp": 68,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "INFESTED_POWER",
+            "amount": 4
+          }
+        ],
+        "slot_name": "phrog"
+      },
+      {
+        "monster_id": "WRIGGLER",
+        "hp": 22,
+        "max_hp": 22,
+        "block": 0,
+        "powers": [],
+        "slot_name": "wriggler1"
+      }
+    ],
+    "source": {
+      "server_id": "2744",
+      "fixed50_trajectory_id": "fixed50:2744-10",
+      "fixed50_index": 10,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 66,
+    "player_max_hp": 66,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "RATTLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "SHROUD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFILE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GRAVE_WARDEN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GRAVEBLAST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEGATIVE_PULSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEATHBRINGER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WISP",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "SCROLL_BOXES",
+      "SWORD_OF_STONE",
+      "REPTILE_TRINKET",
+      "BAG_OF_PREPARATION"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1801215407,
+    "enemies": [
+      {
+        "monster_id": "PHROG_PARASITE",
+        "hp": 68,
+        "max_hp": 68,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "INFESTED_POWER",
+            "amount": 4
+          }
+        ],
+        "slot_name": "phrog"
+      },
+      {
+        "monster_id": "WRIGGLER",
+        "hp": 22,
+        "max_hp": 22,
+        "block": 0,
+        "powers": [],
+        "slot_name": "wriggler1"
+      }
+    ],
+    "source": {
+      "server_id": "2428",
+      "fixed50_trajectory_id": "fixed50:2428-11",
+      "fixed50_index": 11,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 59,
+    "player_max_hp": 75,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "COMPILE_DRIVER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MODDED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CHAOS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FUSION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SKIM",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PRODUCTION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FOLLY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BOOT_SEQUENCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HOTFIX",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "REGEN_POTION"
+      },
+      {
+        "slot": 2,
+        "potion_id": "SHACKLING_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "PRECARIOUS_SHEARS",
+      "ANCHOR",
+      "PAELS_TEARS",
+      "VAJRA",
+      "PRESERVED_FOG",
+      "LANTERN",
+      "WAR_PAINT"
+    ],
+    "energy": 4,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1575772597,
+    "enemies": [
+      {
+        "monster_id": "TERROR_EEL",
+        "hp": 150,
+        "max_hp": 150,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "SHRIEK_POWER",
+            "amount": 70
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "6058",
+      "fixed50_trajectory_id": "fixed50:6058-12",
+      "fixed50_index": 12,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 64,
+    "player_max_hp": 78,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "BEAM_CELL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FTL",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SHADOW_SHIELD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HOLOGRAM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FERAL",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HOLOGRAM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SKIM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ICE_LANCE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REBOOT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LEAP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TEMPEST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CHILL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SCRAPE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "SILVER_CRUCIBLE",
+      "VAJRA",
+      "SAND_CASTLE",
+      "FAKE_BLOOD_VIAL",
+      "FAKE_MANGO",
+      "LIZARD_TAIL",
+      "UNSETTLING_LAMP",
+      "MUSIC_BOX",
+      "FRAGRANT_MUSHROOM",
+      "BRONZE_SCALES"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 504520677,
+    "enemies": [
+      {
+        "monster_id": "VANTOM",
+        "hp": 183,
+        "max_hp": 183,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "SLIPPERY_POWER",
+            "amount": 8
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "3486",
+      "fixed50_trajectory_id": "fixed50:3486-13",
+      "fixed50_index": 13,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BUFFER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "CAPACITOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UPROAR",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "GAMBLERS_BREW"
+      }
+    ],
+    "player_powers": [],
+    "relics": [
+      "CRACKED_CORE",
+      "GOLDEN_PEARL",
+      "TEA_OF_DISCOURTESY"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 719818340,
+    "enemies": [
+      {
+        "monster_id": "LAGAVULIN_MATRIARCH",
+        "hp": 233,
+        "max_hp": 233,
+        "block": 12,
+        "powers": [
+          {
+            "power_id": "PLATING_POWER",
+            "amount": 12
+          },
+          {
+            "power_id": "ASLEEP_POWER",
+            "amount": 3
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "2446",
+      "fixed50_trajectory_id": "fixed50:2446-14",
+      "fixed50_index": 14,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 50,
+    "player_max_hp": 66,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "CLEANSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEGATIVE_PULSE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GRAVE_WARDEN",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "BORROWED_TIME",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "REAPER_FORM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TIMES_UP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEATHBRINGER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PULL_AGGRO",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEATHS_DOOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COUNTDOWN",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ULTIMATE_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEATHS_DOOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ENFEEBLING_TOUCH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TRANSFIGURE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "SWIFT_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 3
+      },
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      },
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      }
+    ],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "PRECARIOUS_SHEARS",
+      "JUZU_BRACELET",
+      "SWORD_OF_JADE",
+      "VENERABLE_TEA_SET",
+      "HAPPY_FLOWER",
+      "RIPPLE_BASIN",
+      "TOY_BOX",
+      "KUSARIGAMA",
+      "PERMAFROST",
+      "BRONZE_SCALES",
+      "BAG_OF_PREPARATION",
+      "ODDLY_SMOOTH_STONE",
+      "CENTENNIAL_PUZZLE",
+      "LANTERN",
+      "BREAD",
+      "BONE_FLUTE",
+      "TRI_BOOMERANG",
+      "PLANISPHERE",
+      "NUNCHAKU",
+      "ANCHOR",
+      "GORGET"
+    ],
+    "energy": 2,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1059768984,
+    "enemies": [
+      {
+        "monster_id": "CEREMONIAL_BEAST",
+        "hp": 262,
+        "max_hp": 262,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "5658",
+      "fixed50_trajectory_id": "fixed50:5658-15",
+      "fixed50_index": 15,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "IRONCLAD",
+    "player_hp": 80,
+    "player_max_hp": 80,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TAUNT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "PRIMAL_FORCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HEADBUTT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "INFLAME",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "EXPECT_A_FIGHT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "WHIRLWIND",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BASH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SHRUG_IT_OFF",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "INFERNAL_BLADE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CASCADE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "RUPTURE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "INFLAME",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CASCADE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HELLRAISER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SHRUG_IT_OFF",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SWORD_BOOMERANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UPPERCUT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PYRE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PYRE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FLAME_BARRIER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MANGLE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BREAKTHROUGH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHRUG_IT_OFF",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ARMAMENTS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "WHIRLWIND",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SWORD_BOOMERANG",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      }
+    ],
+    "relics": [
+      "BURNING_BLOOD",
+      "POMANDER",
+      "WAR_PAINT",
+      "LIZARD_TAIL",
+      "GORGET",
+      "BAG_OF_PREPARATION",
+      "RAINBOW_RING",
+      "SEAL_OF_GOLD",
+      "ANCHOR",
+      "POTION_BELT",
+      "PEN_NIB",
+      "MEAL_TICKET",
+      "BRILLIANT_SCARF",
+      "CHEMICAL_X",
+      "BLOOD_VIAL",
+      "PANTOGRAPH",
+      "REGAL_PILLOW",
+      "KUNAI"
+    ],
+    "energy": 4,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 66901693,
+    "enemies": [
+      {
+        "monster_id": "KIN_FOLLOWER",
+        "hp": 63,
+        "max_hp": 63,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "MINION_POWER",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "monster_id": "KIN_PRIEST",
+        "hp": 199,
+        "max_hp": 199,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "6964",
+      "fixed50_trajectory_id": "fixed50:6964-16",
+      "fixed50_index": 16,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "SILENT",
+    "player_hp": 58,
+    "player_max_hp": 58,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "PREPARED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLADE_DANCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BACKFLIP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLUR",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BOUNCING_FLASK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SERPENT_FORM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SHADOWMELD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LEADING_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PINPOINT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LEG_SWEEP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRANGLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BACKFLIP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLADE_DANCE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PIERCING_WAIL",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TRACKING",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ABRASIVE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ECHOING_SLASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SURVIVOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POUNCE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEUTRALIZE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CLOAK_AND_DAGGER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "UP_MY_SLEEVE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BURST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PREPARED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "INFINITE_BLADES",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "EXPOSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLOAK_AND_DAGGER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CALCULATED_GAMBLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FOOTWORK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ESCAPE_PLAN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLOAK_AND_DAGGER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ACCURACY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "AFTERIMAGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "FLEX_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      },
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "VIGOR_POWER",
+        "amount": 8
+      }
+    ],
+    "relics": [
+      "RING_OF_THE_SNAKE",
+      "LEAFY_POULTICE",
+      "PRAYER_WHEEL",
+      "ETERNAL_FEATHER",
+      "CHANDELIER",
+      "BRONZE_SCALES",
+      "TOY_BOX",
+      "MEAL_TICKET",
+      "PETRIFIED_TOAD",
+      "VAJRA",
+      "SPARKLING_ROUGE",
+      "DAUGHTER_OF_THE_WIND",
+      "BLOOD_VIAL",
+      "BOOK_OF_FIVE_RINGS",
+      "GREMLIN_HORN",
+      "AKABEKO",
+      "ODDLY_SMOOTH_STONE",
+      "IRON_CLUB",
+      "LIZARD_TAIL",
+      "TWISTED_FUNNEL",
+      "WAR_PAINT",
+      "BAG_OF_PREPARATION"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 871154764,
+    "enemies": [
+      {
+        "monster_id": "KIN_FOLLOWER",
+        "hp": 63,
+        "max_hp": 63,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "MINION_POWER",
+            "amount": 1
+          },
+          {
+            "power_id": "POISON_POWER",
+            "amount": 4
+          }
+        ]
+      },
+      {
+        "monster_id": "KIN_PRIEST",
+        "hp": 199,
+        "max_hp": 199,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "POISON_POWER",
+            "amount": 4
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "1310",
+      "fixed50_trajectory_id": "fixed50:1310-17",
+      "fixed50_index": 17,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COLD_SNAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DARKNESS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MODDED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLACIER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LIGHTNING_ROD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FUSION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLACIER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CAPACITOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPINNER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FOCUSED_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "CRACKED_CORE",
+      "BOOMING_CONCH",
+      "VENERABLE_TEA_SET",
+      "BLOOD_VIAL",
+      "ANCHOR",
+      "VERY_HOT_COCOA",
+      "BAG_OF_PREPARATION",
+      "AMETHYST_AUBERGINE",
+      "PARRYING_SHIELD",
+      "HAPPY_FLOWER",
+      "CENTENNIAL_PUZZLE"
+    ],
+    "energy": 7,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1721023607,
+    "enemies": [
+      {
+        "monster_id": "TUNNELER",
+        "hp": 92,
+        "max_hp": 92,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "1016",
+      "fixed50_trajectory_id": "fixed50:1016-18",
+      "fixed50_index": 18,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "SILENT",
+    "player_hp": 77,
+    "player_max_hp": 77,
+    "player_block": 7,
+    "hand_cards": [
+      {
+        "card_id": "MAD_SCIENCE",
+        "is_upgraded": false,
+        "tinker_time_type": "Power",
+        "tinker_time_rider": "Expertise"
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLUMSY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TACTICIAN",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "UNTOUCHABLE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SNAKEBITE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "POISONED_STAB",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "NEUTRALIZE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LEADING_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "OUTBREAK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ACROBATICS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PIERCING_WAIL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUCKER_PUNCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WELL_LAID_PLANS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ANTICIPATE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PRODUCTION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SURVIVOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEADLY_POISON",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HIDDEN_DAGGERS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TOOLS_OF_THE_TRADE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REFLEX",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LEG_SWEEP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DARK_SHACKLES",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ESCAPE_PLAN",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "STABLE_SERUM"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      }
+    ],
+    "relics": [
+      "RING_OF_THE_DRAKE",
+      "SILKEN_TRESS",
+      "GREMLIN_HORN",
+      "FESTIVE_POPPER",
+      "GORGET",
+      "STRAWBERRY",
+      "UNSETTLING_LAMP",
+      "TOUCH_OF_OROBAS",
+      "BAG_OF_MARBLES",
+      "POTION_BELT",
+      "MEMBERSHIP_CARD",
+      "BLOOD_VIAL",
+      "KUNAI",
+      "WAR_PAINT",
+      "SAI",
+      "VAMBRACE",
+      "KUSARIGAMA",
+      "NUNCHAKU",
+      "HAPPY_FLOWER"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 470119233,
+    "enemies": [
+      {
+        "monster_id": "TUNNELER",
+        "hp": 92,
+        "max_hp": 92,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "VULNERABLE_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "6420",
+      "fixed50_trajectory_id": "fixed50:6420-19",
+      "fixed50_index": 19,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 63,
+    "player_max_hp": 63,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ADAPTIVE_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REBOOT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "CRACKED_CORE",
+      "LEAFY_POULTICE",
+      "ORICHALCUM",
+      "UNSETTLING_LAMP",
+      "REGAL_PILLOW",
+      "PRISMATIC_GEM"
+    ],
+    "energy": 4,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 992752455,
+    "enemies": [
+      {
+        "monster_id": "EXOSKELETON",
+        "hp": 29,
+        "max_hp": 29,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "HARD_TO_KILL_POWER",
+            "amount": 9
+          }
+        ],
+        "slot_name": "first"
+      }
+    ],
+    "source": {
+      "server_id": "5067",
+      "fixed50_trajectory_id": "fixed50:5067-20",
+      "fixed50_index": 20,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 73,
+    "player_max_hp": 73,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPOILS_MAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLASSWORK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "BEAM_CELL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BEAM_CELL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GUILTY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SCAVENGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FIGHT_THROUGH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GO_FOR_THE_EYES",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "STABLE_SERUM"
+      }
+    ],
+    "player_powers": [],
+    "relics": [
+      "CRACKED_CORE",
+      "LEAFY_POULTICE",
+      "PEAR"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1488829045,
+    "enemies": [
+      {
+        "monster_id": "BOWLBUG_EGG",
+        "hp": 24,
+        "max_hp": 24,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "BOWLBUG_NECTAR",
+        "hp": 39,
+        "max_hp": 39,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "BOWLBUG_ROCK",
+        "hp": 49,
+        "max_hp": 49,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "IMBALANCED_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "5069",
+      "fixed50_trajectory_id": "fixed50:5069-21",
+      "fixed50_index": 21,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 73,
+    "player_max_hp": 73,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "HOTFIX",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TEMPEST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "WISH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BALL_LIGHTNING",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COLD_SNAP",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "GLACIER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "VOLTAIC",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SUPERCRITICAL",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LIGHTNING_ROD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LOOP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TEMPEST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GREED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLACIER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COMPILE_DRIVER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MAD_SCIENCE",
+        "is_upgraded": false,
+        "tinker_time_type": "Power",
+        "tinker_time_rider": "Expertise"
+      },
+      {
+        "card_id": "HOLOGRAM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WISH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HAND_OF_GREED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "THUNDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "OVERCLOCK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WISH",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "DROPLET_OF_PRECOGNITION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "FOCUS_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "CURSED_PEARL",
+      "ODDLY_SMOOTH_STONE",
+      "BONE_TEA",
+      "PARRYING_SHIELD",
+      "MINIATURE_CANNON",
+      "TOY_BOX",
+      "LUCKY_FYSH",
+      "MERCURY_HOURGLASS",
+      "LANTERN",
+      "PENDULUM",
+      "DATA_DISK",
+      "UNCEASING_TOP",
+      "GREMLIN_HORN",
+      "KUNAI",
+      "SERE_TALON",
+      "STRAWBERRY",
+      "CHANDELIER",
+      "LETTER_OPENER"
+    ],
+    "energy": 4,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1887889828,
+    "enemies": [
+      {
+        "monster_id": "OVICOPTER",
+        "hp": 132,
+        "max_hp": 132,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "TOUGH_EGG",
+        "hp": 19,
+        "max_hp": 19,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "HATCH_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "3337",
+      "fixed50_trajectory_id": "fixed50:3337-22",
+      "fixed50_index": 22,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 88,
+    "player_max_hp": 88,
+    "player_block": 14,
+    "hand_cards": [
+      {
+        "card_id": "BEGONE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CRUSH_UNDER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PRODUCTION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CONVERGENCE",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPECTRUM_SHIFT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TYRANNY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PALE_BLUE_DOT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "APPARITION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHARGE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PILLAR_OF_CREATION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MAD_SCIENCE",
+        "is_upgraded": false,
+        "tinker_time_type": "Power",
+        "tinker_time_rider": "Curious"
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "APPARITION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "APPARITION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COLLISION_COURSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PILLAR_OF_CREATION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PILLAR_OF_CREATION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BUNDLE_OF_JOY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GATHER_LIGHT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COLLISION_COURSE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BEGONE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BEGONE",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "DIVINE_RIGHT",
+      "SILVER_CRUCIBLE",
+      "STRIKE_DUMMY",
+      "BLOOD_VIAL",
+      "PAELS_TEARS",
+      "TEA_OF_DISCOURTESY",
+      "VAJRA",
+      "PEAR",
+      "BOWLER_HAT",
+      "ANCHOR",
+      "WAR_PAINT",
+      "DISTINGUISHED_CAPE",
+      "KUSARIGAMA",
+      "RINGING_TRIANGLE",
+      "GREMLIN_HORN",
+      "WHETSTONE",
+      "NUNCHAKU",
+      "FAKE_LEES_WAFFLE",
+      "FAKE_MANGO",
+      "FAKE_ORICHALCUM",
+      "FAKE_ANCHOR",
+      "FAKE_VENERABLE_TEA_SET"
+    ],
+    "energy": 3,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 708980339,
+    "enemies": [
+      {
+        "monster_id": "BOWLBUG_EGG",
+        "hp": 24,
+        "max_hp": 24,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "BOWLBUG_NECTAR",
+        "hp": 39,
+        "max_hp": 39,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "BOWLBUG_ROCK",
+        "hp": 49,
+        "max_hp": 49,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "IMBALANCED_POWER",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "monster_id": "BOWLBUG_SILK",
+        "hp": 44,
+        "max_hp": 44,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "7522",
+      "fixed50_trajectory_id": "fixed50:7522-23",
+      "fixed50_index": 23,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 66,
+    "player_max_hp": 66,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "DISTRACTION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "OMNISLICE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "WISP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ENFEEBLING_TOUCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MELANCHOLY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHROUD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ENFEEBLING_TOUCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ENFEEBLING_TOUCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BONE_SHARDS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEUROSURGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEATHBRINGER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MELANCHOLY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "AFTERLIFE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SLEIGHT_OF_FLESH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "JACK_OF_ALL_TRADES",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEGATIVE_PULSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REAP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ENFEEBLING_TOUCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GREED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BONE_SHARDS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHROUD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "LEAD_PAPERWEIGHT",
+      "ANCHOR",
+      "NUNCHAKU",
+      "ROYAL_STAMP",
+      "DRIFTWOOD",
+      "BING_BONG",
+      "CENTENNIAL_PUZZLE"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1886550466,
+    "enemies": [
+      {
+        "monster_id": "BOWLBUG_EGG",
+        "hp": 24,
+        "max_hp": 24,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "BOWLBUG_NECTAR",
+        "hp": 39,
+        "max_hp": 39,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "BOWLBUG_ROCK",
+        "hp": 49,
+        "max_hp": 49,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "IMBALANCED_POWER",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "monster_id": "BOWLBUG_SILK",
+        "hp": 44,
+        "max_hp": 44,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "6314",
+      "fixed50_trajectory_id": "fixed50:6314-24",
+      "fixed50_index": 24,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 63,
+    "player_max_hp": 63,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "CLUMSY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SMOKESTACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TRASH_TO_TREASURE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "FLAK_CANNON",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SUPERCRITICAL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MOMENTUM_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LEAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SUBROUTINE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FIGHT_THROUGH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BULK_UP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GO_FOR_THE_EYES",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MACHINE_LEARNING",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DARKNESS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ITERATION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CREATIVE_AI",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MAD_SCIENCE",
+        "is_upgraded": false,
+        "tinker_time_type": "Power",
+        "tinker_time_rider": "Expertise"
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "RADIANT_TINCTURE"
+      },
+      {
+        "slot": 2,
+        "potion_id": "STABLE_SERUM"
+      },
+      {
+        "slot": 3,
+        "potion_id": "SPEED_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "LEAFY_POULTICE",
+      "PENDULUM",
+      "RIPPLE_BASIN",
+      "LASTING_CANDY",
+      "PAELS_LEGION",
+      "ETERNAL_FEATHER",
+      "PANTOGRAPH",
+      "HAPPY_FLOWER",
+      "LETTER_OPENER",
+      "POTION_BELT",
+      "GREMLIN_HORN",
+      "GLITTER",
+      "ODDLY_SMOOTH_STONE"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 858556946,
+    "enemies": [
+      {
+        "monster_id": "HUNTER_KILLER",
+        "hp": 126,
+        "max_hp": 126,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "6017",
+      "fixed50_trajectory_id": "fixed50:6017-25",
+      "fixed50_index": 25,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 63,
+    "player_max_hp": 63,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "QUADCAST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GLASSWORK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SMOKESTACK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SHATTER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ECHO_FORM",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "GUNK_UP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GUNK_UP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BOOST_AWAY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "OVERCLOCK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SKIM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WHITE_NOISE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHADOW_SHIELD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FINESSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MACHINE_LEARNING",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GO_FOR_THE_EYES",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SUBROUTINE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ITERATION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COMPACT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DOUBLE_ENERGY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ALL_FOR_ONE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BOOST_AWAY",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "FLEX_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "VIGOR_POWER",
+        "amount": 8
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "LEAFY_POULTICE",
+      "PERMAFROST",
+      "AKABEKO",
+      "AMETHYST_AUBERGINE",
+      "ARCHAIC_TOOTH",
+      "SCREAMING_FLAGON",
+      "CANDELABRA",
+      "PARRYING_SHIELD",
+      "VAMBRACE",
+      "ASTROLABE",
+      "LIZARD_TAIL",
+      "WHETSTONE",
+      "RED_MASK",
+      "ETERNAL_FEATHER",
+      "TUNING_FORK"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1198323495,
+    "enemies": [
+      {
+        "monster_id": "ENTOMANCER",
+        "hp": 155,
+        "max_hp": 155,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "PERSONAL_HIVE_POWER",
+            "amount": 1
+          },
+          {
+            "power_id": "WEAK_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "7482",
+      "fixed50_trajectory_id": "fixed50:7482-26",
+      "fixed50_index": 26,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 82,
+    "player_max_hp": 82,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ULTIMATE_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PROWESS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FIGHT_THROUGH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FIGHT_THROUGH",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "OVERCLOCK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HOLOGRAM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COLD_SNAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HOTFIX",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "RAINBOW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "APOTHEOSIS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CREATIVE_AI",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CREATIVE_AI",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CURSE_OF_THE_BELL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DISCOVERY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SUPERCRITICAL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUPERCRITICAL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFRAGMENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      },
+      {
+        "power_id": "FOCUS_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "LEAD_PAPERWEIGHT",
+      "VENERABLE_TEA_SET",
+      "STRAWBERRY",
+      "ETERNAL_FEATHER",
+      "CALLING_BELL",
+      "BRONZE_SCALES",
+      "PANTOGRAPH",
+      "RAINBOW_RING",
+      "DATA_DISK",
+      "JUZU_BRACELET",
+      "CHANDELIER",
+      "BING_BONG",
+      "MEAL_TICKET",
+      "JEWELRY_BOX",
+      "FORGOTTEN_SOUL",
+      "GAMBLING_CHIP",
+      "STONE_CALENDAR",
+      "STRIKE_DUMMY",
+      "HAPPY_FLOWER"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1474703768,
+    "enemies": [
+      {
+        "monster_id": "ENTOMANCER",
+        "hp": 155,
+        "max_hp": 155,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "PERSONAL_HIVE_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "3342",
+      "fixed50_trajectory_id": "fixed50:3342-27",
+      "fixed50_index": 27,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "IRONCLAD",
+    "player_hp": 80,
+    "player_max_hp": 80,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "BASH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "UPPERCUT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEMON_FORM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PILLAGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TWIN_STRIKE",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "RAGE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CRUELTY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TWIN_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CASCADE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CRUELTY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MOLTEN_FIST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FLAME_BARRIER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STOMP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SETUP_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CASCADE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PERFECTED_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HELLRAISER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STAMPEDE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BLOODLETTING",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MOLTEN_FIST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DISMANTLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLOODLETTING",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HELLRAISER",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "LIQUID_BRONZE"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 3
+      },
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      }
+    ],
+    "relics": [
+      "BURNING_BLOOD",
+      "SILVER_CRUCIBLE",
+      "ORNAMENTAL_FAN",
+      "AMETHYST_AUBERGINE",
+      "SWORD_OF_JADE",
+      "TOXIC_EGG",
+      "SEAL_OF_GOLD",
+      "RED_MASK",
+      "VENERABLE_TEA_SET",
+      "PERMAFROST",
+      "ANCHOR",
+      "BAG_OF_MARBLES",
+      "DRAGON_FRUIT",
+      "MEAT_CLEAVER",
+      "PETRIFIED_TOAD",
+      "BRONZE_SCALES",
+      "BLOOD_VIAL"
+    ],
+    "energy": 4,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 315372601,
+    "enemies": [
+      {
+        "monster_id": "ENTOMANCER",
+        "hp": 155,
+        "max_hp": 155,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "PERSONAL_HIVE_POWER",
+            "amount": 1
+          },
+          {
+            "power_id": "WEAK_POWER",
+            "amount": 1
+          },
+          {
+            "power_id": "VULNERABLE_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "1519",
+      "fixed50_trajectory_id": "fixed50:1519-28",
+      "fixed50_index": 28,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 61,
+    "player_max_hp": 61,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "SHARED_FATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHARED_FATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "RATTLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "RIGHT_HAND_HAND",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "AFTERLIFE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "CALCIFY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LETHALITY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FRIENDSHIP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HIGH_FIVE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SIC_EM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GRAVE_WARDEN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SNAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLATTEN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "INVOKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FLATTEN",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLUMSY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POKE",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "LEAFY_POULTICE",
+      "STRAWBERRY",
+      "FESTIVE_POPPER",
+      "ODDLY_SMOOTH_STONE",
+      "RUNIC_PYRAMID",
+      "REPTILE_TRINKET",
+      "VEXING_PUZZLEBOX",
+      "HORN_CLEAT",
+      "STRIKE_DUMMY",
+      "MERCURY_HOURGLASS",
+      "IRON_CLUB",
+      "THE_COURIER",
+      "VENERABLE_TEA_SET",
+      "BELLOWS",
+      "LANTERN"
+    ],
+    "energy": 4,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1659778792,
+    "enemies": [
+      {
+        "monster_id": "KNOWLEDGE_DEMON",
+        "hp": 399,
+        "max_hp": 399,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "2488",
+      "fixed50_trajectory_id": "fixed50:2488-29",
+      "fixed50_index": 29,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GUARDS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPECTRUM_SHIFT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SPLASH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GLOW",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PILLAR_OF_CREATION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ORBIT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ORBIT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GLITTERSTREAM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUPERMASSIVE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CHARGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PILLAR_OF_CREATION",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ULTIMATE_DEFEND",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BEGONE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MANIFEST_AUTHORITY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLITTERSTREAM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CRUSH_UNDER",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      }
+    ],
+    "relics": [
+      "DIVINE_RIGHT",
+      "SMALL_CAPSULE",
+      "PENDULUM",
+      "DREAM_CATCHER",
+      "POTION_BELT",
+      "GOLDEN_COMPASS",
+      "VAJRA",
+      "PRAYER_WHEEL",
+      "GORGET",
+      "HAPPY_FLOWER",
+      "GIRYA",
+      "JEWELED_MASK",
+      "BLOOD_VIAL",
+      "ETERNAL_FEATHER",
+      "PETRIFIED_TOAD"
+    ],
+    "energy": 3,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1470257445,
+    "enemies": [
+      {
+        "monster_id": "KNOWLEDGE_DEMON",
+        "hp": 399,
+        "max_hp": 399,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "6773",
+      "fixed50_trajectory_id": "fixed50:6773-30",
+      "fixed50_index": 30,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 66,
+    "player_max_hp": 66,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "CALCIFY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LETHALITY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "REAP",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "PUTREFY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SPUR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEUROSURGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FETCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SACRIFICE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CALL_OF_THE_VOID",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SCULPTING_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BURY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PAGESTORM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GREED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FETCH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "INVOKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MAD_SCIENCE",
+        "is_upgraded": true,
+        "tinker_time_type": "Power",
+        "tinker_time_rider": "Improvement"
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GRAVEBLAST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SOW",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "DISTILLED_CHAOS"
+      },
+      {
+        "slot": 1,
+        "potion_id": "POWER_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "CURSED_PEARL",
+      "BOOKMARK",
+      "CHANDELIER",
+      "ODDLY_SMOOTH_STONE",
+      "CLOAK_CLASP",
+      "VERY_HOT_COCOA",
+      "BIG_HAT",
+      "BOOK_OF_FIVE_RINGS",
+      "LUCKY_FYSH",
+      "TUNING_FORK",
+      "CHOICES_PARADOX",
+      "STONE_CALENDAR",
+      "NUNCHAKU",
+      "WAR_PAINT"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1851820985,
+    "enemies": [
+      {
+        "monster_id": "KNOWLEDGE_DEMON",
+        "hp": 399,
+        "max_hp": 399,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "1642",
+      "fixed50_trajectory_id": "fixed50:1642-31",
+      "fixed50_index": 31,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 54,
+    "player_max_hp": 54,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MISERY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "THE_SCYTHE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEBILITATE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "LETHALITY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "AFTERLIFE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SLEIGHT_OF_FLESH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHARED_FATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SCOURGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COUNTDOWN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SCOURGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NO_ESCAPE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "POTION_OF_DOOM"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "SURROUNDED_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "LEAFY_POULTICE",
+      "PENDULUM",
+      "CENTENNIAL_PUZZLE",
+      "VAMBRACE",
+      "POCKETWATCH",
+      "PAELS_CLAW",
+      "UNDYING_SIGIL",
+      "BONE_FLUTE",
+      "PERMAFROST",
+      "MINIATURE_CANNON",
+      "MR_STRUGGLES",
+      "BAG_OF_PREPARATION"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 754727552,
+    "enemies": [
+      {
+        "monster_id": "CRUSHER",
+        "hp": 219,
+        "max_hp": 219,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "BACK_ATTACK_LEFT_POWER",
+            "amount": 1
+          },
+          {
+            "power_id": "CRAB_RAGE_POWER",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "monster_id": "ROCKET",
+        "hp": 209,
+        "max_hp": 209,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "BACK_ATTACK_RIGHT_POWER",
+            "amount": 1
+          },
+          {
+            "power_id": "CRAB_RAGE_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "1046",
+      "fixed50_trajectory_id": "fixed50:1046-32",
+      "fixed50_index": 32,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "SILENT",
+    "player_hp": 70,
+    "player_max_hp": 70,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "INFINITE_BLADES",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "EXTERMINATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PREPARED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PREPARED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SURVIVOR",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "KNIFE_TRAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLADE_DANCE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FOOTWORK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNTOUCHABLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "EXPERTISE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHADOW_STEP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ADRENALINE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "INFINITE_BLADES",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEUTRALIZE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DAGGER_THROW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TRACKING",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      }
+    ],
+    "relics": [
+      "RING_OF_THE_SNAKE",
+      "NEW_LEAF",
+      "LUCKY_FYSH",
+      "PAELS_BLOOD",
+      "BLOOD_VIAL",
+      "BRONZE_SCALES"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 415523948,
+    "enemies": [
+      {
+        "monster_id": "DEVOTED_SCULPTOR",
+        "hp": 172,
+        "max_hp": 172,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "5166",
+      "fixed50_trajectory_id": "fixed50:5166-33",
+      "fixed50_index": 33,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "IRONCLAD",
+    "player_hp": 80,
+    "player_max_hp": 80,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "ANGER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TRUE_GRIT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "KNOW_THY_PLACE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLOW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HEGEMONY",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "DISCOVERY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SETUP_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HEADBUTT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHARGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UPPERCUT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STOKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASHEN_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FEEL_NO_PAIN",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SHRUG_IT_OFF",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "THUNDERCLAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BIG_BANG",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DRUM_OF_BATTLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TYRANNY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COLOSSUS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "KINGLY_PUNCH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ROYALTIES",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TREMBLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DRUM_OF_BATTLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PILLAGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "TOUCH_OF_INSANITY"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "BURNING_BLOOD",
+      "LARGE_CAPSULE",
+      "GREMLIN_HORN",
+      "VENERABLE_TEA_SET",
+      "CANDELABRA",
+      "LETTER_OPENER",
+      "PARRYING_SHIELD",
+      "SEA_GLASS",
+      "ANCHOR",
+      "ODDLY_SMOOTH_STONE",
+      "RIPPLE_BASIN",
+      "KUSARIGAMA"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1173069129,
+    "enemies": [
+      {
+        "monster_id": "DEVOTED_SCULPTOR",
+        "hp": 172,
+        "max_hp": 172,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "4228",
+      "fixed50_trajectory_id": "fixed50:4228-34",
+      "fixed50_index": 34,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 54,
+    "player_max_hp": 54,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "AFTERLIFE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PAGESTORM",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DOUBT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DANSE_MACABRE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPOILS_MAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFILE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFILE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LETHALITY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FEAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLUMSY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      }
+    ],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "NEOWS_BONES",
+      "LEAFY_POULTICE",
+      "POMANDER",
+      "BRONZE_SCALES",
+      "FRESNEL_LENS",
+      "CENTENNIAL_PUZZLE",
+      "ANCHOR",
+      "GHOST_SEED",
+      "SWORD_OF_STONE"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1541543702,
+    "enemies": [
+      {
+        "monster_id": "DEVOTED_SCULPTOR",
+        "hp": 172,
+        "max_hp": 172,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "4978",
+      "fixed50_trajectory_id": "fixed50:4978-35",
+      "fixed50_index": 35,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 59,
+    "player_max_hp": 78,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "ZAP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "OVERCLOCK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SKIM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LEAP",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "COMPACT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ALL_FOR_ONE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TEMPEST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GLASSWORK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COMPACT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GO_FOR_THE_EYES",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GLACIER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HOTFIX",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLAW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHATTER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WHITE_NOISE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HOLOGRAM",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "SPEED_POTION"
+      },
+      {
+        "slot": 1,
+        "potion_id": "FLEX_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "STRENGTH_POWER",
+        "amount": 3
+      },
+      {
+        "power_id": "FOCUS_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "VIGOR_POWER",
+        "amount": 8
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "PRECARIOUS_SHEARS",
+      "SWORD_OF_JADE",
+      "BAG_OF_PREPARATION",
+      "LETTER_OPENER",
+      "PEN_NIB",
+      "CANDELABRA",
+      "ELECTRIC_SHRYMP",
+      "DATA_DISK",
+      "PENDULUM",
+      "AKABEKO",
+      "REPTILE_TRINKET",
+      "IRON_CLUB",
+      "FAKE_BLOOD_VIAL",
+      "FAKE_MANGO",
+      "FAKE_VENERABLE_TEA_SET",
+      "FAKE_HAPPY_FLOWER",
+      "NUNCHAKU",
+      "HAPPY_FLOWER",
+      "ROYAL_POISON",
+      "ANCHOR"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 189549646,
+    "enemies": [
+      {
+        "monster_id": "DEVOTED_SCULPTOR",
+        "hp": 172,
+        "max_hp": 172,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "3478",
+      "fixed50_trajectory_id": "fixed50:3478-36",
+      "fixed50_index": 36,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "I_AM_INVINCIBLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHILD_OF_THE_STARS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GLOW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PARTICLE_WALL",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HIDDEN_CACHE",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "CHARGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "VOID_FORM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COSMIC_INDIFFERENCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CRASH_LANDING",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FURNACE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REFLECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SPOILS_OF_BATTLE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PARRY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CONQUEROR",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ALIGNMENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BRIGHTEST_FLAME",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "THORNS_POWER",
+        "amount": 3
+      }
+    ],
+    "relics": [
+      "DIVINE_RIGHT",
+      "SILVER_CRUCIBLE",
+      "WHETSTONE",
+      "STORYBOOK",
+      "ROYAL_STAMP",
+      "BLESSED_ANTLER",
+      "BRONZE_SCALES",
+      "FENCING_MANUAL",
+      "VENERABLE_TEA_SET"
+    ],
+    "energy": 4,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1381220098,
+    "enemies": [
+      {
+        "monster_id": "OWL_MAGISTRATE",
+        "hp": 247,
+        "max_hp": 247,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "6485",
+      "fixed50_trajectory_id": "fixed50:6485-37",
+      "fixed50_index": 37,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 54,
+    "player_max_hp": 54,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "INVOKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "CAPTURE_SPIRIT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEMESNE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SCOURGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DANSE_MACABRE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SCULPTING_STRIKE",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 0,
+        "potion_id": "WEAK_POTION"
+      }
+    ],
+    "player_powers": [],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "LEAFY_POULTICE",
+      "THE_BOOT"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1587761462,
+    "enemies": [
+      {
+        "monster_id": "SLIMED_BERSERKER",
+        "hp": 281,
+        "max_hp": 281,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "3518",
+      "fixed50_trajectory_id": "fixed50:3518-38",
+      "fixed50_index": 38,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "IRONCLAD",
+    "player_hp": 80,
+    "player_max_hp": 80,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FEEL_NO_PAIN",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CRIMSON_MANTLE",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "FIEND_FIRE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "APPARITION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "EXPECT_A_FIGHT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ARMAMENTS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STAMPEDE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MOLTEN_FIST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLOODLETTING",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TREMBLE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "APPARITION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STONE_ARMOR",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "OFFERING",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PERFECTED_STRIKE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PACTS_END",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "APPARITION",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STOMP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "POMMEL_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SPITE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PERFECTED_STRIKE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SECOND_WIND",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FINESSE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BATTLE_TRANCE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "VICIOUS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TAUNT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "BURNING_PACT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      },
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "BURNING_BLOOD",
+      "NEOWS_TALISMAN",
+      "PENDULUM",
+      "GORGET",
+      "WHETSTONE",
+      "ETERNAL_FEATHER",
+      "FESTIVE_POPPER",
+      "ELECTRIC_SHRYMP",
+      "POTION_BELT",
+      "PEN_NIB",
+      "GREMLIN_HORN",
+      "PLANISPHERE",
+      "SHURIKEN",
+      "DISTINGUISHED_CAPE",
+      "PANTOGRAPH",
+      "ODDLY_SMOOTH_STONE"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 721240557,
+    "enemies": [
+      {
+        "monster_id": "GLOBE_HEAD",
+        "hp": 158,
+        "max_hp": 158,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "GALVANIC_POWER",
+            "amount": 6
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "3118",
+      "fixed50_trajectory_id": "fixed50:3118-39",
+      "fixed50_index": 39,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "SILENT",
+    "player_hp": 70,
+    "player_max_hp": 70,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DODGE_AND_ROLL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BACKFLIP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ANTICIPATE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "SURVIVOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPEEDSTER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "MURDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DAGGER_THROW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNTOUCHABLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ANTICIPATE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFLECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MEMENTO_MORI",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DAGGER_THROW",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MIND_BLAST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "NEUTRALIZE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FLICK_FLACK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "THE_BOMB",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WELL_LAID_PLANS",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 2,
+        "potion_id": "VULNERABLE_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      }
+    ],
+    "relics": [
+      "RING_OF_THE_SNAKE",
+      "LEAD_PAPERWEIGHT",
+      "BOOK_OF_FIVE_RINGS",
+      "GIRYA",
+      "REPTILE_TRINKET",
+      "GORGET",
+      "NUTRITIOUS_SOUP",
+      "CENTENNIAL_PUZZLE",
+      "FROZEN_EGG",
+      "VAMBRACE"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 701225013,
+    "enemies": [
+      {
+        "monster_id": "FROG_KNIGHT",
+        "hp": 199,
+        "max_hp": 199,
+        "block": 15,
+        "powers": [
+          {
+            "power_id": "PLATING_POWER",
+            "amount": 15
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "741",
+      "fixed50_trajectory_id": "fixed50:741-40",
+      "fixed50_index": 40,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "TORIC_TOUGHNESS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FTL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TEMPEST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MAYHEM",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HOTFIX",
+        "is_upgraded": true
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "SUPERCRITICAL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "WHITE_NOISE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "THUNDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MAD_SCIENCE",
+        "is_upgraded": false,
+        "tinker_time_type": "Skill",
+        "tinker_time_rider": "Energized"
+      },
+      {
+        "card_id": "FERAL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HELIX_DRILL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BYRD_SWOOP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BOOST_AWAY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "HOTFIX",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "METAMORPHOSIS",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "GLASSWORK",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STORM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HOTFIX",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COOLHEADED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEOWS_FURY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LIGHTNING_ROD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUBROUTINE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFRAGMENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "TRASH_TO_TREASURE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SYNTHESIS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUBROUTINE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STORM",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "SPEED_POTION"
+      }
+    ],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      },
+      {
+        "power_id": "VIGOR_POWER",
+        "amount": 8
+      }
+    ],
+    "relics": [
+      "INFUSED_CORE",
+      "NEOWS_TORMENT",
+      "ETERNAL_FEATHER",
+      "PLANISPHERE",
+      "BYRDPIP",
+      "TOUCH_OF_OROBAS",
+      "VEXING_PUZZLEBOX",
+      "BELLOWS",
+      "ODDLY_SMOOTH_STONE",
+      "RAZOR_TOOTH",
+      "KUNAI",
+      "SIGNET_RING",
+      "CANDELABRA",
+      "JUZU_BRACELET",
+      "RUNIC_CAPACITOR",
+      "STONE_CRACKER",
+      "BAG_OF_MARBLES",
+      "AKABEKO",
+      "INTIMIDATING_HELMET",
+      "POCKETWATCH"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 6,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      },
+      {
+        "orb_id": "LIGHTNING_ORB"
+      },
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 918755779,
+    "enemies": [
+      {
+        "monster_id": "MECHA_KNIGHT",
+        "hp": 320,
+        "max_hp": 320,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "ARTIFACT_POWER",
+            "amount": 2
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "5483",
+      "fixed50_trajectory_id": "fixed50:5483-41",
+      "fixed50_index": 41,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "SILENT",
+    "player_hp": 70,
+    "player_max_hp": 70,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFLECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PIERCING_WAIL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SPEEDSTER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "SURVIVOR",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ACCURACY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UP_MY_SLEEVE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LEG_SWEEP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "NEUTRALIZE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SHADOWMELD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFLECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HAZE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DAGGER_THROW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_SILENT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "RING_OF_THE_SNAKE",
+      "SILVER_CRUCIBLE",
+      "VAMBRACE"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1784266301,
+    "enemies": [
+      {
+        "monster_id": "MECHA_KNIGHT",
+        "hp": 320,
+        "max_hp": 320,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "ARTIFACT_POWER",
+            "amount": 3
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "5512",
+      "fixed50_trajectory_id": "fixed50:5512-42",
+      "fixed50_index": 42,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLOAK_OF_STARS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CLOAK_OF_STARS",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLITTERSTREAM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "PHOTON_CUT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GATHER_LIGHT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "REFINE_BLADE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLACK_HOLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ORBIT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "DIVINE_RIGHT",
+      "FISHING_ROD",
+      "THE_COURIER"
+    ],
+    "energy": 3,
+    "stars": 3,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1099236681,
+    "enemies": [
+      {
+        "monster_id": "SOUL_NEXUS",
+        "hp": 254,
+        "max_hp": 254,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "6844",
+      "fixed50_trajectory_id": "fixed50:6844-43",
+      "fixed50_index": 43,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "NECROBINDER",
+    "player_hp": 54,
+    "player_max_hp": 54,
+    "player_block": 10,
+    "hand_cards": [
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BODYGUARD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "UNLEASH",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_NECROBINDER",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_NECROBINDER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEATHBRINGER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEATH_MARCH",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "PULL_FROM_BELOW",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "SOUL_STORM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DIRGE",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [
+      {
+        "slot": 1,
+        "potion_id": "VULNERABLE_POTION"
+      }
+    ],
+    "player_powers": [],
+    "relics": [
+      "BOUND_PHYLACTERY",
+      "LEAFY_POULTICE",
+      "GHOST_SEED",
+      "REGAL_PILLOW",
+      "BONE_FLUTE",
+      "ANCHOR"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1222187614,
+    "enemies": [
+      {
+        "monster_id": "SOUL_NEXUS",
+        "hp": 254,
+        "max_hp": 254,
+        "block": 0,
+        "powers": []
+      }
+    ],
+    "source": {
+      "server_id": "851",
+      "fixed50_trajectory_id": "fixed50:851-44",
+      "fixed50_index": 44,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "IRONCLAD",
+    "player_hp": 80,
+    "player_max_hp": 80,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "STAMPEDE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "PILLAGE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MOLTEN_FIST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TREMBLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BASH",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLOOD_WALL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_IRONCLAD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ANGER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DOMINATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BYRD_SWOOP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ARMAMENTS",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "BURNING_BLOOD",
+      "SMALL_CAPSULE",
+      "NUNCHAKU",
+      "BYRDPIP",
+      "CENTENNIAL_PUZZLE",
+      "INTIMIDATING_HELMET"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 743985434,
+    "enemies": [
+      {
+        "monster_id": "QUEEN",
+        "hp": 419,
+        "max_hp": 419,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "TORCH_HEAD_AMALGAM",
+        "hp": 211,
+        "max_hp": 211,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "MINION_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "1946",
+      "fixed50_trajectory_id": "fixed50:1946-45",
+      "fixed50_index": 45,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 82,
+    "player_max_hp": 82,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BULK_UP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BOOST_AWAY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REBOOT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COMPACT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "NULL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "COLD_SNAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SMOKESTACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SMOKESTACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COMPILE_DRIVER",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TURBO",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SMOKESTACK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "PLATING_POWER",
+        "amount": 4
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "SCROLL_BOXES",
+      "WAR_PAINT",
+      "ELECTRIC_SHRYMP",
+      "LEES_WAFFLE",
+      "BING_BONG",
+      "GORGET"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1195704608,
+    "enemies": [
+      {
+        "monster_id": "QUEEN",
+        "hp": 419,
+        "max_hp": 419,
+        "block": 0,
+        "powers": []
+      },
+      {
+        "monster_id": "TORCH_HEAD_AMALGAM",
+        "hp": 211,
+        "max_hp": 211,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "MINION_POWER",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "5074",
+      "fixed50_trajectory_id": "fixed50:5074-46",
+      "fixed50_index": 46,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "MODDED",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BOOST_AWAY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DOUBLE_ENERGY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "LIGHTNING_ROD",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ECHO_FORM",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "VOLTAIC",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TESLA_COIL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LEAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TESLA_COIL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CAPACITOR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LEAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FTL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LIGHTNING_ROD",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CHARGE_BATTERY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "CREATIVE_AI",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "CLUMSY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "FOCUS_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "CRACKED_CORE",
+      "NEW_LEAF",
+      "PERMAFROST",
+      "HORN_CLEAT",
+      "SPARKLING_ROUGE",
+      "EMPTY_CAGE",
+      "VENERABLE_TEA_SET",
+      "BREAD",
+      "JUZU_BRACELET",
+      "BOOK_OF_FIVE_RINGS",
+      "HAPPY_FLOWER",
+      "BONE_TEA",
+      "REGAL_PILLOW",
+      "IRON_CLUB",
+      "FESTIVE_POPPER",
+      "DATA_DISK"
+    ],
+    "energy": 1,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 97062133,
+    "enemies": [
+      {
+        "monster_id": "AEONGLASS",
+        "hp": 535,
+        "max_hp": 535,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "WITHERING_PRESENCE_POWER",
+            "amount": 6
+          },
+          {
+            "power_id": "ARTIFACT_POWER",
+            "amount": 3
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "5323",
+      "fixed50_trajectory_id": "fixed50:5323-47",
+      "fixed50_index": 47,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "REGENT",
+    "player_hp": 78,
+    "player_max_hp": 78,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "EXTERMINATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GLITTERSTREAM",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "HIDDEN_CACHE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COLLISION_COURSE",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "KINGLY_KICK",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SUPERMASSIVE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "BLACK_HOLE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "GAMMA_BLAST",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "REFLECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "HIDDEN_CACHE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "VENERATE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "COSMIC_INDIFFERENCE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "FALLING_STAR",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "TYRANNY",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "KNOW_THY_PLACE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ASCENDERS_BANE",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "MANIFEST_AUTHORITY",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "DEFEND_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_REGENT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SECRET_TECHNIQUE",
+        "is_upgraded": true
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [
+      {
+        "power_id": "DEXTERITY_POWER",
+        "amount": 1
+      }
+    ],
+    "relics": [
+      "DIVINE_DESTINY",
+      "WINGED_BOOTS",
+      "ODDLY_SMOOTH_STONE",
+      "TUNING_FORK",
+      "FRESNEL_LENS",
+      "TOUCH_OF_OROBAS",
+      "FAKE_VENERABLE_TEA_SET",
+      "FAKE_MANGO",
+      "RED_MASK"
+    ],
+    "energy": 3,
+    "stars": 7,
+    "orb_slots": 0,
+    "orbs": [],
+    "seed": 1601590533,
+    "enemies": [
+      {
+        "monster_id": "AEONGLASS",
+        "hp": 535,
+        "max_hp": 535,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "WITHERING_PRESENCE_POWER",
+            "amount": 6
+          },
+          {
+            "power_id": "ARTIFACT_POWER",
+            "amount": 2
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "4650",
+      "fixed50_trajectory_id": "fixed50:4650-48",
+      "fixed50_index": 48,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  },
+  {
+    "character_id": "DEFECT",
+    "player_hp": 75,
+    "player_max_hp": 75,
+    "player_block": 0,
+    "hand_cards": [
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "ZAP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "SWEEPING_BEAM",
+        "is_upgraded": false
+      }
+    ],
+    "draw_pile_cards": [
+      {
+        "card_id": "TESLA_COIL",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "LOOP",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DUALCAST",
+        "is_upgraded": true
+      },
+      {
+        "card_id": "STRIKE_DEFECT",
+        "is_upgraded": false
+      },
+      {
+        "card_id": "DEFEND_DEFECT",
+        "is_upgraded": false
+      }
+    ],
+    "discard_pile_cards": [],
+    "exhaust_pile_cards": [],
+    "potions": [],
+    "player_powers": [],
+    "relics": [
+      "CRACKED_CORE",
+      "POMANDER"
+    ],
+    "energy": 3,
+    "stars": 0,
+    "orb_slots": 3,
+    "orbs": [
+      {
+        "orb_id": "LIGHTNING_ORB"
+      }
+    ],
+    "seed": 1997805524,
+    "enemies": [
+      {
+        "monster_id": "AEONGLASS",
+        "hp": 535,
+        "max_hp": 535,
+        "block": 0,
+        "powers": [
+          {
+            "power_id": "WITHERING_PRESENCE_POWER",
+            "amount": 6
+          },
+          {
+            "power_id": "ARTIFACT_POWER",
+            "amount": 3
+          }
+        ]
+      }
+    ],
+    "source": {
+      "server_id": "5800",
+      "fixed50_trajectory_id": "fixed50:5800-49",
+      "fixed50_index": 49,
+      "restored_from": "trajectories_fixed50_orbapi_20260721_3 decision_index=0",
+      "emulator_version": "2026-07-21 13:33:20"
+    }
+  }
+]

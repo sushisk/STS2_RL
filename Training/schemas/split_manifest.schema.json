@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sts2-rl/split_manifest.schema.json",
+  "title": "STS2 RL Training Split Manifest Row",
+  "type": "object",
+  "required": ["trajectory_id", "scenario_id", "dataset_kind", "split"],
+  "properties": {
+    "trajectory_id": { "type": "string" },
+    "scenario_id": { "type": "string" },
+    "dataset_kind": { "enum": ["complete", "partial"] },
+    "split": { "enum": ["train", "validation", "test"] }
+  }
+}

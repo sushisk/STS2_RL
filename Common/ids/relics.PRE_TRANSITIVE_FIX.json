@@ -1,0 +1,2990 @@
+{
+  "AKABEKO": {
+    "class_name": "Akabeko",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "ALCHEMICAL_COFFER": {
+    "class_name": "AlchemicalCoffer",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "AMETHYST_AUBERGINE": {
+    "class_name": "AmethystAubergine",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "ANCHOR": {
+    "class_name": "Anchor",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "ARCANE_SCROLL": {
+    "class_name": "ArcaneScroll",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "ARCHAIC_TOOTH": {
+    "class_name": "ArchaicTooth",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "ART_OF_WAR": {
+    "class_name": "ArtOfWar",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "ASTROLABE": {
+    "class_name": "Astrolabe",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BAG_OF_MARBLES": {
+    "class_name": "BagOfMarbles",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BAG_OF_PREPARATION": {
+    "class_name": "BagOfPreparation",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BEATING_REMNANT": {
+    "class_name": "BeatingRemnant",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "BEAUTIFUL_BRACELET": {
+    "class_name": "BeautifulBracelet",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BELLOWS": {
+    "class_name": "Bellows",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "BELT_BUCKLE": {
+    "class_name": "BeltBuckle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "BIG_HAT": {
+    "class_name": "BigHat",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "BIG_MUSHROOM": {
+    "class_name": "BigMushroom",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "BIIIG_HUG": {
+    "class_name": "BiiigHug",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BING_BONG": {
+    "class_name": "BingBong",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "BLACK_BLOOD": {
+    "class_name": "BlackBlood",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "BLACK_STAR": {
+    "class_name": "BlackStar",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BLESSED_ANTLER": {
+    "class_name": "BlessedAntler",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BLOOD_SOAKED_ROSE": {
+    "class_name": "BloodSoakedRose",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BLOOD_VIAL": {
+    "class_name": "BloodVial",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BONE_FLUTE": {
+    "class_name": "BoneFlute",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BONE_TEA": {
+    "class_name": "BoneTea",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "BOOKMARK": {
+    "class_name": "Bookmark",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "BOOK_OF_FIVE_RINGS": {
+    "class_name": "BookOfFiveRings",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BOOK_REPAIR_KNIFE": {
+    "class_name": "BookRepairKnife",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "BOOMING_CONCH": {
+    "class_name": "BoomingConch",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BOUND_PHYLACTERY": {
+    "class_name": "BoundPhylactery",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "BOWLER_HAT": {
+    "class_name": "BowlerHat",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "BREAD": {
+    "class_name": "Bread",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "BRILLIANT_SCARF": {
+    "class_name": "BrilliantScarf",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "BRIMSTONE": {
+    "class_name": "Brimstone",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "BRONZE_SCALES": {
+    "class_name": "BronzeScales",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BURNING_BLOOD": {
+    "class_name": "BurningBlood",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "BURNING_STICKS": {
+    "class_name": "BurningSticks",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "BYRDPIP": {
+    "class_name": "Byrdpip",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "CALLING_BELL": {
+    "class_name": "CallingBell",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "CANDELABRA": {
+    "class_name": "Candelabra",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "CAPTAINS_WHEEL": {
+    "class_name": "CaptainsWheel",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "CAULDRON": {
+    "class_name": "Cauldron",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "CENTENNIAL_PUZZLE": {
+    "class_name": "CentennialPuzzle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "CHANDELIER": {
+    "class_name": "Chandelier",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "CHARONS_ASHES": {
+    "class_name": "CharonsAshes",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "CHEMICAL_X": {
+    "class_name": "ChemicalX",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "CHOICES_PARADOX": {
+    "class_name": "ChoicesParadox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "CHOSEN_CHEESE": {
+    "class_name": "ChosenCheese",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "CIRCLET": {
+    "class_name": "Circlet",
+    "is_stackable": true,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "None"
+  },
+  "CLAWS": {
+    "class_name": "Claws",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "CLOAK_CLASP": {
+    "class_name": "CloakClasp",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "CRACKED_CORE": {
+    "class_name": "CrackedCore",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "CROSSBOW": {
+    "class_name": "Crossbow",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "CURSED_PEARL": {
+    "class_name": "CursedPearl",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "DARKSTONE_PERIAPT": {
+    "class_name": "DarkstonePeriapt",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "DATA_DISK": {
+    "class_name": "DataDisk",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "DAUGHTER_OF_THE_WIND": {
+    "class_name": "DaughterOfTheWind",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "DELICATE_FROND": {
+    "class_name": "DelicateFrond",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "DEMON_TONGUE": {
+    "class_name": "DemonTongue",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "DEPRECATED_RELIC": {
+    "class_name": "DeprecatedRelic",
+    "is_stackable": true,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "None"
+  },
+  "DIAMOND_DIADEM": {
+    "class_name": "DiamondDiadem",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "DINGY_RUG": {
+    "class_name": "DingyRug",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "DISTINGUISHED_CAPE": {
+    "class_name": "DistinguishedCape",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "DIVINE_DESTINY": {
+    "class_name": "DivineDestiny",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "DIVINE_RIGHT": {
+    "class_name": "DivineRight",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "DOLLYS_MIRROR": {
+    "class_name": "DollysMirror",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "DOWSING_ROD": {
+    "class_name": "DowsingRod",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "DRAGON_FRUIT": {
+    "class_name": "DragonFruit",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "DREAM_CATCHER": {
+    "class_name": "DreamCatcher",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "DRIFTWOOD": {
+    "class_name": "Driftwood",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "DUSTY_TOME": {
+    "class_name": "DustyTome",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "ECTOPLASM": {
+    "class_name": "Ectoplasm",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "ELECTRIC_SHRYMP": {
+    "class_name": "ElectricShrymp",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "EMBER_TEA": {
+    "class_name": "EmberTea",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "EMOTION_CHIP": {
+    "class_name": "EmotionChip",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "EMPTY_CAGE": {
+    "class_name": "EmptyCage",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "ETERNAL_FEATHER": {
+    "class_name": "EternalFeather",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "FAKE_ANCHOR": {
+    "class_name": "FakeAnchor",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_BLOOD_VIAL": {
+    "class_name": "FakeBloodVial",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_HAPPY_FLOWER": {
+    "class_name": "FakeHappyFlower",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_LEES_WAFFLE": {
+    "class_name": "FakeLeesWaffle",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_MANGO": {
+    "class_name": "FakeMango",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_MERCHANTS_RUG": {
+    "class_name": "FakeMerchantsRug",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_ORICHALCUM": {
+    "class_name": "FakeOrichalcum",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_SNECKO_EYE": {
+    "class_name": "FakeSneckoEye",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_STRIKE_DUMMY": {
+    "class_name": "FakeStrikeDummy",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FAKE_VENERABLE_TEA_SET": {
+    "class_name": "FakeVenerableTeaSet",
+    "is_stackable": null,
+    "merchant_cost": 50,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FENCING_MANUAL": {
+    "class_name": "FencingManual",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "FESTIVE_POPPER": {
+    "class_name": "FestivePopper",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "FIDDLE": {
+    "class_name": "Fiddle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "FISHING_ROD": {
+    "class_name": "FishingRod",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "FORGOTTEN_SOUL": {
+    "class_name": "ForgottenSoul",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FRAGRANT_MUSHROOM": {
+    "class_name": "FragrantMushroom",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FRESNEL_LENS": {
+    "class_name": "FresnelLens",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FROZEN_EGG": {
+    "class_name": "FrozenEgg",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "FUNERARY_MASK": {
+    "class_name": "FuneraryMask",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "FUR_COAT": {
+    "class_name": "FurCoat",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "GALACTIC_DUST": {
+    "class_name": "GalacticDust",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "GAMBLING_CHIP": {
+    "class_name": "GamblingChip",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "GAME_PIECE": {
+    "class_name": "GamePiece",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "GHOST_SEED": {
+    "class_name": "GhostSeed",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "GIRYA": {
+    "class_name": "Girya",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "GLASS_EYE": {
+    "class_name": "GlassEye",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "GLITTER": {
+    "class_name": "Glitter",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "GNARLED_HAMMER": {
+    "class_name": "GnarledHammer",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "GOLDEN_COMPASS": {
+    "class_name": "GoldenCompass",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "GOLDEN_PEARL": {
+    "class_name": "GoldenPearl",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "GOLD_PLATED_CABLES": {
+    "class_name": "GoldPlatedCables",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "GORGET": {
+    "class_name": "Gorget",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "GREMLIN_HORN": {
+    "class_name": "GremlinHorn",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "HAND_DRILL": {
+    "class_name": "HandDrill",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "HAPPY_FLOWER": {
+    "class_name": "HappyFlower",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "HEFTY_TABLET": {
+    "class_name": "HeftyTablet",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "HELICAL_DART": {
+    "class_name": "HelicalDart",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "HISTORY_COURSE": {
+    "class_name": "HistoryCourse",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "HORN_CLEAT": {
+    "class_name": "HornCleat",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "ICE_CREAM": {
+    "class_name": "IceCream",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "INFUSED_CORE": {
+    "class_name": "InfusedCore",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "INTIMIDATING_HELMET": {
+    "class_name": "IntimidatingHelmet",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "IRON_CLUB": {
+    "class_name": "IronClub",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "IVORY_TILE": {
+    "class_name": "IvoryTile",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "JEWELED_MASK": {
+    "class_name": "JeweledMask",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "JEWELRY_BOX": {
+    "class_name": "JewelryBox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "JOSS_PAPER": {
+    "class_name": "JossPaper",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "JUZU_BRACELET": {
+    "class_name": "JuzuBracelet",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "KALEIDOSCOPE": {
+    "class_name": "Kaleidoscope",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "KIFUDA": {
+    "class_name": "Kifuda",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "KUNAI": {
+    "class_name": "Kunai",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "KUSARIGAMA": {
+    "class_name": "Kusarigama",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "LANTERN": {
+    "class_name": "Lantern",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "LARGE_CAPSULE": {
+    "class_name": "LargeCapsule",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "LASTING_CANDY": {
+    "class_name": "LastingCandy",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "LAVA_LAMP": {
+    "class_name": "LavaLamp",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "LAVA_ROCK": {
+    "class_name": "LavaRock",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "LEAD_PAPERWEIGHT": {
+    "class_name": "LeadPaperweight",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "LEAFY_POULTICE": {
+    "class_name": "LeafyPoultice",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "LEES_WAFFLE": {
+    "class_name": "LeesWaffle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "LETTER_OPENER": {
+    "class_name": "LetterOpener",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "LIZARD_TAIL": {
+    "class_name": "LizardTail",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "LOOMING_FRUIT": {
+    "class_name": "LoomingFruit",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "LORDS_PARASOL": {
+    "class_name": "LordsParasol",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "LOST_COFFER": {
+    "class_name": "LostCoffer",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "LOST_WISP": {
+    "class_name": "LostWisp",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "LUCKY_FYSH": {
+    "class_name": "LuckyFysh",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "LUNAR_PASTRY": {
+    "class_name": "LunarPastry",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MANGO": {
+    "class_name": "Mango",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MASSIVE_SCROLL": {
+    "class_name": "MassiveScroll",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "MAW_BANK": {
+    "class_name": "MawBank",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "MEAL_TICKET": {
+    "class_name": "MealTicket",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "MEAT_CLEAVER": {
+    "class_name": "MeatCleaver",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "MEAT_ON_THE_BONE": {
+    "class_name": "MeatOnTheBone",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MEMBERSHIP_CARD": {
+    "class_name": "MembershipCard",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "MERCURY_HOURGLASS": {
+    "class_name": "MercuryHourglass",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "METRONOME": {
+    "class_name": "Metronome",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MINIATURE_CANNON": {
+    "class_name": "MiniatureCannon",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "MINIATURE_TENT": {
+    "class_name": "MiniatureTent",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "MINI_REGENT": {
+    "class_name": "MiniRegent",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MOLTEN_EGG": {
+    "class_name": "MoltenEgg",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MR_STRUGGLES": {
+    "class_name": "MrStruggles",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "MUMMIFIED_HAND": {
+    "class_name": "MummifiedHand",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MUSIC_BOX": {
+    "class_name": "MusicBox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "MYSTIC_LIGHTER": {
+    "class_name": "MysticLighter",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "NEOWS_BONES": {
+    "class_name": "NeowsBones",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "NEOWS_SACRIFICE": {
+    "class_name": "NeowsSacrifice",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "NEOWS_TALISMAN": {
+    "class_name": "NeowsTalisman",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "NEOWS_TORMENT": {
+    "class_name": "NeowsTorment",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "NEW_LEAF": {
+    "class_name": "NewLeaf",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "NINJA_SCROLL": {
+    "class_name": "NinjaScroll",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "NUNCHAKU": {
+    "class_name": "Nunchaku",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "NUTRITIOUS_OYSTER": {
+    "class_name": "NutritiousOyster",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "NUTRITIOUS_SOUP": {
+    "class_name": "NutritiousSoup",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "ODDLY_SMOOTH_STONE": {
+    "class_name": "OddlySmoothStone",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "OLD_COIN": {
+    "class_name": "OldCoin",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "ORANGE_DOUGH": {
+    "class_name": "OrangeDough",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "ORICHALCUM": {
+    "class_name": "Orichalcum",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "ORNAMENTAL_FAN": {
+    "class_name": "OrnamentalFan",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "ORRERY": {
+    "class_name": "Orrery",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "PAELS_BLOOD": {
+    "class_name": "PaelsBlood",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_CLAW": {
+    "class_name": "PaelsClaw",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_EYE": {
+    "class_name": "PaelsEye",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_FLESH": {
+    "class_name": "PaelsFlesh",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_GROWTH": {
+    "class_name": "PaelsGrowth",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_HORN": {
+    "class_name": "PaelsHorn",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_LEGION": {
+    "class_name": "PaelsLegion",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_TEARS": {
+    "class_name": "PaelsTears",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_TOOTH": {
+    "class_name": "PaelsTooth",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PAELS_WING": {
+    "class_name": "PaelsWing",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PANDORAS_BOX": {
+    "class_name": "PandorasBox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PANTOGRAPH": {
+    "class_name": "Pantograph",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "PAPER_KRANE": {
+    "class_name": "PaperKrane",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "PAPER_PHROG": {
+    "class_name": "PaperPhrog",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "PARRYING_SHIELD": {
+    "class_name": "ParryingShield",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "PEAR": {
+    "class_name": "Pear",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "PENDULUM": {
+    "class_name": "Pendulum",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "PEN_NIB": {
+    "class_name": "PenNib",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "PERMAFROST": {
+    "class_name": "Permafrost",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "PETRIFIED_TOAD": {
+    "class_name": "PetrifiedToad",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "PHIAL_HOLSTER": {
+    "class_name": "PhialHolster",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PHILOSOPHERS_STONE": {
+    "class_name": "PhilosophersStone",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PHYLACTERY_UNBOUND": {
+    "class_name": "PhylacteryUnbound",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "PLANISPHERE": {
+    "class_name": "Planisphere",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "POCKETWATCH": {
+    "class_name": "Pocketwatch",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "POLLINOUS_CORE": {
+    "class_name": "PollinousCore",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "POMANDER": {
+    "class_name": "Pomander",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "POTION_BELT": {
+    "class_name": "PotionBelt",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "POWER_CELL": {
+    "class_name": "PowerCell",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "PRAYER_WHEEL": {
+    "class_name": "PrayerWheel",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "PRECARIOUS_SHEARS": {
+    "class_name": "PrecariousShears",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PRECISE_SCISSORS": {
+    "class_name": "PreciseScissors",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PRESERVED_FOG": {
+    "class_name": "PreservedFog",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PRISMATIC_GEM": {
+    "class_name": "PrismaticGem",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PUMPKIN_CANDLE": {
+    "class_name": "PumpkinCandle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "PUNCH_DAGGER": {
+    "class_name": "PunchDagger",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "RADIANT_PEARL": {
+    "class_name": "RadiantPearl",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "RAINBOW_RING": {
+    "class_name": "RainbowRing",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "RAZOR_TOOTH": {
+    "class_name": "RazorTooth",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "RED_MASK": {
+    "class_name": "RedMask",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "RED_SKULL": {
+    "class_name": "RedSkull",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "REGALITE": {
+    "class_name": "Regalite",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "REGAL_PILLOW": {
+    "class_name": "RegalPillow",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "REPTILE_TRINKET": {
+    "class_name": "ReptileTrinket",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "RINGING_TRIANGLE": {
+    "class_name": "RingingTriangle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "RING_OF_THE_DRAKE": {
+    "class_name": "RingOfTheDrake",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "RING_OF_THE_SNAKE": {
+    "class_name": "RingOfTheSnake",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Starter"
+  },
+  "RIPPLE_BASIN": {
+    "class_name": "RippleBasin",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "ROYAL_POISON": {
+    "class_name": "RoyalPoison",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "ROYAL_STAMP": {
+    "class_name": "RoyalStamp",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "RUINED_HELMET": {
+    "class_name": "RuinedHelmet",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "RUNIC_CAPACITOR": {
+    "class_name": "RunicCapacitor",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "RUNIC_PYRAMID": {
+    "class_name": "RunicPyramid",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SAI": {
+    "class_name": "Sai",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SAND_CASTLE": {
+    "class_name": "SandCastle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SCREAMING_FLAGON": {
+    "class_name": "ScreamingFlagon",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "SCROLL_BOXES": {
+    "class_name": "ScrollBoxes",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SEAL_OF_GOLD": {
+    "class_name": "SealOfGold",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SEA_GLASS": {
+    "class_name": "SeaGlass",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SELF_FORMING_CLAY": {
+    "class_name": "SelfFormingClay",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "SERE_TALON": {
+    "class_name": "SereTalon",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SHOVEL": {
+    "class_name": "Shovel",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "SHURIKEN": {
+    "class_name": "Shuriken",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "SIGNET_RING": {
+    "class_name": "SignetRing",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SILKEN_TRESS": {
+    "class_name": "SilkenTress",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SILVER_CRUCIBLE": {
+    "class_name": "SilverCrucible",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SLING_OF_COURAGE": {
+    "class_name": "SlingOfCourage",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "SMALL_CAPSULE": {
+    "class_name": "SmallCapsule",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SNECKO_EYE": {
+    "class_name": "SneckoEye",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SNECKO_SKULL": {
+    "class_name": "SneckoSkull",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "SOZU": {
+    "class_name": "Sozu",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "SPARKLING_ROUGE": {
+    "class_name": "SparklingRouge",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "SPIKED_GAUNTLETS": {
+    "class_name": "SpikedGauntlets",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "STONE_CALENDAR": {
+    "class_name": "StoneCalendar",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "STONE_CRACKER": {
+    "class_name": "StoneCracker",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "STONE_HUMIDIFIER": {
+    "class_name": "StoneHumidifier",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "STORYBOOK": {
+    "class_name": "Storybook",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "STRAWBERRY": {
+    "class_name": "Strawberry",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "STRIKE_DUMMY": {
+    "class_name": "StrikeDummy",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "STURDY_CLAMP": {
+    "class_name": "SturdyClamp",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "SWORD_OF_JADE": {
+    "class_name": "SwordOfJade",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "SWORD_OF_STONE": {
+    "class_name": "SwordOfStone",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "SYMBIOTIC_VIRUS": {
+    "class_name": "SymbioticVirus",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "TANXS_WHISTLE": {
+    "class_name": "TanxsWhistle",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "TEA_OF_DISCOURTESY": {
+    "class_name": "TeaOfDiscourtesy",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "THE_ABACUS": {
+    "class_name": "TheAbacus",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "THE_BOOT": {
+    "class_name": "TheBoot",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "THE_COURIER": {
+    "class_name": "TheCourier",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "THROWING_AXE": {
+    "class_name": "ThrowingAxe",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "TINGSHA": {
+    "class_name": "Tingsha",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "TINY_MAILBOX": {
+    "class_name": "TinyMailbox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "TOASTY_MITTENS": {
+    "class_name": "ToastyMittens",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "TOOLBOX": {
+    "class_name": "Toolbox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "TOUCH_OF_OROBAS": {
+    "class_name": "TouchOfOrobas",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "TOUGH_BANDAGES": {
+    "class_name": "ToughBandages",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "TOXIC_EGG": {
+    "class_name": "ToxicEgg",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "TOY_BOX": {
+    "class_name": "ToyBox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "TRI_BOOMERANG": {
+    "class_name": "TriBoomerang",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "TUNGSTEN_ROD": {
+    "class_name": "TungstenRod",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "TUNING_FORK": {
+    "class_name": "TuningFork",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "TWISTED_FUNNEL": {
+    "class_name": "TwistedFunnel",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "UNCEASING_TOP": {
+    "class_name": "UnceasingTop",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "UNDYING_SIGIL": {
+    "class_name": "UndyingSigil",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "UNSETTLING_LAMP": {
+    "class_name": "UnsettlingLamp",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "VAJRA": {
+    "class_name": "Vajra",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "VAMBRACE": {
+    "class_name": "Vambrace",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "VELVET_CHOKER": {
+    "class_name": "VelvetChoker",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "VENERABLE_TEA_SET": {
+    "class_name": "VenerableTeaSet",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "VERY_HOT_COCOA": {
+    "class_name": "VeryHotCocoa",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "VEXING_PUZZLEBOX": {
+    "class_name": "VexingPuzzlebox",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "VITRUVIAN_MINION": {
+    "class_name": "VitruvianMinion",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "WAR_HAMMER": {
+    "class_name": "WarHammer",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "WAR_PAINT": {
+    "class_name": "WarPaint",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "WHETSTONE": {
+    "class_name": "Whetstone",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "WHISPERING_EARRING": {
+    "class_name": "WhisperingEarring",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "WHITE_BEAST_STATUE": {
+    "class_name": "WhiteBeastStatue",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "WHITE_STAR": {
+    "class_name": "WhiteStar",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "WINGED_BOOTS": {
+    "class_name": "WingedBoots",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  },
+  "WING_CHARM": {
+    "class_name": "WingCharm",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Shop"
+  },
+  "WONGOS_MYSTERY_TICKET": {
+    "class_name": "WongosMysteryTicket",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "WONGO_CUSTOMER_APPRECIATION_BADGE": {
+    "class_name": "WongoCustomerAppreciationBadge",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "YUMMY_COOKIE": {
+    "class_name": "YummyCookie",
+    "is_stackable": null,
+    "merchant_cost": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient"
+  }
+}

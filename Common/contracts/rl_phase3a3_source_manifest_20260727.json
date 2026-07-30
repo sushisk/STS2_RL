@@ -1,0 +1,107 @@
+{
+  "manifestId": "rl_phase3a3_source_manifest_20260727",
+  "generatedAt": "2026-07-27T19:45:32.665217",
+  "rlCommit": "not_a_git_repository",
+  "compatibleEmulatorImportedCommit": "1e637c8a7daefbdf43d3f9f4e8a49e98db2a3e2c",
+  "compatibleEmulatorCodeCommit": "5d222efa117712503d551941daa83cfa8c7365d1",
+  "compatibleEmulatorReportCommit": "5b5c98c8903fb5575703e46f4383ee1543fa06d7",
+  "emulatorDllSha256": "f61a1533e7ba8c746d1257ccf9e68f7ea239394ec2f268f1df4aece514ad1bf0",
+  "contractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.5.md",
+  "contractSha256": "e33b369e12543e04fe763c07196e2189460099cfcb3d22b5a35137e2a2b86b07",
+  "contractSha256_phase3a3_original": "839315960b73d815e460bb7f31d28c0d610e6568a6ecee3e9e29d73935a903dd",
+  "priorContractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.4.md",
+  "priorContractSha256": "d646c4537da5f5c156e15f1db82278b144921c50adce477c43d620420e2d7cbf",
+  "files": [
+    {
+      "path": "C:\\STS2_RL\\Combat\\live_combat_session.py",
+      "sha256": "6c3d173251ec63bd0e0db5e8aa7d88bb309d7038a7b88a8135bddbfc0037d72f",
+      "size_bytes": 27364,
+      "note": "Phase 3A.3: ActionFaultContext dataclass + _build_fault_context(), ActionExecutionError, FaultedCombatSessionError, _session_faulted/last_fault_context bookkeeping, _ensure_session_not_faulted(), new get_observation()/get_legal_actions() methods, fault-catching wrapped around both step_live_action() call sites in step(). No change to start_combat/resume_from/_resynchronize logic beyond adding the fault-clear-on-success line."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\emulator_bridge.py",
+      "sha256": "ca05c99ecceba13bb7adf2e4fb673ecca8df825bcefed4cbba2b145736a99789",
+      "size_bytes": 6079,
+      "note": "Registered ActionFaultedException/FaultedCombatSessionException in the _types dict, mirroring the existing QuiescentBoundaryViolationException pattern."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\tests\\test_action_fault_contract.py",
+      "sha256": "5afd81b1f914dfd05d837b693a0bacd97fc71efc7c20a07ee4f05fc62f884ab0",
+      "size_bytes": 10466,
+      "note": "New: 6 tests, native main()-style (no pytest dependency), independently reproduces the Emulator's own Console.Out-corruption fault-injection technique from the RL side."
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.5.md",
+      "sha256": "839315960b73d815e460bb7f31d28c0d610e6568a6ecee3e9e29d73935a903dd",
+      "size_bytes": 14681,
+      "note": "New canonical contract, supersedes v0.4 (retained as historical record)."
+    }
+  ],
+  "test_commands": [
+    "python Combat/tests/test_action_fault_contract.py",
+    "python Combat/tests/test_scenario_v2.py",
+    "python Combat/tests/test_choice_semantics.py",
+    "python Combat/evaluation/online_eval/verify_live_combat_session_6546_21.py",
+    "python Combat/evaluation/online_eval/verify_snapshot_phase2b.py",
+    "python Combat/evaluation/online_eval/qb_repro_driver_rl.py --order forward --iterations 30",
+    "python Combat/evaluation/online_eval/qb_repro_driver_rl.py --order reverse --iterations 30"
+  ],
+  "test_results": {
+    "test_action_fault_contract.py": {"passed": 6, "failed": 0},
+    "test_scenario_v2.py": {"passed": 31, "failed": 1, "failed_test": "test_wriggler_missing_slot_without_encounter_is_detected", "note": "known/accepted, unrelated pre-existing MonsterMoveStateMachine bug, reason string changed to init_exception:TimeoutException per the async-settlement fix"},
+    "test_choice_semantics.py": {"passed": 20, "failed": 0},
+    "verify_live_combat_session_6546_21.py": {"decisions": 49, "outcome": "victory", "quiescent_boundary_violations": 0, "action_faults": 0},
+    "verify_snapshot_phase2b.py": {"failing_checks": 0},
+    "native_harness_forward_30x": {"total_test_executions": 1560, "quiescent_boundary_violations": 0, "wriggler_known_failures": 30, "other_unexpected_failures": 0},
+    "native_harness_reverse_30x": {"total_test_executions": 1560, "quiescent_boundary_violations": 0, "wriggler_known_failures": 30, "other_unexpected_failures": 0},
+    "pytest_natural_reoccurrence_check": {
+      "runs": 11,
+      "note": "Combined tests/test_scenario_v2.py + tests/test_choice_semantics.py + tests/test_action_fault_contract.py under `pytest -q` (default fd-capture). Multiple runs naturally produced Sts2Emulator.Api.ActionFaultedException with originalExceptionType=System.IO.IOException ('the handle is invalid') propagating uncaught through the legacy BattleEmulator.apply_action()/step_live_action() path used by pre-existing tests (not LiveCombatSession-based, so not caught/translated by this round's new code, by design - see contract v0.5 \u00a75-B). This is the precise root cause of the QuiescentBoundaryViolation nondeterminism flagged in rl_pytest_quiescent_nondeterminism_investigation_20260727.md, now honestly surfaced instead of silently swallowed. pytest -s / --capture=no: 0 occurrences (4/4 and 8/8 clean across this and the prior investigation). SUPERSEDED by phase3a4Addendum below - Phase 3A.4's Console I/O isolation closes this at the source."
+    }
+  },
+  "phase3a4Addendum": {
+    "note": "Console I/O isolation - Phase 3A.4. Updates this same manifest in place per the 'RL\u62c5\u5f53 Phase 3A.4\u6700\u7d42\u7d71\u5408\u6307\u793a' fixation-work requirement (update rl_phase3a3_source_manifest_20260727.json, not create a new file).",
+    "compatibleEmulatorCodeCommits": ["e9fb60b0c70382be78c23af7f7d4a32a407d537f", "50cf52a19af84eba6e18229198ed847e878b26ac"],
+    "compatibleEmulatorReportCommit": "39e0f0085b9a257a6fc90180043b4b2f1d54d00d",
+    "emulatorDllSha256": "9b10549f92202b750f866d4592d76b9d8b515bbab9eac73d51998c7d05a5e629",
+    "contractSha256_final": "e33b369e12543e04fe763c07196e2189460099cfcb3d22b5a35137e2a2b86b07",
+    "files": [
+      {
+        "path": "C:\\STS2_RL\\Combat\\tests\\test_action_fault_contract.py",
+        "sha256": "65639215b2956508ed1a89d7097b204b58b7c4b9ca74bce1438729cfb34055e1",
+        "size_bytes": 17255,
+        "note": "Extended: 3 new reflection-based SafeConsoleTextWriter._inner tamper tests (ObjectDisposedException via disposed StreamWriter, genuine IOException via broken AnonymousPipeServerStream, control case NotSupportedException via fixed-capacity MemoryStream overflow - all mirroring the Emulator's own Layer B methodology). 9 tests total (was 6)."
+      },
+      {
+        "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\pytest_capture_mode_repro.py",
+        "sha256": "4319aadb00a841416e5f9e340335487f3ffb7786ba4194d52ef3f2e3ae76f6a8",
+        "size_bytes": 4891,
+        "note": "New: spawns N genuinely independent fresh pytest subprocesses per capture mode, tallying QuiescentBoundaryViolation / IOException-family ActionFaultedException / other-rooted ActionFaultedException / other unexpected failures."
+      }
+    ],
+    "note_no_change": "Combat/live_combat_session.py and Combat/emulator_bridge.py are UNCHANGED this round - Console I/O isolation is entirely Emulator-side and transparent to Python; no new Python type or wrapper was needed (confirmed by design review, not merely assumed).",
+    "test_commands": [
+      "python Combat/tests/test_action_fault_contract.py",
+      "python Combat/evaluation/online_eval/pytest_capture_mode_repro.py --mode default --iterations 100",
+      "python Combat/evaluation/online_eval/pytest_capture_mode_repro.py --mode fd --iterations 100",
+      "python Combat/evaluation/online_eval/pytest_capture_mode_repro.py --mode sys --iterations 50",
+      "python Combat/evaluation/online_eval/pytest_capture_mode_repro.py --mode=-s --iterations 50",
+      "python Combat/evaluation/online_eval/qb_repro_driver_rl.py --order forward --iterations 30",
+      "python Combat/evaluation/online_eval/qb_repro_driver_rl.py --order reverse --iterations 30",
+      "python Combat/evaluation/online_eval/verify_live_combat_session_6546_21.py",
+      "python Combat/evaluation/online_eval/verify_snapshot_phase2b.py"
+    ],
+    "test_results": {
+      "test_action_fault_contract.py": {"passed": 9, "failed": 0},
+      "pytest_capture_mode_repro_default_100x": {"runs": 100, "quiescent_boundary_violation_runs": 0, "action_fault_io_family": 0, "action_fault_other": 0, "other_unexpected": 0, "elapsed_seconds": 2291},
+      "pytest_capture_mode_repro_fd_100x": {"runs": 100, "quiescent_boundary_violation_runs": 0, "action_fault_io_family": 0, "action_fault_other": 0, "other_unexpected": 0, "elapsed_seconds": 2299},
+      "pytest_capture_mode_repro_sys_50x": {"runs": 50, "quiescent_boundary_violation_runs": 0, "action_fault_io_family": 0, "action_fault_other": 0, "other_unexpected": 0, "elapsed_seconds": 1252},
+      "pytest_capture_mode_repro_-s_50x": {"runs": 50, "quiescent_boundary_violation_runs": 0, "action_fault_io_family": 0, "action_fault_other": 0, "other_unexpected": 0, "elapsed_seconds": 1239},
+      "native_harness_forward_30x": {"total_test_executions": 1560, "quiescent_boundary_violations": 0, "wriggler_known_failures": 30, "other_unexpected_failures": 0, "elapsed_seconds": 511.8},
+      "native_harness_reverse_30x": {"total_test_executions": 1560, "quiescent_boundary_violations": 0, "wriggler_known_failures": 30, "other_unexpected_failures": 0, "elapsed_seconds": 511.9},
+      "verify_live_combat_session_6546_21.py": {"decisions": 49, "outcome": "victory", "quiescent_boundary_violations": 0},
+      "verify_snapshot_phase2b.py": {"failing_checks": 0}
+    },
+    "conclusion": "0/300 total pytest-subprocess runs (across all 4 capture modes) show any QuiescentBoundaryViolation or IOException/ObjectDisposedException/UnauthorizedAccessException-rooted ActionFaultedException - full agreement with the Emulator's own 100/100/50/50 result. The pytest/Console-capture nondeterminism first flagged in rl_pytest_quiescent_nondeterminism_investigation_20260727.md and root-caused in rl_action_fault_contract_phase3a3_integration_20260727.md is now closed."
+  }
+}

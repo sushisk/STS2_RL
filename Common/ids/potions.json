@@ -1,0 +1,586 @@
+{
+  "AMBERGRIS": {
+    "class_name": "Ambergris",
+    "potion_type": null,
+    "present_in": [
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "ASHWATER": {
+    "class_name": "Ashwater",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "ATTACK_POTION": {
+    "class_name": "AttackPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BEETLE_JUICE": {
+    "class_name": "BeetleJuice",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "BLESSING_OF_THE_FORGE": {
+    "class_name": "BlessingOfTheForge",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "BLOCK_POTION": {
+    "class_name": "BlockPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BLOOD_POTION": {
+    "class_name": "BloodPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "BONE_BREW": {
+    "class_name": "BoneBrew",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "BOTTLED_POTENTIAL": {
+    "class_name": "BottledPotential",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "CLARITY": {
+    "class_name": "Clarity",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "COLORLESS_POTION": {
+    "class_name": "ColorlessPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "COSMIC_CONCOCTION": {
+    "class_name": "CosmicConcoction",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "CUNNING_POTION": {
+    "class_name": "CunningPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "CURE_ALL": {
+    "class_name": "CureAll",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "DEPRECATED_POTION": {
+    "class_name": "DeprecatedPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "None"
+  },
+  "DEXTERITY_POTION": {
+    "class_name": "DexterityPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "DISTILLED_CHAOS": {
+    "class_name": "DistilledChaos",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "DROPLET_OF_PRECOGNITION": {
+    "class_name": "DropletOfPrecognition",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "DUPLICATOR": {
+    "class_name": "Duplicator",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "ENERGY_POTION": {
+    "class_name": "EnergyPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "ENTROPIC_BREW": {
+    "class_name": "EntropicBrew",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "ESSENCE_OF_DARKNESS": {
+    "class_name": "EssenceOfDarkness",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "EXPLOSIVE_AMPOULE": {
+    "class_name": "ExplosiveAmpoule",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "FAIRY_IN_ABOTTLE": {
+    "class_name": "FairyInABottle",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "FIRE_POTION": {
+    "class_name": "FirePotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "FLEX_POTION": {
+    "class_name": "FlexPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "FOCUS_POTION": {
+    "class_name": "FocusPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "FORTIFIER": {
+    "class_name": "Fortifier",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "FOUL_POTION": {
+    "class_name": "FoulPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "FRUIT_JUICE": {
+    "class_name": "FruitJuice",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "FYSH_OIL": {
+    "class_name": "FyshOil",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "GAMBLERS_BREW": {
+    "class_name": "GamblersBrew",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "GHOST_IN_AJAR": {
+    "class_name": "GhostInAJar",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "GIGANTIFICATION_POTION": {
+    "class_name": "GigantificationPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "GLOWWATER_POTION": {
+    "class_name": "GlowwaterPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event"
+  },
+  "HEART_OF_IRON": {
+    "class_name": "HeartOfIron",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "KINGS_COURAGE": {
+    "class_name": "KingsCourage",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "LIQUID_BRONZE": {
+    "class_name": "LiquidBronze",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "LIQUID_MEMORIES": {
+    "class_name": "LiquidMemories",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "LUCKY_TONIC": {
+    "class_name": "LuckyTonic",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "MAZALETHS_GIFT": {
+    "class_name": "MazalethsGift",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "OROBIC_ACID": {
+    "class_name": "OrobicAcid",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "POISON_POTION": {
+    "class_name": "PoisonPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "POTION_OF_BINDING": {
+    "class_name": "PotionOfBinding",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "POTION_OF_CAPACITY": {
+    "class_name": "PotionOfCapacity",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "POTION_OF_DOOM": {
+    "class_name": "PotionOfDoom",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "POTION_SHAPED_ROCK": {
+    "class_name": "PotionShapedRock",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token"
+  },
+  "POT_OF_GHOULS": {
+    "class_name": "PotOfGhouls",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "POWDERED_DEMISE": {
+    "class_name": "PowderedDemise",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "POWER_POTION": {
+    "class_name": "PowerPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "RADIANT_TINCTURE": {
+    "class_name": "RadiantTincture",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "REGEN_POTION": {
+    "class_name": "RegenPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "SHACKLING_POTION": {
+    "class_name": "ShacklingPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "SHIP_IN_ABOTTLE": {
+    "class_name": "ShipInABottle",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "SKILL_POTION": {
+    "class_name": "SkillPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "SNECKO_OIL": {
+    "class_name": "SneckoOil",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "SOLDIERS_STEW": {
+    "class_name": "SoldiersStew",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare"
+  },
+  "SPEED_POTION": {
+    "class_name": "SpeedPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "STABLE_SERUM": {
+    "class_name": "StableSerum",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "STAR_POTION": {
+    "class_name": "StarPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "STRENGTH_POTION": {
+    "class_name": "StrengthPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "SWIFT_POTION": {
+    "class_name": "SwiftPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "TOUCH_OF_INSANITY": {
+    "class_name": "TouchOfInsanity",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon"
+  },
+  "VULNERABLE_POTION": {
+    "class_name": "VulnerablePotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  },
+  "WEAK_POTION": {
+    "class_name": "WeakPotion",
+    "potion_type": null,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common"
+  }
+}

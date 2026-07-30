@@ -1,0 +1,156 @@
+"""CLR bootstrap and .NET <-> Python plain-value conversion for the STS2 emulator.
+
+Only one `GameInstance` may be "live" per OS process - constructing/resetting a second
+one tears down whatever the first had (confirmed experimentally; see battle_emulator.py
+module docstring). Every caller in this package must therefore go through the single
+shared instance returned by `shared_game_instance()`, never construct their own.
+
+IMPORTANT: never run from a working directory inside the emulator's own repo
+(C:\\STS2_Emulator) and never add that repo root to sys.path. Python's import system
+will find the "Sts2Emulator/Api" *source folder* there and resolve it as a namespace
+package, shadowing the CLR-backed "Sts2Emulator.Api" module the clr importer provides -
+`from Sts2Emulator.Api import GameInstance` then fails with a confusing ImportError.
+(Discovered the hard way - reproduced and confirmed before landing this workaround.)
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+DEFAULT_REPO_ROOT = Path(r"C:\STS2_Emulator")
+
+_types: dict[str, Any] | None = None
+_shared_instance = None
+
+
+def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
+    """Bootstraps pythonnet/CoreCLR and returns the CLR types this package needs.
+
+    Idempotent - safe to call from every module that needs a type; only the first
+    call actually loads the runtime and assembly.
+    """
+    global _types
+    if _types is not None:
+        return _types
+
+    root = repo_root or DEFAULT_REPO_ROOT
+    cli_output_dir = root / "Sts2Emulator.Cli" / "bin" / "Debug" / "net8.0"
+    dll_path = cli_output_dir / "Sts2Emulator.dll"
+    runtime_config_path = cli_output_dir / "Sts2Emulator.Cli.runtimeconfig.json"
+    if not dll_path.exists() or not runtime_config_path.exists():
+        raise FileNotFoundError(
+            f"Build output not found under {cli_output_dir}\n"
+            "Run `dotnet build Sts2EmulatorPhase1.sln` first."
+        )
+
+    from pythonnet import load
+
+    load("coreclr", runtime_config=str(runtime_config_path))
+    import clr  # noqa: E402
+
+    clr.AddReference(str(dll_path))
+
+    from Sts2Emulator.Api import (  # noqa: E402
+        ActionFaultedException,
+        FaultedCombatSessionException,
+        GameInstance,
+        QuiescentBoundaryViolationException,
+    )
+    from Sts2Emulator.Dto import (  # noqa: E402
+        CardInstanceScenario,
+        CombatScenario,
+        EnemyScenario,
+        OrbScenario,
+        PendingChoiceScenario,
+        PotionScenario,
+        PowerStack,
+    )
+    from System.Collections.Generic import List  # noqa: E402
+    from System import Decimal, String  # noqa: E402
+
+    _types = {
+        "GameInstance": GameInstance,
+        "QuiescentBoundaryViolationException": QuiescentBoundaryViolationException,
+        "ActionFaultedException": ActionFaultedException,
+        "FaultedCombatSessionException": FaultedCombatSessionException,
+        "CombatScenario": CombatScenario,
+        "EnemyScenario": EnemyScenario,
+        "OrbScenario": OrbScenario,
+        "PendingChoiceScenario": PendingChoiceScenario,
+        "PowerStack": PowerStack,
+        "CardInstanceScenario": CardInstanceScenario,
+        "PotionScenario": PotionScenario,
+        "List": List,
+        "Decimal": Decimal,
+        "String": String,
+    }
+    return _types
+
+
+def shared_game_instance(repo_root: Path | None = None):
+    """The one and only live GameInstance for this process."""
+    global _shared_instance
+    types = ensure_loaded(repo_root)
+    if _shared_instance is None:
+        _shared_instance = types["GameInstance"]()
+    return _shared_instance
+
+
+def str_list(items):
+    types = ensure_loaded()
+    lst = types["List"][types["String"]]()
+    for item in items:
+        lst.Add(item)
+    return lst
+
+
+def to_plain(value: Any) -> Any:
+    """Recursively converts a pythonnet-wrapped .NET value into plain Python data.
+
+    System.Decimal (orb basePassiveValue/baseEvokeValue - see battle_emulator.py's
+    _orb_scenarios/_decimal_value, the write-side counterpart of this same value) is
+    special-cased to a plain float: it has neither Keys/Values nor __iter__, so without
+    this check it fell through to `return value` unchanged - a live CLR object masquerading
+    as plain data. That silently broke the very first caller to copy.deepcopy() a whole
+    engine_state containing orbs (BattleEmulator.clone_state()/with_shuffle_seed(), used by
+    LookaheadSearcher and this evaluation harness) with `TypeError: cannot pickle 'Decimal'
+    object` - deepcopy has no idea how to clone a CLR type. Every other engine_state
+    consumer only ever read individual fields back out (never deep-copied the dict itself),
+    which is why this went unnoticed until now.
+    """
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if value.__class__.__module__ == "System" and value.__class__.__name__ == "Decimal":
+        # float(value) fails - pythonnet's Decimal wrapper doesn't support Python's float()
+        # protocol directly. str() round-trip is the same pattern battle_emulator.py's own
+        # _decimal_value()/_stable_orb_value() already rely on for this exact type.
+        return float(str(value))
+    if hasattr(value, "Keys") and hasattr(value, "Values"):
+        return {str(k): to_plain(value[k]) for k in value.Keys}
+    if hasattr(value, "__iter__"):
+        return [to_plain(item) for item in value]
+    return value
+
+
+def legal_action_to_dict(action) -> dict:
+    return {
+        "action_id": int(action.ActionId),
+        "action_type": str(action.ActionType),
+        "label": str(action.Label),
+        "is_available": bool(action.IsAvailable),
+        "parameters": to_plain(action.Parameters),
+    }
+
+
+def legal_actions_to_list(actions) -> list[dict]:
+    return [legal_action_to_dict(a) for a in actions]
+
+
+def observation_to_dict(obs) -> dict:
+    return {
+        "turn": int(obs.Turn),
+        "is_terminal": bool(obs.IsTerminal),
+        "outcome": str(obs.Outcome),
+        "state": to_plain(obs.State),
+    }

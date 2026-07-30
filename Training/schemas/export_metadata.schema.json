@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sts2-rl/export_metadata.schema.json",
+  "title": "STS2 RL Training Export Metadata",
+  "type": "object",
+  "required": [
+    "data_contract_version",
+    "export_version",
+    "export_script_version",
+    "dictionary_version",
+    "source_run_dir",
+    "source_manifest_sha256",
+    "rl_git_commit",
+    "split_seed",
+    "heuristic_version",
+    "complete_trajectory_count",
+    "partial_trajectory_count",
+    "complete_decision_count",
+    "partial_decision_count",
+    "complete_split_counts",
+    "partial_split_counts",
+    "validation_rules"
+  ],
+  "properties": {
+    "data_contract_version": { "type": "string" },
+    "export_version": { "type": "string" },
+    "export_script_version": { "type": "string" },
+    "dictionary_version": { "type": "string" },
+    "source_run_dir": { "type": "string" },
+    "source_manifest_sha256": { "type": "string" },
+    "rl_git_commit": { "type": "string" },
+    "split_seed": {
+      "type": "object",
+      "required": ["complete", "partial"],
+      "properties": {
+        "complete": { "type": "integer" },
+        "partial": { "type": "integer" }
+      }
+    },
+    "heuristic_version": { "type": ["string", "null"] },
+    "complete_trajectory_count": { "type": "integer", "minimum": 0 },
+    "partial_trajectory_count": { "type": "integer", "minimum": 0 },
+    "complete_decision_count": { "type": "integer", "minimum": 0 },
+    "partial_decision_count": { "type": "integer", "minimum": 0 },
+    "complete_split_counts": { "type": "object" },
+    "partial_split_counts": { "type": "object" },
+    "validation_rules": { "type": "object" }
+  }
+}

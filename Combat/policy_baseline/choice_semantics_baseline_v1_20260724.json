@@ -1,0 +1,47 @@
+{
+  "baseline_id": "choice_semantics_baseline_v1_20260724",
+  "recorded_on": "2026-07-24",
+  "purpose": "Frozen reference point for the currently-approved Choice Semantics resolution logic (GamblingChipDiscard choiceType rule + Potion origin-type-alias fix), recorded before the origin-dependency audit that follows. Does not overwrite any existing file - references by path + SHA256 only.",
+  "rl_repo_note": "C:\\STS2_RL is not a git repository (no commit hash available here) - same caveat as policy_baseline_v1_20260724.json.",
+  "code": {
+    "file": "Combat/choice_semantics.py",
+    "sha256": "48912bdb01cf9a56d8af7e1cc09246c4428be1de6bdb1c374927bd5308f18e6d"
+  },
+  "choice_semantics_lookup": {
+    "file": "Common/schemas/choice_semantics_lookup.v1.json",
+    "table_version": "choice_semantics.v1",
+    "sha256": "5e7d260f076047b6d0ee02eb79fcd57a06067be49c923621e84ec0df06df8d44",
+    "schema_file": "Common/schemas/choice_semantics_schema.json",
+    "schema_sha256": "0b101edd3a7e5ddcac150eab40e03ca7cb9811f7c06bd76ad53f2f834d1b9d4d",
+    "note": "unchanged by the GamblingChip/Potion rule update - same file/hash as when the Choice Semantics analysis role delivered it"
+  },
+  "origin_type_alias_lookup": {
+    "file": "Common/schemas/choice_semantics_origin_type_aliases.v1.json",
+    "table_version": "choice_semantics_origin_type_aliases.v1",
+    "sha256": "a456f0a235c84c2ee815367593c479fb5ed8479916ad4257a55b2d9ea1a33814",
+    "entry_count": 7,
+    "note": "new file added by the GamblingChip/Potion rule update - 7 empirically-confirmed potion origin-type aliases, corrected from an earlier miscounted claim of 11 (see rl_choice_semantics_rule_update_report_20260724.md section 0)"
+  },
+  "tests": {
+    "file": "Combat/tests/test_choice_semantics.py",
+    "result": "20/20 passed",
+    "verified_on": "2026-07-24"
+  },
+  "reports": [
+    {"file": "Outputs/reports/rl_choice_semantics_stage_a_report_20260724.md", "covers": "Stage A, 20 scenarios"},
+    {"file": "Outputs/reports/rl_choice_semantics_stage_b_report_20260724.md", "covers": "Stage B, 50 scenarios, pre-rule-update"},
+    {"file": "Outputs/reports/rl_choice_semantics_rule_update_report_20260724.md", "covers": "GamblingChipDiscard + Potion origin-type rule implementation and offline re-resolution diff"}
+  ],
+  "stage_b_saved_logs": {
+    "output_dir": "Combat/evaluation/reports/choice_stage_b_with_semantics",
+    "choice_log_jsonl_sha256": "81bb3c75e1005111ae3e7d6096ef7e3aa02f8bc79c4d91074366be8e2038a7cd",
+    "combats_jsonl_sha256": "8ca9747ffd11af717de33576d08a4e9c8a25e43d6830810b79ed2f608ee3f1bf",
+    "row_count": 275,
+    "note": "These are the exact saved logs the origin-dependency audit (Outputs/reports/rl_choice_semantics_origin_audit_report_20260724.md) re-resolves offline. Fixed and referenced by hash - not regenerated for the audit."
+  },
+  "stage_a_saved_logs": {
+    "output_dir": "Combat/evaluation/reports/choice_stage_a_with_semantics",
+    "choice_log_jsonl_sha256": "43c757375e06f210b5acd6ee31266c62eb3a395775dad0881505f541fb7e4731"
+  },
+  "status": "Approved as Choice Semantics baseline v1. Origin-dependency audit proceeds against this exact, unmodified version - see rl_choice_semantics_origin_audit_report_20260724.md."
+}

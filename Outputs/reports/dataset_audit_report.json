@@ -1,0 +1,168 @@
+{
+  "source": "C:\\STS2_Data\\runs-all-before-2026-06.json",
+  "total_records": 6796,
+  "parse_errors": 0,
+  "build_id_counts": {
+    "v0.99.1": 1594,
+    "v0.98.3": 952,
+    "v0.103.2": 754,
+    "v0.98.2": 638,
+    "v0.100.0": 496,
+    "v0.101.0": 472,
+    "v0.104.0": 454,
+    "v0.102.0": 440,
+    "v0.103.0": 331,
+    "v0.105.1": 297,
+    "v0.98.1": 187,
+    "v0.98.0": 78,
+    "v0.105.0": 59,
+    "v0.103.1": 30,
+    "v0.106.1": 6,
+    "v0.99.0": 5,
+    "v0.106.0": 3
+  },
+  "schema_version_counts": {
+    "8": 3950,
+    "9": 2846
+  },
+  "ascension_counts": {
+    "0": 686,
+    "1": 467,
+    "2": 450,
+    "3": 402,
+    "4": 383,
+    "5": 343,
+    "6": 340,
+    "7": 304,
+    "8": 324,
+    "9": 445,
+    "10": 2652
+  },
+  "character_counts": {
+    "CHARACTER.REGENT": 1629,
+    "CHARACTER.SILENT": 1330,
+    "CHARACTER.IRONCLAD": 1305,
+    "CHARACTER.DEFECT": 1272,
+    "CHARACTER.NECROBINDER": 1260
+  },
+  "game_mode_counts": {
+    "standard": 6752,
+    "daily": 33,
+    "custom": 11
+  },
+  "platform_counts": {
+    "steam": 6796
+  },
+  "win_counts": {
+    "True": 2117,
+    "False": 4679
+  },
+  "abandoned_counts": {
+    "False": 6082,
+    "True": 714
+  },
+  "cheated_counts": {
+    "False": 6734,
+    "True": 62
+  },
+  "acts_signature_top20": {
+    "ACT.OVERGROWTH,ACT.HIVE,ACT.GLORY": 3455,
+    "ACT.UNDERDOCKS,ACT.HIVE,ACT.GLORY": 3341
+  },
+  "acts_signature_distinct": 2,
+  "killed_by_encounter_top20": {
+    "NONE.NONE": 2398,
+    "ENCOUNTER.DECIMILLIPEDE_ELITE": 241,
+    "ENCOUNTER.KNOWLEDGE_DEMON_BOSS": 226,
+    "ENCOUNTER.WATERFALL_GIANT_BOSS": 199,
+    "ENCOUNTER.KAISER_CRAB_BOSS": 187,
+    "ENCOUNTER.THE_INSATIABLE_BOSS": 171,
+    "ENCOUNTER.VANTOM_BOSS": 169,
+    "ENCOUNTER.QUEEN_BOSS": 165,
+    "ENCOUNTER.CEREMONIAL_BEAST_BOSS": 163,
+    "ENCOUNTER.TEST_SUBJECT_BOSS": 158,
+    "ENCOUNTER.BYGONE_EFFIGY_ELITE": 157,
+    "ENCOUNTER.PHROG_PARASITE_ELITE": 156,
+    "ENCOUNTER.INFESTED_PRISMS_ELITE": 154,
+    "ENCOUNTER.ENTOMANCER_ELITE": 148,
+    "ENCOUNTER.TERROR_EEL_ELITE": 141,
+    "ENCOUNTER.LAGAVULIN_MATRIARCH_BOSS": 138,
+    "ENCOUNTER.THE_KIN_BOSS": 134,
+    "ENCOUNTER.SOUL_FYSH_BOSS": 134,
+    "ENCOUNTER.PHANTASMAL_GARDENERS_ELITE": 127,
+    "ENCOUNTER.DOORMAKER_BOSS": 114
+  },
+  "killed_by_event_top20": {
+    "NONE.NONE": 6584,
+    "EVENT.NEOW": 172,
+    "EVENT.PUNCH_OFF": 9,
+    "EVENT.TEZCATARA": 4,
+    "EVENT.THE_LANTERN_KEY": 4,
+    "EVENT.DENSE_VEGETATION": 3,
+    "EVENT.SLIPPERY_BRIDGE": 3,
+    "EVENT.TRIAL": 2,
+    "EVENT.PAEL": 2,
+    "EVENT.COLOSSAL_FLOWER": 2,
+    "EVENT.WOOD_CARVINGS": 1,
+    "EVENT.FIELD_OF_MAN_SIZED_HOLES": 1,
+    "EVENT.WATERLOGGED_SCRIPTORIUM": 1,
+    "EVENT.VAKUU": 1,
+    "EVENT.BUGSLAYER": 1,
+    "EVENT.POTION_COURIER": 1,
+    "EVENT.NONUPEIPE": 1,
+    "EVENT.ROOM_FULL_OF_CHEESE": 1,
+    "EVENT.SUNKEN_STATUE": 1,
+    "EVENT.THIS_OR_THAT": 1
+  },
+  "deck_size": {
+    "min": 0,
+    "max": 762,
+    "p10": 14,
+    "p50": 23,
+    "p90": 33
+  },
+  "relic_count": {
+    "min": 1,
+    "max": 35,
+    "p10": 3,
+    "p50": 9,
+    "p90": 19
+  },
+  "potion_count": {
+    "min": 0,
+    "max": 5,
+    "p10": 0,
+    "p50": 0,
+    "p90": 2
+  },
+  "run_time_seconds": {
+    "min": 1,
+    "max": 139696,
+    "p10": 354,
+    "p50": 1701,
+    "p90": 4165
+  },
+  "id_coverage_against_v109_canonical": {
+    "card_refs_total": 163978,
+    "card_refs_unmatched": 207,
+    "card_refs_unmatched_pct": 0.126,
+    "unmatched_card_ids_top20": {
+      "CARD.FOLLOW_THROUGH": 126,
+      "CARD.GRAPPLE": 41,
+      "CARD.PREPARE": 40
+    },
+    "relic_refs_total": 70180,
+    "relic_refs_unmatched": 0,
+    "relic_refs_unmatched_pct": 0.0,
+    "unmatched_relic_ids_top20": {},
+    "potion_refs_total": 3873,
+    "potion_refs_unmatched": 0,
+    "potion_refs_unmatched_pct": 0.0,
+    "unmatched_potion_ids_top20": {}
+  },
+  "usable_for_scenario_generation": {
+    "count": 5997,
+    "criteria": "not was_abandoned, not _isCheated, game_mode == 'standard', has players[0]",
+    "pct_of_total": 88.24
+  }
+}

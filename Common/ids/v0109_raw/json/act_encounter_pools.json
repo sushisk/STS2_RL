@@ -1,0 +1,2991 @@
+[
+  {
+    "act": {
+      "category": "act",
+      "entry": "OVERGROWTH"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "FuzzyWurmCrawlerWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "FUZZY_WURM_CRAWLER_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FUZZY_WURM_CRAWLER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\FuzzyWurmCrawlerWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "FUZZY_WURM_CRAWLER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<FuzzyWurmCrawler>().ToMutable(), null))"
+          }
+        ],
+        "tags": [
+          "Crawler"
+        ]
+      },
+      {
+        "class_name": "NibbitsWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "NIBBITS_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "NIBBIT"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\NibbitsWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "NIBBIT"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "Nibbit nibbit = (Nibbit)ModelDb.Monster<Nibbit>().ToMutable(); nibbit.IsAlone = true; return new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((nibbit, null));"
+          }
+        ],
+        "tags": [
+          "Nibbit"
+        ]
+      },
+      {
+        "class_name": "ShrinkerBeetleWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "SHRINKER_BEETLE_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SHRINKER_BEETLE"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ShrinkerBeetleWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SHRINKER_BEETLE"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<ShrinkerBeetle>().ToMutable(), null))"
+          }
+        ],
+        "tags": [
+          "Shrinker"
+        ]
+      },
+      {
+        "class_name": "SlimesWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "LEAF_SLIME_M"
+          },
+          {
+            "category": "monster",
+            "entry": "LEAF_SLIME_S"
+          },
+          {
+            "category": "monster",
+            "entry": "TWIG_SLIME_M"
+          },
+          {
+            "category": "monster",
+            "entry": "TWIG_SLIME_S"
+          }
+        ],
+        "source": {
+          "line": 10,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlimesWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "slot_choices",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "LEAF_SLIME_S"
+              },
+              {
+                "category": "monster",
+                "entry": "TWIG_SLIME_S"
+              },
+              {
+                "category": "monster",
+                "entry": "LEAF_SLIME_M"
+              },
+              {
+                "category": "monster",
+                "entry": "TWIG_SLIME_M"
+              }
+            ],
+            "raw": "List<(MonsterModel, string)> list = new List<(MonsterModel, string)>(); List<MonsterModel> list2 = _smallSlimes.ToList(); MonsterModel monsterModel = base.Rng.NextItem(list2); list2.Remove(monsterModel); MonsterModel monsterModel2 = base.Rng.NextItem(list2); list.Add((monsterModel.ToMutable(), null)); list.Add((base.Rng.NextItem(_mediumSlimes).ToMutable(), null)); list.Add((monsterModel2.ToMutable(), null)); return list;",
+            "slots": [
+              {
+                "choices": [
+                  {
+                    "category": "monster",
+                    "entry": "LEAF_SLIME_S"
+                  },
+                  {
+                    "category": "monster",
+                    "entry": "TWIG_SLIME_S"
+                  }
+                ],
+                "position": 1,
+                "raw": "monsterModel.ToMutable()"
+              },
+              {
+                "choices": [
+                  {
+                    "category": "monster",
+                    "entry": "LEAF_SLIME_M"
+                  },
+                  {
+                    "category": "monster",
+                    "entry": "TWIG_SLIME_M"
+                  }
+                ],
+                "position": 2,
+                "raw": "base.Rng.NextItem(_mediumSlimes).ToMutable()"
+              },
+              {
+                "choices": [
+                  {
+                    "category": "monster",
+                    "entry": "LEAF_SLIME_S"
+                  },
+                  {
+                    "category": "monster",
+                    "entry": "TWIG_SLIME_S"
+                  }
+                ],
+                "position": 3,
+                "raw": "monsterModel2.ToMutable()"
+              }
+            ]
+          }
+        ],
+        "tags": [
+          "Slimes"
+        ]
+      }
+    ],
+    "pool_type": "weak"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "OVERGROWTH"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "CubexConstructNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "CUBEX_CONSTRUCT_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CUBEX_CONSTRUCT"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\CubexConstructNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CUBEX_CONSTRUCT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<CubexConstruct>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "FlyconidNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "FLYCONID_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FLYCONID"
+          },
+          {
+            "category": "monster",
+            "entry": "LEAF_SLIME_M"
+          },
+          {
+            "category": "monster",
+            "entry": "TWIG_SLIME_M"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\FlyconidNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "FLYCONID"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (base.Rng.NextItem(_mediumSlimes).ToMutable(), null), (ModelDb.Monster<Flyconid>().ToMutable(), null) })"
+          }
+        ],
+        "tags": [
+          "Mushroom",
+          "Slimes"
+        ]
+      },
+      {
+        "class_name": "FogmogNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "FOGMOG_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "EYE_WITH_TEETH"
+          },
+          {
+            "category": "monster",
+            "entry": "FOGMOG"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\FogmogNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "FOGMOG"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Fogmog>().ToMutable(), \"fogmog\"))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "InkletsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "INKLETS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "INKLET"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\InkletsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "INKLET"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "Inklet item = (Inklet)ModelDb.Monster<Inklet>().ToMutable(); Inklet inklet = (Inklet)ModelDb.Monster<Inklet>().ToMutable(); Inklet item2 = (Inklet)ModelDb.Monster<Inklet>().ToMutable(); inklet.MiddleInklet = true; return new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (item, null), (inklet, null), (item2, null) });"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "MawlerNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "MAWLER_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "MAWLER"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\MawlerNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "MAWLER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Mawler>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "NibbitsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "NIBBITS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "NIBBIT"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\NibbitsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "NIBBIT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (nibbit, \"front\"), (ModelDb.Monster<Nibbit>().ToMutable(), \"back\") })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "OvergrowthCrawlers",
+        "id": {
+          "category": "encounter",
+          "entry": "OVERGROWTH_CRAWLERS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FUZZY_WURM_CRAWLER"
+          },
+          {
+            "category": "monster",
+            "entry": "SHRINKER_BEETLE"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\OvergrowthCrawlers.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SHRINKER_BEETLE"
+              },
+              {
+                "category": "monster",
+                "entry": "FUZZY_WURM_CRAWLER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<ShrinkerBeetle>().ToMutable(), null), (ModelDb.Monster<FuzzyWurmCrawler>().ToMutable(), null) })"
+          }
+        ],
+        "tags": [
+          "Shrinker",
+          "Crawler"
+        ]
+      },
+      {
+        "class_name": "RubyRaidersNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "RUBY_RAIDERS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "ASSASSIN_RUBY_RAIDER"
+          },
+          {
+            "category": "monster",
+            "entry": "AXE_RUBY_RAIDER"
+          },
+          {
+            "category": "monster",
+            "entry": "BRUTE_RUBY_RAIDER"
+          },
+          {
+            "category": "monster",
+            "entry": "CROSSBOW_RUBY_RAIDER"
+          },
+          {
+            "category": "monster",
+            "entry": "TRACKER_RUBY_RAIDER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\RubyRaidersNormal.cs"
+        },
+        "spawn_patterns": [],
+        "tags": null
+      },
+      {
+        "class_name": "SlimesNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "LEAF_SLIME_M"
+          },
+          {
+            "category": "monster",
+            "entry": "LEAF_SLIME_S"
+          },
+          {
+            "category": "monster",
+            "entry": "TWIG_SLIME_M"
+          },
+          {
+            "category": "monster",
+            "entry": "TWIG_SLIME_S"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlimesNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "TWIG_SLIME_M"
+              },
+              {
+                "category": "monster",
+                "entry": "LEAF_SLIME_M"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[4] { (ModelDb.Monster<TwigSlimeM>().ToMutable(), null), (ModelDb.Monster<LeafSlimeM>().ToMutable(), null), (monsterModel.ToMutable(), null), (monsterModel2.ToMutable(), null) })"
+          }
+        ],
+        "tags": [
+          "Slimes"
+        ]
+      },
+      {
+        "class_name": "SlitheringStranglerNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "LEAF_SLIME_M"
+          },
+          {
+            "category": "monster",
+            "entry": "LEAF_SLIME_S"
+          },
+          {
+            "category": "monster",
+            "entry": "SLITHERING_STRANGLER"
+          },
+          {
+            "category": "monster",
+            "entry": "SNAPPING_JAXFRUIT"
+          },
+          {
+            "category": "monster",
+            "entry": "TWIG_SLIME_M"
+          },
+          {
+            "category": "monster",
+            "entry": "TWIG_SLIME_S"
+          }
+        ],
+        "source": {
+          "line": 11,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlitheringStranglerNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SLITHERING_STRANGLER"
+              },
+              {
+                "category": "monster",
+                "entry": "SNAPPING_JAXFRUIT"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "List<MonsterModel> list2; switch (base.Rng.NextItem(Enum.GetValues<SecondaryEnemyType>())) { case SecondaryEnemyType.SnappingJaxfruit: { int num = 1; List<MonsterModel> list4 = new List<MonsterModel>(num); CollectionsMarshal.SetCount(list4, num); Span<MonsterModel> span = CollectionsMarshal.AsSpan(list4); int num2 = 0; span[num2] = ModelDb.Monster<SnappingJaxfruit>(); list2 = list4; break; } case SecondaryEnemyType.MediumSlime: { int num2 = 1; List<MonsterModel> list3 = new List<MonsterModel>(num2); CollectionsMarshal.SetCount(list3, num2); Span<MonsterModel> span = CollectionsMarshal.AsSpan(list3); int num = 0; span[num] = base.Rng.NextItem(_mediumSlimes); list2 = list3; break; } case SecondaryEnemyType.SmallSlimes: { int num = 2; List<MonsterModel> list = new List<MonsterModel>(num); CollectionsMarshal.SetCount(list, num); Span<MonsterModel> span = CollectionsMarshal.AsSpan(list); int num2 = 0; span[num2] = base.Rng.NextItem(_smallSlimes); num2++; span[num2] = base.Rng.NextItem(_smallSlimes); list2 = list; break; } default: throw new ArgumentOutOfRangeException(); } List<MonsterModel> list5 = list2; list5.Add(ModelDb.Monster<SlitheringStrangler>()); return list5.Select((MonsterModel m) => ((MonsterModel, string?))(m.ToMutable(), null)).ToList();"
+          }
+        ],
+        "tags": [
+          "Jaxfruit",
+          "Slimes"
+        ]
+      },
+      {
+        "class_name": "SnappingJaxfruitNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SNAPPING_JAXFRUIT_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FLYCONID"
+          },
+          {
+            "category": "monster",
+            "entry": "SNAPPING_JAXFRUIT"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SnappingJaxfruitNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SNAPPING_JAXFRUIT"
+              },
+              {
+                "category": "monster",
+                "entry": "FLYCONID"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<SnappingJaxfruit>().ToMutable(), null), (ModelDb.Monster<Flyconid>().ToMutable(), null) })"
+          }
+        ],
+        "tags": [
+          "Mushroom",
+          "Jaxfruit"
+        ]
+      },
+      {
+        "class_name": "VineShamblerNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "VINE_SHAMBLER_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "VINE_SHAMBLER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\VineShamblerNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "VINE_SHAMBLER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<VineShambler>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "normal"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "OVERGROWTH"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "BygoneEffigyElite",
+        "id": {
+          "category": "encounter",
+          "entry": "BYGONE_EFFIGY_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "BYGONE_EFFIGY"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\BygoneEffigyElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "BYGONE_EFFIGY"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<BygoneEffigy>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "ByrdonisElite",
+        "id": {
+          "category": "encounter",
+          "entry": "BYRDONIS_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "BYRDONIS"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ByrdonisElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "BYRDONIS"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Byrdonis>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "PhrogParasiteElite",
+        "id": {
+          "category": "encounter",
+          "entry": "PHROG_PARASITE_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "PHROG_PARASITE"
+          },
+          {
+            "category": "monster",
+            "entry": "WRIGGLER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\PhrogParasiteElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "PHROG_PARASITE"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<PhrogParasite>().ToMutable(), \"phrog\"))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "elite"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "OVERGROWTH"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "CeremonialBeastBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "CEREMONIAL_BEAST_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CEREMONIAL_BEAST"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\CeremonialBeastBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CEREMONIAL_BEAST"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<CeremonialBeast>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "TheKinBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "THE_KIN_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "KIN_FOLLOWER"
+          },
+          {
+            "category": "monster",
+            "entry": "KIN_PRIEST"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheKinBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "KIN_FOLLOWER"
+              },
+              {
+                "category": "monster",
+                "entry": "KIN_PRIEST"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (kinFollower, \"slot1\"), (ModelDb.Monster<KinFollower>().ToMutable(), \"slot2\"), (ModelDb.Monster<KinPriest>().ToMutable(), \"leaderSlot\") })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "VantomBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "VANTOM_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "VANTOM"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\VantomBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "VANTOM"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Vantom>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "boss"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "UNDERDOCKS"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "CorpseSlugsWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "CORPSE_SLUGS_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CORPSE_SLUG"
+          }
+        ],
+        "source": {
+          "line": 11,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\CorpseSlugsWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CORPSE_SLUG"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "int num = 2; List<(MonsterModel, string)> list = new List<(MonsterModel, string)>(num); CollectionsMarshal.SetCount(list, num); Span<(MonsterModel, string)> span = CollectionsMarshal.AsSpan(list); int num2 = 0; span[num2] = (ModelDb.Monster<CorpseSlug>().ToMutable(), null); num2++; span[num2] = (ModelDb.Monster<CorpseSlug>().ToMutable(), null); List<(MonsterModel, string)> list2 = list; CorpseSlug.EnsureCorpseSlugsStartWithDifferentMoves(list2.Select(((MonsterModel, string) kvp) => kvp.Item1), base.Rng); return list2;"
+          }
+        ],
+        "tags": [
+          "Slugs"
+        ]
+      },
+      {
+        "class_name": "SeapunkWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "SEAPUNK_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SEAPUNK"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SeapunkWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SEAPUNK"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Seapunk>().ToMutable(), null))"
+          }
+        ],
+        "tags": [
+          "Seapunk"
+        ]
+      },
+      {
+        "class_name": "SludgeSpinnerWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "SLUDGE_SPINNER_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SLUDGE_SPINNER"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SludgeSpinnerWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SLUDGE_SPINNER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<SludgeSpinner>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "ToadpolesWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "TOADPOLES_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "TOADPOLE"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ToadpolesWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "TOADPOLE"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "Toadpole toadpole = (Toadpole)ModelDb.Monster<Toadpole>().ToMutable(); toadpole.IsFront = true; Toadpole toadpole2 = (Toadpole)ModelDb.Monster<Toadpole>().ToMutable(); toadpole2.IsFront = false; return new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (toadpole, null), (toadpole2, null) });"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "weak"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "UNDERDOCKS"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "CorpseSlugsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "CORPSE_SLUGS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CORPSE_SLUG"
+          }
+        ],
+        "source": {
+          "line": 11,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\CorpseSlugsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CORPSE_SLUG"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "int num = 3; List<(MonsterModel, string)> list = new List<(MonsterModel, string)>(num); CollectionsMarshal.SetCount(list, num); Span<(MonsterModel, string)> span = CollectionsMarshal.AsSpan(list); int num2 = 0; span[num2] = (ModelDb.Monster<CorpseSlug>().ToMutable(), null); num2++; span[num2] = (ModelDb.Monster<CorpseSlug>().ToMutable(), null); num2++; span[num2] = (ModelDb.Monster<CorpseSlug>().ToMutable(), null); List<(MonsterModel, string)> list2 = list; CorpseSlug.EnsureCorpseSlugsStartWithDifferentMoves(list2.Select(((MonsterModel, string) kvp) => kvp.Item1), base.Rng); return list2;"
+          }
+        ],
+        "tags": [
+          "Slugs"
+        ]
+      },
+      {
+        "class_name": "CultistsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "CULTISTS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CALCIFIED_CULTIST"
+          },
+          {
+            "category": "monster",
+            "entry": "DAMP_CULTIST"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\CultistsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CALCIFIED_CULTIST"
+              },
+              {
+                "category": "monster",
+                "entry": "DAMP_CULTIST"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<CalcifiedCultist>().ToMutable(), null), (ModelDb.Monster<DampCultist>().ToMutable(), null) })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "FossilStalkerNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "FOSSIL_STALKER_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FOSSIL_STALKER"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\FossilStalkerNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "FOSSIL_STALKER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<FossilStalker>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "GremlinMercNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "GREMLIN_MERC_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FAT_GREMLIN"
+          },
+          {
+            "category": "monster",
+            "entry": "GREMLIN_MERC"
+          },
+          {
+            "category": "monster",
+            "entry": "SNEAKY_GREMLIN"
+          }
+        ],
+        "source": {
+          "line": 10,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\GremlinMercNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "GREMLIN_MERC"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<GremlinMerc>().ToMutable(), \"merc\"))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "HauntedShipNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "HAUNTED_SHIP_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "HAUNTED_SHIP"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\HauntedShipNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "HAUNTED_SHIP"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<HauntedShip>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "LivingFogNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "LIVING_FOG_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "GAS_BOMB"
+          },
+          {
+            "category": "monster",
+            "entry": "LIVING_FOG"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\LivingFogNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "LIVING_FOG"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<LivingFog>().ToMutable(), \"livingFog\"))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "PunchConstructNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "PUNCH_CONSTRUCT_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "PUNCH_CONSTRUCT"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\PunchConstructNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "PUNCH_CONSTRUCT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<PunchConstruct>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "SeapunkNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SEAPUNK_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CALCIFIED_CULTIST"
+          },
+          {
+            "category": "monster",
+            "entry": "SEAPUNK"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SeapunkNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CALCIFIED_CULTIST"
+              },
+              {
+                "category": "monster",
+                "entry": "SEAPUNK"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<CalcifiedCultist>().ToMutable(), null), (ModelDb.Monster<Seapunk>().ToMutable(), null) })"
+          }
+        ],
+        "tags": [
+          "Seapunk"
+        ]
+      },
+      {
+        "class_name": "SewerClamNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SEWER_CLAM_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SEWER_CLAM"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SewerClamNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SEWER_CLAM"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<SewerClam>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "TwoTailedRatsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "TWO_TAILED_RATS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "TWO_TAILED_RAT"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TwoTailedRatsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "TWO_TAILED_RAT"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "TwoTailedRat twoTailedRat = (TwoTailedRat)ModelDb.Monster<TwoTailedRat>().ToMutable(); TwoTailedRat twoTailedRat2 = (TwoTailedRat)ModelDb.Monster<TwoTailedRat>().ToMutable(); TwoTailedRat twoTailedRat3 = (TwoTailedRat)ModelDb.Monster<TwoTailedRat>().ToMutable(); int num = (twoTailedRat.StarterMoveIndex = base.Rng.NextInt(3)); twoTailedRat2.StarterMoveIndex = (num + 1) % 3; twoTailedRat3.StarterMoveIndex = (num + 2) % 3; return new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (twoTailedRat, Slots[2]), (twoTailedRat2, Slots[3]), (twoTailedRat3, Slots[4]) });"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "normal"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "UNDERDOCKS"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "PhantasmalGardenersElite",
+        "id": {
+          "category": "encounter",
+          "entry": "PHANTASMAL_GARDENERS_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "PHANTASMAL_GARDENER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\PhantasmalGardenersElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "PHANTASMAL_GARDENER"
+              },
+              {
+                "category": "monster",
+                "entry": "PHANTASMAL_GARDENER"
+              },
+              {
+                "category": "monster",
+                "entry": "PHANTASMAL_GARDENER"
+              },
+              {
+                "category": "monster",
+                "entry": "PHANTASMAL_GARDENER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[4] { (ModelDb.Monster<PhantasmalGardener>().ToMutable(), \"first\"), (ModelDb.Monster<PhantasmalGardener>().ToMutable(), \"second\"), (ModelDb.Monster<PhantasmalGardener>().ToMutable(), \"third\"), (ModelDb.Monster<PhantasmalGardener>().ToMutable(), \"fourth\") })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "SkulkingColonyElite",
+        "id": {
+          "category": "encounter",
+          "entry": "SKULKING_COLONY_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SKULKING_COLONY"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SkulkingColonyElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SKULKING_COLONY"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<SkulkingColony>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "TerrorEelElite",
+        "id": {
+          "category": "encounter",
+          "entry": "TERROR_EEL_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "TERROR_EEL"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TerrorEelElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "TERROR_EEL"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<TerrorEel>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "elite"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "UNDERDOCKS"
+    },
+    "act_index": 0,
+    "act_number": 1,
+    "encounters": [
+      {
+        "class_name": "LagavulinMatriarchBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "LAGAVULIN_MATRIARCH_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "LAGAVULIN_MATRIARCH"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\LagavulinMatriarchBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "LAGAVULIN_MATRIARCH"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<LagavulinMatriarch>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "SoulFyshBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "SOUL_FYSH_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SOUL_FYSH"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SoulFyshBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SOUL_FYSH"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<SoulFysh>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "WaterfallGiantBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "WATERFALL_GIANT_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "WATERFALL_GIANT"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\WaterfallGiantBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "WATERFALL_GIANT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<WaterfallGiant>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "boss"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "HIVE"
+    },
+    "act_index": 1,
+    "act_number": 2,
+    "encounters": [
+      {
+        "class_name": "BowlbugsWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_EGG"
+          },
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_NECTAR"
+          },
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_ROCK"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\BowlbugsWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "BOWLBUG_ROCK"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<BowlbugRock>().ToMutable(), \"odd\"), (base.Rng.NextItem(Bugs).ToMutable(), \"even\") })"
+          }
+        ],
+        "tags": [
+          "Workers"
+        ]
+      },
+      {
+        "class_name": "ExoskeletonsWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "EXOSKELETONS_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "EXOSKELETON"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ExoskeletonsWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "EXOSKELETON"
+              },
+              {
+                "category": "monster",
+                "entry": "EXOSKELETON"
+              },
+              {
+                "category": "monster",
+                "entry": "EXOSKELETON"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (ModelDb.Monster<Exoskeleton>().ToMutable(), \"first\"), (ModelDb.Monster<Exoskeleton>().ToMutable(), \"second\"), (ModelDb.Monster<Exoskeleton>().ToMutable(), \"third\") })"
+          }
+        ],
+        "tags": [
+          "Exoskeletons"
+        ]
+      },
+      {
+        "class_name": "ThievingHopperWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "THIEVING_HOPPER_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "THIEVING_HOPPER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ThievingHopperWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "THIEVING_HOPPER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<ThievingHopper>().ToMutable(), null))"
+          }
+        ],
+        "tags": [
+          "Thieves"
+        ]
+      },
+      {
+        "class_name": "TunnelerWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "TUNNELER_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "TUNNELER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TunnelerWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "TUNNELER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Tunneler>().ToMutable(), null))"
+          }
+        ],
+        "tags": [
+          "Burrower"
+        ]
+      }
+    ],
+    "pool_type": "weak"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "HIVE"
+    },
+    "act_index": 1,
+    "act_number": 2,
+    "encounters": [
+      {
+        "class_name": "BowlbugsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_EGG"
+          },
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_NECTAR"
+          },
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_ROCK"
+          },
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_SILK"
+          }
+        ],
+        "source": {
+          "line": 11,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\BowlbugsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "BOWLBUG_ROCK"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "List<MonsterModel> currentWorkers = new List<MonsterModel>(); int num = 1; List<(MonsterModel, string)> list = new List<(MonsterModel, string)>(num); CollectionsMarshal.SetCount(list, num); Span<(MonsterModel, string)> span = CollectionsMarshal.AsSpan(list); int index = 0; span[index] = (ModelDb.Monster<BowlbugRock>().ToMutable(), _slotNames[0]); List<(MonsterModel, string)> list2 = list; for (int i = 0; i < 2; i++) { List<MonsterModel> items = _workerValidCounts.Keys.Where((MonsterModel r) => currentWorkers.Count((MonsterModel c) => c == r) < _workerValidCounts[r]).ToList(); MonsterModel monsterModel = base.Rng.NextItem(items); currentWorkers.Add(monsterModel); list2.Add((monsterModel.ToMutable(), _slotNames[i + 1])); } return list2;"
+          }
+        ],
+        "tags": [
+          "Workers"
+        ]
+      },
+      {
+        "class_name": "ChompersNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "CHOMPERS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CHOMPER"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ChompersNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CHOMPER"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "Chomper item = (Chomper)ModelDb.Monster<Chomper>().ToMutable(); Chomper chomper = (Chomper)ModelDb.Monster<Chomper>().ToMutable(); chomper.ScreamFirst = true; return new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (item, null), (chomper, null) });"
+          }
+        ],
+        "tags": [
+          "Chomper"
+        ]
+      },
+      {
+        "class_name": "ExoskeletonsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "EXOSKELETONS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "EXOSKELETON"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ExoskeletonsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "EXOSKELETON"
+              },
+              {
+                "category": "monster",
+                "entry": "EXOSKELETON"
+              },
+              {
+                "category": "monster",
+                "entry": "EXOSKELETON"
+              },
+              {
+                "category": "monster",
+                "entry": "EXOSKELETON"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[4] { (ModelDb.Monster<Exoskeleton>().ToMutable(), \"first\"), (ModelDb.Monster<Exoskeleton>().ToMutable(), \"second\"), (ModelDb.Monster<Exoskeleton>().ToMutable(), \"third\"), (ModelDb.Monster<Exoskeleton>().ToMutable(), \"fourth\") })"
+          }
+        ],
+        "tags": [
+          "Exoskeletons"
+        ]
+      },
+      {
+        "class_name": "HunterKillerNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "HUNTER_KILLER_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "HUNTER_KILLER"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\HunterKillerNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "HUNTER_KILLER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<HunterKiller>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "LouseProgenitorNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "LOUSE_PROGENITOR_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "LOUSE_PROGENITOR"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\LouseProgenitorNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "LOUSE_PROGENITOR"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<LouseProgenitor>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "MytesNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "MYTES_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "MYTE"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\MytesNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "MYTE"
+              },
+              {
+                "category": "monster",
+                "entry": "MYTE"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<Myte>().ToMutable(), \"first\"), (ModelDb.Monster<Myte>().ToMutable(), \"second\") })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "OvicopterNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "OVICOPTER_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "OVICOPTER"
+          },
+          {
+            "category": "monster",
+            "entry": "TOUGH_EGG"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\OvicopterNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "slot_choices",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "OVICOPTER"
+              }
+            ],
+            "raw": "List<(MonsterModel, string)> list = new List<(MonsterModel, string)>(); list.Add((ModelDb.Monster<Ovicopter>().ToMutable(), \"ovicopter\")); return list;",
+            "slots": [
+              {
+                "choices": [
+                  {
+                    "category": "monster",
+                    "entry": "OVICOPTER"
+                  }
+                ],
+                "position": 1,
+                "raw": "ModelDb.Monster<Ovicopter>().ToMutable()"
+              }
+            ]
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "SlumberingBeetleNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SLUMBERING_BEETLE_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_ROCK"
+          },
+          {
+            "category": "monster",
+            "entry": "BOWLBUG_SILK"
+          },
+          {
+            "category": "monster",
+            "entry": "SLUMBERING_BEETLE"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlumberingBeetleNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "BOWLBUG_ROCK"
+              },
+              {
+                "category": "monster",
+                "entry": "BOWLBUG_SILK"
+              },
+              {
+                "category": "monster",
+                "entry": "SLUMBERING_BEETLE"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (ModelDb.Monster<BowlbugRock>().ToMutable(), \"first\"), (ModelDb.Monster<BowlbugSilk>().ToMutable(), \"second\"), (ModelDb.Monster<SlumberingBeetle>().ToMutable(), \"third\") })"
+          }
+        ],
+        "tags": [
+          "Workers"
+        ]
+      },
+      {
+        "class_name": "SpinyToadNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SPINY_TOAD_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SPINY_TOAD"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SpinyToadNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SPINY_TOAD"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<SpinyToad>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "TheObscuraNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "THE_OBSCURA_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "PARAFRIGHT"
+          },
+          {
+            "category": "monster",
+            "entry": "THE_OBSCURA"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheObscuraNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "THE_OBSCURA"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<TheObscura>().ToMutable(), \"obscura\"))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "normal"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "HIVE"
+    },
+    "act_index": 1,
+    "act_number": 2,
+    "encounters": [
+      {
+        "class_name": "DecimillipedeElite",
+        "id": {
+          "category": "encounter",
+          "entry": "DECIMILLIPEDE_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "DECIMILLIPEDE_SEGMENT_BACK"
+          },
+          {
+            "category": "monster",
+            "entry": "DECIMILLIPEDE_SEGMENT_FRONT"
+          },
+          {
+            "category": "monster",
+            "entry": "DECIMILLIPEDE_SEGMENT_MIDDLE"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\DecimillipedeElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "DECIMILLIPEDE_SEGMENT_BACK"
+              },
+              {
+                "category": "monster",
+                "entry": "DECIMILLIPEDE_SEGMENT_FRONT"
+              },
+              {
+                "category": "monster",
+                "entry": "DECIMILLIPEDE_SEGMENT_MIDDLE"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "DecimillipedeSegment decimillipedeSegment = (DecimillipedeSegment)ModelDb.Monster<DecimillipedeSegmentFront>().ToMutable(); DecimillipedeSegment decimillipedeSegment2 = (DecimillipedeSegment)ModelDb.Monster<DecimillipedeSegmentMiddle>().ToMutable(); DecimillipedeSegment decimillipedeSegment3 = (DecimillipedeSegment)ModelDb.Monster<DecimillipedeSegmentBack>().ToMutable(); int num = (decimillipedeSegment.StarterMoveIdx = base.Rng.NextInt(3)); decimillipedeSegment2.StarterMoveIdx = (num + 1) % 3; decimillipedeSegment3.StarterMoveIdx = (num + 2) % 3; return new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (decimillipedeSegment, \"segment1\"), (decimillipedeSegment2, \"segment2\"), (decimillipedeSegment3, \"segment3\") });"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "EntomancerElite",
+        "id": {
+          "category": "encounter",
+          "entry": "ENTOMANCER_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "ENTOMANCER"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\EntomancerElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "ENTOMANCER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Entomancer>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "InfestedPrismsElite",
+        "id": {
+          "category": "encounter",
+          "entry": "INFESTED_PRISMS_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "INFESTED_PRISM"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\InfestedPrismsElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "INFESTED_PRISM"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<InfestedPrism>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "elite"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "HIVE"
+    },
+    "act_index": 1,
+    "act_number": 2,
+    "encounters": [
+      {
+        "class_name": "KaiserCrabBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "KAISER_CRAB_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CRUSHER"
+          },
+          {
+            "category": "monster",
+            "entry": "ROCKET"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\KaiserCrabBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "CRUSHER"
+              },
+              {
+                "category": "monster",
+                "entry": "ROCKET"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<Crusher>().ToMutable(), \"crusher\"), (ModelDb.Monster<Rocket>().ToMutable(), \"rocket\") })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "KnowledgeDemonBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "KNOWLEDGE_DEMON_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "KNOWLEDGE_DEMON"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\KnowledgeDemonBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "KNOWLEDGE_DEMON"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<KnowledgeDemon>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "TheInsatiableBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "THE_INSATIABLE_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "THE_INSATIABLE"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheInsatiableBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "THE_INSATIABLE"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<TheInsatiable>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "boss"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "GLORY"
+    },
+    "act_index": 2,
+    "act_number": 3,
+    "encounters": [
+      {
+        "class_name": "DevotedSculptorWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "DEVOTED_SCULPTOR_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "DEVOTED_SCULPTOR"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\DevotedSculptorWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "DEVOTED_SCULPTOR"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<DevotedSculptor>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "ScrollsOfBitingWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "SCROLLS_OF_BITING_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SCROLL_OF_BITING"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ScrollsOfBitingWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SCROLL_OF_BITING"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "ScrollOfBiting scrollOfBiting = (ScrollOfBiting)ModelDb.Monster<ScrollOfBiting>().ToMutable(); ScrollOfBiting scrollOfBiting2 = (ScrollOfBiting)ModelDb.Monster<ScrollOfBiting>().ToMutable(); ScrollOfBiting scrollOfBiting3 = (ScrollOfBiting)ModelDb.Monster<ScrollOfBiting>().ToMutable(); int num = (scrollOfBiting.StarterMoveIdx = base.Rng.NextInt(3)); scrollOfBiting2.StarterMoveIdx = (num + 1) % 3; scrollOfBiting3.StarterMoveIdx = (num + 2) % 3; return new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (scrollOfBiting, null), (scrollOfBiting2, null), (scrollOfBiting3, null) });"
+          }
+        ],
+        "tags": [
+          "Scrolls"
+        ]
+      },
+      {
+        "class_name": "TurretOperatorWeak",
+        "id": {
+          "category": "encounter",
+          "entry": "TURRET_OPERATOR_WEAK"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "LIVING_SHIELD"
+          },
+          {
+            "category": "monster",
+            "entry": "TURRET_OPERATOR"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TurretOperatorWeak.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "LIVING_SHIELD"
+              },
+              {
+                "category": "monster",
+                "entry": "TURRET_OPERATOR"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<LivingShield>().ToMutable(), null), (ModelDb.Monster<TurretOperator>().ToMutable(), null) })"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "weak"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "GLORY"
+    },
+    "act_index": 2,
+    "act_number": 3,
+    "encounters": [
+      {
+        "class_name": "AxebotsNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "AXEBOTS_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "AXEBOT"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\AxebotsNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "AXEBOT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Axebot>().ToMutable(), \"front\"))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "ConstructMenagerieNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "CONSTRUCT_MENAGERIE_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "CUBEX_CONSTRUCT"
+          },
+          {
+            "category": "monster",
+            "entry": "PUNCH_CONSTRUCT"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ConstructMenagerieNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "PUNCH_CONSTRUCT"
+              },
+              {
+                "category": "monster",
+                "entry": "CUBEX_CONSTRUCT"
+              },
+              {
+                "category": "monster",
+                "entry": "CUBEX_CONSTRUCT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (ModelDb.Monster<PunchConstruct>().ToMutable(), null), (ModelDb.Monster<CubexConstruct>().ToMutable(), null), (ModelDb.Monster<CubexConstruct>().ToMutable(), null) })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "FabricatorNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "FABRICATOR_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FABRICATOR"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\FabricatorNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "FABRICATOR"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Fabricator>().ToMutable(), \"fabricator\"))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "FrogKnightNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "FROG_KNIGHT_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FROG_KNIGHT"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\FrogKnightNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "FROG_KNIGHT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<FrogKnight>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "GlobeHeadNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "GLOBE_HEAD_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "GLOBE_HEAD"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\GlobeHeadNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "GLOBE_HEAD"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<GlobeHead>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "OwlMagistrateNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "OWL_MAGISTRATE_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "OWL_MAGISTRATE"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\OwlMagistrateNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "OWL_MAGISTRATE"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<OwlMagistrate>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "ScrollsOfBitingNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SCROLLS_OF_BITING_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SCROLL_OF_BITING"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\ScrollsOfBitingNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "method_possible_set",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SCROLL_OF_BITING"
+              }
+            ],
+            "note": "Could not split exact spawn groups from source; listed all monster models referenced by GenerateMonsters.",
+            "raw": "ScrollOfBiting scrollOfBiting = (ScrollOfBiting)ModelDb.Monster<ScrollOfBiting>().ToMutable(); ScrollOfBiting scrollOfBiting2 = (ScrollOfBiting)ModelDb.Monster<ScrollOfBiting>().ToMutable(); ScrollOfBiting scrollOfBiting3 = (ScrollOfBiting)ModelDb.Monster<ScrollOfBiting>().ToMutable(); ScrollOfBiting scrollOfBiting4 = (ScrollOfBiting)ModelDb.Monster<ScrollOfBiting>().ToMutable(); int num = (scrollOfBiting.StarterMoveIdx = base.Rng.NextInt(3)); scrollOfBiting2.StarterMoveIdx = (num + 1) % 3; scrollOfBiting3.StarterMoveIdx = (num + 2) % 3; scrollOfBiting4.StarterMoveIdx = 2; return new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[4] { (scrollOfBiting, null), (scrollOfBiting2, null), (scrollOfBiting3, null), (scrollOfBiting4, null) });"
+          }
+        ],
+        "tags": [
+          "Scrolls"
+        ]
+      },
+      {
+        "class_name": "SlimedBerserkerNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMED_BERSERKER_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SLIMED_BERSERKER"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlimedBerserkerNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SLIMED_BERSERKER"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<SlimedBerserker>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "TheLostAndForgottenNormal",
+        "id": {
+          "category": "encounter",
+          "entry": "THE_LOST_AND_FORGOTTEN_NORMAL"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "THE_FORGOTTEN"
+          },
+          {
+            "category": "monster",
+            "entry": "THE_LOST"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheLostAndForgottenNormal.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "THE_LOST"
+              },
+              {
+                "category": "monster",
+                "entry": "THE_FORGOTTEN"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<TheLost>().ToMutable(), null), (ModelDb.Monster<TheForgotten>().ToMutable(), null) })"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "normal"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "GLORY"
+    },
+    "act_index": 2,
+    "act_number": 3,
+    "encounters": [
+      {
+        "class_name": "KnightsElite",
+        "id": {
+          "category": "encounter",
+          "entry": "KNIGHTS_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "FLAIL_KNIGHT"
+          },
+          {
+            "category": "monster",
+            "entry": "MAGI_KNIGHT"
+          },
+          {
+            "category": "monster",
+            "entry": "SPECTRAL_KNIGHT"
+          }
+        ],
+        "source": {
+          "line": 10,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\KnightsElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "FLAIL_KNIGHT"
+              },
+              {
+                "category": "monster",
+                "entry": "SPECTRAL_KNIGHT"
+              },
+              {
+                "category": "monster",
+                "entry": "MAGI_KNIGHT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[3] { (ModelDb.Monster<FlailKnight>().ToMutable(), \"first\"), (ModelDb.Monster<SpectralKnight>().ToMutable(), \"second\"), (ModelDb.Monster<MagiKnight>().ToMutable(), \"third\") })"
+          }
+        ],
+        "tags": [
+          "Knights"
+        ]
+      },
+      {
+        "class_name": "MechaKnightElite",
+        "id": {
+          "category": "encounter",
+          "entry": "MECHA_KNIGHT_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "MECHA_KNIGHT"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\MechaKnightElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "MECHA_KNIGHT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<MechaKnight>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "SoulNexusElite",
+        "id": {
+          "category": "encounter",
+          "entry": "SOUL_NEXUS_ELITE"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "SOUL_NEXUS"
+          }
+        ],
+        "source": {
+          "line": 7,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\SoulNexusElite.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "SOUL_NEXUS"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<SoulNexus>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "elite"
+  },
+  {
+    "act": {
+      "category": "act",
+      "entry": "GLORY"
+    },
+    "act_index": 2,
+    "act_number": 3,
+    "encounters": [
+      {
+        "class_name": "AeonglassBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "AEONGLASS_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "AEONGLASS"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\AeonglassBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "AEONGLASS"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<Aeonglass>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "QueenBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "QUEEN_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "QUEEN"
+          },
+          {
+            "category": "monster",
+            "entry": "TORCH_HEAD_AMALGAM"
+          }
+        ],
+        "source": {
+          "line": 9,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\QueenBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "TORCH_HEAD_AMALGAM"
+              },
+              {
+                "category": "monster",
+                "entry": "QUEEN"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlyArray<(MonsterModel, string)>(new(MonsterModel, string)[2] { (ModelDb.Monster<TorchHeadAmalgam>().ToMutable(), \"amalgam\"), (ModelDb.Monster<Queen>().ToMutable(), \"queen\") })"
+          }
+        ],
+        "tags": null
+      },
+      {
+        "class_name": "TestSubjectBoss",
+        "id": {
+          "category": "encounter",
+          "entry": "TEST_SUBJECT_BOSS"
+        },
+        "possible_monsters": [
+          {
+            "category": "monster",
+            "entry": "TEST_SUBJECT"
+          }
+        ],
+        "source": {
+          "line": 8,
+          "path": "MegaCrit.Sts2.Core.Models.Encounters\\TestSubjectBoss.cs"
+        },
+        "spawn_patterns": [
+          {
+            "kind": "direct_return",
+            "monsters": [
+              {
+                "category": "monster",
+                "entry": "TEST_SUBJECT"
+              }
+            ],
+            "raw": "new global::_003C_003Ez__ReadOnlySingleElementList<(MonsterModel, string)>((ModelDb.Monster<TestSubject>().ToMutable(), null))"
+          }
+        ],
+        "tags": null
+      }
+    ],
+    "pool_type": "boss"
+  }
+]

@@ -1,0 +1,6555 @@
+{
+  "ABRASIVE": {
+    "class_name": "Abrasive",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ABUNDANCE": {
+    "class_name": "Abundance",
+    "energy_cost": 1,
+    "present_in": [
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ACCELERANT": {
+    "class_name": "Accelerant",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ACCURACY": {
+    "class_name": "Accuracy",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ACROBATICS": {
+    "class_name": "Acrobatics",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ADAPTIVE_STRIKE": {
+    "class_name": "AdaptiveStrike",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ADRENALINE": {
+    "class_name": "Adrenaline",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "AFTERIMAGE": {
+    "class_name": "Afterimage",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "AFTERLIFE": {
+    "class_name": "Afterlife",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "AGGRESSION": {
+    "class_name": "Aggression",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ALCHEMIZE": {
+    "class_name": "Alchemize",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ALIGNMENT": {
+    "class_name": "Alignment",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ALL_FOR_ONE": {
+    "class_name": "AllForOne",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ANGER": {
+    "class_name": "Anger",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ANOINTED": {
+    "class_name": "Anointed",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ANTICIPATE": {
+    "class_name": "Anticipate",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "APOTHEOSIS": {
+    "class_name": "Apotheosis",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "APPARITION": {
+    "class_name": "Apparition",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ARMAMENTS": {
+    "class_name": "Armaments",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ARSENAL": {
+    "class_name": "Arsenal",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ASCENDERS_BANE": {
+    "class_name": "AscendersBane",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "ASHEN_STRIKE": {
+    "class_name": "AshenStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ASSASSINATE": {
+    "class_name": "Assassinate",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ASTRAL_PULSE": {
+    "class_name": "AstralPulse",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "AUTOMATION": {
+    "class_name": "Automation",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "BACKFLIP": {
+    "class_name": "Backflip",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BACKSTAB": {
+    "class_name": "Backstab",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BAD_LUCK": {
+    "class_name": "BadLuck",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "BALL_LIGHTNING": {
+    "class_name": "BallLightning",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BANSHEES_CRY": {
+    "class_name": "BansheesCry",
+    "energy_cost": 9,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "BARRAGE": {
+    "class_name": "Barrage",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BARRICADE": {
+    "class_name": "Barricade",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "BASH": {
+    "class_name": "Bash",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BATTLE_TRANCE": {
+    "class_name": "BattleTrance",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BEACON_OF_HOPE": {
+    "class_name": "BeaconOfHope",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "BEAM_CELL": {
+    "class_name": "BeamCell",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BEAT_DOWN": {
+    "class_name": "BeatDown",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "RandomEnemy",
+    "type": "Skill"
+  },
+  "BEAT_INTO_SHAPE": {
+    "class_name": "BeatIntoShape",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BECKON": {
+    "class_name": "Beckon",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "BEGONE": {
+    "class_name": "Begone",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BELIEVE_IN_YOU": {
+    "class_name": "BelieveInYou",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "BIASED_COGNITION": {
+    "class_name": "BiasedCognition",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "BIG_BANG": {
+    "class_name": "BigBang",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BLACK_HOLE": {
+    "class_name": "BlackHole",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "BLADE_DANCE": {
+    "class_name": "BladeDance",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BLADE_OF_INK": {
+    "class_name": "BladeOfInk",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BLADE_SYMPHONY": {
+    "class_name": "BladeSymphony",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllAllies",
+    "type": "Skill"
+  },
+  "BLAZE": {
+    "class_name": "Blaze",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "BLIGHT_STRIKE": {
+    "class_name": "BlightStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BLOODLETTING": {
+    "class_name": "Bloodletting",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BLOOD_WALL": {
+    "class_name": "BloodWall",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BLUDGEON": {
+    "class_name": "Bludgeon",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BLUR": {
+    "class_name": "Blur",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BODYGUARD": {
+    "class_name": "Bodyguard",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BODY_SLAM": {
+    "class_name": "BodySlam",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BOLAS": {
+    "class_name": "Bolas",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BOMBARDMENT": {
+    "class_name": "Bombardment",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BONE_SHARDS": {
+    "class_name": "BoneShards",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "BOOST_AWAY": {
+    "class_name": "BoostAway",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BOOT_SEQUENCE": {
+    "class_name": "BootSequence",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BORROWED_TIME": {
+    "class_name": "BorrowedTime",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BOUNCING_FLASK": {
+    "class_name": "BouncingFlask",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "RandomEnemy",
+    "type": "Skill"
+  },
+  "BRAND": {
+    "class_name": "Brand",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BREAK": {
+    "class_name": "Break",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BREAKTHROUGH": {
+    "class_name": "Breakthrough",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "BRIGHTEST_FLAME": {
+    "class_name": "BrightestFlame",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BUBBLE_BUBBLE": {
+    "class_name": "BubbleBubble",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "BUFFER": {
+    "class_name": "Buffer",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "BULK_UP": {
+    "class_name": "BulkUp",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "BULLET_TIME": {
+    "class_name": "BulletTime",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BULLY": {
+    "class_name": "Bully",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BULWARK": {
+    "class_name": "Bulwark",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BUNDLE_OF_JOY": {
+    "class_name": "BundleOfJoy",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BURN": {
+    "class_name": "Burn",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "BURNING_PACT": {
+    "class_name": "BurningPact",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BURST": {
+    "class_name": "Burst",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "BURY": {
+    "class_name": "Bury",
+    "energy_cost": 4,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "BYRDONIS_EGG": {
+    "class_name": "ByrdonisEgg",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Quest",
+    "target_type": "None",
+    "type": "Quest"
+  },
+  "BYRD_SWOOP": {
+    "class_name": "ByrdSwoop",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "CACOPHONY": {
+    "class_name": "Cacophony",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CALAMITY": {
+    "class_name": "Calamity",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CALCIFY": {
+    "class_name": "Calcify",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CALCULATED_GAMBLE": {
+    "class_name": "CalculatedGamble",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CALL_OF_THE_VOID": {
+    "class_name": "CallOfTheVoid",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CALTROPS": {
+    "class_name": "Caltrops",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CAPACITOR": {
+    "class_name": "Capacitor",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CAPTURE_SPIRIT": {
+    "class_name": "CaptureSpirit",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "CASCADE": {
+    "class_name": "Cascade",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CATASTROPHE": {
+    "class_name": "Catastrophe",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CELESTIAL_MIGHT": {
+    "class_name": "CelestialMight",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "CHAOS": {
+    "class_name": "Chaos",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CHARGE": {
+    "class_name": "Charge",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CHARGE_BATTERY": {
+    "class_name": "ChargeBattery",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CHILD_OF_THE_STARS": {
+    "class_name": "ChildOfTheStars",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CHILL": {
+    "class_name": "Chill",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CINDER": {
+    "class_name": "Cinder",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "CLASH": {
+    "class_name": "Clash",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "CLAW": {
+    "class_name": "Claw",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "CLEANSE": {
+    "class_name": "Cleanse",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CLOAK_AND_DAGGER": {
+    "class_name": "CloakAndDagger",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CLOAK_OF_STARS": {
+    "class_name": "CloakOfStars",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CLUMSY": {
+    "class_name": "Clumsy",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "COLD_SNAP": {
+    "class_name": "ColdSnap",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "COLLISION_COURSE": {
+    "class_name": "CollisionCourse",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "COLOSSUS": {
+    "class_name": "Colossus",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "COMET": {
+    "class_name": "Comet",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "COMPACT": {
+    "class_name": "Compact",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "COMPILE_DRIVER": {
+    "class_name": "CompileDriver",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "CONCOCT": {
+    "class_name": "Concoct",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "CONFLAGRATION": {
+    "class_name": "Conflagration",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "CONQUEROR": {
+    "class_name": "Conqueror",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "CONSTELLATION": {
+    "class_name": "Constellation",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "CONSUMING_SHADOW": {
+    "class_name": "ConsumingShadow",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CONVERGENCE": {
+    "class_name": "Convergence",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "COOLANT": {
+    "class_name": "Coolant",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "COOLHEADED": {
+    "class_name": "Coolheaded",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "COORDINATE": {
+    "class_name": "Coordinate",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "CORROSIVE_WAVE": {
+    "class_name": "CorrosiveWave",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "CORRUPTION": {
+    "class_name": "Corruption",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "COSMIC_INDIFFERENCE": {
+    "class_name": "CosmicIndifference",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "COUNTDOWN": {
+    "class_name": "Countdown",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CRASH_LANDING": {
+    "class_name": "CrashLanding",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "CREATIVE_AI": {
+    "class_name": "CreativeAi",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CRESCENT_SPEAR": {
+    "class_name": "CrescentSpear",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "CRIMSON_MANTLE": {
+    "class_name": "CrimsonMantle",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CRUELTY": {
+    "class_name": "Cruelty",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "CRUSH_UNDER": {
+    "class_name": "CrushUnder",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "CURSE_OF_THE_BELL": {
+    "class_name": "CurseOfTheBell",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "DAGGER_SPRAY": {
+    "class_name": "DaggerSpray",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "DAGGER_THROW": {
+    "class_name": "DaggerThrow",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DANSE_MACABRE": {
+    "class_name": "DanseMacabre",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "DARKNESS": {
+    "class_name": "Darkness",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DARK_EMBRACE": {
+    "class_name": "DarkEmbrace",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "DARK_SHACKLES": {
+    "class_name": "DarkShackles",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "DASH": {
+    "class_name": "Dash",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DAZED": {
+    "class_name": "Dazed",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "DEADLY_POISON": {
+    "class_name": "DeadlyPoison",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "DEATHBRINGER": {
+    "class_name": "Deathbringer",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "DEATHS_DOOR": {
+    "class_name": "DeathsDoor",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEATH_MARCH": {
+    "class_name": "DeathMarch",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DEBILITATE": {
+    "class_name": "Debilitate",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DEBRIS": {
+    "class_name": "Debris",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "DEBT": {
+    "class_name": "Debt",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "DECAY": {
+    "class_name": "Decay",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "DECISIONS_DECISIONS": {
+    "class_name": "DecisionsDecisions",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEFEND_DEFECT": {
+    "class_name": "DefendDefect",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEFEND_IRONCLAD": {
+    "class_name": "DefendIronclad",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEFEND_NECROBINDER": {
+    "class_name": "DefendNecrobinder",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEFEND_REGENT": {
+    "class_name": "DefendRegent",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEFEND_SILENT": {
+    "class_name": "DefendSilent",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEFILE": {
+    "class_name": "Defile",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DEFLECT": {
+    "class_name": "Deflect",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEFRAGMENT": {
+    "class_name": "Defragment",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "DEFY": {
+    "class_name": "Defy",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "DELAY": {
+    "class_name": "Delay",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DEMESNE": {
+    "class_name": "Demesne",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "DEMONIC_SHIELD": {
+    "class_name": "DemonicShield",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "DEMON_FORM": {
+    "class_name": "DemonForm",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "DEPRECATED_CARD": {
+    "class_name": "DeprecatedCard",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "DEVASTATE": {
+    "class_name": "Devastate",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DEVOUR_LIFE": {
+    "class_name": "DevourLife",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "DIRGE": {
+    "class_name": "Dirge",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DISCOVERY": {
+    "class_name": "Discovery",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DISINTEGRATION": {
+    "class_name": "Disintegration",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "DISMANTLE": {
+    "class_name": "Dismantle",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DISTRACTION": {
+    "class_name": "Distraction",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DODGE_AND_ROLL": {
+    "class_name": "DodgeAndRoll",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DOMINATE": {
+    "class_name": "Dominate",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "DOUBLE_ENERGY": {
+    "class_name": "DoubleEnergy",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DOUBT": {
+    "class_name": "Doubt",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "DOWSING": {
+    "class_name": "Dowsing",
+    "energy_cost": -1,
+    "present_in": [
+      "v109"
+    ],
+    "rarity": "Quest",
+    "target_type": "None",
+    "type": "Quest"
+  },
+  "DRAIN_POWER": {
+    "class_name": "DrainPower",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "DRAMATIC_ENTRANCE": {
+    "class_name": "DramaticEntrance",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "DREDGE": {
+    "class_name": "Dredge",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DRUM_OF_BATTLE": {
+    "class_name": "DrumOfBattle",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DUALCAST": {
+    "class_name": "Dualcast",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DUAL_WIELD": {
+    "class_name": "DualWield",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "DYING_STAR": {
+    "class_name": "DyingStar",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "ECHOING_SLASH": {
+    "class_name": "EchoingSlash",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "ECHO_FORM": {
+    "class_name": "EchoForm",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "EIDOLON": {
+    "class_name": "Eidolon",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "END_OF_DAYS": {
+    "class_name": "EndOfDays",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "ENERGY_SURGE": {
+    "class_name": "EnergySurge",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllAllies",
+    "type": "Skill"
+  },
+  "ENFEEBLING_TOUCH": {
+    "class_name": "EnfeeblingTouch",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "ENLIGHTENMENT": {
+    "class_name": "Enlightenment",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ENTHRALLED": {
+    "class_name": "Enthralled",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "ENTRENCH": {
+    "class_name": "Entrench",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ENTROPY": {
+    "class_name": "Entropy",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ENVENOM": {
+    "class_name": "Envenom",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "EQUILIBRIUM": {
+    "class_name": "Equilibrium",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ERADICATE": {
+    "class_name": "Eradicate",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ESCAPE_PLAN": {
+    "class_name": "EscapePlan",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ETERNAL_ARMOR": {
+    "class_name": "EternalArmor",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "EVIL_EYE": {
+    "class_name": "EvilEye",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "EXPECT_AFIGHT": {
+    "class_name": "ExpectAFight",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "EXPERTISE": {
+    "class_name": "Expertise",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "EXPOSE": {
+    "class_name": "Expose",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "EXTERMINATE": {
+    "class_name": "Exterminate",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "FADE": {
+    "class_name": "Fade",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "FALLING_STAR": {
+    "class_name": "FallingStar",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FAN_OF_KNIVES": {
+    "class_name": "FanOfKnives",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FASTEN": {
+    "class_name": "Fasten",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FEAR": {
+    "class_name": "Fear",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FEED": {
+    "class_name": "Feed",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FEEDING_FRENZY": {
+    "class_name": "FeedingFrenzy",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "FEEL_NO_PAIN": {
+    "class_name": "FeelNoPain",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FERAL": {
+    "class_name": "Feral",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FETCH": {
+    "class_name": "Fetch",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FIEND_FIRE": {
+    "class_name": "FiendFire",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FIGHT_ME": {
+    "class_name": "FightMe",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FIGHT_THROUGH": {
+    "class_name": "FightThrough",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "FINESSE": {
+    "class_name": "Finesse",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "FINISHER": {
+    "class_name": "Finisher",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FISTICUFFS": {
+    "class_name": "Fisticuffs",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FLAK_CANNON": {
+    "class_name": "FlakCannon",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "RandomEnemy",
+    "type": "Attack"
+  },
+  "FLAME_BARRIER": {
+    "class_name": "FlameBarrier",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "FLANKING": {
+    "class_name": "Flanking",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "FLASH_OF_STEEL": {
+    "class_name": "FlashOfSteel",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FLATTEN": {
+    "class_name": "Flatten",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FLECHETTES": {
+    "class_name": "Flechettes",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FLICK_FLACK": {
+    "class_name": "FlickFlack",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "FOCUSED_STRIKE": {
+    "class_name": "FocusedStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FOLLY": {
+    "class_name": "Folly",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "FOOTWORK": {
+    "class_name": "Footwork",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FORBIDDEN_GRIMOIRE": {
+    "class_name": "ForbiddenGrimoire",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FOREGONE_CONCLUSION": {
+    "class_name": "ForegoneConclusion",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "FORGOTTEN_RITUAL": {
+    "class_name": "ForgottenRitual",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "FRANTIC_ESCAPE": {
+    "class_name": "FranticEscape",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "Self",
+    "type": "Status"
+  },
+  "FRIENDSHIP": {
+    "class_name": "Friendship",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FTL": {
+    "class_name": "Ftl",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "FUEL": {
+    "class_name": "Fuel",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "FURNACE": {
+    "class_name": "Furnace",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "FUSION": {
+    "class_name": "Fusion",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GAMMA_BLAST": {
+    "class_name": "GammaBlast",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "GANG_UP": {
+    "class_name": "GangUp",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "GATHER_LIGHT": {
+    "class_name": "GatherLight",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GENESIS": {
+    "class_name": "Genesis",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "GENETIC_ALGORITHM": {
+    "class_name": "GeneticAlgorithm",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GIANT_ROCK": {
+    "class_name": "GiantRock",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "GLACIER": {
+    "class_name": "Glacier",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GLASSWORK": {
+    "class_name": "Glasswork",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GLIMMER": {
+    "class_name": "Glimmer",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GLIMPSE_BEYOND": {
+    "class_name": "GlimpseBeyond",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllAllies",
+    "type": "Skill"
+  },
+  "GLITTERSTREAM": {
+    "class_name": "Glitterstream",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GLOW": {
+    "class_name": "Glow",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GOLD_AXE": {
+    "class_name": "GoldAxe",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "GO_FOR_THE_EYES": {
+    "class_name": "GoForTheEyes",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "GRAND_FINALE": {
+    "class_name": "GrandFinale",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "GRAVEBLAST": {
+    "class_name": "Graveblast",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "GRAVE_WARDEN": {
+    "class_name": "GraveWarden",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GREED": {
+    "class_name": "Greed",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "GUARDS": {
+    "class_name": "Guards",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "GUIDING_STAR": {
+    "class_name": "GuidingStar",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "GUILTY": {
+    "class_name": "Guilty",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "GUNK_UP": {
+    "class_name": "GunkUp",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HAILSTORM": {
+    "class_name": "Hailstorm",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "HAMMER_TIME": {
+    "class_name": "HammerTime",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "HAND_OF_GREED": {
+    "class_name": "HandOfGreed",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HAND_TRICK": {
+    "class_name": "HandTrick",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HANG": {
+    "class_name": "Hang",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HAUNT": {
+    "class_name": "Haunt",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "HAVOC": {
+    "class_name": "Havoc",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HAZE": {
+    "class_name": "Haze",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "HEADBUTT": {
+    "class_name": "Headbutt",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HEAVENLY_DRILL": {
+    "class_name": "HeavenlyDrill",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HEGEMONY": {
+    "class_name": "Hegemony",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HEIRLOOM_HAMMER": {
+    "class_name": "HeirloomHammer",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HELIX_DRILL": {
+    "class_name": "HelixDrill",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HELLO_WORLD": {
+    "class_name": "HelloWorld",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "HELLRAISER": {
+    "class_name": "Hellraiser",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "HEMOKINESIS": {
+    "class_name": "Hemokinesis",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "HIBERNATE": {
+    "class_name": "Hibernate",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HIDDEN_CACHE": {
+    "class_name": "HiddenCache",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HIDDEN_DAGGERS": {
+    "class_name": "HiddenDaggers",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HIDDEN_GEM": {
+    "class_name": "HiddenGem",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HIGH_FIVE": {
+    "class_name": "HighFive",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "HOLOGRAM": {
+    "class_name": "Hologram",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HOTFIX": {
+    "class_name": "Hotfix",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "HOWL_FROM_BEYOND": {
+    "class_name": "HowlFromBeyond",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "HUDDLE_UP": {
+    "class_name": "HuddleUp",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllAllies",
+    "type": "Skill"
+  },
+  "HYPERBEAM": {
+    "class_name": "Hyperbeam",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "ICE_LANCE": {
+    "class_name": "IceLance",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "IGNITION": {
+    "class_name": "Ignition",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "IMITATION_LEARNING": {
+    "class_name": "ImitationLearning",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "IMPATIENCE": {
+    "class_name": "Impatience",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "IMPERVIOUS": {
+    "class_name": "Impervious",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "INFECTION": {
+    "class_name": "Infection",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "INFERNAL_BLADE": {
+    "class_name": "InfernalBlade",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "INFERNO": {
+    "class_name": "Inferno",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "INFINITE_BLADES": {
+    "class_name": "InfiniteBlades",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "INFLAME": {
+    "class_name": "Inflame",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "INJURY": {
+    "class_name": "Injury",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "INTERCEPT": {
+    "class_name": "Intercept",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "INVOKE": {
+    "class_name": "Invoke",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "IRON_WAVE": {
+    "class_name": "IronWave",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ITERATION": {
+    "class_name": "Iteration",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "I_AM_INVINCIBLE": {
+    "class_name": "IAmInvincible",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "JACKPOT": {
+    "class_name": "Jackpot",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "JACK_OF_ALL_TRADES": {
+    "class_name": "JackOfAllTrades",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "JUGGERNAUT": {
+    "class_name": "Juggernaut",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "JUGGLING": {
+    "class_name": "Juggling",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "KINGLY_KICK": {
+    "class_name": "KinglyKick",
+    "energy_cost": 4,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "KINGLY_PUNCH": {
+    "class_name": "KinglyPunch",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "KNIFE_TRAP": {
+    "class_name": "KnifeTrap",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "KNOCKDOWN": {
+    "class_name": "Knockdown",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "KNOCKOUT_BLOW": {
+    "class_name": "KnockoutBlow",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "KNOW_THY_PLACE": {
+    "class_name": "KnowThyPlace",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "LANTERN_KEY": {
+    "class_name": "LanternKey",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Quest",
+    "target_type": "Self",
+    "type": "Quest"
+  },
+  "LARGESSE": {
+    "class_name": "Largesse",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "LEADING_STRIKE": {
+    "class_name": "LeadingStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "LEAP": {
+    "class_name": "Leap",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "LEGION_OF_BONE": {
+    "class_name": "LegionOfBone",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllAllies",
+    "type": "Skill"
+  },
+  "LEG_SWEEP": {
+    "class_name": "LegSweep",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "LETHALITY": {
+    "class_name": "Lethality",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "LIFT": {
+    "class_name": "Lift",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "LIGHTNING_ROD": {
+    "class_name": "LightningRod",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "LOOP": {
+    "class_name": "Loop",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "LUMINESCE": {
+    "class_name": "Luminesce",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "LUNAR_BLAST": {
+    "class_name": "LunarBlast",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MACHINE_LEARNING": {
+    "class_name": "MachineLearning",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "MAD_SCIENCE": {
+    "class_name": "MadScience",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MAKE_IT_SO": {
+    "class_name": "MakeItSo",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MALAISE": {
+    "class_name": "Malaise",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "MANGLE": {
+    "class_name": "Mangle",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MANIFEST_AUTHORITY": {
+    "class_name": "ManifestAuthority",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MASTER_OF_STRATEGY": {
+    "class_name": "MasterOfStrategy",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MASTER_PLANNER": {
+    "class_name": "MasterPlanner",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "MAUL": {
+    "class_name": "Maul",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MAYHEM": {
+    "class_name": "Mayhem",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "MELANCHOLY": {
+    "class_name": "Melancholy",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MEMENTO_MORI": {
+    "class_name": "MementoMori",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "METAMORPHOSIS": {
+    "class_name": "Metamorphosis",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "METEOR_SHOWER": {
+    "class_name": "MeteorShower",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "METEOR_STRIKE": {
+    "class_name": "MeteorStrike",
+    "energy_cost": 5,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MIDNIGHT": {
+    "class_name": "Midnight",
+    "energy_cost": 12,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MIMIC": {
+    "class_name": "Mimic",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "MIND_BLAST": {
+    "class_name": "MindBlast",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MIND_ROT": {
+    "class_name": "MindRot",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "MINION_DIVE_BOMB": {
+    "class_name": "MinionDiveBomb",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MINION_SACRIFICE": {
+    "class_name": "MinionSacrifice",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MINION_STRIKE": {
+    "class_name": "MinionStrike",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MIRAGE": {
+    "class_name": "Mirage",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MISERY": {
+    "class_name": "Misery",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MODDED": {
+    "class_name": "Modded",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MOLTEN_FIST": {
+    "class_name": "MoltenFist",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MOMENTUM_STRIKE": {
+    "class_name": "MomentumStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "MONARCHS_GAZE": {
+    "class_name": "MonarchsGaze",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "MONOLOGUE": {
+    "class_name": "Monologue",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MULTI_CAST": {
+    "class_name": "MultiCast",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "MURDER": {
+    "class_name": "Murder",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "NECRO_MASTERY": {
+    "class_name": "NecroMastery",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "NEGATIVE_PULSE": {
+    "class_name": "NegativePulse",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "NEOWS_FURY": {
+    "class_name": "NeowsFury",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "NEUROSURGE": {
+    "class_name": "Neurosurge",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "NEUTRALIZE": {
+    "class_name": "Neutralize",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "NEUTRON_AEGIS": {
+    "class_name": "NeutronAegis",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "NIGHTMARE": {
+    "class_name": "Nightmare",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "NORMALITY": {
+    "class_name": "Normality",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "NOSTALGIA": {
+    "class_name": "Nostalgia",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "NOT_YET": {
+    "class_name": "NotYet",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "NOXIOUS_FUMES": {
+    "class_name": "NoxiousFumes",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "NO_ESCAPE": {
+    "class_name": "NoEscape",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "NULL": {
+    "class_name": "Null",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "OBLIVION": {
+    "class_name": "Oblivion",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "OFFERING": {
+    "class_name": "Offering",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "OMNISLICE": {
+    "class_name": "Omnislice",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ONE_FOR_ALL": {
+    "class_name": "OneForAll",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllAllies",
+    "type": "Power"
+  },
+  "ONE_TWO_PUNCH": {
+    "class_name": "OneTwoPunch",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ORBIT": {
+    "class_name": "Orbit",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "OUTBREAK": {
+    "class_name": "Outbreak",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "OUTMANEUVER": {
+    "class_name": "Outmaneuver",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "OUTRAGE": {
+    "class_name": "Outrage",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "OVERCLOCK": {
+    "class_name": "Overclock",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PACTS_END": {
+    "class_name": "PactsEnd",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "PAGESTORM": {
+    "class_name": "Pagestorm",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PALE_BLUE_DOT": {
+    "class_name": "PaleBlueDot",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PANACHE": {
+    "class_name": "Panache",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PANIC_BUTTON": {
+    "class_name": "PanicButton",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PARRY": {
+    "class_name": "Parry",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PARSE": {
+    "class_name": "Parse",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PARTICLE_WALL": {
+    "class_name": "ParticleWall",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PATTER": {
+    "class_name": "Patter",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PECK": {
+    "class_name": "Peck",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PERFECTED_STRIKE": {
+    "class_name": "PerfectedStrike",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PHANTOM_BLADES": {
+    "class_name": "PhantomBlades",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PHOTON_CUT": {
+    "class_name": "PhotonCut",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PIERCING_WAIL": {
+    "class_name": "PiercingWail",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "PILLAGE": {
+    "class_name": "Pillage",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PILLAR_OF_CREATION": {
+    "class_name": "PillarOfCreation",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PINPOINT": {
+    "class_name": "Pinpoint",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PLOT": {
+    "class_name": "Plot",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllAllies",
+    "type": "Skill"
+  },
+  "POISONED_STAB": {
+    "class_name": "PoisonedStab",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "POKE": {
+    "class_name": "Poke",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "POMMEL_STRIKE": {
+    "class_name": "PommelStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "POOR_SLEEP": {
+    "class_name": "PoorSleep",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "POUNCE": {
+    "class_name": "Pounce",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PRECISE_CUT": {
+    "class_name": "PreciseCut",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PREDATOR": {
+    "class_name": "Predator",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PREPARED": {
+    "class_name": "Prepared",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PREP_TIME": {
+    "class_name": "PrepTime",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PRIMAL_FORCE": {
+    "class_name": "PrimalForce",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PRODUCTION": {
+    "class_name": "Production",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PROLONG": {
+    "class_name": "Prolong",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PROPHESIZE": {
+    "class_name": "Prophesize",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PROTECTOR": {
+    "class_name": "Protector",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PROWESS": {
+    "class_name": "Prowess",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "PULL_AGGRO": {
+    "class_name": "PullAggro",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PULL_FROM_BELOW": {
+    "class_name": "PullFromBelow",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "PURITY": {
+    "class_name": "Purity",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "PUTREFY": {
+    "class_name": "Putrefy",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "PYRE": {
+    "class_name": "Pyre",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "QUADCAST": {
+    "class_name": "Quadcast",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "QUASAR": {
+    "class_name": "Quasar",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "RADIATE": {
+    "class_name": "Radiate",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "RAGE": {
+    "class_name": "Rage",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "RAINBOW": {
+    "class_name": "Rainbow",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "RALLY": {
+    "class_name": "Rally",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllAllies",
+    "type": "Skill"
+  },
+  "RAMPAGE": {
+    "class_name": "Rampage",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "RATTLE": {
+    "class_name": "Rattle",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "REANIMATE": {
+    "class_name": "Reanimate",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "REAP": {
+    "class_name": "Reap",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "REAPER_FORM": {
+    "class_name": "ReaperForm",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "REAVE": {
+    "class_name": "Reave",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "REBOOT": {
+    "class_name": "Reboot",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "REBOUND": {
+    "class_name": "Rebound",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "REFINE_BLADE": {
+    "class_name": "RefineBlade",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "REFLECT": {
+    "class_name": "Reflect",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "REFLEX": {
+    "class_name": "Reflex",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "REFRACT": {
+    "class_name": "Refract",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "REGRET": {
+    "class_name": "Regret",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "RELAX": {
+    "class_name": "Relax",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "REND": {
+    "class_name": "Rend",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "RESONANCE": {
+    "class_name": "Resonance",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "RESTLESSNESS": {
+    "class_name": "Restlessness",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "RICOCHET": {
+    "class_name": "Ricochet",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "RandomEnemy",
+    "type": "Attack"
+  },
+  "RIGHT_HAND_HAND": {
+    "class_name": "RightHandHand",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "RIP_AND_TEAR": {
+    "class_name": "RipAndTear",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "RandomEnemy",
+    "type": "Attack"
+  },
+  "ROCKET_PUNCH": {
+    "class_name": "RocketPunch",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ROLLING_BOULDER": {
+    "class_name": "RollingBoulder",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ROYALTIES": {
+    "class_name": "Royalties",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ROYAL_GAMBLE": {
+    "class_name": "RoyalGamble",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "RUPTURE": {
+    "class_name": "Rupture",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SACRIFICE": {
+    "class_name": "Sacrifice",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SALVO": {
+    "class_name": "Salvo",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SCARE": {
+    "class_name": "Scare",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "SCAVENGE": {
+    "class_name": "Scavenge",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SCOURGE": {
+    "class_name": "Scourge",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "SCRAPE": {
+    "class_name": "Scrape",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SCRAWL": {
+    "class_name": "Scrawl",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SCULPTING_STRIKE": {
+    "class_name": "SculptingStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SEANCE": {
+    "class_name": "Seance",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SECOND_WIND": {
+    "class_name": "SecondWind",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SECRET_TECHNIQUE": {
+    "class_name": "SecretTechnique",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SECRET_WEAPON": {
+    "class_name": "SecretWeapon",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SEEKER_STRIKE": {
+    "class_name": "SeekerStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SEEKING_EDGE": {
+    "class_name": "SeekingEdge",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SENTRY_MODE": {
+    "class_name": "SentryMode",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SERPENT_FORM": {
+    "class_name": "SerpentForm",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SETUP_STRIKE": {
+    "class_name": "SetupStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SEVEN_STARS": {
+    "class_name": "SevenStars",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "SEVERANCE": {
+    "class_name": "Severance",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SHADOWMELD": {
+    "class_name": "Shadowmeld",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SHADOW_SHIELD": {
+    "class_name": "ShadowShield",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SHADOW_STEP": {
+    "class_name": "ShadowStep",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SHAME": {
+    "class_name": "Shame",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "SHARED_FATE": {
+    "class_name": "SharedFate",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "SHATTER": {
+    "class_name": "Shatter",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "SHINING_STRIKE": {
+    "class_name": "ShiningStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SHIV": {
+    "class_name": "Shiv",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SHOCKWAVE": {
+    "class_name": "Shockwave",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Skill"
+  },
+  "SHROUD": {
+    "class_name": "Shroud",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SHRUG_IT_OFF": {
+    "class_name": "ShrugItOff",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SIC_EM": {
+    "class_name": "SicEm",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SIGNAL_BOOST": {
+    "class_name": "SignalBoost",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SKEWER": {
+    "class_name": "Skewer",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SKIM": {
+    "class_name": "Skim",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SLEIGHT_OF_FLESH": {
+    "class_name": "SleightOfFlesh",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SLICE": {
+    "class_name": "Slice",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SLIMED": {
+    "class_name": "Slimed",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "SLOTH": {
+    "class_name": "Sloth",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "SMOKESTACK": {
+    "class_name": "Smokestack",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SNAKEBITE": {
+    "class_name": "Snakebite",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "SNAP": {
+    "class_name": "Snap",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SNEAKY": {
+    "class_name": "Sneaky",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SOLAR_STRIKE": {
+    "class_name": "SolarStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SOOT": {
+    "class_name": "Soot",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "SOUL": {
+    "class_name": "Soul",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SOULBOUND": {
+    "class_name": "Soulbound",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyAlly",
+    "type": "Power"
+  },
+  "SOUL_STORM": {
+    "class_name": "SoulStorm",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SOVEREIGN_BLADE": {
+    "class_name": "SovereignBlade",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SOW": {
+    "class_name": "Sow",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "SPECTRUM_SHIFT": {
+    "class_name": "SpectrumShift",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SPEEDSTER": {
+    "class_name": "Speedster",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SPINNER": {
+    "class_name": "Spinner",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SPIRIT_OF_ASH": {
+    "class_name": "SpiritOfAsh",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SPITE": {
+    "class_name": "Spite",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SPLASH": {
+    "class_name": "Splash",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SPOILS_MAP": {
+    "class_name": "SpoilsMap",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Quest",
+    "target_type": "Self",
+    "type": "Quest"
+  },
+  "SPOILS_OF_BATTLE": {
+    "class_name": "SpoilsOfBattle",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SPORE_MIND": {
+    "class_name": "SporeMind",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "SPUR": {
+    "class_name": "Spur",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SQUASH": {
+    "class_name": "Squash",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SQUEEZE": {
+    "class_name": "Squeeze",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "STACK": {
+    "class_name": "Stack",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "STAMPEDE": {
+    "class_name": "Stampede",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "STARDUST": {
+    "class_name": "Stardust",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "RandomEnemy",
+    "type": "Attack"
+  },
+  "STOKE": {
+    "class_name": "Stoke",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "STOMP": {
+    "class_name": "Stomp",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "STONE_ARMOR": {
+    "class_name": "StoneArmor",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "STORM": {
+    "class_name": "Storm",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "STORM_OF_STEEL": {
+    "class_name": "StormOfSteel",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "STRANGLE": {
+    "class_name": "Strangle",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "STRATAGEM": {
+    "class_name": "Stratagem",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "STRIKE_DEFECT": {
+    "class_name": "StrikeDefect",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "STRIKE_IRONCLAD": {
+    "class_name": "StrikeIronclad",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "STRIKE_NECROBINDER": {
+    "class_name": "StrikeNecrobinder",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "STRIKE_REGENT": {
+    "class_name": "StrikeRegent",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "STRIKE_SILENT": {
+    "class_name": "StrikeSilent",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SUBROUTINE": {
+    "class_name": "Subroutine",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SUCKER_PUNCH": {
+    "class_name": "SuckerPunch",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SUMMON_FORTH": {
+    "class_name": "SummonForth",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SUNDER": {
+    "class_name": "Sunder",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SUPERCRITICAL": {
+    "class_name": "Supercritical",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SUPERMASSIVE": {
+    "class_name": "Supermassive",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SUPPRESS": {
+    "class_name": "Suppress",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "SURVIVOR": {
+    "class_name": "Survivor",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SWEEPING_BEAM": {
+    "class_name": "SweepingBeam",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "SWEEPING_GAZE": {
+    "class_name": "SweepingGaze",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Token",
+    "target_type": "RandomEnemy",
+    "type": "Attack"
+  },
+  "SWORD_BOOMERANG": {
+    "class_name": "SwordBoomerang",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "RandomEnemy",
+    "type": "Attack"
+  },
+  "SWORD_SAGE": {
+    "class_name": "SwordSage",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "SYNCHRONIZE": {
+    "class_name": "Synchronize",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "SYNTHESIS": {
+    "class_name": "Synthesis",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "TACTICIAN": {
+    "class_name": "Tactician",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "TAG_TEAM": {
+    "class_name": "TagTeam",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "TANK": {
+    "class_name": "Tank",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "TAUNT": {
+    "class_name": "Taunt",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "TEAR_ASUNDER": {
+    "class_name": "TearAsunder",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "TEMPEST": {
+    "class_name": "Tempest",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "TERRAFORMING": {
+    "class_name": "Terraforming",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "TESLA_COIL": {
+    "class_name": "TeslaCoil",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "THE_BALL": {
+    "class_name": "TheBall",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "THE_BOMB": {
+    "class_name": "TheBomb",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "THE_GAMBIT": {
+    "class_name": "TheGambit",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "THE_HUNT": {
+    "class_name": "TheHunt",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "THE_SCYTHE": {
+    "class_name": "TheScythe",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "THE_SEALED_THRONE": {
+    "class_name": "TheSealedThrone",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "THE_SMITH": {
+    "class_name": "TheSmith",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "THINKING_AHEAD": {
+    "class_name": "ThinkingAhead",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "THRASH": {
+    "class_name": "Thrash",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "THRUMMING_HATCHET": {
+    "class_name": "ThrummingHatchet",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "THUNDER": {
+    "class_name": "Thunder",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "THUNDERCLAP": {
+    "class_name": "Thunderclap",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "TIMES_UP": {
+    "class_name": "TimesUp",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "TOOLS_OF_THE_TRADE": {
+    "class_name": "ToolsOfTheTrade",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "TORIC_TOUGHNESS": {
+    "class_name": "ToricToughness",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Event",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "TOXIC": {
+    "class_name": "Toxic",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "TRACKING": {
+    "class_name": "Tracking",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "TRANSFIGURE": {
+    "class_name": "Transfigure",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "TRASH_TO_TREASURE": {
+    "class_name": "TrashToTreasure",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "TREMBLE": {
+    "class_name": "Tremble",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Skill"
+  },
+  "TRUE_GRIT": {
+    "class_name": "TrueGrit",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "TURBO": {
+    "class_name": "Turbo",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "TUTOR": {
+    "class_name": "Tutor",
+    "energy_cost": 1,
+    "present_in": [
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "AnyAlly",
+    "type": "Skill"
+  },
+  "TWIN_STRIKE": {
+    "class_name": "TwinStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "TYRANNY": {
+    "class_name": "Tyranny",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "ULTIMATE_DEFEND": {
+    "class_name": "UltimateDefend",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "ULTIMATE_STRIKE": {
+    "class_name": "UltimateStrike",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "UNDEATH": {
+    "class_name": "Undeath",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "UNDERWORLD": {
+    "class_name": "Underworld",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "UNLEASH": {
+    "class_name": "Unleash",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "UNMOVABLE": {
+    "class_name": "Unmovable",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "UNRELENTING": {
+    "class_name": "Unrelenting",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "UNTOUCHABLE": {
+    "class_name": "Untouchable",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "UPPERCUT": {
+    "class_name": "Uppercut",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "UPROAR": {
+    "class_name": "Uproar",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "UP_MY_SLEEVE": {
+    "class_name": "UpMySleeve",
+    "energy_cost": 2,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "VEILPIERCER": {
+    "class_name": "Veilpiercer",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "VENERATE": {
+    "class_name": "Venerate",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "VICIOUS": {
+    "class_name": "Vicious",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "VOID": {
+    "class_name": "Void",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "VOID_FORM": {
+    "class_name": "VoidForm",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "VOLLEY": {
+    "class_name": "Volley",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "RandomEnemy",
+    "type": "Attack"
+  },
+  "VOLTAIC": {
+    "class_name": "Voltaic",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "WASTE_AWAY": {
+    "class_name": "WasteAway",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "WELL_LAID_PLANS": {
+    "class_name": "WellLaidPlans",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Rare",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "WHIRLWIND": {
+    "class_name": "Whirlwind",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "AllEnemies",
+    "type": "Attack"
+  },
+  "WHISTLE": {
+    "class_name": "Whistle",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "WHITE_NOISE": {
+    "class_name": "WhiteNoise",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Uncommon",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "WISH": {
+    "class_name": "Wish",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "WISP": {
+    "class_name": "Wisp",
+    "energy_cost": 0,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "Self",
+    "type": "Skill"
+  },
+  "WITHER": {
+    "class_name": "Wither",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "WOUND": {
+    "class_name": "Wound",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Status",
+    "target_type": "None",
+    "type": "Status"
+  },
+  "WRAITH_FORM": {
+    "class_name": "WraithForm",
+    "energy_cost": 3,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Ancient",
+    "target_type": "Self",
+    "type": "Power"
+  },
+  "WRITHE": {
+    "class_name": "Writhe",
+    "energy_cost": -1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Curse",
+    "target_type": "None",
+    "type": "Curse"
+  },
+  "WROUGHT_IN_WAR": {
+    "class_name": "WroughtInWar",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Common",
+    "target_type": "AnyEnemy",
+    "type": "Attack"
+  },
+  "ZAP": {
+    "class_name": "Zap",
+    "energy_cost": 1,
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "rarity": "Basic",
+    "target_type": "Self",
+    "type": "Skill"
+  }
+}

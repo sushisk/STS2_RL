@@ -1,0 +1,5337 @@
+[
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "Aeonglass",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "AEONGLASS_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 535,
+        "min": 535
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 535, 512)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "AEONGLASS"
+    },
+    "loc_keys": {
+      "title": "monsters.AEONGLASS.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 22,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Aeonglass.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Architect",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_ARCHITECT_EVENT_ENCOUNTER"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "ARCHITECT"
+    },
+    "loc_keys": {
+      "title": "monsters.ARCHITECT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 11,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Architect.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "AssassinRubyRaider",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "RUBY_RAIDERS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "ASSASSIN_RUBY_RAIDER"
+    },
+    "loc_keys": {
+      "title": "monsters.ASSASSIN_RUBY_RAIDER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\AssassinRubyRaider.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Axebot",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "AXEBOTS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 86,
+        "min": 76
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 86, 78)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 76, 70)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "AXEBOT"
+    },
+    "loc_keys": {
+      "title": "monsters.AXEBOT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Axebot.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "AxeRubyRaider",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "RUBY_RAIDERS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 23,
+        "min": 21
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 23, 22)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 21, 20)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "AXE_RUBY_RAIDER"
+    },
+    "loc_keys": {
+      "title": "monsters.AXE_RUBY_RAIDER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 14,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\AxeRubyRaider.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "BattleFriendV1",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 75,
+        "min": 75
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "75",
+        "min": "75"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BATTLE_FRIEND_V1"
+    },
+    "loc_keys": {
+      "title": "monsters.BATTLE_FRIEND_V1.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BattleFriendV1.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "BattleFriendV2",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 150,
+        "min": 150
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "150",
+        "min": "150"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BATTLE_FRIEND_V2"
+    },
+    "loc_keys": {
+      "title": "monsters.BATTLE_FRIEND_V2.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BattleFriendV2.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "BattleFriendV3",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 300,
+        "min": 300
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "300",
+        "min": "300"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BATTLE_FRIEND_V3"
+    },
+    "loc_keys": {
+      "title": "monsters.BATTLE_FRIEND_V3.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BattleFriendV3.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "BigDummy",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BIG_DUMMY"
+    },
+    "loc_keys": {
+      "title": "monsters.BIG_DUMMY.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 11,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BigDummy.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "BowlbugEgg",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 23
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 22)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 23, 21)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BOWLBUG_EGG"
+    },
+    "loc_keys": {
+      "title": "monsters.BOWLBUG_EGG.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugEgg.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "BowlbugNectar",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 39,
+        "min": 36
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 39, 38)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 36, 35)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BOWLBUG_NECTAR"
+    },
+    "loc_keys": {
+      "title": "monsters.BOWLBUG_NECTAR.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugNectar.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "BowlbugRock",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLUMBERING_BEETLE_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 49,
+        "min": 46
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 49, 48)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 45)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BOWLBUG_ROCK"
+    },
+    "loc_keys": {
+      "title": "monsters.BOWLBUG_ROCK.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugRock.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "BowlbugSilk",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLUMBERING_BEETLE_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 44,
+        "min": 41
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 44, 43)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 41, 40)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BOWLBUG_SILK"
+    },
+    "loc_keys": {
+      "title": "monsters.BOWLBUG_SILK.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugSilk.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "BruteRubyRaider",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "RUBY_RAIDERS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 34,
+        "min": 31
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 34, 33)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 31, 30)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BRUTE_RUBY_RAIDER"
+    },
+    "loc_keys": {
+      "title": "monsters.BRUTE_RUBY_RAIDER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 15,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BruteRubyRaider.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "BygoneEffigy",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BYGONE_EFFIGY_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 132,
+        "min": 132
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 132, 127)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BYGONE_EFFIGY"
+    },
+    "loc_keys": {
+      "title": "monsters.BYGONE_EFFIGY.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 24,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\BygoneEffigy.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "Byrdonis",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BYRDONIS_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 90,
+        "min": 90
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 90, 84)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 90, 81)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BYRDONIS"
+    },
+    "loc_keys": {
+      "title": "monsters.BYRDONIS.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 16,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Byrdonis.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "Byrdpip",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "BYRDPIP"
+    },
+    "loc_keys": {
+      "title": "monsters.BYRDPIP.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 10,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Byrdpip.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "CalcifiedCultist",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CULTISTS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SEAPUNK_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 42,
+        "min": 39
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 42, 41)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 39, 38)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "CALCIFIED_CULTIST"
+    },
+    "loc_keys": {
+      "title": "monsters.CALCIFIED_CULTIST.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\CalcifiedCultist.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "CeremonialBeast",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CEREMONIAL_BEAST_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 262,
+        "min": 262
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 262, 252)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "CEREMONIAL_BEAST"
+    },
+    "loc_keys": {
+      "title": "monsters.CEREMONIAL_BEAST.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 25,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\CeremonialBeast.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Chomper",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CHOMPERS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TUNNELER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 67,
+        "min": 63
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 67, 64)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 63, 60)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "CHOMPER"
+    },
+    "loc_keys": {
+      "title": "monsters.CHOMPER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Chomper.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "CorpseSlug",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CORPSE_SLUGS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CORPSE_SLUGS_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 29,
+        "min": 27
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 29, 27)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 27, 25)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "CORPSE_SLUG"
+    },
+    "loc_keys": {
+      "title": "monsters.CORPSE_SLUG.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\CorpseSlug.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "CrossbowRubyRaider",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "RUBY_RAIDERS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 22,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "CROSSBOW_RUBY_RAIDER"
+    },
+    "loc_keys": {
+      "title": "monsters.CROSSBOW_RUBY_RAIDER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 16,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\CrossbowRubyRaider.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "Crusher",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KAISER_CRAB_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 219,
+        "min": 219
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 219, 209)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "CRUSHER"
+    },
+    "loc_keys": {
+      "title": "monsters.CRUSHER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 23,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Crusher.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "CubexConstruct",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CONSTRUCT_MENAGERIE_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CUBEX_CONSTRUCT_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 70,
+        "min": 70
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 70, 65)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "CUBEX_CONSTRUCT"
+    },
+    "loc_keys": {
+      "title": "monsters.CUBEX_CONSTRUCT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\CubexConstruct.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "DampCultist",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CULTISTS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 54,
+        "min": 52
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 54, 53)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 51)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "DAMP_CULTIST"
+    },
+    "loc_keys": {
+      "title": "monsters.DAMP_CULTIST.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\DampCultist.cs"
+    }
+  },
+  {
+    "abstract": true,
+    "appears_in_pools": [],
+    "class_name": "DecimillipedeSegment",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 52,
+        "min": 46
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "DECIMILLIPEDE_SEGMENT"
+    },
+    "loc_keys": {
+      "title": "monsters.DECIMILLIPEDE_SEGMENT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": false,
+    "source": {
+      "line": 27,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegment.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "DecimillipedeSegmentBack",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "DECIMILLIPEDE_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": false,
+    "hp": {
+      "ascension10": {
+        "max": 52,
+        "min": 46
+      },
+      "inherited_from": "DecimillipedeSegment",
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "DECIMILLIPEDE_SEGMENT_BACK"
+    },
+    "loc_keys": {
+      "title": "monsters.DECIMILLIPEDE_SEGMENT_BACK.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 9,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegmentBack.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "DecimillipedeSegmentFront",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "DECIMILLIPEDE_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": false,
+    "hp": {
+      "ascension10": {
+        "max": 52,
+        "min": 46
+      },
+      "inherited_from": "DecimillipedeSegment",
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "DECIMILLIPEDE_SEGMENT_FRONT"
+    },
+    "loc_keys": {
+      "title": "monsters.DECIMILLIPEDE_SEGMENT_FRONT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 9,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegmentFront.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "DecimillipedeSegmentMiddle",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "DECIMILLIPEDE_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": false,
+    "hp": {
+      "ascension10": {
+        "max": 52,
+        "min": 46
+      },
+      "inherited_from": "DecimillipedeSegment",
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "DECIMILLIPEDE_SEGMENT_MIDDLE"
+    },
+    "loc_keys": {
+      "title": "monsters.DECIMILLIPEDE_SEGMENT_MIDDLE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 10,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegmentMiddle.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "DeprecatedMonster",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 0,
+        "min": 0
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "0",
+        "min": "0"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "DEPRECATED_MONSTER"
+    },
+    "loc_keys": {
+      "title": "monsters.DEPRECATED_MONSTER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\DeprecatedMonster.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak"
+    ],
+    "class_name": "DevotedSculptor",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "DEVOTED_SCULPTOR_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 172,
+        "min": 172
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 172, 162)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "DEVOTED_SCULPTOR"
+    },
+    "loc_keys": {
+      "title": "monsters.DEVOTED_SCULPTOR.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\DevotedSculptor.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "Entomancer",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "ENTOMANCER_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 155,
+        "min": 155
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 155, 145)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "ENTOMANCER"
+    },
+    "loc_keys": {
+      "title": "monsters.ENTOMANCER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Entomancer.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "Exoskeleton",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "EXOSKELETONS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "EXOSKELETONS_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 29,
+        "min": 25
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 29, 28)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 25, 24)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "EXOSKELETON"
+    },
+    "loc_keys": {
+      "title": "monsters.EXOSKELETON.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Exoskeleton.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "EyeWithTeeth",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FOGMOG_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 6,
+        "min": 6
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "6"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "EYE_WITH_TEETH"
+    },
+    "loc_keys": {
+      "title": "monsters.EYE_WITH_TEETH.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\EyeWithTeeth.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Fabricator",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FABRICATOR_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 155,
+        "min": 155
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 155, 150)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FABRICATOR"
+    },
+    "loc_keys": {
+      "title": "monsters.FABRICATOR.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Fabricator.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "FakeMerchantMonster",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FAKE_MERCHANT_EVENT_ENCOUNTER"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 175,
+        "min": 175
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 175, 165)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 175, 165)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FAKE_MERCHANT_MONSTER"
+    },
+    "loc_keys": {
+      "title": "monsters.FAKE_MERCHANT_MONSTER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 21,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\FakeMerchantMonster.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "FatGremlin",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "GREMLIN_MERC_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 18,
+        "min": 14
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 14, 13)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FAT_GREMLIN"
+    },
+    "loc_keys": {
+      "title": "monsters.FAT_GREMLIN.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\FatGremlin.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "FlailKnight",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KNIGHTS_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 108,
+        "min": 108
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 108, 101)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FLAIL_KNIGHT"
+    },
+    "loc_keys": {
+      "title": "monsters.FLAIL_KNIGHT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\FlailKnight.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Flyconid",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FLYCONID_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SNAPPING_JAXFRUIT_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 53,
+        "min": 51
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 53, 49)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 51, 47)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FLYCONID"
+    },
+    "loc_keys": {
+      "title": "monsters.FLYCONID.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Flyconid.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Fogmog",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FOGMOG_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 78,
+        "min": 78
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 78, 74)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FOGMOG"
+    },
+    "loc_keys": {
+      "title": "monsters.FOGMOG.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Fogmog.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "FossilStalker",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FOSSIL_STALKER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 56,
+        "min": 54
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 56, 53)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 54, 51)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FOSSIL_STALKER"
+    },
+    "loc_keys": {
+      "title": "monsters.FOSSIL_STALKER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\FossilStalker.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "FrogKnight",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FROG_KNIGHT_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 199,
+        "min": 199
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 199, 191)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FROG_KNIGHT"
+    },
+    "loc_keys": {
+      "title": "monsters.FROG_KNIGHT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\FrogKnight.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "FuzzyWurmCrawler",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FUZZY_WURM_CRAWLER_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OVERGROWTH_CRAWLERS"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 59,
+        "min": 58
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 59, 57)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 58, 55)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "FUZZY_WURM_CRAWLER"
+    },
+    "loc_keys": {
+      "title": "monsters.FUZZY_WURM_CRAWLER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 21,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\FuzzyWurmCrawler.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "GasBomb",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "LIVING_FOG_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 8,
+        "min": 8
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 8, 7)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "GAS_BOMB"
+    },
+    "loc_keys": {
+      "title": "monsters.GAS_BOMB.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\GasBomb.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "GlobeHead",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "GLOBE_HEAD_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 158,
+        "min": 158
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 158, 148)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "GLOBE_HEAD"
+    },
+    "loc_keys": {
+      "title": "monsters.GLOBE_HEAD.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 15,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\GlobeHead.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "GremlinMerc",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "GREMLIN_MERC_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 53,
+        "min": 51
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 53, 49)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 51, 47)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "GREMLIN_MERC"
+    },
+    "loc_keys": {
+      "title": "monsters.GREMLIN_MERC.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\GremlinMerc.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "Guardbot",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 21,
+        "min": 17
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 21, 20)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 17, 16)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "GUARDBOT"
+    },
+    "loc_keys": {
+      "title": "monsters.GUARDBOT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Guardbot.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "HauntedShip",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "HAUNTED_SHIP_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 67,
+        "min": 67
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 67, 63)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "HAUNTED_SHIP"
+    },
+    "loc_keys": {
+      "title": "monsters.HAUNTED_SHIP.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\HauntedShip.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "HunterKiller",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "HUNTER_KILLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 126,
+        "min": 126
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 126, 121)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "HUNTER_KILLER"
+    },
+    "loc_keys": {
+      "title": "monsters.HUNTER_KILLER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\HunterKiller.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "InfestedPrism",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "INFESTED_PRISMS_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 171,
+        "min": 171
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 171, 161)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "INFESTED_PRISM"
+    },
+    "loc_keys": {
+      "title": "monsters.INFESTED_PRISM.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\InfestedPrism.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Inklet",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "INKLETS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 18,
+        "min": 12
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 12, 11)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "INKLET"
+    },
+    "loc_keys": {
+      "title": "monsters.INKLET.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Inklet.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "KinFollower",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_KIN_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 63,
+        "min": 62
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 63, 59)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 62, 58)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "KIN_FOLLOWER"
+    },
+    "loc_keys": {
+      "title": "monsters.KIN_FOLLOWER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 24,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\KinFollower.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "KinPriest",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_KIN_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 199,
+        "min": 199
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 199, 190)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "KIN_PRIEST"
+    },
+    "loc_keys": {
+      "title": "monsters.KIN_PRIEST.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 23,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\KinPriest.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "KnowledgeDemon",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KNOWLEDGE_DEMON_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 399,
+        "min": 399
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 399, 379)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "KNOWLEDGE_DEMON"
+    },
+    "loc_keys": {
+      "title": "monsters.KNOWLEDGE_DEMON.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 22,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\KnowledgeDemon.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "LagavulinMatriarch",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "LAGAVULIN_MATRIARCH_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 233,
+        "min": 233
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 233, 222)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "LAGAVULIN_MATRIARCH"
+    },
+    "loc_keys": {
+      "title": "monsters.LAGAVULIN_MATRIARCH.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 21,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\LagavulinMatriarch.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "LeafSlimeM",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FLYCONID_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 36,
+        "min": 33
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 36, 35)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 33, 32)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "LEAF_SLIME_M"
+    },
+    "loc_keys": {
+      "title": "monsters.LEAF_SLIME_M.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\LeafSlimeM.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "LeafSlimeS",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 16,
+        "min": 12
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 16, 15)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 12, 11)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "LEAF_SLIME_S"
+    },
+    "loc_keys": {
+      "title": "monsters.LEAF_SLIME_S.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 16,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\LeafSlimeS.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "LivingFog",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "LIVING_FOG_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 82,
+        "min": 82
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 82, 80)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "LIVING_FOG"
+    },
+    "loc_keys": {
+      "title": "monsters.LIVING_FOG.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\LivingFog.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak"
+    ],
+    "class_name": "LivingShield",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TURRET_OPERATOR_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 65,
+        "min": 65
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 65, 55)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "LIVING_SHIELD"
+    },
+    "loc_keys": {
+      "title": "monsters.LIVING_SHIELD.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 16,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\LivingShield.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "LouseProgenitor",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "LOUSE_PROGENITOR_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 141,
+        "min": 138
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 141, 136)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 138, 134)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "LOUSE_PROGENITOR"
+    },
+    "loc_keys": {
+      "title": "monsters.LOUSE_PROGENITOR.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\LouseProgenitor.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "MagiKnight",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KNIGHTS_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 89,
+        "min": 89
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 89, 82)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "MAGI_KNIGHT"
+    },
+    "loc_keys": {
+      "title": "monsters.MAGI_KNIGHT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 23,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\MagiKnight.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Mawler",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "MAWLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 76,
+        "min": 76
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 76, 72)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "MAWLER"
+    },
+    "loc_keys": {
+      "title": "monsters.MAWLER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Mawler.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "MechaKnight",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "MECHA_KNIGHT_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 320,
+        "min": 320
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 320, 300)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "MECHA_KNIGHT"
+    },
+    "loc_keys": {
+      "title": "monsters.MECHA_KNIGHT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 26,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\MechaKnight.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "MultiAttackMoveMonster",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 999,
+        "min": 999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "999",
+        "min": "999"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "MULTI_ATTACK_MOVE_MONSTER"
+    },
+    "loc_keys": {
+      "title": "monsters.MULTI_ATTACK_MOVE_MONSTER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 11,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\MultiAttackMoveMonster.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Myte",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "MYTES_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 69,
+        "min": 64
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 69, 67)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 64, 61)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "MYTE"
+    },
+    "loc_keys": {
+      "title": "monsters.MYTE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 22,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Myte.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "Nibbit",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "NIBBITS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "NIBBITS_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 48,
+        "min": 44
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 48, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 44, 42)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "NIBBIT"
+    },
+    "loc_keys": {
+      "title": "monsters.NIBBIT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Nibbit.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "Noisebot",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "NOISEBOT"
+    },
+    "loc_keys": {
+      "title": "monsters.NOISEBOT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 21,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Noisebot.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "OneHpMonster",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 1,
+        "min": 1
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "1",
+        "min": "1"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "ONE_HP_MONSTER"
+    },
+    "loc_keys": {
+      "title": "monsters.ONE_HP_MONSTER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 10,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\OneHpMonster.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "Osty",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 1,
+        "min": 1
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "1",
+        "min": "1"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "OSTY"
+    },
+    "loc_keys": {
+      "title": "monsters.OSTY.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Osty.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Ovicopter",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OVICOPTER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 132,
+        "min": 126
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 132, 130)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 126, 124)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "OVICOPTER"
+    },
+    "loc_keys": {
+      "title": "monsters.OVICOPTER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Ovicopter.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "OwlMagistrate",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OWL_MAGISTRATE_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 247,
+        "min": 247
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 247, 231)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "OWL_MAGISTRATE"
+    },
+    "loc_keys": {
+      "title": "monsters.OWL_MAGISTRATE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\OwlMagistrate.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "PaelsLegion",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "PAELS_LEGION"
+    },
+    "loc_keys": {
+      "title": "monsters.PAELS_LEGION.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 11,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\PaelsLegion.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "Parafright",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_OBSCURA_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 21,
+        "min": 21
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "21"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "PARAFRIGHT"
+    },
+    "loc_keys": {
+      "title": "monsters.PARAFRIGHT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Parafright.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "PhantasmalGardener",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PHANTASMAL_GARDENERS_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 32,
+        "min": 27
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 32, 31)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 27, 26)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "PHANTASMAL_GARDENER"
+    },
+    "loc_keys": {
+      "title": "monsters.PHANTASMAL_GARDENER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\PhantasmalGardener.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "PhrogParasite",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PHROG_PARASITE_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 68,
+        "min": 66
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 68, 64)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 66, 61)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "PHROG_PARASITE"
+    },
+    "loc_keys": {
+      "title": "monsters.PHROG_PARASITE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\PhrogParasite.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "PunchConstruct",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CONSTRUCT_MENAGERIE_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PUNCH_CONSTRUCT_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PUNCH_OFF_EVENT_ENCOUNTER"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 60,
+        "min": 60
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 60, 55)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "PUNCH_CONSTRUCT"
+    },
+    "loc_keys": {
+      "title": "monsters.PUNCH_CONSTRUCT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\PunchConstruct.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "Queen",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "QUEEN_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 419,
+        "min": 419
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 419, 400)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "QUEEN"
+    },
+    "loc_keys": {
+      "title": "monsters.QUEEN.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 22,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Queen.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "Rocket",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KAISER_CRAB_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 209,
+        "min": 209
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 209, 199)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "ROCKET"
+    },
+    "loc_keys": {
+      "title": "monsters.ROCKET.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Rocket.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "ScrollOfBiting",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SCROLLS_OF_BITING_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SCROLLS_OF_BITING_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 39,
+        "min": 33
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 39, 37)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 33, 30)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SCROLL_OF_BITING"
+    },
+    "loc_keys": {
+      "title": "monsters.SCROLL_OF_BITING.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\ScrollOfBiting.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "Seapunk",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SEAPUNK_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SEAPUNK_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 49,
+        "min": 47
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 49, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 47, 44)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SEAPUNK"
+    },
+    "loc_keys": {
+      "title": "monsters.SEAPUNK.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Seapunk.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "SewerClam",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SEWER_CLAM_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 58,
+        "min": 58
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 58, 56)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SEWER_CLAM"
+    },
+    "loc_keys": {
+      "title": "monsters.SEWER_CLAM.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SewerClam.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "ShrinkerBeetle",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OVERGROWTH_CRAWLERS"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SHRINKER_BEETLE_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 42,
+        "min": 40
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 42, 40)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 40, 38)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SHRINKER_BEETLE"
+    },
+    "loc_keys": {
+      "title": "monsters.SHRINKER_BEETLE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\ShrinkerBeetle.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "SingleAttackMoveMonster",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 999,
+        "min": 999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "999",
+        "min": "999"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SINGLE_ATTACK_MOVE_MONSTER"
+    },
+    "loc_keys": {
+      "title": "monsters.SINGLE_ATTACK_MOVE_MONSTER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 11,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SingleAttackMoveMonster.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "SkulkingColony",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SKULKING_COLONY_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 80,
+        "min": 80
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 80, 75)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SKULKING_COLONY"
+    },
+    "loc_keys": {
+      "title": "monsters.SKULKING_COLONY.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SkulkingColony.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "SlimedBerserker",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMED_BERSERKER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 281,
+        "min": 281
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 281, 261)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SLIMED_BERSERKER"
+    },
+    "loc_keys": {
+      "title": "monsters.SLIMED_BERSERKER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SlimedBerserker.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "SlitheringStrangler",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 56,
+        "min": 54
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 56, 55)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 54, 53)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SLITHERING_STRANGLER"
+    },
+    "loc_keys": {
+      "title": "monsters.SLITHERING_STRANGLER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SlitheringStrangler.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak"
+    ],
+    "class_name": "SludgeSpinner",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLUDGE_SPINNER_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 42,
+        "min": 41
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 42, 39)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 41, 37)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SLUDGE_SPINNER"
+    },
+    "loc_keys": {
+      "title": "monsters.SLUDGE_SPINNER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SludgeSpinner.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "SlumberingBeetle",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLUMBERING_BEETLE_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 89,
+        "min": 89
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 89, 86)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SLUMBERING_BEETLE"
+    },
+    "loc_keys": {
+      "title": "monsters.SLUMBERING_BEETLE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SlumberingBeetle.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "SnappingJaxfruit",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SNAPPING_JAXFRUIT_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 36,
+        "min": 34
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 36, 33)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 34, 31)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SNAPPING_JAXFRUIT"
+    },
+    "loc_keys": {
+      "title": "monsters.SNAPPING_JAXFRUIT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 21,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SnappingJaxfruit.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "SneakyGremlin",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "GREMLIN_MERC_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 15,
+        "min": 11
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 15, 14)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 11, 10)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SNEAKY_GREMLIN"
+    },
+    "loc_keys": {
+      "title": "monsters.SNEAKY_GREMLIN.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 15,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SneakyGremlin.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "SoulFysh",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SOUL_FYSH_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 221,
+        "min": 221
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 221, 211)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SOUL_FYSH"
+    },
+    "loc_keys": {
+      "title": "monsters.SOUL_FYSH.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 24,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SoulFysh.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "SoulNexus",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SOUL_NEXUS_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 254,
+        "min": 254
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 254, 234)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SOUL_NEXUS"
+    },
+    "loc_keys": {
+      "title": "monsters.SOUL_NEXUS.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SoulNexus.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "SpectralKnight",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KNIGHTS_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 97,
+        "min": 97
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 97, 93)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SPECTRAL_KNIGHT"
+    },
+    "loc_keys": {
+      "title": "monsters.SPECTRAL_KNIGHT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SpectralKnight.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "SpinyToad",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SPINY_TOAD_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 124,
+        "min": 121
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 124, 119)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 121, 116)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "SPINY_TOAD"
+    },
+    "loc_keys": {
+      "title": "monsters.SPINY_TOAD.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\SpinyToad.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "Stabbot",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "STABBOT"
+    },
+    "loc_keys": {
+      "title": "monsters.STABBOT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Stabbot.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "TenHpMonster",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 10,
+        "min": 10
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "10",
+        "min": "10"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TEN_HP_MONSTER"
+    },
+    "loc_keys": {
+      "title": "monsters.TEN_HP_MONSTER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 10,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TenHpMonster.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "elite"
+    ],
+    "class_name": "TerrorEel",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TERROR_EEL_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 150,
+        "min": 150
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 150, 140)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TERROR_EEL"
+    },
+    "loc_keys": {
+      "title": "monsters.TERROR_EEL.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TerrorEel.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "TestSubject",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TEST_SUBJECT_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 111,
+        "min": 111
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "FirstFormHp"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TEST_SUBJECT"
+    },
+    "loc_keys": {
+      "title": "monsters.TEST_SUBJECT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 25,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TestSubject.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "TheAdversaryMkOne",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 100,
+        "min": 100
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "100"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THE_ADVERSARY_MK_ONE"
+    },
+    "loc_keys": {
+      "title": "monsters.THE_ADVERSARY_MK_ONE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheAdversaryMkOne.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "TheAdversaryMkThree",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 300,
+        "min": 300
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 300, 300)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THE_ADVERSARY_MK_THREE"
+    },
+    "loc_keys": {
+      "title": "monsters.THE_ADVERSARY_MK_THREE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 15,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheAdversaryMkThree.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "TheAdversaryMkTwo",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 200,
+        "min": 200
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 200, 200)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THE_ADVERSARY_MK_TWO"
+    },
+    "loc_keys": {
+      "title": "monsters.THE_ADVERSARY_MK_TWO.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 15,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheAdversaryMkTwo.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "TheForgotten",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_LOST_AND_FORGOTTEN_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 111,
+        "min": 111
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 111, 106)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THE_FORGOTTEN"
+    },
+    "loc_keys": {
+      "title": "monsters.THE_FORGOTTEN.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheForgotten.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "TheInsatiable",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_INSATIABLE_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 341,
+        "min": 341
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 341, 321)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THE_INSATIABLE"
+    },
+    "loc_keys": {
+      "title": "monsters.THE_INSATIABLE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 24,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheInsatiable.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "TheLost",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_LOST_AND_FORGOTTEN_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 99,
+        "min": 99
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 99, 93)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THE_LOST"
+    },
+    "loc_keys": {
+      "title": "monsters.THE_LOST.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheLost.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "TheObscura",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_OBSCURA_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 129,
+        "min": 129
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 129, 123)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THE_OBSCURA"
+    },
+    "loc_keys": {
+      "title": "monsters.THE_OBSCURA.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheObscura.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak"
+    ],
+    "class_name": "ThievingHopper",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THIEVING_HOPPER_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 84,
+        "min": 84
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 84, 79)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "THIEVING_HOPPER"
+    },
+    "loc_keys": {
+      "title": "monsters.THIEVING_HOPPER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 26,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\ThievingHopper.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak"
+    ],
+    "class_name": "Toadpole",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TOADPOLES_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 26,
+        "min": 22
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 26, 25)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TOADPOLE"
+    },
+    "loc_keys": {
+      "title": "monsters.TOADPOLE.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Toadpole.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "TorchHeadAmalgam",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "QUEEN_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 211,
+        "min": 211
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 211, 199)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TORCH_HEAD_AMALGAM"
+    },
+    "loc_keys": {
+      "title": "monsters.TORCH_HEAD_AMALGAM.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TorchHeadAmalgam.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "ToughEgg",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OVICOPTER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 19,
+        "min": 15
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 15, 14)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TOUGH_EGG"
+    },
+    "loc_keys": {
+      "title": "monsters.TOUGH_EGG.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 24,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\ToughEgg.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "TrackerRubyRaider",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "RUBY_RAIDERS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 26,
+        "min": 22
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 26, 25)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TRACKER_RUBY_RAIDER"
+    },
+    "loc_keys": {
+      "title": "monsters.TRACKER_RUBY_RAIDER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 15,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TrackerRubyRaider.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "Tunneler",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TUNNELER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TUNNELER_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 92,
+        "min": 92
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 92, 87)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TUNNELER"
+    },
+    "loc_keys": {
+      "title": "monsters.TUNNELER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Tunneler.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak"
+    ],
+    "class_name": "TurretOperator",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TURRET_OPERATOR_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 51,
+        "min": 51
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 51, 41)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TURRET_OPERATOR"
+    },
+    "loc_keys": {
+      "title": "monsters.TURRET_OPERATOR.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 17,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TurretOperator.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "TwigSlimeM",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FLYCONID_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 29,
+        "min": 27
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 29, 28)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 27, 26)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TWIG_SLIME_M"
+    },
+    "loc_keys": {
+      "title": "monsters.TWIG_SLIME_M.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TwigSlimeM.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "weak",
+      "normal"
+    ],
+    "class_name": "TwigSlimeS",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_WEAK"
+        },
+        "is_weak": true,
+        "pool_type": "weak",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 12,
+        "min": 8
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 12, 11)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 8, 7)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TWIG_SLIME_S"
+    },
+    "loc_keys": {
+      "title": "monsters.TWIG_SLIME_S.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TwigSlimeS.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "TwoTailedRat",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TWO_TAILED_RATS_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 22,
+        "min": 18
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "TWO_TAILED_RAT"
+    },
+    "loc_keys": {
+      "title": "monsters.TWO_TAILED_RAT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 20,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\TwoTailedRat.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "Vantom",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "VANTOM_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 183,
+        "min": 183
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 183, 173)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "VANTOM"
+    },
+    "loc_keys": {
+      "title": "monsters.VANTOM.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 28,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Vantom.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal"
+    ],
+    "class_name": "VineShambler",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "VINE_SHAMBLER_NORMAL"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 64,
+        "min": 64
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 64, 61)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "VINE_SHAMBLER"
+    },
+    "loc_keys": {
+      "title": "monsters.VINE_SHAMBLER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 16,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\VineShambler.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "boss"
+    ],
+    "class_name": "WaterfallGiant",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "WATERFALL_GIANT_BOSS"
+        },
+        "is_weak": false,
+        "pool_type": "boss",
+        "room_type": "Boss"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 250,
+        "min": 250
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 250, 240)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "WATERFALL_GIANT"
+    },
+    "loc_keys": {
+      "title": "monsters.WATERFALL_GIANT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 21,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\WaterfallGiant.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [
+      "normal",
+      "elite"
+    ],
+    "class_name": "Wriggler",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "DENSE_VEGETATION_EVENT_ENCOUNTER"
+        },
+        "is_weak": false,
+        "pool_type": "normal",
+        "room_type": "Monster"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PHROG_PARASITE_ELITE"
+        },
+        "is_weak": false,
+        "pool_type": "elite",
+        "room_type": "Elite"
+      }
+    ],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 22,
+        "min": 18
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "WRIGGLER"
+    },
+    "loc_keys": {
+      "title": "monsters.WRIGGLER.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 18,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Wriggler.cs"
+    }
+  },
+  {
+    "abstract": false,
+    "appears_in_pools": [],
+    "class_name": "Zapbot",
+    "encounters": [],
+    "has_move_state_machine": true,
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "id": {
+      "category": "monster",
+      "entry": "ZAPBOT"
+    },
+    "loc_keys": {
+      "title": "monsters.ZAPBOT.name"
+    },
+    "mock": false,
+    "moves_extracted": false,
+    "show_in_compendium": null,
+    "source": {
+      "line": 19,
+      "path": "MegaCrit.Sts2.Core.Models.Monsters\\Zapbot.cs"
+    }
+  }
+]

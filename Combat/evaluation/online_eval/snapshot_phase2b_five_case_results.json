@@ -1,0 +1,89 @@
+{
+  "case1_reset_bare": {
+    "completeness": "complete",
+    "unsupported_count": 0,
+    "unsupported_fields": [],
+    "dangling_count": 0,
+    "dangling_causes": [],
+    "duplicate_ids": [],
+    "restore_input_eligible": true,
+    "restore_ineligible_reasons": [],
+    "canonical_json_sha256": "cc7759ec38711c4c9843ce36a72cc7cc7b86d26048526bfd49e620074e7b67bd"
+  },
+  "case2_reset_from_scenario": {
+    "completeness": "complete",
+    "unsupported_count": 0,
+    "unsupported_fields": [],
+    "dangling_count": 5,
+    "dangling_causes": [
+      "source_live_state_inconsistency"
+    ],
+    "duplicate_ids": [],
+    "restore_input_eligible": false,
+    "restore_ineligible_reasons": [
+      "dangling_references=5 (see validate_snapshot_references for detail)"
+    ],
+    "canonical_json_sha256": "e1915ca3be228b823a5011bc35f45b70a01ef9f7201d6157855fcf0821fb70a1"
+  },
+  "case3_scenario_6546_21": {
+    "completeness": "complete",
+    "unsupported_count": 0,
+    "unsupported_fields": [],
+    "dangling_count": 3,
+    "dangling_causes": [
+      "source_live_state_inconsistency"
+    ],
+    "duplicate_ids": [],
+    "restore_input_eligible": false,
+    "restore_ineligible_reasons": [
+      "dangling_references=3 (see validate_snapshot_references for detail)"
+    ],
+    "canonical_json_sha256": "3afd40bd5f447852a13217d0b1144677fac460d4580f32723891ab0d060390e3"
+  },
+  "case4_natural_draw": {
+    "completeness": "complete",
+    "unsupported_count": 0,
+    "unsupported_fields": [],
+    "dangling_count": 5,
+    "dangling_causes": [
+      "source_live_state_inconsistency"
+    ],
+    "duplicate_ids": [],
+    "restore_input_eligible": false,
+    "restore_ineligible_reasons": [
+      "dangling_references=5 (see validate_snapshot_references for detail)"
+    ],
+    "canonical_json_sha256": "2a483f75c695457f195808664a9015821325e67ce16e5adf4299f69028f745b9",
+    "card_drawn_entry_count": 5
+  },
+  "case5_double_capture_a": {
+    "completeness": "complete",
+    "unsupported_count": 0,
+    "unsupported_fields": [],
+    "dangling_count": 5,
+    "dangling_causes": [
+      "source_live_state_inconsistency"
+    ],
+    "duplicate_ids": [],
+    "restore_input_eligible": false,
+    "restore_ineligible_reasons": [
+      "dangling_references=5 (see validate_snapshot_references for detail)"
+    ],
+    "canonical_json_sha256": "88062e7fe23bb873de2409bfcefb5ed2269e5c5434992631a985d385ef037e31"
+  },
+  "case5_double_capture_b": {
+    "completeness": "complete",
+    "unsupported_count": 0,
+    "unsupported_fields": [],
+    "dangling_count": 5,
+    "dangling_causes": [
+      "source_live_state_inconsistency"
+    ],
+    "duplicate_ids": [],
+    "restore_input_eligible": false,
+    "restore_ineligible_reasons": [
+      "dangling_references=5 (see validate_snapshot_references for detail)"
+    ],
+    "canonical_json_sha256": "88062e7fe23bb873de2409bfcefb5ed2269e5c5434992631a985d385ef037e31"
+  }
+}

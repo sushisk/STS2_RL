@@ -1,0 +1,2394 @@
+{
+  "ACCELERANT_POWER": {
+    "allow_negative": null,
+    "class_name": "AccelerantPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ACCURACY_POWER": {
+    "allow_negative": null,
+    "class_name": "AccuracyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ADAPTABLE_POWER": {
+    "allow_negative": null,
+    "class_name": "AdaptablePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "AFTERIMAGE_POWER": {
+    "allow_negative": null,
+    "class_name": "AfterimagePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "AGGRESSION_POWER": {
+    "allow_negative": null,
+    "class_name": "AggressionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "AMBERGRIS_POWER": {
+    "allow_negative": null,
+    "class_name": "AmbergrisPower",
+    "present_in": [
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ANTICIPATE_POWER": {
+    "allow_negative": null,
+    "class_name": "AnticipatePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "ARSENAL_POWER": {
+    "allow_negative": null,
+    "class_name": "ArsenalPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ARTIFACT_POWER": {
+    "allow_negative": null,
+    "class_name": "ArtifactPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ASLEEP_POWER": {
+    "allow_negative": null,
+    "class_name": "AsleepPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "AUTOMATION_POWER": {
+    "allow_negative": null,
+    "class_name": "AutomationPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BACK_ATTACK_LEFT_POWER": {
+    "allow_negative": null,
+    "class_name": "BackAttackLeftPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "BACK_ATTACK_RIGHT_POWER": {
+    "allow_negative": null,
+    "class_name": "BackAttackRightPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "BARRICADE_POWER": {
+    "allow_negative": null,
+    "class_name": "BarricadePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "BATTLEWORN_DUMMY_TIME_LIMIT_POWER": {
+    "allow_negative": null,
+    "class_name": "BattlewornDummyTimeLimitPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BEACON_OF_HOPE_POWER": {
+    "allow_negative": null,
+    "class_name": "BeaconOfHopePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "BIASED_COGNITION_POWER": {
+    "allow_negative": null,
+    "class_name": "BiasedCognitionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BLACK_HOLE_POWER": {
+    "allow_negative": null,
+    "class_name": "BlackHolePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BLOCK_NEXT_TURN_POWER": {
+    "allow_negative": null,
+    "class_name": "BlockNextTurnPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BLUR_POWER": {
+    "allow_negative": null,
+    "class_name": "BlurPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BORROWED_TIME_POWER": {
+    "allow_negative": null,
+    "class_name": "BorrowedTimePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BUFFER_POWER": {
+    "allow_negative": null,
+    "class_name": "BufferPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "BURROWED_POWER": {
+    "allow_negative": null,
+    "class_name": "BurrowedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "BURST_POWER": {
+    "allow_negative": null,
+    "class_name": "BurstPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CACOPHONY_POWER": {
+    "allow_negative": null,
+    "class_name": "CacophonyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CALAMITY_POWER": {
+    "allow_negative": null,
+    "class_name": "CalamityPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CALCIFY_POWER": {
+    "allow_negative": null,
+    "class_name": "CalcifyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CALL_OF_THE_VOID_POWER": {
+    "allow_negative": null,
+    "class_name": "CallOfTheVoidPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CHAINS_OF_BINDING_POWER": {
+    "allow_negative": null,
+    "class_name": "ChainsOfBindingPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CHILD_OF_THE_STARS_POWER": {
+    "allow_negative": null,
+    "class_name": "ChildOfTheStarsPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CLARITY_POWER": {
+    "allow_negative": null,
+    "class_name": "ClarityPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "COLOSSUS_POWER": {
+    "allow_negative": null,
+    "class_name": "ColossusPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CONCOCT_POWER": {
+    "allow_negative": null,
+    "class_name": "ConcoctPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CONFUSED_POWER": {
+    "allow_negative": null,
+    "class_name": "ConfusedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "CONQUEROR_POWER": {
+    "allow_negative": null,
+    "class_name": "ConquerorPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CONSTRICT_POWER": {
+    "allow_negative": null,
+    "class_name": "ConstrictPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CONSUMING_SHADOW_POWER": {
+    "allow_negative": null,
+    "class_name": "ConsumingShadowPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "COOLANT_POWER": {
+    "allow_negative": null,
+    "class_name": "CoolantPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "COORDINATE_POWER": {
+    "allow_negative": null,
+    "class_name": "CoordinatePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "CORROSIVE_WAVE_POWER": {
+    "allow_negative": null,
+    "class_name": "CorrosiveWavePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CORRUPTION_POWER": {
+    "allow_negative": null,
+    "class_name": "CorruptionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "COUNTDOWN_POWER": {
+    "allow_negative": null,
+    "class_name": "CountdownPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "COVERED_POWER": {
+    "allow_negative": null,
+    "class_name": "CoveredPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "CRAB_RAGE_POWER": {
+    "allow_negative": null,
+    "class_name": "CrabRagePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "CREATIVE_AI_POWER": {
+    "allow_negative": null,
+    "class_name": "CreativeAiPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CRIMSON_MANTLE_POWER": {
+    "allow_negative": null,
+    "class_name": "CrimsonMantlePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CRUELTY_POWER": {
+    "allow_negative": null,
+    "class_name": "CrueltyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CRUSH_UNDER_POWER": {
+    "allow_negative": null,
+    "class_name": "CrushUnderPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "CURIOUS_POWER": {
+    "allow_negative": null,
+    "class_name": "CuriousPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "CURL_UP_POWER": {
+    "allow_negative": null,
+    "class_name": "CurlUpPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DAMPEN_POWER": {
+    "allow_negative": null,
+    "class_name": "DampenPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "None"
+  },
+  "DANSE_MACABRE_POWER": {
+    "allow_negative": null,
+    "class_name": "DanseMacabrePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DARK_EMBRACE_POWER": {
+    "allow_negative": null,
+    "class_name": "DarkEmbracePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DARK_SHACKLES_POWER": {
+    "allow_negative": null,
+    "class_name": "DarkShacklesPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "DEBILITATE_POWER": {
+    "allow_negative": null,
+    "class_name": "DebilitatePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DEMESNE_POWER": {
+    "allow_negative": null,
+    "class_name": "DemesnePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DEMISE_POWER": {
+    "allow_negative": null,
+    "class_name": "DemisePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DEMON_FORM_POWER": {
+    "allow_negative": null,
+    "class_name": "DemonFormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DEVOUR_LIFE_POWER": {
+    "allow_negative": null,
+    "class_name": "DevourLifePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DEXTERITY_POWER": {
+    "allow_negative": true,
+    "class_name": "DexterityPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DIAMOND_DIADEM_POWER": {
+    "allow_negative": null,
+    "class_name": "DiamondDiademPower",
+    "present_in": [
+      "v108"
+    ],
+    "stack_type": "Single"
+  },
+  "DIE_FOR_YOU_POWER": {
+    "allow_negative": null,
+    "class_name": "DieForYouPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "DISINTEGRATION_POWER": {
+    "allow_negative": null,
+    "class_name": "DisintegrationPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DOOM_POWER": {
+    "allow_negative": null,
+    "class_name": "DoomPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DOUBLE_DAMAGE_POWER": {
+    "allow_negative": null,
+    "class_name": "DoubleDamagePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DRAW_CARDS_NEXT_TURN_POWER": {
+    "allow_negative": null,
+    "class_name": "DrawCardsNextTurnPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DUPLICATION_POWER": {
+    "allow_negative": null,
+    "class_name": "DuplicationPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "DYING_STAR_POWER": {
+    "allow_negative": null,
+    "class_name": "DyingStarPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "ECHO_FORM_POWER": {
+    "allow_negative": null,
+    "class_name": "EchoFormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ENERGY_NEXT_TURN_POWER": {
+    "allow_negative": null,
+    "class_name": "EnergyNextTurnPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ENFEEBLING_TOUCH_POWER": {
+    "allow_negative": null,
+    "class_name": "EnfeeblingTouchPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "ENRAGE_POWER": {
+    "allow_negative": null,
+    "class_name": "EnragePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ENTROPY_POWER": {
+    "allow_negative": null,
+    "class_name": "EntropyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ENVENOM_POWER": {
+    "allow_negative": null,
+    "class_name": "EnvenomPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ESCAPE_ARTIST_POWER": {
+    "allow_negative": null,
+    "class_name": "EscapeArtistPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FADE_POWER": {
+    "allow_negative": null,
+    "class_name": "FadePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "FAN_OF_KNIVES_POWER": {
+    "allow_negative": null,
+    "class_name": "FanOfKnivesPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "FASTEN_POWER": {
+    "allow_negative": null,
+    "class_name": "FastenPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FEEDING_FRENZY_POWER": {
+    "allow_negative": null,
+    "class_name": "FeedingFrenzyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "FEEL_NO_PAIN_POWER": {
+    "allow_negative": null,
+    "class_name": "FeelNoPainPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FERAL_POWER": {
+    "allow_negative": null,
+    "class_name": "FeralPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FLAME_BARRIER_POWER": {
+    "allow_negative": null,
+    "class_name": "FlameBarrierPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FLANKING_POWER": {
+    "allow_negative": null,
+    "class_name": "FlankingPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FLEX_POTION_POWER": {
+    "allow_negative": null,
+    "class_name": "FlexPotionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "FLUTTER_POWER": {
+    "allow_negative": null,
+    "class_name": "FlutterPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FOCUSED_STRIKE_POWER": {
+    "allow_negative": null,
+    "class_name": "FocusedStrikePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "FOCUS_POWER": {
+    "allow_negative": true,
+    "class_name": "FocusPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FORBIDDEN_GRIMOIRE_POWER": {
+    "allow_negative": null,
+    "class_name": "ForbiddenGrimoirePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FOREGONE_CONCLUSION_POWER": {
+    "allow_negative": null,
+    "class_name": "ForegoneConclusionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FRAIL_POWER": {
+    "allow_negative": null,
+    "class_name": "FrailPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FREE_ATTACK_POWER": {
+    "allow_negative": null,
+    "class_name": "FreeAttackPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FREE_POWER_POWER": {
+    "allow_negative": null,
+    "class_name": "FreePowerPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FREE_SKILL_POWER": {
+    "allow_negative": null,
+    "class_name": "FreeSkillPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FRIENDSHIP_POWER": {
+    "allow_negative": null,
+    "class_name": "FriendshipPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "FURNACE_POWER": {
+    "allow_negative": null,
+    "class_name": "FurnacePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "GALVANIC_POWER": {
+    "allow_negative": null,
+    "class_name": "GalvanicPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "GENESIS_POWER": {
+    "allow_negative": null,
+    "class_name": "GenesisPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "GIGANTIFICATION_POWER": {
+    "allow_negative": null,
+    "class_name": "GigantificationPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "GRAVITY_POWER": {
+    "allow_negative": null,
+    "class_name": "GravityPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "GUARDED_POWER": {
+    "allow_negative": null,
+    "class_name": "GuardedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "HAILSTORM_POWER": {
+    "allow_negative": null,
+    "class_name": "HailstormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HAMMER_TIME_POWER": {
+    "allow_negative": null,
+    "class_name": "HammerTimePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "HANG_POWER": {
+    "allow_negative": null,
+    "class_name": "HangPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HARDENED_SHELL_POWER": {
+    "allow_negative": null,
+    "class_name": "HardenedShellPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HARD_TO_KILL_POWER": {
+    "allow_negative": null,
+    "class_name": "HardToKillPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HATCH_POWER": {
+    "allow_negative": null,
+    "class_name": "HatchPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HAUNT_POWER": {
+    "allow_negative": null,
+    "class_name": "HauntPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HEIST_POWER": {
+    "allow_negative": null,
+    "class_name": "HeistPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HELICAL_DART_POWER": {
+    "allow_negative": null,
+    "class_name": "HelicalDartPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "HELLO_WORLD_POWER": {
+    "allow_negative": null,
+    "class_name": "HelloWorldPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HELLRAISER_POWER": {
+    "allow_negative": null,
+    "class_name": "HellraiserPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "HEX_POWER": {
+    "allow_negative": null,
+    "class_name": "HexPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "HIBERNATE_POWER": {
+    "allow_negative": null,
+    "class_name": "HibernatePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HIGH_VOLTAGE_POWER": {
+    "allow_negative": null,
+    "class_name": "HighVoltagePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "HOTFIX_POWER": {
+    "allow_negative": null,
+    "class_name": "HotfixPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "ILLUSION_POWER": {
+    "allow_negative": null,
+    "class_name": "IllusionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "IMBALANCED_POWER": {
+    "allow_negative": null,
+    "class_name": "ImbalancedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "IMITATION_LEARNING_POWER": {
+    "allow_negative": null,
+    "class_name": "ImitationLearningPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "IMPROVEMENT_POWER": {
+    "allow_negative": null,
+    "class_name": "ImprovementPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "INFERNO_POWER": {
+    "allow_negative": null,
+    "class_name": "InfernoPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "INFESTED_POWER": {
+    "allow_negative": null,
+    "class_name": "InfestedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "INFINITE_BLADES_POWER": {
+    "allow_negative": null,
+    "class_name": "InfiniteBladesPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "INTANGIBLE_POWER": {
+    "allow_negative": null,
+    "class_name": "IntangiblePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "INTERCEPT_POWER": {
+    "allow_negative": null,
+    "class_name": "InterceptPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "ITERATION_POWER": {
+    "allow_negative": null,
+    "class_name": "IterationPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "JUGGERNAUT_POWER": {
+    "allow_negative": null,
+    "class_name": "JuggernautPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "JUGGLING_POWER": {
+    "allow_negative": null,
+    "class_name": "JugglingPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "KNOCKDOWN_POWER": {
+    "allow_negative": null,
+    "class_name": "KnockdownPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "LEADERSHIP_POWER": {
+    "allow_negative": null,
+    "class_name": "LeadershipPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "LETHALITY_POWER": {
+    "allow_negative": null,
+    "class_name": "LethalityPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "LIGHTNING_ROD_POWER": {
+    "allow_negative": null,
+    "class_name": "LightningRodPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "LOOP_POWER": {
+    "allow_negative": null,
+    "class_name": "LoopPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "MACHINE_LEARNING_POWER": {
+    "allow_negative": null,
+    "class_name": "MachineLearningPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "MAGIC_BOMB_POWER": {
+    "allow_negative": null,
+    "class_name": "MagicBombPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "MANGLE_POWER": {
+    "allow_negative": null,
+    "class_name": "ManglePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "MASTER_PLANNER_POWER": {
+    "allow_negative": null,
+    "class_name": "MasterPlannerPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "MAYHEM_POWER": {
+    "allow_negative": null,
+    "class_name": "MayhemPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "MIND_ROT_POWER": {
+    "allow_negative": null,
+    "class_name": "MindRotPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "MINION_POWER": {
+    "allow_negative": null,
+    "class_name": "MinionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "MONARCHS_GAZE_POWER": {
+    "allow_negative": null,
+    "class_name": "MonarchsGazePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "MONARCHS_GAZE_STRENGTH_DOWN_POWER": {
+    "allow_negative": null,
+    "class_name": "MonarchsGazeStrengthDownPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "MONOLOGUE_POWER": {
+    "allow_negative": null,
+    "class_name": "MonologuePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "NECRO_MASTERY_POWER": {
+    "allow_negative": null,
+    "class_name": "NecroMasteryPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "NEMESIS_POWER": {
+    "allow_negative": null,
+    "class_name": "NemesisPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "NEUROSURGE_POWER": {
+    "allow_negative": null,
+    "class_name": "NeurosurgePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "NIGHTMARE_POWER": {
+    "allow_negative": null,
+    "class_name": "NightmarePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "NOSTALGIA_POWER": {
+    "allow_negative": null,
+    "class_name": "NostalgiaPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "NOXIOUS_FUMES_POWER": {
+    "allow_negative": null,
+    "class_name": "NoxiousFumesPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "NO_BLOCK_POWER": {
+    "allow_negative": null,
+    "class_name": "NoBlockPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "NO_DRAW_POWER": {
+    "allow_negative": null,
+    "class_name": "NoDrawPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "NO_ENERGY_GAIN_POWER": {
+    "allow_negative": null,
+    "class_name": "NoEnergyGainPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "OBLIVION_POWER": {
+    "allow_negative": null,
+    "class_name": "OblivionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ONE_FOR_ALL_POWER": {
+    "allow_negative": null,
+    "class_name": "OneForAllPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ONE_TWO_PUNCH_POWER": {
+    "allow_negative": null,
+    "class_name": "OneTwoPunchPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ORBIT_POWER": {
+    "allow_negative": null,
+    "class_name": "OrbitPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "OUTBREAK_POWER": {
+    "allow_negative": null,
+    "class_name": "OutbreakPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PAGESTORM_POWER": {
+    "allow_negative": null,
+    "class_name": "PagestormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PAINFUL_STABS_POWER": {
+    "allow_negative": null,
+    "class_name": "PainfulStabsPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PALE_BLUE_DOT_POWER": {
+    "allow_negative": null,
+    "class_name": "PaleBlueDotPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PANACHE_POWER": {
+    "allow_negative": null,
+    "class_name": "PanachePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PAPER_CUTS_POWER": {
+    "allow_negative": null,
+    "class_name": "PaperCutsPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PARRY_POWER": {
+    "allow_negative": null,
+    "class_name": "ParryPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PERSONAL_HIVE_POWER": {
+    "allow_negative": null,
+    "class_name": "PersonalHivePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PHANTOM_BLADES_POWER": {
+    "allow_negative": null,
+    "class_name": "PhantomBladesPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PIERCING_WAIL_POWER": {
+    "allow_negative": null,
+    "class_name": "PiercingWailPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "PILLAR_OF_CREATION_POWER": {
+    "allow_negative": null,
+    "class_name": "PillarOfCreationPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PLATING_POWER": {
+    "allow_negative": null,
+    "class_name": "PlatingPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PLOW_POWER": {
+    "allow_negative": null,
+    "class_name": "PlowPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "POISON_POWER": {
+    "allow_negative": null,
+    "class_name": "PoisonPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "POSSESS_SPEED_POWER": {
+    "allow_negative": null,
+    "class_name": "PossessSpeedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "POSSESS_STRENGTH_POWER": {
+    "allow_negative": null,
+    "class_name": "PossessStrengthPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "PREP_TIME_POWER": {
+    "allow_negative": null,
+    "class_name": "PrepTimePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "PYRE_POWER": {
+    "allow_negative": null,
+    "class_name": "PyrePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "RADIANCE_POWER": {
+    "allow_negative": null,
+    "class_name": "RadiancePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "RAGE_POWER": {
+    "allow_negative": null,
+    "class_name": "RagePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "RAMPART_POWER": {
+    "allow_negative": null,
+    "class_name": "RampartPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "RAVENOUS_POWER": {
+    "allow_negative": null,
+    "class_name": "RavenousPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "REAPER_FORM_POWER": {
+    "allow_negative": null,
+    "class_name": "ReaperFormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "REATTACH_POWER": {
+    "allow_negative": null,
+    "class_name": "ReattachPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "REBOUND_POWER": {
+    "allow_negative": null,
+    "class_name": "ReboundPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "REFLECT_POWER": {
+    "allow_negative": null,
+    "class_name": "ReflectPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "REGEN_POWER": {
+    "allow_negative": null,
+    "class_name": "RegenPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "REPTILE_TRINKET_POWER": {
+    "allow_negative": null,
+    "class_name": "ReptileTrinketPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "RETAIN_HAND_POWER": {
+    "allow_negative": null,
+    "class_name": "RetainHandPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "RINGING_POWER": {
+    "allow_negative": null,
+    "class_name": "RingingPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "RITUAL_POWER": {
+    "allow_negative": null,
+    "class_name": "RitualPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ROLLING_BOULDER_POWER": {
+    "allow_negative": null,
+    "class_name": "RollingBoulderPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "ROYALTIES_POWER": {
+    "allow_negative": null,
+    "class_name": "RoyaltiesPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "RUPTURE_POWER": {
+    "allow_negative": null,
+    "class_name": "RupturePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SANDPIT_POWER": {
+    "allow_negative": null,
+    "class_name": "SandpitPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SEEKING_EDGE_POWER": {
+    "allow_negative": null,
+    "class_name": "SeekingEdgePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "SELF_FORMING_CLAY_POWER": {
+    "allow_negative": null,
+    "class_name": "SelfFormingClayPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SENTRY_MODE_POWER": {
+    "allow_negative": null,
+    "class_name": "SentryModePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SERPENT_FORM_POWER": {
+    "allow_negative": null,
+    "class_name": "SerpentFormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SETUP_STRIKE_POWER": {
+    "allow_negative": null,
+    "class_name": "SetupStrikePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "SHACKLING_POTION_POWER": {
+    "allow_negative": null,
+    "class_name": "ShacklingPotionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "SHADOWMELD_POWER": {
+    "allow_negative": null,
+    "class_name": "ShadowmeldPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SHADOW_STEP_POWER": {
+    "allow_negative": null,
+    "class_name": "ShadowStepPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SHRIEK_POWER": {
+    "allow_negative": true,
+    "class_name": "ShriekPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SHRINK_POWER": {
+    "allow_negative": true,
+    "class_name": "ShrinkPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "SHROUD_POWER": {
+    "allow_negative": null,
+    "class_name": "ShroudPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SIC_EM_POWER": {
+    "allow_negative": null,
+    "class_name": "SicEmPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SIGNAL_BOOST_POWER": {
+    "allow_negative": null,
+    "class_name": "SignalBoostPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SKITTISH_POWER": {
+    "allow_negative": null,
+    "class_name": "SkittishPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SLEIGHT_OF_FLESH_POWER": {
+    "allow_negative": null,
+    "class_name": "SleightOfFleshPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SLIPPERY_POWER": {
+    "allow_negative": null,
+    "class_name": "SlipperyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SLOTH_POWER": {
+    "allow_negative": null,
+    "class_name": "SlothPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SLOW_POWER": {
+    "allow_negative": null,
+    "class_name": "SlowPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SLUMBER_POWER": {
+    "allow_negative": null,
+    "class_name": "SlumberPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SMOGGY_POWER": {
+    "allow_negative": null,
+    "class_name": "SmoggyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "SMOKESTACK_POWER": {
+    "allow_negative": null,
+    "class_name": "SmokestackPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SNEAKY_POWER": {
+    "allow_negative": null,
+    "class_name": "SneakyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SOAR_POWER": {
+    "allow_negative": null,
+    "class_name": "SoarPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "SOULBOUND_POWER": {
+    "allow_negative": null,
+    "class_name": "SoulboundPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SPECTRUM_SHIFT_POWER": {
+    "allow_negative": null,
+    "class_name": "SpectrumShiftPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SPEEDSTER_POWER": {
+    "allow_negative": null,
+    "class_name": "SpeedsterPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SPEED_POTION_POWER": {
+    "allow_negative": null,
+    "class_name": "SpeedPotionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "SPINNER_POWER": {
+    "allow_negative": null,
+    "class_name": "SpinnerPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SPIRIT_OF_ASH_POWER": {
+    "allow_negative": null,
+    "class_name": "SpiritOfAshPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STAMPEDE_POWER": {
+    "allow_negative": null,
+    "class_name": "StampedePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STAR_NEXT_TURN_POWER": {
+    "allow_negative": null,
+    "class_name": "StarNextTurnPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STEAM_ERUPTION_POWER": {
+    "allow_negative": null,
+    "class_name": "SteamEruptionPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STOCK_POWER": {
+    "allow_negative": null,
+    "class_name": "StockPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STORM_POWER": {
+    "allow_negative": null,
+    "class_name": "StormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STRANGLE_POWER": {
+    "allow_negative": null,
+    "class_name": "StranglePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STRATAGEM_POWER": {
+    "allow_negative": null,
+    "class_name": "StratagemPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "STRENGTH_POWER": {
+    "allow_negative": true,
+    "class_name": "StrengthPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SUBROUTINE_POWER": {
+    "allow_negative": null,
+    "class_name": "SubroutinePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SUCK_POWER": {
+    "allow_negative": null,
+    "class_name": "SuckPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SUMMON_NEXT_TURN_POWER": {
+    "allow_negative": null,
+    "class_name": "SummonNextTurnPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SURPRISE_POWER": {
+    "allow_negative": null,
+    "class_name": "SurprisePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "SURROUNDED_POWER": {
+    "allow_negative": null,
+    "class_name": "SurroundedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "SWIPE_POWER": {
+    "allow_negative": null,
+    "class_name": "SwipePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "SWORD_SAGE_POWER": {
+    "allow_negative": null,
+    "class_name": "SwordSagePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "SYNCHRONIZE_POWER": {
+    "allow_negative": null,
+    "class_name": "SynchronizePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": null
+  },
+  "TAG_TEAM_POWER": {
+    "allow_negative": null,
+    "class_name": "TagTeamPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TAINTED_POWER": {
+    "allow_negative": null,
+    "class_name": "TaintedPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TANGLED_POWER": {
+    "allow_negative": null,
+    "class_name": "TangledPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TANK_POWER": {
+    "allow_negative": null,
+    "class_name": "TankPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "TENDER_POWER": {
+    "allow_negative": null,
+    "class_name": "TenderPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TERRITORIAL_POWER": {
+    "allow_negative": null,
+    "class_name": "TerritorialPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "THE_BOMB_POWER": {
+    "allow_negative": null,
+    "class_name": "TheBombPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "THE_GAMBIT_POWER": {
+    "allow_negative": null,
+    "class_name": "TheGambitPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "THE_HUNT_POWER": {
+    "allow_negative": null,
+    "class_name": "TheHuntPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "THE_SEALED_THRONE_POWER": {
+    "allow_negative": null,
+    "class_name": "TheSealedThronePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "THIEVERY_POWER": {
+    "allow_negative": null,
+    "class_name": "ThieveryPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "THORNS_POWER": {
+    "allow_negative": null,
+    "class_name": "ThornsPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "THUNDER_POWER": {
+    "allow_negative": null,
+    "class_name": "ThunderPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TOOLS_OF_THE_TRADE_POWER": {
+    "allow_negative": null,
+    "class_name": "ToolsOfTheTradePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TORIC_TOUGHNESS_POWER": {
+    "allow_negative": null,
+    "class_name": "ToricToughnessPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TRACKING_POWER": {
+    "allow_negative": null,
+    "class_name": "TrackingPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TRASH_TO_TREASURE_POWER": {
+    "allow_negative": null,
+    "class_name": "TrashToTreasurePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "TYRANNY_POWER": {
+    "allow_negative": null,
+    "class_name": "TyrannyPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "UNDERWORLD_POWER": {
+    "allow_negative": null,
+    "class_name": "UnderworldPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "UNMOVABLE_POWER": {
+    "allow_negative": null,
+    "class_name": "UnmovablePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "VEILPIERCER_POWER": {
+    "allow_negative": null,
+    "class_name": "VeilpiercerPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "VICIOUS_POWER": {
+    "allow_negative": null,
+    "class_name": "ViciousPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "VIGOR_POWER": {
+    "allow_negative": null,
+    "class_name": "VigorPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "VITAL_SPARK_POWER": {
+    "allow_negative": null,
+    "class_name": "VitalSparkPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "VOID_FORM_POWER": {
+    "allow_negative": null,
+    "class_name": "VoidFormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "VULNERABLE_POWER": {
+    "allow_negative": null,
+    "class_name": "VulnerablePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "WASTE_AWAY_POWER": {
+    "allow_negative": null,
+    "class_name": "WasteAwayPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "WEAK_POWER": {
+    "allow_negative": null,
+    "class_name": "WeakPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "WELL_LAID_PLANS_POWER": {
+    "allow_negative": null,
+    "class_name": "WellLaidPlansPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Single"
+  },
+  "WITHERING_PRESENCE_POWER": {
+    "allow_negative": null,
+    "class_name": "WitheringPresencePower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  },
+  "WRAITH_FORM_POWER": {
+    "allow_negative": null,
+    "class_name": "WraithFormPower",
+    "present_in": [
+      "v108",
+      "v109"
+    ],
+    "stack_type": "Counter"
+  }
+}

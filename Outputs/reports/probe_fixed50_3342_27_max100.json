@@ -1,0 +1,2577 @@
+﻿[INFO] ModelIdSerializationCache initialized. Categories: 20 Entries: 1654 Epochs: 57 Properties: 47 Hash: 4232096141
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+[INFO] Player 1 chose cards []
+{
+  "case": "fixed50:3342-27",
+  "expected_label": "B_heuristic_stagnation",
+  "expected_warning": "truncated_at_max_decisions:50",
+  "status": "ok",
+  "decision_count": 11,
+  "warnings": [
+    "no_progress_detected:10_end_turns"
+  ],
+  "termination_reason": "no_progress_detected:10_end_turns",
+  "final_outcome": "in_progress",
+  "final_is_terminal": false,
+  "relics": [
+    "CRACKED_CORE",
+    "LEAD_PAPERWEIGHT",
+    "VENERABLE_TEA_SET",
+    "STRAWBERRY",
+    "ETERNAL_FEATHER",
+    "CALLING_BELL",
+    "BRONZE_SCALES",
+    "PANTOGRAPH",
+    "RAINBOW_RING",
+    "DATA_DISK",
+    "JUZU_BRACELET",
+    "CHANDELIER",
+    "BING_BONG",
+    "MEAL_TICKET",
+    "JEWELRY_BOX",
+    "FORGOTTEN_SOUL",
+    "GAMBLING_CHIP",
+    "STONE_CALENDAR",
+    "STRIKE_DUMMY",
+    "HAPPY_FLOWER"
+  ],
+  "initial_state": {
+    "hp": 82,
+    "maxHp": 82,
+    "block": 0,
+    "energy": 3,
+    "stars": 0,
+    "turnNumber": 1,
+    "combatRoundNumber": 1,
+    "stepIndex": 0,
+    "hand": [
+      "ASCENDERS_BANE",
+      "ULTIMATE_STRIKE",
+      "PROWESS",
+      "FIGHT_THROUGH",
+      "FIGHT_THROUGH"
+    ],
+    "drawPileTop10": [
+      "OVERCLOCK",
+      "HOLOGRAM",
+      "COLD_SNAP",
+      "HOTFIX",
+      "COOLHEADED",
+      "RAINBOW",
+      "DUALCAST",
+      "COOLHEADED",
+      "APOTHEOSIS",
+      "DEFEND_DEFECT"
+    ],
+    "discardPileTop10": [],
+    "exhaustPileTop10": [],
+    "playerPowers": [
+      [
+        "THORNS_POWER",
+        3
+      ],
+      [
+        "FOCUS_POWER",
+        1
+      ]
+    ],
+    "enemies": [
+      {
+        "index": 0,
+        "id": "ENTOMANCER",
+        "hp": 155,
+        "maxHp": 155,
+        "block": 0,
+        "intent": "BEES_MOVE",
+        "attackDamage": 3,
+        "attackRepeats": 7,
+        "powers": [
+          [
+            "PERSONAL_HIVE_POWER",
+            1
+          ]
+        ]
+      }
+    ],
+    "pendingChoice": {
+      "choiceType": "GamblingChipDiscard",
+      "scope": "StartOfCombat",
+      "scenarioRestorable": true,
+      "minSelect": 0,
+      "maxSelect": 999999999,
+      "selectedCount": 0,
+      "options": [
+        {
+          "id": "ASCENDERS_BANE",
+          "type": "Curse",
+          "rarity": "Curse",
+          "cost": 0,
+          "targetType": "None",
+          "upgraded": false,
+          "upgradeLevel": 0,
+          "tinkerTimeType": null,
+          "tinkerTimeRider": null
+        },
+        {
+          "id": "ULTIMATE_STRIKE",
+          "type": "Attack",
+          "rarity": "Uncommon",
+          "cost": 1,
+          "targetType": "AnyEnemy",
+          "upgraded": false,
+          "upgradeLevel": 0,
+          "tinkerTimeType": null,
+          "tinkerTimeRider": null
+        },
+        {
+          "id": "PROWESS",
+          "type": "Power",
+          "rarity": "Uncommon",
+          "cost": 1,
+          "targetType": "Self",
+          "upgraded": true,
+          "upgradeLevel": 1,
+          "tinkerTimeType": null,
+          "tinkerTimeRider": null
+        },
+        {
+          "id": "FIGHT_THROUGH",
+          "type": "Skill",
+          "rarity": "Uncommon",
+          "cost": 1,
+          "targetType": "Self",
+          "upgraded": true,
+          "upgradeLevel": 1,
+          "tinkerTimeType": null,
+          "tinkerTimeRider": null
+        },
+        {
+          "id": "FIGHT_THROUGH",
+          "type": "Skill",
+          "rarity": "Uncommon",
+          "cost": 1,
+          "targetType": "Self",
+          "upgraded": true,
+          "upgradeLevel": 1,
+          "tinkerTimeType": null,
+          "tinkerTimeRider": null
+        }
+      ]
+    }
+  },
+  "last_state": {
+    "hp": 82,
+    "maxHp": 82,
+    "block": 0,
+    "energy": 3,
+    "stars": 0,
+    "turnNumber": 1,
+    "combatRoundNumber": 1,
+    "stepIndex": 2,
+    "hand": [
+      "RAINBOW",
+      "DUALCAST",
+      "COOLHEADED",
+      "APOTHEOSIS",
+      "DEFEND_DEFECT"
+    ],
+    "drawPileTop10": [
+      "CREATIVE_AI",
+      "DEFEND_DEFECT",
+      "ZAP",
+      "CREATIVE_AI",
+      "CURSE_OF_THE_BELL",
+      "DEFEND_DEFECT",
+      "DISCOVERY",
+      "SUPERCRITICAL",
+      "SUPERCRITICAL",
+      "DEFRAGMENT"
+    ],
+    "discardPileTop10": [
+      "ASCENDERS_BANE",
+      "ULTIMATE_STRIKE",
+      "PROWESS",
+      "FIGHT_THROUGH",
+      "FIGHT_THROUGH",
+      "OVERCLOCK",
+      "HOLOGRAM",
+      "COLD_SNAP",
+      "HOTFIX",
+      "COOLHEADED"
+    ],
+    "exhaustPileTop10": [],
+    "playerPowers": [
+      [
+        "THORNS_POWER",
+        3
+      ],
+      [
+        "FOCUS_POWER",
+        1
+      ]
+    ],
+    "enemies": [
+      {
+        "index": 0,
+        "id": "ENTOMANCER",
+        "hp": 155,
+        "maxHp": 155,
+        "block": 0,
+        "intent": "BEES_MOVE",
+        "attackDamage": 3,
+        "attackRepeats": 7,
+        "powers": [
+          [
+            "PERSONAL_HIVE_POWER",
+            1
+          ]
+        ]
+      }
+    ],
+    "pendingChoice": null
+  },
+  "last_next_state": {
+    "hp": 82,
+    "maxHp": 82,
+    "block": 0,
+    "energy": 3,
+    "stars": 0,
+    "turnNumber": 1,
+    "combatRoundNumber": 1,
+    "stepIndex": 2,
+    "hand": [
+      "DUALCAST",
+      "COOLHEADED",
+      "APOTHEOSIS",
+      "DEFEND_DEFECT",
+      "CREATIVE_AI"
+    ],
+    "drawPileTop10": [
+      "DEFEND_DEFECT",
+      "ZAP",
+      "CREATIVE_AI",
+      "CURSE_OF_THE_BELL",
+      "DEFEND_DEFECT",
+      "DISCOVERY",
+      "SUPERCRITICAL",
+      "SUPERCRITICAL",
+      "DEFRAGMENT",
+      "TURBO"
+    ],
+    "discardPileTop10": [
+      "ASCENDERS_BANE",
+      "ULTIMATE_STRIKE",
+      "PROWESS",
+      "FIGHT_THROUGH",
+      "FIGHT_THROUGH",
+      "OVERCLOCK",
+      "HOLOGRAM",
+      "COLD_SNAP",
+      "HOTFIX",
+      "COOLHEADED"
+    ],
+    "exhaustPileTop10": [],
+    "playerPowers": [
+      [
+        "THORNS_POWER",
+        3
+      ],
+      [
+        "FOCUS_POWER",
+        1
+      ]
+    ],
+    "enemies": [
+      {
+        "index": 0,
+        "id": "ENTOMANCER",
+        "hp": 155,
+        "maxHp": 155,
+        "block": 0,
+        "intent": "BEES_MOVE",
+        "attackDamage": 3,
+        "attackRepeats": 7,
+        "powers": [
+          [
+            "PERSONAL_HIVE_POWER",
+            1
+          ]
+        ]
+      }
+    ],
+    "pendingChoice": null
+  },
+  "enemy_hp_progression": [
+    155,
+    155,
+    155,
+    155,
+    155,
+    155,
+    155,
+    155,
+    155,
+    155,
+    155,
+    155
+  ],
+  "player_hp_progression": [
+    82,
+    82,
+    82,
+    82,
+    82,
+    82,
+    82,
+    82,
+    82,
+    82,
+    82,
+    82
+  ],
+  "last_10_decisions": [
+    {
+      "decision_index": 1,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "ULTIMATE_STRIKE",
+          "is_available": true,
+          "parameters": {
+            "cardId": "ULTIMATE_STRIKE",
+            "cost": 1,
+            "targetType": "AnyEnemy"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "PROWESS",
+          "is_available": true,
+          "parameters": {
+            "cardId": "PROWESS",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "FIGHT_THROUGH",
+          "is_available": true,
+          "parameters": {
+            "cardId": "FIGHT_THROUGH",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "FIGHT_THROUGH",
+          "is_available": true,
+          "parameters": {
+            "cardId": "FIGHT_THROUGH",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "OVERCLOCK",
+          "is_available": true,
+          "parameters": {
+            "cardId": "OVERCLOCK",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK"
+        ],
+        "drawPileTop10": [
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM"
+        ],
+        "drawPileTop10": [
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 2,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "PROWESS",
+          "is_available": true,
+          "parameters": {
+            "cardId": "PROWESS",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "FIGHT_THROUGH",
+          "is_available": true,
+          "parameters": {
+            "cardId": "FIGHT_THROUGH",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "FIGHT_THROUGH",
+          "is_available": true,
+          "parameters": {
+            "cardId": "FIGHT_THROUGH",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "OVERCLOCK",
+          "is_available": true,
+          "parameters": {
+            "cardId": "OVERCLOCK",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "HOLOGRAM",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOLOGRAM",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM"
+        ],
+        "drawPileTop10": [
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP"
+        ],
+        "drawPileTop10": [
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 3,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "FIGHT_THROUGH",
+          "is_available": true,
+          "parameters": {
+            "cardId": "FIGHT_THROUGH",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "FIGHT_THROUGH",
+          "is_available": true,
+          "parameters": {
+            "cardId": "FIGHT_THROUGH",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "OVERCLOCK",
+          "is_available": true,
+          "parameters": {
+            "cardId": "OVERCLOCK",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "HOLOGRAM",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOLOGRAM",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "COLD_SNAP",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COLD_SNAP",
+            "cost": 1,
+            "targetType": "AnyEnemy"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP"
+        ],
+        "drawPileTop10": [
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX"
+        ],
+        "drawPileTop10": [
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 4,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "FIGHT_THROUGH",
+          "is_available": true,
+          "parameters": {
+            "cardId": "FIGHT_THROUGH",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "OVERCLOCK",
+          "is_available": true,
+          "parameters": {
+            "cardId": "OVERCLOCK",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "HOLOGRAM",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOLOGRAM",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "COLD_SNAP",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COLD_SNAP",
+            "cost": 1,
+            "targetType": "AnyEnemy"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "HOTFIX",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOTFIX",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX"
+        ],
+        "drawPileTop10": [
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED"
+        ],
+        "drawPileTop10": [
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 5,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "OVERCLOCK",
+          "is_available": true,
+          "parameters": {
+            "cardId": "OVERCLOCK",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "HOLOGRAM",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOLOGRAM",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "COLD_SNAP",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COLD_SNAP",
+            "cost": 1,
+            "targetType": "AnyEnemy"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "HOTFIX",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOTFIX",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED"
+        ],
+        "drawPileTop10": [
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW"
+        ],
+        "drawPileTop10": [
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 6,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "HOLOGRAM",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOLOGRAM",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "COLD_SNAP",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COLD_SNAP",
+            "cost": 1,
+            "targetType": "AnyEnemy"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "HOTFIX",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOTFIX",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "RAINBOW",
+          "is_available": true,
+          "parameters": {
+            "cardId": "RAINBOW",
+            "cost": 2,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW"
+        ],
+        "drawPileTop10": [
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST"
+        ],
+        "drawPileTop10": [
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 7,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "COLD_SNAP",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COLD_SNAP",
+            "cost": 1,
+            "targetType": "AnyEnemy"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "HOTFIX",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOTFIX",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "RAINBOW",
+          "is_available": true,
+          "parameters": {
+            "cardId": "RAINBOW",
+            "cost": 2,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "DUALCAST",
+          "is_available": true,
+          "parameters": {
+            "cardId": "DUALCAST",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST"
+        ],
+        "drawPileTop10": [
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED"
+        ],
+        "drawPileTop10": [
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY",
+          "SUPERCRITICAL"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 8,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "HOTFIX",
+          "is_available": true,
+          "parameters": {
+            "cardId": "HOTFIX",
+            "cost": 0,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "RAINBOW",
+          "is_available": true,
+          "parameters": {
+            "cardId": "RAINBOW",
+            "cost": 2,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "DUALCAST",
+          "is_available": true,
+          "parameters": {
+            "cardId": "DUALCAST",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "HOTFIX",
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED"
+        ],
+        "drawPileTop10": [
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY",
+          "SUPERCRITICAL"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS"
+        ],
+        "drawPileTop10": [
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY",
+          "SUPERCRITICAL",
+          "SUPERCRITICAL"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 9,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "RAINBOW",
+          "is_available": true,
+          "parameters": {
+            "cardId": "RAINBOW",
+            "cost": 2,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "DUALCAST",
+          "is_available": true,
+          "parameters": {
+            "cardId": "DUALCAST",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "APOTHEOSIS",
+          "is_available": true,
+          "parameters": {
+            "cardId": "APOTHEOSIS",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "COOLHEADED",
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS"
+        ],
+        "drawPileTop10": [
+          "DEFEND_DEFECT",
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY",
+          "SUPERCRITICAL",
+          "SUPERCRITICAL"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT"
+        ],
+        "drawPileTop10": [
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY",
+          "SUPERCRITICAL",
+          "SUPERCRITICAL",
+          "DEFRAGMENT"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    },
+    {
+      "decision_index": 10,
+      "selected_action": {
+        "action_id": 0,
+        "action_type": "system",
+        "label": "End Turn",
+        "is_available": true,
+        "parameters": {}
+      },
+      "selected_enemy_index": null,
+      "legal_actions": [
+        {
+          "action_id": 0,
+          "action_type": "system",
+          "label": "End Turn",
+          "is_available": true,
+          "parameters": {}
+        },
+        {
+          "action_id": 1,
+          "action_type": "card",
+          "label": "RAINBOW",
+          "is_available": true,
+          "parameters": {
+            "cardId": "RAINBOW",
+            "cost": 2,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 2,
+          "action_type": "card",
+          "label": "DUALCAST",
+          "is_available": true,
+          "parameters": {
+            "cardId": "DUALCAST",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 3,
+          "action_type": "card",
+          "label": "COOLHEADED",
+          "is_available": true,
+          "parameters": {
+            "cardId": "COOLHEADED",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 4,
+          "action_type": "card",
+          "label": "APOTHEOSIS",
+          "is_available": true,
+          "parameters": {
+            "cardId": "APOTHEOSIS",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        },
+        {
+          "action_id": 5,
+          "action_type": "card",
+          "label": "DEFEND_DEFECT",
+          "is_available": true,
+          "parameters": {
+            "cardId": "DEFEND_DEFECT",
+            "cost": 1,
+            "targetType": "Self"
+          }
+        }
+      ],
+      "state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "RAINBOW",
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT"
+        ],
+        "drawPileTop10": [
+          "CREATIVE_AI",
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY",
+          "SUPERCRITICAL",
+          "SUPERCRITICAL",
+          "DEFRAGMENT"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      },
+      "next_state": {
+        "hp": 82,
+        "maxHp": 82,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "turnNumber": 1,
+        "combatRoundNumber": 1,
+        "stepIndex": 2,
+        "hand": [
+          "DUALCAST",
+          "COOLHEADED",
+          "APOTHEOSIS",
+          "DEFEND_DEFECT",
+          "CREATIVE_AI"
+        ],
+        "drawPileTop10": [
+          "DEFEND_DEFECT",
+          "ZAP",
+          "CREATIVE_AI",
+          "CURSE_OF_THE_BELL",
+          "DEFEND_DEFECT",
+          "DISCOVERY",
+          "SUPERCRITICAL",
+          "SUPERCRITICAL",
+          "DEFRAGMENT",
+          "TURBO"
+        ],
+        "discardPileTop10": [
+          "ASCENDERS_BANE",
+          "ULTIMATE_STRIKE",
+          "PROWESS",
+          "FIGHT_THROUGH",
+          "FIGHT_THROUGH",
+          "OVERCLOCK",
+          "HOLOGRAM",
+          "COLD_SNAP",
+          "HOTFIX",
+          "COOLHEADED"
+        ],
+        "exhaustPileTop10": [],
+        "playerPowers": [
+          [
+            "THORNS_POWER",
+            3
+          ],
+          [
+            "FOCUS_POWER",
+            1
+          ]
+        ],
+        "enemies": [
+          {
+            "index": 0,
+            "id": "ENTOMANCER",
+            "hp": 155,
+            "maxHp": 155,
+            "block": 0,
+            "intent": "BEES_MOVE",
+            "attackDamage": 3,
+            "attackRepeats": 7,
+            "powers": [
+              [
+                "PERSONAL_HIVE_POWER",
+                1
+              ]
+            ]
+          }
+        ],
+        "pendingChoice": null
+      }
+    }
+  ]
+}

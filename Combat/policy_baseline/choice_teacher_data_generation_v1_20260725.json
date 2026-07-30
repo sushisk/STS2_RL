@@ -1,0 +1,43 @@
+{
+  "generation_id": "choice_teacher_data_generation_v1_20260725",
+  "recorded_on": "2026-07-25",
+  "purpose": "Provenance record for the first Choice Policy teacher-data generation run, built on top of choice_semantics_baseline_722b019_v1_20260725.json.",
+  "baseline_ref": "Combat/policy_baseline/choice_semantics_baseline_722b019_v1_20260725.json",
+  "emulator": {
+    "commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "sts2emulator_dll_sha256": "E3C3D26D7499E93E89F2718CCB51E18A2D66559021BBB5CDCA33980BB644C036",
+    "sts2imported_stage1_dll_sha256": "C176109AA6C9887057C09E02245EBEDAAF476FB6E604267D36E787BD3C055900",
+    "verified_before": ["smoke20_run_a", "smoke20_run_b", "full_200"]
+  },
+  "heuristic_teacher": {
+    "version": "greedy_v1_default_weights",
+    "agent_file": "Combat/heuristic_agent.py",
+    "note": "Same HeuristicAgent/build_default_agent() used by Combat/data/generate_heuristic_trajectories.py to produce the original teacher2000 dataset - not a new or modified teacher policy."
+  },
+  "code": {
+    "manifest_builder": {"file": "Combat/evaluation/online_eval/build_choice_teacher_data_manifest.py"},
+    "generator": {
+      "file": "Combat/evaluation/online_eval/generate_choice_teacher_data.py",
+      "sha256": "ff29206404ee35beedc7ea9d8b9f948f6b11ccdf48f30f4f487226373e9024e1"
+    },
+    "eligibility_filter": {"file": "Combat/evaluation/online_eval/filter_choice_teacher_data_eligibility.py"},
+    "choice_semantics": {"file": "Combat/choice_semantics.py", "sha256": "48912bdb01cf9a56d8af7e1cc09246c4428be1de6bdb1c374927bd5308f18e6d", "note": "unchanged from choice_semantics_baseline_v1_20260724.json - no rule/lookup/schema edits made for this task"}
+  },
+  "manifests": {
+    "full": {"file": "Combat/evaluation/online_eval/choice_teacher_data_manifest.jsonl", "sha256": "c11713c0473ad74afc9acfc3c288600a2a1ae03bb7e4189511149bfac5f7607e", "scenario_count": 200, "synthetic_count": 1, "teacher2000_derived_count": 199},
+    "smoke20": {"file": "Combat/evaluation/online_eval/choice_teacher_data_smoke20_manifest.jsonl", "sha256": "eb234b63844ecb35bf90263fd46fe06af6a3c393c6d3f5438320463a7ab406b2", "scenario_count": 20, "note": "first 20 rows of the full manifest - re-executed a 3rd time as part of the full run, giving a free 3-way determinism cross-check"}
+  },
+  "runs": {
+    "smoke20_run_a": {"out_dir": "Combat/evaluation/reports/choice_teacher_smoke20_run_a"},
+    "smoke20_run_b": {"out_dir": "Combat/evaluation/reports/choice_teacher_smoke20_run_b", "purpose": "determinism double-check against run_a"},
+    "full_200": {"out_dir": "Combat/evaluation/reports/choice_teacher_data_full_20260725"}
+  },
+  "determinism": {
+    "method": "3-way row-level diff (smoke20_run_a vs smoke20_run_b vs full_200's overlapping first-20 scenarios) over trajectory_id+decision_index+continuation_step_index+source keys, comparing teacher_action/candidate_card_id/candidate_identifiable/remaining_select_count/emulator_fact/resolved/teacher_action_in_legal/scenario_final_outcome/scenario_truncated",
+    "rows_compared_per_pair": 73,
+    "diffs_found": 0,
+    "scope_note": "Exhaustively re-verified for 20/200 scenarios (73/667 choice rows); remaining 180 scenarios rely on the same unmodified deterministic harness/Emulator, not independently double-run - same scope-limitation disclosure pattern as prior reports in this engagement."
+  },
+  "report": "Outputs/reports/rl_choice_teacher_data_generation_report_20260725.md",
+  "status": "Generated. provisional/formal training-data sign-off has NOT been requested or granted here - per this task's 禁止事項, generation stops after aggregation/reporting; Training/lookup changes/Azure are explicitly not started."
+}

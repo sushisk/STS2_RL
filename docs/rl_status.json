@@ -1,0 +1,224 @@
+{
+  "generated_at": "2026-07-21",
+  "generated_by": "handoff documentation task",
+  "current_phase": "Phase 2 (Heuristic teacher-data pipeline) - fixed50 state mismatches resolved, one new Emulator-side candidate issue remains",
+  "current_game_version": {
+    "canonical_id_basis": "v109",
+    "decompiled_reference": "C:\\STS2_Decompiled_v0109",
+    "decompiled_legacy_reference": "C:\\STS2_Decompiled (v108, comparison only)"
+  },
+  "emulator_dll": {
+    "path": "C:\\STS2_Emulator\\Sts2Emulator.Cli\\bin\\Debug\\net8.0\\Sts2Emulator.dll",
+    "last_confirmed_build": "2026-07-21 10:23:00",
+    "confirmed_features": [
+      "CombatScenario.HandCards/DrawPileCards/DiscardPileCards/ExhaustPileCards (per-card IsUpgraded)",
+      "CombatScenario.Potions (Slot, PotionId)",
+      "CombatScenario.PlayerHp/PlayerMaxHp independently nullable",
+      "CombatScenario.Stars (nullable int) + state[\"stars\"] observation field",
+      "state[\"enemies\"][i][\"index\"] + choice_target Parameters.enemyIndex (session-local only, not persistent across Steps)",
+      "AutoSkipCardSelector: LEAD_PAPERWEIGHT, CLAWS auto-decline",
+      "SkipRewardsSetSelector: LOST_COFFER, TOY_BOX, SMALL_CAPSULE, ORRERY, CAULDRON, CALLING_BELL auto-decline",
+      "RelicsRestoredWithoutAfterObtained: NEOWS_BONES (AddRelicInternal, skips AfterObtained entirely)"
+    ],
+    "not_yet_reflected_in_rl_code": []
+  },
+  "dataset_summary": {
+    "source_file": "C:\\STS2_Data\\runs-all-before-2026-06.json",
+    "source_file_policy": "read-only, never modify or overwrite",
+    "total_runs": 6796,
+    "usable_runs": 5997,
+    "schema_versions_present": [8, 9],
+    "hp_available_in_map_point_history": true,
+    "hp_available_pct": 100.0,
+    "note": "earlier 'HP not available' conclusion was WRONG and is retracted - it only checked the top-level players[] summary, not the nested map_point_history"
+  },
+  "reconstruction_summary": {
+    "runs_processed": 5997,
+    "runs_failed": 0,
+    "combat_states_reconstructed": 95626,
+    "hp_restore_exact_pct": 100.0,
+    "deck_match_pct_including_upgrade_split": 87.09,
+    "relic_match_pct": 100.0,
+    "restore_status_counts": {
+      "exact": 86706,
+      "unsupported_id": 2838,
+      "ambiguous_upgrade": 5767,
+      "history_inconsistent": 315
+    },
+    "split_run_counts": {"train": 4749, "validation": 629, "test": 304, "benchmark": 315},
+    "split_encounter_counts": {"train": 75628, "validation": 9973, "test": 4755, "benchmark": 5270},
+    "split_method": "deterministic SHA256 hash of source_run_id, 80/10/5/5 - same run never spans multiple splits",
+    "output_dir": "Combat/data/full_reconstruction/",
+    "regenerate_command": "cd C:\\STS2_RL\\Combat\\data && python reconstruct_all_runs.py"
+  },
+  "emulator_validation_summary": {
+    "note": "post-LOST_COFFER-fix, post-ID-dict-fix result (before NEOWS_BONES fix / Stars support)",
+    "total_validated": 6095,
+    "valid": 6082,
+    "valid_pct": 99.79,
+    "remaining_failure_categories": {
+      "unknown_enemy_id_OSTY": 5,
+      "InvalidOperationException_sequence_no_matching_element": 5,
+      "ArgumentNullException_dictionary_key": 3
+    },
+    "output_file": "Combat/data/full_reconstruction/emulator_validation.jsonl",
+    "regenerate_command": "python validate_reconstructed_scenarios_at_scale.py"
+  },
+  "teacher_pipeline_status": {
+    "architecture": "reconstructed scenario -> preflight_validate -> CombatEnv.adopt_state -> [get_legal_actions -> choose_action_with_detail(deadline) -> step] loop -> trajectory",
+    "production_entrypoint_files": [
+      "Combat/env/combat_env.py",
+      "Combat/data/preflight_validate.py",
+      "Combat/data/generate_heuristic_trajectories.py",
+      "Combat/data/run_trajectory_batch.py"
+    ],
+    "clean_validation_completed": {"scenario_count": 10, "source": "fixed50[:10]"},
+    "clean_validation_results": {
+      "init_success_rate_pct": 90.0,
+      "combat_completion_rate_pct": 100.0,
+      "illegal_action_count": 0,
+      "heuristic_exception_count": 0,
+      "emulator_exception_count": 0,
+      "timeout_count": 0,
+      "determinism_rate_pct": 100.0,
+      "wins": 8,
+      "losses": 1
+    },
+    "fixed_50_full_batch_status": "STATE MISMATCHES RESOLVED BUT NOT SCALE-UP READY - 2026-07-21 latest DLL + SlotName run completed all 50 into Combat/data/trajectories_fixed50_slotname_emulator_20260721_115618; quarantines are zero, but fixed50:5483-41 has a reproducible first-decision candidate-timeout issue",
+    "fixed_50_latest_results": {
+      "output_dir": "Combat/data/trajectories_fixed50_slotname_emulator_20260721_115618",
+      "total_scenarios": 50,
+      "ok": 50,
+      "quarantined": 0,
+      "illegal_action_count": 0,
+      "heuristic_exception_count": 1,
+      "emulator_step_exception_count": 0,
+      "decision_budget_exceeded_count": 0,
+      "fallback_count": 0,
+      "timeout_count": 0,
+      "determinism_rate_pct": 100.0,
+      "truncated_count": 11,
+      "cycle_detected_count": 0,
+      "no_progress_detected_count": 4,
+      "data_usage_counts": {
+        "usable_complete": 33,
+        "usable_partial": 16,
+        "exclude_heuristic_exception": 1
+      },
+      "truncation_classification_counts": {
+        "A_normal_long_combat": 7,
+        "B_heuristic_stagnation": 4
+      },
+      "quarantine_classification_counts": {
+      },
+      "resolved_previous_quarantines": {
+        "relic_state_mismatch": 5,
+        "slot_name_missing": 3,
+        "exclude_state_mismatch": 8
+      },
+      "new_issue": "fixed50:5483-41: all 7 first-decision candidate evaluations TimeoutException; Emulator stderr shows RunicCapacitor.AfterSideTurnStart -> OrbCmd.AddSlots NullReferenceException",
+      "avg_time_per_combat_s": 11.65,
+      "avg_time_per_decision_s": 0.3241
+    },
+    "fixed_50_A_long_max100_recheck": {
+      "output_dir": "Combat/data/trajectories_fixed50_A_long_max100",
+      "total_scenarios": 5,
+      "usable_complete": 3,
+      "usable_partial": 1,
+      "exclude_heuristic_exception": 1,
+      "truncated_count": 1,
+      "new_emulator_fix_candidate": "QUEEN_BOSS restore after TorchHeadAmalgam has died: Queen.AfterAddedToRoom expects an Amalgam and throws Sequence contains no matching element"
+    },
+    "dev_100_batch_status": "not started"
+  },
+  "completed_tasks": [
+    "Phase 0: ID dictionary + schema audit, v108/v109 diff",
+    "STS2_Emulator hang bug investigation (LEAD_PAPERWEIGHT/CLAWS root cause)",
+    "Emulator v2 feature reflection (card upgrade, potions, nullable HP, enemy index)",
+    "Floor-state reconstruction from map_point_history (prototype 50-run, then full 5997-run)",
+    "LOST_COFFER-class Emulator bug re-validation after fix (283/284 clean)",
+    "ID dictionary transitive-inheritance fix (MYSTERIOUS_KNIGHT resolved)",
+    "CombatEnv implementation",
+    "HeuristicAgent.choose_action_with_detail + candidate-level defensive exception handling + deadline enforcement",
+    "preflight_validate.py implementation",
+    "generate_heuristic_trajectories.py / run_trajectory_batch.py implementation",
+    "Found and fixed: build_scenario_from_state dropping potions/card-upgrade-state on every apply_action restore (affects ALL search, not just this pipeline)",
+    "Found and fixed: human_readable_log crash on skipped (None-score) candidates",
+    "10-scenario clean trajectory generation validation",
+    "Stars reflected into Common/schemas + battle_emulator.py build_scenario_from_spec/build_scenario_from_state + battle_state_key",
+    "NEOWS_BONES-specific quarantine label removed after Emulator-side AddRelicInternal fix; regression test added",
+    "Explicit decision timing/budget/fallback fields added to trajectory records and fixed-50 summary",
+    "run_trajectory_batch.py JSONL writers now flush after each row",
+    "Fixed-50 Stars revalidation executed to completion (historical; see Outputs/reports/stars_fixed50_revalidation_report.md)",
+    "STUNNED forced-move restore failures classified as non_learning_transition before Heuristic evaluation",
+    "Fixed-50 residuals fully classified into quarantine_classification, truncation_classification, cycle/no-progress, and data_usage buckets",
+    "Targeted max100 recheck completed for the 5 A_normal_long_combat trajectories",
+    "SlotName restoration added for PHROG_PARASITE_ELITE Wriggler and EXOSKELETONS_WEAK/NORMAL Exoskeleton layouts",
+    "Latest Emulator DLL revalidated: Queen restore, relic mismatch fixes, and fixed50 previous quarantines all pass preflight",
+    "Fixed50 rerun after SlotName + Emulator fixes completed with quarantined=0 and exclude_state_mismatch=0"
+  ],
+  "pending_tasks": [
+    "Report or fix fixed50:5483-41 RunicCapacitor.AfterSideTurnStart -> OrbCmd.AddSlots NullReferenceException / candidate-timeout issue",
+    "Separate B_heuristic_stagnation partial labels from main imitation data and consider evaluator improvements",
+    "Complete a scale-up-ready full 50-scenario batch run (see RL_HANDOFF.md section 10/12 for exact completion criteria)",
+    "Generate ~100-combat dev set (only after 50-scenario criteria met)",
+    "Per-character small dev sets",
+    "1000-combat quality check",
+    "Full-scale (95,626-state) teacher data generation",
+    "Reorganize Combat/*.py heuristic files into Combat/heuristic/ subdirectory (never done, still flat)"
+  ],
+  "known_issues": [
+    {"id": "ambiguous_upgrade", "count": 5767, "description": "source data cannot uniquely determine which card instance was upgraded when duplicates exist - not usable as exact imitation label"},
+    {"id": "unsupported_id", "count": 2838, "description": "cards/monsters not resolvable against v109 canonical dict - mostly genuinely-removed content (FOLLOW_THROUGH, GRAPPLE, PREPARE, DOOR, DOORMAKER)"},
+    {"id": "other_afterobtained_side_effect_relics", "description": "relics like NeowsSacrifice, DowsingRod, CallingBell, HeftyTablet etc. have unconditional AfterObtained side effects that fire for real in scenarios by design - not yet exhaustively audited for teacher-data impact, see RL_HANDOFF.md section 13.1"},
+    {"id": "enemy_index_not_persistent", "description": "state.enemies[i].index and choice_target.enemyIndex are only valid within one Observation - engine physically removes dead creatures from the list, causing renumbering - confirmed against CombatState.cs source"},
+    {"id": "fixed_50_batch_state_mismatch_resolved_not_scale_ready", "description": "latest fixed50 run completed all 50 with quarantined=0 and exclude_state_mismatch=0, but fixed50:5483-41 has a reproducible first-decision candidate-timeout issue; usable_complete=33/50"},
+    {"id": "stunned_forced_move_restore", "description": "build_scenario_from_state cannot faithfully restore dynamic STUNNED move intents through CombatScenario.ForcedMove; RL classifies these as non_learning_transition and excludes them from normal Heuristic labels"},
+    {"id": "fixed50_relic_mismatch_quarantines", "description": "Resolved by latest Emulator DLL for fixed50: 5 former relic_mismatch scenarios now pass preflight"},
+    {"id": "queen_amalgam_restore", "description": "Resolved by latest Emulator DLL for fixed50: fixed50:5074-46 decision 65 next_state restores and steps deterministically"},
+    {"id": "runic_capacitor_candidate_timeout", "description": "fixed50:5483-41 preflight passes, but all first-decision candidates timeout; Emulator stderr shows RunicCapacitor.AfterSideTurnStart -> OrbCmd.AddSlots NullReferenceException"}
+  ],
+  "next_actions": [
+    "Read docs/RL_HANDOFF.md plus Outputs/reports/fixed50_slotname_emulator_revalidation_report.md",
+    "Keep STUNNED states separated as non_learning_transition unless the Emulator adds faithful dynamic forced-move restore support",
+    "Report or fix fixed50:5483-41 RunicCapacitor candidate-timeout issue",
+    "Decide whether fixed50 long combats should raise --max-decisions or stay separated as incomplete labels",
+    "Run a clean fixed-50 trajectory batch from scratch and verify all criteria in RL_HANDOFF.md section 12",
+    "Proceed to ~100-combat dev set only after section 12 criteria are met"
+  ],
+  "important_paths": {
+    "emulator_dll": "C:\\STS2_Emulator\\Sts2Emulator.Cli\\bin\\Debug\\net8.0\\Sts2Emulator.dll",
+    "decompiled_v109_reference": "C:\\STS2_Decompiled_v0109",
+    "raw_human_run_data": "C:\\STS2_Data\\runs-all-before-2026-06.json",
+    "canonical_id_dicts": "C:\\STS2_RL\\Common\\ids\\{cards,relics,potions,monsters,powers}.json",
+    "schemas": "C:\\STS2_RL\\Common\\schemas\\",
+    "floor_states_output": "C:\\STS2_RL\\Combat\\data\\full_reconstruction\\",
+    "combat_env": "C:\\STS2_RL\\Combat\\env\\combat_env.py",
+    "teacher_data_generator": "C:\\STS2_RL\\Combat\\data\\generate_heuristic_trajectories.py",
+    "trajectory_batch_runner": "C:\\STS2_RL\\Combat\\data\\run_trajectory_batch.py",
+    "preflight_validator": "C:\\STS2_RL\\Combat\\data\\preflight_validate.py",
+    "fixed_50_scenarios": "C:\\STS2_RL\\Combat\\evaluation\\benchmark_states\\fixed_50_scenarios.json",
+    "tests": "C:\\STS2_RL\\Combat\\tests\\test_scenario_v2.py",
+    "handoff_doc": "C:\\STS2_RL\\docs\\RL_HANDOFF.md"
+  },
+  "reports": [
+    {"file": "Outputs/reports/dataset_audit_report.json", "status": "current"},
+    {"file": "Outputs/reports/phase0_summary.md", "status": "current"},
+    {"file": "Outputs/reports/phase1_emulator_v2_reflection_report.md", "status": "current, enemy-index stability note superseded by later findings"},
+    {"file": "Outputs/reports/floor_state_reconstruction_report.md", "status": "superseded numbers (50-run prototype), historical record"},
+    {"file": "Outputs/reports/full_scale_floor_state_reconstruction_report.md", "status": "superseded unsupported_id count (pre-Emulator-fix snapshot, 3000 not 2838)"},
+    {"file": "Outputs/reports/emulator_fix_revalidation_report.md", "status": "current - source of truth for unsupported_id=2838 and 99.79% validation rate"},
+    {"file": "Outputs/reports/heuristic_code_audit.md", "status": "current"},
+    {"file": "Outputs/reports/phase2_teacher_data_pipeline_report.md", "status": "current but superseded on fixed-50 completion status - see RL_HANDOFF.md section 10 for latest"},
+    {"file": "Outputs/reports/stars_fixed50_revalidation_report.md", "status": "historical - superseded by fixed50_failure_classification_report.md for latest fixed50 status"},
+    {"file": "Outputs/reports/fixed50_failure_classification_report.md", "status": "historical - superseded by fixed50_slotname_emulator_revalidation_report.md for latest fixed50 status"},
+    {"file": "Outputs/reports/fixed50_slotname_emulator_revalidation_report.md", "status": "current - latest Emulator + SlotName fixed50 revalidation"},
+    {"file": "docs/RL_HANDOFF.md", "status": "current - authoritative latest status"}
+  ],
+  "tests": [
+    {"file": "Combat/tests/test_scenario_v2.py", "command": "python test_scenario_v2.py", "expected": "13 passed, 0 failed"},
+    {"file": "Combat/evaluation/benchmark_states/generate_fixed_50.py", "command": "python generate_fixed_50.py", "expected": "50/50 validated scenarios written"},
+    {"file": "Combat/data/validate_reconstruction_staged.py", "command": "python validate_reconstruction_staged.py", "expected": "relic match 100%, HP exact 100% across all stages"},
+    {"file": "Combat/data/run_trajectory_batch.py", "command": "python run_trajectory_batch.py --source fixed50", "expected": "see RL_HANDOFF.md section 12 completion criteria"}
+  ]
+}

@@ -1,0 +1,110 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+venv/
+env/
+.conda/
+
+# IDE / tool runtime
+.vscode/
+.idea/
+.claude/
+*.user
+*.suo
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+credentials*.json
+secrets*.json
+
+# Build and binaries
+bin/
+obj/
+*.dll
+*.pdb
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+~$*
+tmp/
+temp/
+
+# Generated outputs
+Outputs/backups/
+Outputs/logs/
+Outputs/tmp/
+Outputs/trajectories/
+Outputs/checkpoints/
+Outputs/models/
+Outputs/datasets/
+
+# Large generated data
+*.jsonl
+*.npz
+*.npy
+*.pt
+*.pth
+*.onnx
+*.ckpt
+
+# --- Repo-specific large/generated directories (identified by survey before
+# staging, not from the instruction's generic template alone - see
+# rl_git_baseline_manifest_20260729.json for the full inventory this was
+# derived from) ---
+
+# Azure staging/verification snapshots (one-off deployment artifacts, ~99MB
+# directory + a 19MB zip of the same content - a near-duplicate of parts of
+# this same tree, not source)
+Outputs/azure_stage_20260723_122305/
+Outputs/azure_stage_20260723_122305.zip
+Outputs/azure_vm_smoke10_20260723/
+Outputs/azure_blob_verify_20260723/
+
+# Bulk trajectory/teacher datasets and reconstruction archives (~1.7GB)
+Combat/data/teacher2000_20260723_archive/
+Combat/data/teacher2000_20260723_dataset/
+Combat/data/teacher2000_20260723_manifests/
+Combat/data/full_reconstruction/
+Combat/data/full_reconstruction_PRE_ID_FIX/
+
+# Per-run generated evaluation output (combats.jsonl/decisions_policy.jsonl per
+# run directory, ~53MB, regenerable, not fixtures - the canonical *input*
+# manifests this project actually depends on live directly under
+# Combat/evaluation/online_eval/ and are re-included below)
+Combat/evaluation/reports/
+
+# Training exports/checkpoints (~800MB combined; *.pt/*.pth above already
+# catches individual checkpoint files, these directory rules catch the
+# exported-dataset content around them too)
+Training/exports/
+Training/checkpoints/
+
+# Leftover local profiling/diagnostic dumps (cProfile .pstats output, ad-hoc
+# text dumps) - not source, not fixtures, not reports; found by survey.
+*.pstats
+Combat/_modeldb_dump.txt
+Combat/profile_output.txt
+Combat/profile_output_optimized.txt
+
+# --- Explicit re-inclusions: small, canonical fixture/manifest files that the
+# broad *.jsonl rule above would otherwise incorrectly exclude. Per this
+# task's own instruction ("拡張子だけを理由に必要なfixtureを除外しない"),
+# these are re-included by extension, not by everything under the directory,
+# so any future large generated file dropped in the same directory still gets
+# ignored by default. ---
+!Combat/evaluation/online_eval/*.jsonl
+!Combat/evaluation/online_eval/*.json

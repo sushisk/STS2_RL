@@ -1,0 +1,18 @@
+{
+  "baseline_id": "combat_state_contract_phase1_emulator_baseline_v1_20260726",
+  "recorded_on": "2026-07-26",
+  "purpose": "Emulator baseline for Canonical CombatStateSnapshot contract v0.3 Phase 1 (Quiescent Decision Boundary enforcement, combatSessionId, stepIndex exposure) - supersedes choice_semantics_baseline_722b019_v1_20260725.json for RL-side verification purposes going forward. Does not overwrite that file (kept as history, per this engagement's established convention).",
+  "emulator": {
+    "commit": "a4c3c028b54835b18536fe6ee8c78a6ffccf5301",
+    "commit_short": "a4c3c02",
+    "parent_commit": "ce7ecc2cc66332c4c2a2abf2f2cd24040dd3baea",
+    "grandparent_commit_previous_baseline": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "sts2emulator_dll_sha256": "041a44cc3e250f13fb4dc5eed5edb2ee310fa42108249a0bb16928f62dfc5b00",
+    "sts2imported_stage1_dll_sha256": "c176109aa6c9887057c09e02245ebedaaf476fb6e604267d36e787bd3c055900",
+    "verified_live_on": "2026-07-26"
+  },
+  "emulator_report": "C:\\STS2_Emulator\\docs\\reports\\combat_state_contract_phase1_emulator_report_20260726.md",
+  "phase1_scope": "Quiescent Decision Boundary assertion (GameInstance.AssertQuiescentDecisionBoundary, throws QuiescentBoundaryViolationException), combatSessionId issuance/exposure (Observation/Metadata/StepResult.Info), stepIndex exposure alongside it, ResetFromScenario documented as new-combat-start-only. All additive, no existing field/action_id semantics changed.",
+  "not_in_scope": "Snapshot DTO (Phase 2), CombatHistory Capture/Restore, RNG cursor capture, Relic/Power serializers (Phase 3) - none implemented in this commit.",
+  "status": "ADOPTED as the RL-side baseline for Phase 1 LiveCombatSession verification. choice_semantics_baseline_722b019_v1_20260725.json remains valid history for the pre-Phase-1 era."
+}

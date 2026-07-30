@@ -1,0 +1,2618 @@
+{
+  "config": {
+    "seed": 20260724,
+    "export_root": "C:\\STS2_RL\\Training\\exports\\teacher2000_20260723_dataset_export_v1",
+    "dataset_kind": "complete",
+    "dataset_version": "v1",
+    "contract_version": "v1",
+    "dictionary_version": "v1",
+    "export_script_version": "v3",
+    "emulator_commit": "163bf040027abca2754393a949e612e42f46a3e7",
+    "emulator_dll_sha256": "673778A6452C7F066F5C0989345B1BA56504428BA249C121DA6E68F7BC8C88B0",
+    "heuristic_version": "greedy_v1_default_weights",
+    "split_seed_complete": 20260722,
+    "state_dim": 4560,
+    "action_numeric_dim": 7,
+    "hidden_dim": 64,
+    "lr": 0.001,
+    "batch_size": 256,
+    "max_train_decisions": null,
+    "max_val_decisions": null,
+    "max_test_decisions": null,
+    "patience": 3,
+    "min_delta": 0.0001,
+    "top_k": [
+      1,
+      3,
+      5
+    ]
+  },
+  "best_epoch": 6,
+  "best_validation_loss": 0.686233577412393,
+  "history": [
+    {
+      "epoch": 0,
+      "train": {
+        "loss": 0.9631326856613159,
+        "accuracy": 0.6515,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.6515,
+        "top_3_accuracy": 0.9026875,
+        "top_5_accuracy": 0.97815625
+      },
+      "validation": {
+        "loss": 0.8352887295422412,
+        "accuracy": 0.7140769605455431,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7140769605455431,
+        "top_3_accuracy": 0.9430102289332684,
+        "top_5_accuracy": 0.9851436921578178
+      }
+    },
+    {
+      "epoch": 1,
+      "train": {
+        "loss": 0.7959196543693543,
+        "accuracy": 0.736375,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.736375,
+        "top_3_accuracy": 0.943875,
+        "top_5_accuracy": 0.98634375
+      },
+      "validation": {
+        "loss": 0.7484254067662978,
+        "accuracy": 0.7537749634680955,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7537749634680955,
+        "top_3_accuracy": 0.9539698002922552,
+        "top_5_accuracy": 0.9885533365806137
+      }
+    },
+    {
+      "epoch": 2,
+      "train": {
+        "loss": 0.7276333193778992,
+        "accuracy": 0.76534375,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.76534375,
+        "top_3_accuracy": 0.955,
+        "top_5_accuracy": 0.98771875
+      },
+      "validation": {
+        "loss": 0.7159188861563562,
+        "accuracy": 0.7717973697028738,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7717973697028738,
+        "top_3_accuracy": 0.9615197272284461,
+        "top_5_accuracy": 0.988309790550414
+      }
+    },
+    {
+      "epoch": 3,
+      "train": {
+        "loss": 0.6859898200035095,
+        "accuracy": 0.7815,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.7815,
+        "top_3_accuracy": 0.95896875,
+        "top_5_accuracy": 0.989625
+      },
+      "validation": {
+        "loss": 0.692650723619921,
+        "accuracy": 0.7808085728202631,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7808085728202631,
+        "top_3_accuracy": 0.9617632732586459,
+        "top_5_accuracy": 0.9914758889430102
+      }
+    },
+    {
+      "epoch": 4,
+      "train": {
+        "loss": 0.6495543265342713,
+        "accuracy": 0.79265625,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.79265625,
+        "top_3_accuracy": 0.96378125,
+        "top_5_accuracy": 0.9928125
+      },
+      "validation": {
+        "loss": 0.7031588635674582,
+        "accuracy": 0.7722844617632733,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7722844617632733,
+        "top_3_accuracy": 0.9595713589868485,
+        "top_5_accuracy": 0.9917194349732099
+      }
+    },
+    {
+      "epoch": 5,
+      "train": {
+        "loss": 0.6248986959457398,
+        "accuracy": 0.800875,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.800875,
+        "top_3_accuracy": 0.9665625,
+        "top_5_accuracy": 0.99446875
+      },
+      "validation": {
+        "loss": 0.6972265859028797,
+        "accuracy": 0.7752070141256697,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7752070141256697,
+        "top_3_accuracy": 0.9620068192888456,
+        "top_5_accuracy": 0.9909887968826108
+      }
+    },
+    {
+      "epoch": 6,
+      "train": {
+        "loss": 0.6065885725021363,
+        "accuracy": 0.808,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.808,
+        "top_3_accuracy": 0.968625,
+        "top_5_accuracy": 0.9943125
+      },
+      "validation": {
+        "loss": 0.686233577412393,
+        "accuracy": 0.7754505601558694,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7754505601558694,
+        "top_3_accuracy": 0.9622503653190453,
+        "top_5_accuracy": 0.9917194349732099
+      }
+    },
+    {
+      "epoch": 7,
+      "train": {
+        "loss": 0.5896059055328369,
+        "accuracy": 0.8130625,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.8130625,
+        "top_3_accuracy": 0.97109375,
+        "top_5_accuracy": 0.9953125
+      },
+      "validation": {
+        "loss": 0.6996157275021976,
+        "accuracy": 0.7700925474914759,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7700925474914759,
+        "top_3_accuracy": 0.9629810034096444,
+        "top_5_accuracy": 0.9919629810034096
+      }
+    },
+    {
+      "epoch": 8,
+      "train": {
+        "loss": 0.5725174102783203,
+        "accuracy": 0.8179375,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.8179375,
+        "top_3_accuracy": 0.974,
+        "top_5_accuracy": 0.99571875
+      },
+      "validation": {
+        "loss": 0.6908773803966427,
+        "accuracy": 0.7905504140282513,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7905504140282513,
+        "top_3_accuracy": 0.9634680954700439,
+        "top_5_accuracy": 0.9917194349732099
+      }
+    },
+    {
+      "epoch": 9,
+      "train": {
+        "loss": 0.556761547088623,
+        "accuracy": 0.82621875,
+        "illegal_action_rate": 0.0,
+        "decisions": 32000.0,
+        "top_1_accuracy": 0.82621875,
+        "top_3_accuracy": 0.9748125,
+        "top_5_accuracy": 0.99590625
+      },
+      "validation": {
+        "loss": 0.7118224947846232,
+        "accuracy": 0.7754505601558694,
+        "illegal_action_rate": 0.0,
+        "decisions": 4106.0,
+        "top_1_accuracy": 0.7754505601558694,
+        "top_3_accuracy": 0.9610326351680467,
+        "top_5_accuracy": 0.9917194349732099
+      }
+    }
+  ],
+  "metrics": {
+    "train": {
+      "loss": 0.5769872391223907,
+      "accuracy": 0.82028125,
+      "illegal_action_rate": 0.0,
+      "decisions": 32000.0,
+      "by_action_type": {
+        "card": {
+          "accuracy": 0.7923840217114748,
+          "correct": 18686.0,
+          "total": 23582.0
+        },
+        "system": {
+          "accuracy": 0.9199252219971958,
+          "correct": 5905.0,
+          "total": 6419.0
+        },
+        "potion": {
+          "accuracy": 0.8294147073536768,
+          "correct": 1658.0,
+          "total": 1999.0
+        }
+      },
+      "by_outcome": {
+        "victory": {
+          "accuracy": 0.8111272609819121,
+          "correct": 20090.0,
+          "total": 24768.0
+        },
+        "defeat": {
+          "accuracy": 0.8516316371681416,
+          "correct": 6159.0,
+          "total": 7232.0
+        }
+      },
+      "by_legal_action_count": {
+        "1": {
+          "accuracy": 1.0,
+          "correct": 5804.0,
+          "total": 5804.0
+        },
+        "6": {
+          "accuracy": 0.7226119805720453,
+          "correct": 4017.0,
+          "total": 5559.0
+        },
+        "5": {
+          "accuracy": 0.7514941199151726,
+          "correct": 3898.0,
+          "total": 5187.0
+        },
+        "4": {
+          "accuracy": 0.7860224331320104,
+          "correct": 3644.0,
+          "total": 4636.0
+        },
+        "2": {
+          "accuracy": 0.9669565217391304,
+          "correct": 3336.0,
+          "total": 3450.0
+        },
+        "3": {
+          "accuracy": 0.8402919708029197,
+          "correct": 2878.0,
+          "total": 3425.0
+        },
+        "7": {
+          "accuracy": 0.7020428500249128,
+          "correct": 1409.0,
+          "total": 2007.0
+        },
+        "8": {
+          "accuracy": 0.67984934086629,
+          "correct": 722.0,
+          "total": 1062.0
+        },
+        "9": {
+          "accuracy": 0.6372745490981964,
+          "correct": 318.0,
+          "total": 499.0
+        },
+        "10": {
+          "accuracy": 0.6056338028169014,
+          "correct": 129.0,
+          "total": 213.0
+        },
+        "11": {
+          "accuracy": 0.5934959349593496,
+          "correct": 73.0,
+          "total": 123.0
+        },
+        "12": {
+          "accuracy": 0.55,
+          "correct": 11.0,
+          "total": 20.0
+        },
+        "13": {
+          "accuracy": 0.5555555555555556,
+          "correct": 5.0,
+          "total": 9.0
+        },
+        "14": {
+          "accuracy": 0.8333333333333334,
+          "correct": 5.0,
+          "total": 6.0
+        }
+      },
+      "by_encounter": {
+        "ENTOMANCER": {
+          "accuracy": 0.8232720909886264,
+          "correct": 941.0,
+          "total": 1143.0
+        },
+        "NIBBIT": {
+          "accuracy": 0.8543689320388349,
+          "correct": 792.0,
+          "total": 927.0
+        },
+        "INFESTED_PRISM": {
+          "accuracy": 0.8119858989424207,
+          "correct": 691.0,
+          "total": 851.0
+        },
+        "THIEVING_HOPPER": {
+          "accuracy": 0.8226002430133658,
+          "correct": 677.0,
+          "total": 823.0
+        },
+        "SLUDGE_SPINNER": {
+          "accuracy": 0.850253807106599,
+          "correct": 670.0,
+          "total": 788.0
+        },
+        "TERROR_EEL": {
+          "accuracy": 0.8402130492676432,
+          "correct": 631.0,
+          "total": 751.0
+        },
+        "CORPSE_SLUG+CORPSE_SLUG": {
+          "accuracy": 0.8365384615384616,
+          "correct": 609.0,
+          "total": 728.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_FRONT+DECIMILLIPEDE_SEGMENT_MIDDLE": {
+          "accuracy": 0.8198324022346368,
+          "correct": 587.0,
+          "total": 716.0
+        },
+        "BYGONE_EFFIGY": {
+          "accuracy": 0.8769898697539797,
+          "correct": 606.0,
+          "total": 691.0
+        },
+        "DEVOTED_SCULPTOR": {
+          "accuracy": 0.8160741885625966,
+          "correct": 528.0,
+          "total": 647.0
+        },
+        "SHRINKER_BEETLE": {
+          "accuracy": 0.8722397476340694,
+          "correct": 553.0,
+          "total": 634.0
+        },
+        "FUZZY_WURM_CRAWLER": {
+          "accuracy": 0.814262023217247,
+          "correct": 491.0,
+          "total": 603.0
+        },
+        "TOADPOLE+TOADPOLE": {
+          "accuracy": 0.8336106489184693,
+          "correct": 501.0,
+          "total": 601.0
+        },
+        "TUNNELER": {
+          "accuracy": 0.8108581436077058,
+          "correct": 463.0,
+          "total": 571.0
+        },
+        "OVICOPTER": {
+          "accuracy": 0.8170515097690941,
+          "correct": 460.0,
+          "total": 563.0
+        },
+        "SEAPUNK": {
+          "accuracy": 0.8464285714285714,
+          "correct": 474.0,
+          "total": 560.0
+        },
+        "SKULKING_COLONY": {
+          "accuracy": 0.8426763110307414,
+          "correct": 466.0,
+          "total": 553.0
+        },
+        "PHROG_PARASITE": {
+          "accuracy": 0.792910447761194,
+          "correct": 425.0,
+          "total": 536.0
+        },
+        "MECHA_KNIGHT": {
+          "accuracy": 0.7404580152671756,
+          "correct": 388.0,
+          "total": 524.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.7248062015503876,
+          "correct": 374.0,
+          "total": 516.0
+        },
+        "BYRDONIS": {
+          "accuracy": 0.8678038379530917,
+          "correct": 407.0,
+          "total": 469.0
+        },
+        "LIVING_SHIELD+TURRET_OPERATOR": {
+          "accuracy": 0.7905405405405406,
+          "correct": 351.0,
+          "total": 444.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.8909512761020881,
+          "correct": 384.0,
+          "total": 431.0
+        },
+        "SOUL_FYSH": {
+          "accuracy": 0.8738317757009346,
+          "correct": 374.0,
+          "total": 428.0
+        },
+        "EXOSKELETON+EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.8164705882352942,
+          "correct": 347.0,
+          "total": 425.0
+        },
+        "SOUL_NEXUS": {
+          "accuracy": 0.7576470588235295,
+          "correct": 322.0,
+          "total": 425.0
+        },
+        "CALCIFIED_CULTIST+DAMP_CULTIST": {
+          "accuracy": 0.8432304038004751,
+          "correct": 355.0,
+          "total": 421.0
+        },
+        "THE_INSATIABLE": {
+          "accuracy": 0.8690476190476191,
+          "correct": 365.0,
+          "total": 420.0
+        },
+        "HUNTER_KILLER": {
+          "accuracy": 0.7275132275132276,
+          "correct": 275.0,
+          "total": 378.0
+        },
+        "BOWLBUG_NECTAR+BOWLBUG_ROCK": {
+          "accuracy": 0.8297297297297297,
+          "correct": 307.0,
+          "total": 370.0
+        },
+        "SPINY_TOAD": {
+          "accuracy": 0.8054054054054054,
+          "correct": 298.0,
+          "total": 370.0
+        },
+        "EXOSKELETON+EXOSKELETON+EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.7994579945799458,
+          "correct": 295.0,
+          "total": 369.0
+        },
+        "CUBEX_CONSTRUCT": {
+          "accuracy": 0.8692098092643051,
+          "correct": 319.0,
+          "total": 367.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S+TWIG_SLIME_S": {
+          "accuracy": 0.8259668508287292,
+          "correct": 299.0,
+          "total": 362.0
+        },
+        "INKLET+INKLET+INKLET": {
+          "accuracy": 0.8864265927977839,
+          "correct": 320.0,
+          "total": 361.0
+        },
+        "NIBBIT+NIBBIT": {
+          "accuracy": 0.8816568047337278,
+          "correct": 298.0,
+          "total": 338.0
+        },
+        "THE_FORGOTTEN+THE_LOST": {
+          "accuracy": 0.7713414634146342,
+          "correct": 253.0,
+          "total": 328.0
+        },
+        "KIN_FOLLOWER+KIN_FOLLOWER+KIN_PRIEST": {
+          "accuracy": 0.8589341692789969,
+          "correct": 274.0,
+          "total": 319.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_ROCK": {
+          "accuracy": 0.8354838709677419,
+          "correct": 259.0,
+          "total": 310.0
+        },
+        "VANTOM": {
+          "accuracy": 0.8092105263157895,
+          "correct": 246.0,
+          "total": 304.0
+        },
+        "CRUSHER+ROCKET": {
+          "accuracy": 0.7785234899328859,
+          "correct": 232.0,
+          "total": 298.0
+        },
+        "TEST_SUBJECT": {
+          "accuracy": 0.7466216216216216,
+          "correct": 221.0,
+          "total": 296.0
+        },
+        "GREMLIN_MERC": {
+          "accuracy": 0.8419243986254296,
+          "correct": 245.0,
+          "total": 291.0
+        },
+        "LOUSE_PROGENITOR": {
+          "accuracy": 0.7773851590106007,
+          "correct": 220.0,
+          "total": 283.0
+        },
+        "THE_OBSCURA": {
+          "accuracy": 0.8291814946619217,
+          "correct": 233.0,
+          "total": 281.0
+        },
+        "FUZZY_WURM_CRAWLER+SHRINKER_BEETLE": {
+          "accuracy": 0.8905660377358491,
+          "correct": 236.0,
+          "total": 265.0
+        },
+        "MYTE+MYTE": {
+          "accuracy": 0.8264150943396227,
+          "correct": 219.0,
+          "total": 265.0
+        },
+        "FLAIL_KNIGHT+MAGI_KNIGHT+SPECTRAL_KNIGHT": {
+          "accuracy": 0.7807692307692308,
+          "correct": 203.0,
+          "total": 260.0
+        },
+        "PUNCH_CONSTRUCT": {
+          "accuracy": 0.8284518828451883,
+          "correct": 198.0,
+          "total": 239.0
+        },
+        "KNOWLEDGE_DEMON": {
+          "accuracy": 0.8,
+          "correct": 188.0,
+          "total": 235.0
+        },
+        "PARAFRIGHT+THE_OBSCURA": {
+          "accuracy": 0.8227272727272728,
+          "correct": 181.0,
+          "total": 220.0
+        },
+        "HAUNTED_SHIP": {
+          "accuracy": 0.8715596330275229,
+          "correct": 190.0,
+          "total": 218.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_MIDDLE": {
+          "accuracy": 0.7549019607843137,
+          "correct": 154.0,
+          "total": 204.0
+        },
+        "CEREMONIAL_BEAST": {
+          "accuracy": 0.7969543147208121,
+          "correct": 157.0,
+          "total": 197.0
+        },
+        "CORPSE_SLUG+CORPSE_SLUG+CORPSE_SLUG": {
+          "accuracy": 0.828125,
+          "correct": 159.0,
+          "total": 192.0
+        },
+        "WRIGGLER+WRIGGLER+WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8972972972972973,
+          "correct": 166.0,
+          "total": 185.0
+        },
+        "FROG_KNIGHT": {
+          "accuracy": 0.6318681318681318,
+          "correct": 115.0,
+          "total": 182.0
+        },
+        "GLOBE_HEAD": {
+          "accuracy": 0.8228571428571428,
+          "correct": 144.0,
+          "total": 175.0
+        },
+        "SLIMED_BERSERKER": {
+          "accuracy": 0.7371428571428571,
+          "correct": 129.0,
+          "total": 175.0
+        },
+        "MYSTERIOUS_KNIGHT": {
+          "accuracy": 0.8830409356725146,
+          "correct": 151.0,
+          "total": 171.0
+        },
+        "CUBEX_CONSTRUCT+CUBEX_CONSTRUCT+PUNCH_CONSTRUCT": {
+          "accuracy": 0.8263473053892215,
+          "correct": 138.0,
+          "total": 167.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_ROCK+BOWLBUG_SILK": {
+          "accuracy": 0.8282208588957055,
+          "correct": 135.0,
+          "total": 163.0
+        },
+        "CHOMPER+CHOMPER": {
+          "accuracy": 0.7852760736196319,
+          "correct": 128.0,
+          "total": 163.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S+TWIG_SLIME_M+TWIG_SLIME_S": {
+          "accuracy": 0.8930817610062893,
+          "correct": 142.0,
+          "total": 159.0
+        },
+        "LEAF_SLIME_S+TWIG_SLIME_M+TWIG_SLIME_S": {
+          "accuracy": 0.8397435897435898,
+          "correct": 131.0,
+          "total": 156.0
+        },
+        "SEWER_CLAM": {
+          "accuracy": 0.8387096774193549,
+          "correct": 130.0,
+          "total": 155.0
+        },
+        "BOWLBUG_ROCK+BOWLBUG_SILK+SLUMBERING_BEETLE": {
+          "accuracy": 0.8300653594771242,
+          "correct": 127.0,
+          "total": 153.0
+        },
+        "FLYCONID+LEAF_SLIME_M": {
+          "accuracy": 0.8705035971223022,
+          "correct": 121.0,
+          "total": 139.0
+        },
+        "FLYCONID+SNAPPING_JAXFRUIT": {
+          "accuracy": 0.8571428571428571,
+          "correct": 114.0,
+          "total": 133.0
+        },
+        "VINE_SHAMBLER": {
+          "accuracy": 0.9172932330827067,
+          "correct": 122.0,
+          "total": 133.0
+        },
+        "CALCIFIED_CULTIST+SEAPUNK": {
+          "accuracy": 0.8320610687022901,
+          "correct": 109.0,
+          "total": 131.0
+        },
+        "LEAF_SLIME_S+TWIG_SLIME_S": {
+          "accuracy": 0.7251908396946565,
+          "correct": 95.0,
+          "total": 131.0
+        },
+        "TWO_TAILED_RAT+TWO_TAILED_RAT+TWO_TAILED_RAT": {
+          "accuracy": 0.7786259541984732,
+          "correct": 102.0,
+          "total": 131.0
+        },
+        "MAWLER": {
+          "accuracy": 0.7538461538461538,
+          "correct": 98.0,
+          "total": 130.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.7165354330708661,
+          "correct": 91.0,
+          "total": 127.0
+        },
+        "LAGAVULIN_MATRIARCH": {
+          "accuracy": 0.7540983606557377,
+          "correct": 92.0,
+          "total": 122.0
+        },
+        "EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.7586206896551724,
+          "correct": 88.0,
+          "total": 116.0
+        },
+        "BOWLBUG_NECTAR+BOWLBUG_ROCK+BOWLBUG_SILK": {
+          "accuracy": 0.9017857142857143,
+          "correct": 101.0,
+          "total": 112.0
+        },
+        "CORPSE_SLUG": {
+          "accuracy": 0.8018018018018018,
+          "correct": 89.0,
+          "total": 111.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.8773584905660378,
+          "correct": 93.0,
+          "total": 106.0
+        },
+        "LIVING_FOG": {
+          "accuracy": 0.7142857142857143,
+          "correct": 70.0,
+          "total": 98.0
+        },
+        "OWL_MAGISTRATE": {
+          "accuracy": 0.673469387755102,
+          "correct": 66.0,
+          "total": 98.0
+        },
+        "EYE_WITH_TEETH+FOGMOG": {
+          "accuracy": 0.9263157894736842,
+          "correct": 88.0,
+          "total": 95.0
+        },
+        "AXEBOT+AXEBOT": {
+          "accuracy": 0.6153846153846154,
+          "correct": 56.0,
+          "total": 91.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_NECTAR+BOWLBUG_ROCK": {
+          "accuracy": 0.9111111111111111,
+          "correct": 82.0,
+          "total": 90.0
+        },
+        "FOSSIL_STALKER": {
+          "accuracy": 0.8620689655172413,
+          "correct": 75.0,
+          "total": 87.0
+        },
+        "QUEEN+TORCH_HEAD_AMALGAM": {
+          "accuracy": 0.6823529411764706,
+          "correct": 58.0,
+          "total": 85.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.7564102564102564,
+          "correct": 59.0,
+          "total": 78.0
+        },
+        "FOGMOG": {
+          "accuracy": 0.8533333333333334,
+          "correct": 64.0,
+          "total": 75.0
+        },
+        "TURRET_OPERATOR": {
+          "accuracy": 0.7702702702702703,
+          "correct": 57.0,
+          "total": 74.0
+        },
+        "PUNCH_CONSTRUCT+PUNCH_CONSTRUCT": {
+          "accuracy": 0.9027777777777778,
+          "correct": 65.0,
+          "total": 72.0
+        },
+        "FAT_GREMLIN+SNEAKY_GREMLIN": {
+          "accuracy": 0.9130434782608695,
+          "correct": 63.0,
+          "total": 69.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.8529411764705882,
+          "correct": 58.0,
+          "total": 68.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S": {
+          "accuracy": 0.8333333333333334,
+          "correct": 55.0,
+          "total": 66.0
+        },
+        "FABRICATOR": {
+          "accuracy": 0.8095238095238095,
+          "correct": 51.0,
+          "total": 63.0
+        },
+        "TOADPOLE": {
+          "accuracy": 0.7777777777777778,
+          "correct": 49.0,
+          "total": 63.0
+        },
+        "CALCIFIED_CULTIST+TOADPOLE": {
+          "accuracy": 0.9322033898305084,
+          "correct": 55.0,
+          "total": 59.0
+        },
+        "BOWLBUG_EGG": {
+          "accuracy": 0.8421052631578947,
+          "correct": 48.0,
+          "total": 57.0
+        },
+        "DAMP_CULTIST": {
+          "accuracy": 0.7719298245614035,
+          "correct": 44.0,
+          "total": 57.0
+        },
+        "CHOMPER+TUNNELER": {
+          "accuracy": 0.7454545454545455,
+          "correct": 41.0,
+          "total": 55.0
+        },
+        "ASSASSIN_RUBY_RAIDER+AXE_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER": {
+          "accuracy": 0.8301886792452831,
+          "correct": 44.0,
+          "total": 53.0
+        },
+        "BATTLE_FRIEND_V2": {
+          "accuracy": 0.7450980392156863,
+          "correct": 38.0,
+          "total": 51.0
+        },
+        "TWO_TAILED_RAT+TWO_TAILED_RAT": {
+          "accuracy": 0.875,
+          "correct": 42.0,
+          "total": 48.0
+        },
+        "BATTLE_FRIEND_V3": {
+          "accuracy": 0.723404255319149,
+          "correct": 34.0,
+          "total": 47.0
+        },
+        "INKLET+INKLET": {
+          "accuracy": 0.8297872340425532,
+          "correct": 39.0,
+          "total": 47.0
+        },
+        "BOWLBUG_EGG+TUNNELER": {
+          "accuracy": 0.8260869565217391,
+          "correct": 38.0,
+          "total": 46.0
+        },
+        "LEAF_SLIME_S": {
+          "accuracy": 0.8478260869565217,
+          "correct": 39.0,
+          "total": 46.0
+        },
+        "WRIGGLER+WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8913043478260869,
+          "correct": 41.0,
+          "total": 46.0
+        },
+        "BOWLBUG_NECTAR": {
+          "accuracy": 0.6,
+          "correct": 27.0,
+          "total": 45.0
+        },
+        "FLYCONID+TWIG_SLIME_M": {
+          "accuracy": 0.8222222222222222,
+          "correct": 37.0,
+          "total": 45.0
+        },
+        "CUBEX_CONSTRUCT+CUBEX_CONSTRUCT": {
+          "accuracy": 0.7727272727272727,
+          "correct": 34.0,
+          "total": 44.0
+        },
+        "THE_FORGOTTEN": {
+          "accuracy": 0.75,
+          "correct": 33.0,
+          "total": 44.0
+        },
+        "EXOSKELETON": {
+          "accuracy": 0.7209302325581395,
+          "correct": 31.0,
+          "total": 43.0
+        },
+        "SCROLL_OF_BITING": {
+          "accuracy": 0.5121951219512195,
+          "correct": 21.0,
+          "total": 41.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK": {
+          "accuracy": 0.725,
+          "correct": 29.0,
+          "total": 40.0
+        },
+        "FLYCONID": {
+          "accuracy": 0.7567567567567568,
+          "correct": 28.0,
+          "total": 37.0
+        },
+        "WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8648648648648649,
+          "correct": 32.0,
+          "total": 37.0
+        },
+        "AXE_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER+TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.9142857142857143,
+          "correct": 32.0,
+          "total": 35.0
+        },
+        "LEAF_SLIME_M+TWIG_SLIME_S": {
+          "accuracy": 0.8571428571428571,
+          "correct": 30.0,
+          "total": 35.0
+        },
+        "LEAF_SLIME_S+SLITHERING_STRANGLER+TWIG_SLIME_S": {
+          "accuracy": 0.9142857142857143,
+          "correct": 32.0,
+          "total": 35.0
+        },
+        "SLUMBERING_BEETLE": {
+          "accuracy": 0.6571428571428571,
+          "correct": 23.0,
+          "total": 35.0
+        },
+        "MAGI_KNIGHT+SPECTRAL_KNIGHT": {
+          "accuracy": 0.7647058823529411,
+          "correct": 26.0,
+          "total": 34.0
+        },
+        "BOWLBUG_SILK+SLUMBERING_BEETLE": {
+          "accuracy": 0.875,
+          "correct": 28.0,
+          "total": 32.0
+        },
+        "FABRICATOR+GUARDBOT+STABBOT": {
+          "accuracy": 0.7931034482758621,
+          "correct": 23.0,
+          "total": 29.0
+        },
+        "BOWLBUG_NECTAR+BOWLBUG_SILK": {
+          "accuracy": 0.8214285714285714,
+          "correct": 23.0,
+          "total": 28.0
+        },
+        "LEAF_SLIME_S+TWIG_SLIME_M": {
+          "accuracy": 0.8928571428571429,
+          "correct": 25.0,
+          "total": 28.0
+        },
+        "BATTLE_FRIEND_V1": {
+          "accuracy": 0.7777777777777778,
+          "correct": 21.0,
+          "total": 27.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_NECTAR": {
+          "accuracy": 0.7407407407407407,
+          "correct": 20.0,
+          "total": 27.0
+        },
+        "KIN_FOLLOWER+KIN_PRIEST": {
+          "accuracy": 0.7777777777777778,
+          "correct": 21.0,
+          "total": 27.0
+        },
+        "QUEEN": {
+          "accuracy": 0.5384615384615384,
+          "correct": 14.0,
+          "total": 26.0
+        },
+        "CHOMPER": {
+          "accuracy": 0.84,
+          "correct": 21.0,
+          "total": 25.0
+        },
+        "LEAF_SLIME_M+SLITHERING_STRANGLER": {
+          "accuracy": 0.8333333333333334,
+          "correct": 20.0,
+          "total": 24.0
+        },
+        "ASSASSIN_RUBY_RAIDER+AXE_RUBY_RAIDER+BRUTE_RUBY_RAIDER": {
+          "accuracy": 0.6956521739130435,
+          "correct": 16.0,
+          "total": 23.0
+        },
+        "SLITHERING_STRANGLER+TWIG_SLIME_S+TWIG_SLIME_S": {
+          "accuracy": 0.8695652173913043,
+          "correct": 20.0,
+          "total": 23.0
+        },
+        "FLAIL_KNIGHT+SPECTRAL_KNIGHT": {
+          "accuracy": 0.8181818181818182,
+          "correct": 18.0,
+          "total": 22.0
+        },
+        "ROCKET": {
+          "accuracy": 0.7272727272727273,
+          "correct": 16.0,
+          "total": 22.0
+        },
+        "SLITHERING_STRANGLER": {
+          "accuracy": 0.5909090909090909,
+          "correct": 13.0,
+          "total": 22.0
+        },
+        "BOWLBUG_ROCK": {
+          "accuracy": 0.65,
+          "correct": 13.0,
+          "total": 20.0
+        },
+        "BOWLBUG_SILK": {
+          "accuracy": 0.7894736842105263,
+          "correct": 15.0,
+          "total": 19.0
+        },
+        "DECIMILLIPEDE_SEGMENT_FRONT+DECIMILLIPEDE_SEGMENT_MIDDLE": {
+          "accuracy": 1.0,
+          "correct": 19.0,
+          "total": 19.0
+        },
+        "SLITHERING_STRANGLER+SNAPPING_JAXFRUIT": {
+          "accuracy": 0.9473684210526315,
+          "correct": 18.0,
+          "total": 19.0
+        },
+        "BRUTE_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER+TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.9444444444444444,
+          "correct": 17.0,
+          "total": 18.0
+        },
+        "LEAF_SLIME_M": {
+          "accuracy": 0.6666666666666666,
+          "correct": 12.0,
+          "total": 18.0
+        },
+        "AXE_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER": {
+          "accuracy": 1.0,
+          "correct": 17.0,
+          "total": 17.0
+        },
+        "PHANTASMAL_GARDENER": {
+          "accuracy": 0.7647058823529411,
+          "correct": 13.0,
+          "total": 17.0
+        },
+        "FABRICATOR+STABBOT": {
+          "accuracy": 0.6875,
+          "correct": 11.0,
+          "total": 16.0
+        },
+        "TWIG_SLIME_S": {
+          "accuracy": 0.9375,
+          "correct": 15.0,
+          "total": 16.0
+        },
+        "INKLET": {
+          "accuracy": 0.6666666666666666,
+          "correct": 10.0,
+          "total": 15.0
+        },
+        "ASSASSIN_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER": {
+          "accuracy": 0.8571428571428571,
+          "correct": 12.0,
+          "total": 14.0
+        },
+        "FABRICATOR+GUARDBOT+STABBOT+ZAPBOT": {
+          "accuracy": 0.9285714285714286,
+          "correct": 13.0,
+          "total": 14.0
+        },
+        "SNEAKY_GREMLIN": {
+          "accuracy": 0.6923076923076923,
+          "correct": 9.0,
+          "total": 13.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_FRONT": {
+          "accuracy": 0.9166666666666666,
+          "correct": 11.0,
+          "total": 12.0
+        },
+        "MYTE": {
+          "accuracy": 0.75,
+          "correct": 9.0,
+          "total": 12.0
+        },
+        "WATERFALL_GIANT": {
+          "accuracy": 1.0,
+          "correct": 12.0,
+          "total": 12.0
+        },
+        "WRIGGLER": {
+          "accuracy": 0.75,
+          "correct": 9.0,
+          "total": 12.0
+        },
+        "CALCIFIED_CULTIST": {
+          "accuracy": 0.6363636363636364,
+          "correct": 7.0,
+          "total": 11.0
+        },
+        "FAT_GREMLIN": {
+          "accuracy": 0.5454545454545454,
+          "correct": 6.0,
+          "total": 11.0
+        },
+        "TWO_TAILED_RAT": {
+          "accuracy": 0.7272727272727273,
+          "correct": 8.0,
+          "total": 11.0
+        },
+        "ASSASSIN_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER+TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.9,
+          "correct": 9.0,
+          "total": 10.0
+        },
+        "AXE_RUBY_RAIDER": {
+          "accuracy": 0.9,
+          "correct": 9.0,
+          "total": 10.0
+        },
+        "LIVING_SHIELD": {
+          "accuracy": 0.6,
+          "correct": 6.0,
+          "total": 10.0
+        },
+        "SPECTRAL_KNIGHT": {
+          "accuracy": 0.7,
+          "correct": 7.0,
+          "total": 10.0
+        },
+        "AXE_RUBY_RAIDER+TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.8571428571428571,
+          "correct": 6.0,
+          "total": 7.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_SILK": {
+          "accuracy": 1.0,
+          "correct": 7.0,
+          "total": 7.0
+        },
+        "FABRICATOR+ZAPBOT": {
+          "accuracy": 0.7142857142857143,
+          "correct": 5.0,
+          "total": 7.0
+        },
+        "KIN_PRIEST": {
+          "accuracy": 0.5714285714285714,
+          "correct": 4.0,
+          "total": 7.0
+        },
+        "MAGI_KNIGHT": {
+          "accuracy": 0.7142857142857143,
+          "correct": 5.0,
+          "total": 7.0
+        },
+        "CUBEX_CONSTRUCT+PUNCH_CONSTRUCT": {
+          "accuracy": 0.6666666666666666,
+          "correct": 4.0,
+          "total": 6.0
+        },
+        "DECIMILLIPEDE_SEGMENT_MIDDLE": {
+          "accuracy": 0.5,
+          "correct": 3.0,
+          "total": 6.0
+        },
+        "ASSASSIN_RUBY_RAIDER+AXE_RUBY_RAIDER": {
+          "accuracy": 0.6,
+          "correct": 3.0,
+          "total": 5.0
+        },
+        "BRUTE_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER": {
+          "accuracy": 1.0,
+          "correct": 5.0,
+          "total": 5.0
+        },
+        "FABRICATOR+STABBOT+ZAPBOT": {
+          "accuracy": 1.0,
+          "correct": 5.0,
+          "total": 5.0
+        },
+        "BOWLBUG_ROCK+BOWLBUG_SILK": {
+          "accuracy": 0.75,
+          "correct": 3.0,
+          "total": 4.0
+        },
+        "FABRICATOR+NOISEBOT": {
+          "accuracy": 1.0,
+          "correct": 4.0,
+          "total": 4.0
+        },
+        "LEAF_SLIME_M+TWIG_SLIME_M": {
+          "accuracy": 0.75,
+          "correct": 3.0,
+          "total": 4.0
+        },
+        "FABRICATOR+NOISEBOT+ZAPBOT": {
+          "accuracy": 0.6666666666666666,
+          "correct": 2.0,
+          "total": 3.0
+        },
+        "FLAIL_KNIGHT": {
+          "accuracy": 0.3333333333333333,
+          "correct": 1.0,
+          "total": 3.0
+        },
+        "THE_LOST": {
+          "accuracy": 0.6666666666666666,
+          "correct": 2.0,
+          "total": 3.0
+        },
+        "FABRICATOR+GUARDBOT+ZAPBOT": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "FLAIL_KNIGHT+MAGI_KNIGHT": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S+TWIG_SLIME_M": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        },
+        "LEAF_SLIME_S+SLITHERING_STRANGLER": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        },
+        "SLITHERING_STRANGLER+TWIG_SLIME_S": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        },
+        "TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "TWIG_SLIME_S+TWIG_SLIME_S": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        }
+      },
+      "misclassified_saved": 100,
+      "top_1_accuracy": 0.82028125,
+      "top_3_accuracy": 0.971,
+      "top_5_accuracy": 0.995125
+    },
+    "validation": {
+      "loss": 0.686233577412393,
+      "accuracy": 0.7754505601558694,
+      "illegal_action_rate": 0.0,
+      "decisions": 4106.0,
+      "by_action_type": {
+        "card": {
+          "accuracy": 0.7379696769940672,
+          "correct": 2239.0,
+          "total": 3034.0
+        },
+        "system": {
+          "accuracy": 0.9108040201005025,
+          "correct": 725.0,
+          "total": 796.0
+        },
+        "potion": {
+          "accuracy": 0.7971014492753623,
+          "correct": 220.0,
+          "total": 276.0
+        }
+      },
+      "by_outcome": {
+        "victory": {
+          "accuracy": 0.7686170212765957,
+          "correct": 2601.0,
+          "total": 3384.0
+        },
+        "defeat": {
+          "accuracy": 0.8074792243767313,
+          "correct": 583.0,
+          "total": 722.0
+        }
+      },
+      "by_legal_action_count": {
+        "1": {
+          "accuracy": 1.0,
+          "correct": 725.0,
+          "total": 725.0
+        },
+        "6": {
+          "accuracy": 0.6586102719033232,
+          "correct": 436.0,
+          "total": 662.0
+        },
+        "5": {
+          "accuracy": 0.6869009584664537,
+          "correct": 430.0,
+          "total": 626.0
+        },
+        "4": {
+          "accuracy": 0.7043918918918919,
+          "correct": 417.0,
+          "total": 592.0
+        },
+        "2": {
+          "accuracy": 0.9463917525773196,
+          "correct": 459.0,
+          "total": 485.0
+        },
+        "3": {
+          "accuracy": 0.7857142857142857,
+          "correct": 352.0,
+          "total": 448.0
+        },
+        "7": {
+          "accuracy": 0.6796875,
+          "correct": 174.0,
+          "total": 256.0
+        },
+        "8": {
+          "accuracy": 0.6588235294117647,
+          "correct": 112.0,
+          "total": 170.0
+        },
+        "9": {
+          "accuracy": 0.5857142857142857,
+          "correct": 41.0,
+          "total": 70.0
+        },
+        "10": {
+          "accuracy": 0.5714285714285714,
+          "correct": 24.0,
+          "total": 42.0
+        },
+        "11": {
+          "accuracy": 0.42857142857142855,
+          "correct": 12.0,
+          "total": 28.0
+        },
+        "12": {
+          "accuracy": 1.0,
+          "correct": 2.0,
+          "total": 2.0
+        }
+      },
+      "by_encounter": {
+        "ENTOMANCER": {
+          "accuracy": 0.7613636363636364,
+          "correct": 134.0,
+          "total": 176.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_FRONT+DECIMILLIPEDE_SEGMENT_MIDDLE": {
+          "accuracy": 0.8402366863905325,
+          "correct": 142.0,
+          "total": 169.0
+        },
+        "SOUL_NEXUS": {
+          "accuracy": 0.6923076923076923,
+          "correct": 108.0,
+          "total": 156.0
+        },
+        "DEVOTED_SCULPTOR": {
+          "accuracy": 0.7677419354838709,
+          "correct": 119.0,
+          "total": 155.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.9172413793103448,
+          "correct": 133.0,
+          "total": 145.0
+        },
+        "LIVING_SHIELD+TURRET_OPERATOR": {
+          "accuracy": 0.7338129496402878,
+          "correct": 102.0,
+          "total": 139.0
+        },
+        "SLUDGE_SPINNER": {
+          "accuracy": 0.768595041322314,
+          "correct": 93.0,
+          "total": 121.0
+        },
+        "BYRDONIS": {
+          "accuracy": 0.7913043478260869,
+          "correct": 91.0,
+          "total": 115.0
+        },
+        "THE_INSATIABLE": {
+          "accuracy": 0.6415094339622641,
+          "correct": 68.0,
+          "total": 106.0
+        },
+        "LOUSE_PROGENITOR": {
+          "accuracy": 0.8041237113402062,
+          "correct": 78.0,
+          "total": 97.0
+        },
+        "THIEVING_HOPPER": {
+          "accuracy": 0.7419354838709677,
+          "correct": 69.0,
+          "total": 93.0
+        },
+        "INFESTED_PRISM": {
+          "accuracy": 0.8636363636363636,
+          "correct": 76.0,
+          "total": 88.0
+        },
+        "NIBBIT": {
+          "accuracy": 0.7241379310344828,
+          "correct": 63.0,
+          "total": 87.0
+        },
+        "FUZZY_WURM_CRAWLER": {
+          "accuracy": 0.7209302325581395,
+          "correct": 62.0,
+          "total": 86.0
+        },
+        "SPINY_TOAD": {
+          "accuracy": 0.7619047619047619,
+          "correct": 64.0,
+          "total": 84.0
+        },
+        "TUNNELER": {
+          "accuracy": 0.6785714285714286,
+          "correct": 57.0,
+          "total": 84.0
+        },
+        "OWL_MAGISTRATE": {
+          "accuracy": 0.8227848101265823,
+          "correct": 65.0,
+          "total": 79.0
+        },
+        "MYTE+MYTE": {
+          "accuracy": 0.8461538461538461,
+          "correct": 66.0,
+          "total": 78.0
+        },
+        "BYGONE_EFFIGY": {
+          "accuracy": 0.96,
+          "correct": 72.0,
+          "total": 75.0
+        },
+        "SKULKING_COLONY": {
+          "accuracy": 0.75,
+          "correct": 54.0,
+          "total": 72.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_ROCK": {
+          "accuracy": 0.835820895522388,
+          "correct": 56.0,
+          "total": 67.0
+        },
+        "LIVING_FOG": {
+          "accuracy": 0.7384615384615385,
+          "correct": 48.0,
+          "total": 65.0
+        },
+        "CRUSHER+ROCKET": {
+          "accuracy": 0.8888888888888888,
+          "correct": 56.0,
+          "total": 63.0
+        },
+        "CORPSE_SLUG+CORPSE_SLUG": {
+          "accuracy": 0.6779661016949152,
+          "correct": 40.0,
+          "total": 59.0
+        },
+        "CHOMPER+CHOMPER": {
+          "accuracy": 0.7368421052631579,
+          "correct": 42.0,
+          "total": 57.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S+TWIG_SLIME_S": {
+          "accuracy": 0.8928571428571429,
+          "correct": 50.0,
+          "total": 56.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.6785714285714286,
+          "correct": 38.0,
+          "total": 56.0
+        },
+        "SLITHERING_STRANGLER+SNAPPING_JAXFRUIT": {
+          "accuracy": 0.875,
+          "correct": 49.0,
+          "total": 56.0
+        },
+        "SEAPUNK": {
+          "accuracy": 0.8518518518518519,
+          "correct": 46.0,
+          "total": 54.0
+        },
+        "BOWLBUG_NECTAR+BOWLBUG_ROCK": {
+          "accuracy": 0.7843137254901961,
+          "correct": 40.0,
+          "total": 51.0
+        },
+        "INKLET+INKLET+INKLET": {
+          "accuracy": 0.875,
+          "correct": 42.0,
+          "total": 48.0
+        },
+        "VINE_SHAMBLER": {
+          "accuracy": 0.7083333333333334,
+          "correct": 34.0,
+          "total": 48.0
+        },
+        "FLYCONID+SNAPPING_JAXFRUIT": {
+          "accuracy": 0.7727272727272727,
+          "correct": 34.0,
+          "total": 44.0
+        },
+        "TOADPOLE+TOADPOLE": {
+          "accuracy": 0.7317073170731707,
+          "correct": 30.0,
+          "total": 41.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_MIDDLE": {
+          "accuracy": 0.725,
+          "correct": 29.0,
+          "total": 40.0
+        },
+        "MECHA_KNIGHT": {
+          "accuracy": 0.6842105263157895,
+          "correct": 26.0,
+          "total": 38.0
+        },
+        "SLITHERING_STRANGLER+TWIG_SLIME_M": {
+          "accuracy": 0.8,
+          "correct": 28.0,
+          "total": 35.0
+        },
+        "CEREMONIAL_BEAST": {
+          "accuracy": 0.7941176470588235,
+          "correct": 27.0,
+          "total": 34.0
+        },
+        "PHROG_PARASITE": {
+          "accuracy": 0.7647058823529411,
+          "correct": 26.0,
+          "total": 34.0
+        },
+        "PARAFRIGHT+THE_OBSCURA": {
+          "accuracy": 0.8484848484848485,
+          "correct": 28.0,
+          "total": 33.0
+        },
+        "SEWER_CLAM": {
+          "accuracy": 0.7272727272727273,
+          "correct": 24.0,
+          "total": 33.0
+        },
+        "LEAF_SLIME_S+TWIG_SLIME_M+TWIG_SLIME_S": {
+          "accuracy": 0.8709677419354839,
+          "correct": 27.0,
+          "total": 31.0
+        },
+        "CUBEX_CONSTRUCT": {
+          "accuracy": 0.7333333333333333,
+          "correct": 22.0,
+          "total": 30.0
+        },
+        "FOSSIL_STALKER": {
+          "accuracy": 0.7666666666666667,
+          "correct": 23.0,
+          "total": 30.0
+        },
+        "GREMLIN_MERC": {
+          "accuracy": 0.7142857142857143,
+          "correct": 20.0,
+          "total": 28.0
+        },
+        "THE_OBSCURA": {
+          "accuracy": 0.8214285714285714,
+          "correct": 23.0,
+          "total": 28.0
+        },
+        "FABRICATOR": {
+          "accuracy": 0.7777777777777778,
+          "correct": 21.0,
+          "total": 27.0
+        },
+        "FLAIL_KNIGHT+MAGI_KNIGHT+SPECTRAL_KNIGHT": {
+          "accuracy": 0.6666666666666666,
+          "correct": 18.0,
+          "total": 27.0
+        },
+        "SHRINKER_BEETLE": {
+          "accuracy": 0.8518518518518519,
+          "correct": 23.0,
+          "total": 27.0
+        },
+        "EYE_WITH_TEETH+FOGMOG": {
+          "accuracy": 0.9230769230769231,
+          "correct": 24.0,
+          "total": 26.0
+        },
+        "MYTE": {
+          "accuracy": 0.72,
+          "correct": 18.0,
+          "total": 25.0
+        },
+        "FROG_KNIGHT": {
+          "accuracy": 0.43478260869565216,
+          "correct": 10.0,
+          "total": 23.0
+        },
+        "WRIGGLER+WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8695652173913043,
+          "correct": 20.0,
+          "total": 23.0
+        },
+        "AXEBOT+AXEBOT": {
+          "accuracy": 0.8181818181818182,
+          "correct": 18.0,
+          "total": 22.0
+        },
+        "CHOMPER+TUNNELER": {
+          "accuracy": 0.6190476190476191,
+          "correct": 13.0,
+          "total": 21.0
+        },
+        "BOWLBUG_EGG": {
+          "accuracy": 0.7,
+          "correct": 14.0,
+          "total": 20.0
+        },
+        "CUBEX_CONSTRUCT+CUBEX_CONSTRUCT+PUNCH_CONSTRUCT": {
+          "accuracy": 0.8,
+          "correct": 16.0,
+          "total": 20.0
+        },
+        "HUNTER_KILLER": {
+          "accuracy": 0.55,
+          "correct": 11.0,
+          "total": 20.0
+        },
+        "KIN_FOLLOWER+KIN_FOLLOWER+KIN_PRIEST": {
+          "accuracy": 0.7894736842105263,
+          "correct": 15.0,
+          "total": 19.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S": {
+          "accuracy": 0.8421052631578947,
+          "correct": 16.0,
+          "total": 19.0
+        },
+        "CORPSE_SLUG+CORPSE_SLUG+CORPSE_SLUG": {
+          "accuracy": 0.8333333333333334,
+          "correct": 15.0,
+          "total": 18.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.7222222222222222,
+          "correct": 13.0,
+          "total": 18.0
+        },
+        "TWO_TAILED_RAT+TWO_TAILED_RAT+TWO_TAILED_RAT": {
+          "accuracy": 0.6666666666666666,
+          "correct": 12.0,
+          "total": 18.0
+        },
+        "EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.8125,
+          "correct": 13.0,
+          "total": 16.0
+        },
+        "HAUNTED_SHIP": {
+          "accuracy": 0.875,
+          "correct": 14.0,
+          "total": 16.0
+        },
+        "CALCIFIED_CULTIST+DAMP_CULTIST": {
+          "accuracy": 0.8666666666666667,
+          "correct": 13.0,
+          "total": 15.0
+        },
+        "FABRICATOR+GUARDBOT+ZAPBOT+ZAPBOT": {
+          "accuracy": 0.7857142857142857,
+          "correct": 11.0,
+          "total": 14.0
+        },
+        "FLYCONID+TWIG_SLIME_M": {
+          "accuracy": 0.7857142857142857,
+          "correct": 11.0,
+          "total": 14.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_NECTAR+BOWLBUG_ROCK": {
+          "accuracy": 0.9230769230769231,
+          "correct": 12.0,
+          "total": 13.0
+        },
+        "BOWLBUG_ROCK+BOWLBUG_SILK+SLUMBERING_BEETLE": {
+          "accuracy": 0.9230769230769231,
+          "correct": 12.0,
+          "total": 13.0
+        },
+        "EXOSKELETON+EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.6923076923076923,
+          "correct": 9.0,
+          "total": 13.0
+        },
+        "FABRICATOR+GUARDBOT+ZAPBOT": {
+          "accuracy": 0.9230769230769231,
+          "correct": 12.0,
+          "total": 13.0
+        },
+        "TURRET_OPERATOR": {
+          "accuracy": 0.6923076923076923,
+          "correct": 9.0,
+          "total": 13.0
+        },
+        "WRIGGLER": {
+          "accuracy": 0.6923076923076923,
+          "correct": 9.0,
+          "total": 13.0
+        },
+        "FLAIL_KNIGHT+MAGI_KNIGHT": {
+          "accuracy": 1.0,
+          "correct": 12.0,
+          "total": 12.0
+        },
+        "SLUMBERING_BEETLE": {
+          "accuracy": 0.6666666666666666,
+          "correct": 8.0,
+          "total": 12.0
+        },
+        "TERROR_EEL": {
+          "accuracy": 0.8333333333333334,
+          "correct": 10.0,
+          "total": 12.0
+        },
+        "WRIGGLER+WRIGGLER+WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8333333333333334,
+          "correct": 10.0,
+          "total": 12.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_FRONT": {
+          "accuracy": 0.8181818181818182,
+          "correct": 9.0,
+          "total": 11.0
+        },
+        "FABRICATOR+STABBOT": {
+          "accuracy": 0.8181818181818182,
+          "correct": 9.0,
+          "total": 11.0
+        },
+        "FABRICATOR+STABBOT+STABBOT": {
+          "accuracy": 0.8181818181818182,
+          "correct": 9.0,
+          "total": 11.0
+        },
+        "WRIGGLER+WRIGGLER": {
+          "accuracy": 0.9090909090909091,
+          "correct": 10.0,
+          "total": 11.0
+        },
+        "LEAF_SLIME_M+TWIG_SLIME_S": {
+          "accuracy": 0.7,
+          "correct": 7.0,
+          "total": 10.0
+        },
+        "INKLET+INKLET": {
+          "accuracy": 0.75,
+          "correct": 6.0,
+          "total": 8.0
+        },
+        "SLITHERING_STRANGLER": {
+          "accuracy": 0.625,
+          "correct": 5.0,
+          "total": 8.0
+        },
+        "CORPSE_SLUG": {
+          "accuracy": 0.7142857142857143,
+          "correct": 5.0,
+          "total": 7.0
+        },
+        "FOGMOG": {
+          "accuracy": 0.7142857142857143,
+          "correct": 5.0,
+          "total": 7.0
+        },
+        "INKLET": {
+          "accuracy": 0.8571428571428571,
+          "correct": 6.0,
+          "total": 7.0
+        },
+        "LEAF_SLIME_S+TWIG_SLIME_M": {
+          "accuracy": 0.7142857142857143,
+          "correct": 5.0,
+          "total": 7.0
+        },
+        "BOWLBUG_SILK+SLUMBERING_BEETLE": {
+          "accuracy": 1.0,
+          "correct": 6.0,
+          "total": 6.0
+        },
+        "CUBEX_CONSTRUCT+PUNCH_CONSTRUCT": {
+          "accuracy": 0.8333333333333334,
+          "correct": 5.0,
+          "total": 6.0
+        },
+        "LEAF_SLIME_S": {
+          "accuracy": 0.8,
+          "correct": 4.0,
+          "total": 5.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.8,
+          "correct": 4.0,
+          "total": 5.0
+        },
+        "SCROLL_OF_BITING": {
+          "accuracy": 0.6,
+          "correct": 3.0,
+          "total": 5.0
+        },
+        "TOADPOLE": {
+          "accuracy": 0.8,
+          "correct": 4.0,
+          "total": 5.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK": {
+          "accuracy": 0.25,
+          "correct": 1.0,
+          "total": 4.0
+        },
+        "PHANTASMAL_GARDENER": {
+          "accuracy": 0.5,
+          "correct": 2.0,
+          "total": 4.0
+        },
+        "TWIG_SLIME_M": {
+          "accuracy": 0.75,
+          "correct": 3.0,
+          "total": 4.0
+        },
+        "FLYCONID": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 3.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.6666666666666666,
+          "correct": 2.0,
+          "total": 3.0
+        },
+        "BOWLBUG_ROCK": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 2.0
+        },
+        "CHOMPER": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "EXOSKELETON": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "FAT_GREMLIN+SNEAKY_GREMLIN": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "TWIG_SLIME_S": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "TWO_TAILED_RAT": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "TWO_TAILED_RAT+TWO_TAILED_RAT": {
+          "accuracy": 1.0,
+          "correct": 2.0,
+          "total": 2.0
+        },
+        "BOWLBUG_NECTAR": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "DAMP_CULTIST": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "FAT_GREMLIN": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "MAGI_KNIGHT": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "PUNCH_CONSTRUCT": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "SNAPPING_JAXFRUIT": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        }
+      },
+      "misclassified_saved": 100,
+      "top_1_accuracy": 0.7754505601558694,
+      "top_3_accuracy": 0.9622503653190453,
+      "top_5_accuracy": 0.9917194349732099
+    },
+    "test": {
+      "loss": 0.6915267122939612,
+      "accuracy": 0.7762154432793136,
+      "illegal_action_rate": 0.0,
+      "decisions": 4196.0,
+      "by_action_type": {
+        "card": {
+          "accuracy": 0.7350758309131978,
+          "correct": 2278.0,
+          "total": 3099.0
+        },
+        "system": {
+          "accuracy": 0.9261904761904762,
+          "correct": 778.0,
+          "total": 840.0
+        },
+        "potion": {
+          "accuracy": 0.7821011673151751,
+          "correct": 201.0,
+          "total": 257.0
+        }
+      },
+      "by_outcome": {
+        "victory": {
+          "accuracy": 0.7652552926525529,
+          "correct": 2458.0,
+          "total": 3212.0
+        },
+        "defeat": {
+          "accuracy": 0.8119918699186992,
+          "correct": 799.0,
+          "total": 984.0
+        }
+      },
+      "by_legal_action_count": {
+        "1": {
+          "accuracy": 1.0,
+          "correct": 774.0,
+          "total": 774.0
+        },
+        "6": {
+          "accuracy": 0.6716621253405994,
+          "correct": 493.0,
+          "total": 734.0
+        },
+        "5": {
+          "accuracy": 0.676923076923077,
+          "correct": 484.0,
+          "total": 715.0
+        },
+        "4": {
+          "accuracy": 0.7169230769230769,
+          "correct": 466.0,
+          "total": 650.0
+        },
+        "2": {
+          "accuracy": 0.9410430839002267,
+          "correct": 415.0,
+          "total": 441.0
+        },
+        "3": {
+          "accuracy": 0.7686915887850467,
+          "correct": 329.0,
+          "total": 428.0
+        },
+        "7": {
+          "accuracy": 0.6653386454183267,
+          "correct": 167.0,
+          "total": 251.0
+        },
+        "8": {
+          "accuracy": 0.7522935779816514,
+          "correct": 82.0,
+          "total": 109.0
+        },
+        "9": {
+          "accuracy": 0.49019607843137253,
+          "correct": 25.0,
+          "total": 51.0
+        },
+        "10": {
+          "accuracy": 0.5862068965517241,
+          "correct": 17.0,
+          "total": 29.0
+        },
+        "11": {
+          "accuracy": 0.35714285714285715,
+          "correct": 5.0,
+          "total": 14.0
+        }
+      },
+      "by_encounter": {
+        "TERROR_EEL": {
+          "accuracy": 0.8315789473684211,
+          "correct": 158.0,
+          "total": 190.0
+        },
+        "INFESTED_PRISM": {
+          "accuracy": 0.7592592592592593,
+          "correct": 123.0,
+          "total": 162.0
+        },
+        "BYRDONIS": {
+          "accuracy": 0.825,
+          "correct": 99.0,
+          "total": 120.0
+        },
+        "NIBBIT": {
+          "accuracy": 0.788135593220339,
+          "correct": 93.0,
+          "total": 118.0
+        },
+        "DEVOTED_SCULPTOR": {
+          "accuracy": 0.6120689655172413,
+          "correct": 71.0,
+          "total": 116.0
+        },
+        "PHROG_PARASITE": {
+          "accuracy": 0.6944444444444444,
+          "correct": 75.0,
+          "total": 108.0
+        },
+        "THIEVING_HOPPER": {
+          "accuracy": 0.6388888888888888,
+          "correct": 69.0,
+          "total": 108.0
+        },
+        "THE_INSATIABLE": {
+          "accuracy": 0.6261682242990654,
+          "correct": 67.0,
+          "total": 107.0
+        },
+        "SHRINKER_BEETLE": {
+          "accuracy": 0.8921568627450981,
+          "correct": 91.0,
+          "total": 102.0
+        },
+        "SEAPUNK": {
+          "accuracy": 0.7608695652173914,
+          "correct": 70.0,
+          "total": 92.0
+        },
+        "THE_OBSCURA": {
+          "accuracy": 0.7912087912087912,
+          "correct": 72.0,
+          "total": 91.0
+        },
+        "FLAIL_KNIGHT+MAGI_KNIGHT+SPECTRAL_KNIGHT": {
+          "accuracy": 0.8588235294117647,
+          "correct": 73.0,
+          "total": 85.0
+        },
+        "ENTOMANCER": {
+          "accuracy": 0.8192771084337349,
+          "correct": 68.0,
+          "total": 83.0
+        },
+        "KIN_FOLLOWER+KIN_FOLLOWER+KIN_PRIEST": {
+          "accuracy": 0.8536585365853658,
+          "correct": 70.0,
+          "total": 82.0
+        },
+        "SKULKING_COLONY": {
+          "accuracy": 0.8333333333333334,
+          "correct": 65.0,
+          "total": 78.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S+TWIG_SLIME_S": {
+          "accuracy": 0.8266666666666667,
+          "correct": 62.0,
+          "total": 75.0
+        },
+        "CEREMONIAL_BEAST": {
+          "accuracy": 0.9315068493150684,
+          "correct": 68.0,
+          "total": 73.0
+        },
+        "INKLET+INKLET+INKLET": {
+          "accuracy": 0.8194444444444444,
+          "correct": 59.0,
+          "total": 72.0
+        },
+        "CORPSE_SLUG+CORPSE_SLUG": {
+          "accuracy": 0.7714285714285715,
+          "correct": 54.0,
+          "total": 70.0
+        },
+        "FUZZY_WURM_CRAWLER": {
+          "accuracy": 0.7681159420289855,
+          "correct": 53.0,
+          "total": 69.0
+        },
+        "SLUDGE_SPINNER": {
+          "accuracy": 0.8676470588235294,
+          "correct": 59.0,
+          "total": 68.0
+        },
+        "AXEBOT+AXEBOT": {
+          "accuracy": 0.9104477611940298,
+          "correct": 61.0,
+          "total": 67.0
+        },
+        "BYGONE_EFFIGY": {
+          "accuracy": 0.8955223880597015,
+          "correct": 60.0,
+          "total": 67.0
+        },
+        "TOADPOLE+TOADPOLE": {
+          "accuracy": 0.6451612903225806,
+          "correct": 40.0,
+          "total": 62.0
+        },
+        "LIVING_SHIELD+TURRET_OPERATOR": {
+          "accuracy": 0.7868852459016393,
+          "correct": 48.0,
+          "total": 61.0
+        },
+        "CALCIFIED_CULTIST+DAMP_CULTIST": {
+          "accuracy": 0.7966101694915254,
+          "correct": 47.0,
+          "total": 59.0
+        },
+        "MAWLER": {
+          "accuracy": 0.6551724137931034,
+          "correct": 38.0,
+          "total": 58.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_ROCK": {
+          "accuracy": 0.75,
+          "correct": 42.0,
+          "total": 56.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.6363636363636364,
+          "correct": 35.0,
+          "total": 55.0
+        },
+        "SOUL_FYSH": {
+          "accuracy": 0.8363636363636363,
+          "correct": 46.0,
+          "total": 55.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S": {
+          "accuracy": 0.7592592592592593,
+          "correct": 41.0,
+          "total": 54.0
+        },
+        "THE_FORGOTTEN+THE_LOST": {
+          "accuracy": 0.6851851851851852,
+          "correct": 37.0,
+          "total": 54.0
+        },
+        "LIVING_FOG": {
+          "accuracy": 0.8431372549019608,
+          "correct": 43.0,
+          "total": 51.0
+        },
+        "TEST_SUBJECT": {
+          "accuracy": 0.6122448979591837,
+          "correct": 30.0,
+          "total": 49.0
+        },
+        "GREMLIN_MERC": {
+          "accuracy": 0.8478260869565217,
+          "correct": 39.0,
+          "total": 46.0
+        },
+        "FUZZY_WURM_CRAWLER+SHRINKER_BEETLE": {
+          "accuracy": 0.8444444444444444,
+          "correct": 38.0,
+          "total": 45.0
+        },
+        "EYE_WITH_TEETH+FOGMOG": {
+          "accuracy": 0.9090909090909091,
+          "correct": 40.0,
+          "total": 44.0
+        },
+        "HAUNTED_SHIP": {
+          "accuracy": 0.7954545454545454,
+          "correct": 35.0,
+          "total": 44.0
+        },
+        "KNOWLEDGE_DEMON": {
+          "accuracy": 0.9318181818181818,
+          "correct": 41.0,
+          "total": 44.0
+        },
+        "PUNCH_CONSTRUCT": {
+          "accuracy": 0.7441860465116279,
+          "correct": 32.0,
+          "total": 43.0
+        },
+        "FOGMOG": {
+          "accuracy": 0.85,
+          "correct": 34.0,
+          "total": 40.0
+        },
+        "OWL_MAGISTRATE": {
+          "accuracy": 0.6052631578947368,
+          "correct": 23.0,
+          "total": 38.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.6842105263157895,
+          "correct": 26.0,
+          "total": 38.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.75,
+          "correct": 27.0,
+          "total": 36.0
+        },
+        "SEWER_CLAM": {
+          "accuracy": 0.8611111111111112,
+          "correct": 31.0,
+          "total": 36.0
+        },
+        "HUNTER_KILLER": {
+          "accuracy": 0.5882352941176471,
+          "correct": 20.0,
+          "total": 34.0
+        },
+        "BOWLBUG_NECTAR+BOWLBUG_ROCK": {
+          "accuracy": 0.7575757575757576,
+          "correct": 25.0,
+          "total": 33.0
+        },
+        "BOWLBUG_ROCK+BOWLBUG_SILK+SLUMBERING_BEETLE": {
+          "accuracy": 0.7575757575757576,
+          "correct": 25.0,
+          "total": 33.0
+        },
+        "QUEEN+TORCH_HEAD_AMALGAM": {
+          "accuracy": 0.6666666666666666,
+          "correct": 22.0,
+          "total": 33.0
+        },
+        "TWO_TAILED_RAT+TWO_TAILED_RAT+TWO_TAILED_RAT": {
+          "accuracy": 0.9090909090909091,
+          "correct": 30.0,
+          "total": 33.0
+        },
+        "LEAF_SLIME_M+LEAF_SLIME_S+TWIG_SLIME_M+TWIG_SLIME_S": {
+          "accuracy": 0.8125,
+          "correct": 26.0,
+          "total": 32.0
+        },
+        "CRUSHER+ROCKET": {
+          "accuracy": 0.8333333333333334,
+          "correct": 25.0,
+          "total": 30.0
+        },
+        "CUBEX_CONSTRUCT+CUBEX_CONSTRUCT+PUNCH_CONSTRUCT": {
+          "accuracy": 0.7586206896551724,
+          "correct": 22.0,
+          "total": 29.0
+        },
+        "PARAFRIGHT+THE_OBSCURA": {
+          "accuracy": 0.8214285714285714,
+          "correct": 23.0,
+          "total": 28.0
+        },
+        "WRIGGLER+WRIGGLER+WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8928571428571429,
+          "correct": 25.0,
+          "total": 28.0
+        },
+        "NIBBIT+NIBBIT": {
+          "accuracy": 0.8518518518518519,
+          "correct": 23.0,
+          "total": 27.0
+        },
+        "TUNNELER": {
+          "accuracy": 0.7407407407407407,
+          "correct": 20.0,
+          "total": 27.0
+        },
+        "LOUSE_PROGENITOR": {
+          "accuracy": 0.8846153846153846,
+          "correct": 23.0,
+          "total": 26.0
+        },
+        "FROG_KNIGHT": {
+          "accuracy": 0.76,
+          "correct": 19.0,
+          "total": 25.0
+        },
+        "LEAF_SLIME_S+TWIG_SLIME_M+TWIG_SLIME_S": {
+          "accuracy": 0.96,
+          "correct": 24.0,
+          "total": 25.0
+        },
+        "MECHA_KNIGHT": {
+          "accuracy": 0.6086956521739131,
+          "correct": 14.0,
+          "total": 23.0
+        },
+        "VANTOM": {
+          "accuracy": 0.6956521739130435,
+          "correct": 16.0,
+          "total": 23.0
+        },
+        "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_FRONT+DECIMILLIPEDE_SEGMENT_MIDDLE": {
+          "accuracy": 0.9047619047619048,
+          "correct": 19.0,
+          "total": 21.0
+        },
+        "LEAF_SLIME_S+TWIG_SLIME_S": {
+          "accuracy": 0.65,
+          "correct": 13.0,
+          "total": 20.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_ROCK+BOWLBUG_SILK": {
+          "accuracy": 0.8947368421052632,
+          "correct": 17.0,
+          "total": 19.0
+        },
+        "EXOSKELETON+EXOSKELETON+EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.631578947368421,
+          "correct": 12.0,
+          "total": 19.0
+        },
+        "FLYCONID+SNAPPING_JAXFRUIT": {
+          "accuracy": 0.7368421052631579,
+          "correct": 14.0,
+          "total": 19.0
+        },
+        "OVICOPTER": {
+          "accuracy": 0.8421052631578947,
+          "correct": 16.0,
+          "total": 19.0
+        },
+        "KIN_PRIEST": {
+          "accuracy": 0.7058823529411765,
+          "correct": 12.0,
+          "total": 17.0
+        },
+        "SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING": {
+          "accuracy": 0.875,
+          "correct": 14.0,
+          "total": 16.0
+        },
+        "VINE_SHAMBLER": {
+          "accuracy": 0.6,
+          "correct": 9.0,
+          "total": 15.0
+        },
+        "CORPSE_SLUG+CORPSE_SLUG+CORPSE_SLUG": {
+          "accuracy": 0.8571428571428571,
+          "correct": 12.0,
+          "total": 14.0
+        },
+        "SPINY_TOAD": {
+          "accuracy": 0.7857142857142857,
+          "correct": 11.0,
+          "total": 14.0
+        },
+        "ASSASSIN_RUBY_RAIDER+BRUTE_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER": {
+          "accuracy": 0.6153846153846154,
+          "correct": 8.0,
+          "total": 13.0
+        },
+        "SLITHERING_STRANGLER+TWIG_SLIME_M": {
+          "accuracy": 0.9230769230769231,
+          "correct": 12.0,
+          "total": 13.0
+        },
+        "CUBEX_CONSTRUCT": {
+          "accuracy": 0.5833333333333334,
+          "correct": 7.0,
+          "total": 12.0
+        },
+        "KIN_FOLLOWER+KIN_PRIEST": {
+          "accuracy": 0.6666666666666666,
+          "correct": 8.0,
+          "total": 12.0
+        },
+        "EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.6363636363636364,
+          "correct": 7.0,
+          "total": 11.0
+        },
+        "TOADPOLE": {
+          "accuracy": 0.8181818181818182,
+          "correct": 9.0,
+          "total": 11.0
+        },
+        "ASSASSIN_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER+TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.5,
+          "correct": 5.0,
+          "total": 10.0
+        },
+        "CROSSBOW_RUBY_RAIDER+TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.7,
+          "correct": 7.0,
+          "total": 10.0
+        },
+        "BRUTE_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER+TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.7777777777777778,
+          "correct": 7.0,
+          "total": 9.0
+        },
+        "CORPSE_SLUG": {
+          "accuracy": 0.6666666666666666,
+          "correct": 6.0,
+          "total": 9.0
+        },
+        "BATTLE_FRIEND_V3": {
+          "accuracy": 0.375,
+          "correct": 3.0,
+          "total": 8.0
+        },
+        "EXOSKELETON+EXOSKELETON+EXOSKELETON": {
+          "accuracy": 0.75,
+          "correct": 6.0,
+          "total": 8.0
+        },
+        "FLYCONID": {
+          "accuracy": 0.625,
+          "correct": 5.0,
+          "total": 8.0
+        },
+        "MAGI_KNIGHT+SPECTRAL_KNIGHT": {
+          "accuracy": 1.0,
+          "correct": 7.0,
+          "total": 7.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 0.8571428571428571,
+          "correct": 6.0,
+          "total": 7.0
+        },
+        "TWO_TAILED_RAT+TWO_TAILED_RAT": {
+          "accuracy": 1.0,
+          "correct": 7.0,
+          "total": 7.0
+        },
+        "BOWLBUG_SILK+TUNNELER": {
+          "accuracy": 1.0,
+          "correct": 6.0,
+          "total": 6.0
+        },
+        "FOSSIL_STALKER": {
+          "accuracy": 0.6666666666666666,
+          "correct": 4.0,
+          "total": 6.0
+        },
+        "LEAF_SLIME_S": {
+          "accuracy": 1.0,
+          "correct": 6.0,
+          "total": 6.0
+        },
+        "QUEEN": {
+          "accuracy": 1.0,
+          "correct": 6.0,
+          "total": 6.0
+        },
+        "SCROLL_OF_BITING": {
+          "accuracy": 0.5,
+          "correct": 3.0,
+          "total": 6.0
+        },
+        "WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8333333333333334,
+          "correct": 5.0,
+          "total": 6.0
+        },
+        "DAMP_CULTIST": {
+          "accuracy": 0.6,
+          "correct": 3.0,
+          "total": 5.0
+        },
+        "TURRET_OPERATOR": {
+          "accuracy": 0.6,
+          "correct": 3.0,
+          "total": 5.0
+        },
+        "WRIGGLER+WRIGGLER+WRIGGLER": {
+          "accuracy": 0.8,
+          "correct": 4.0,
+          "total": 5.0
+        },
+        "BOWLBUG_EGG": {
+          "accuracy": 0.25,
+          "correct": 1.0,
+          "total": 4.0
+        },
+        "BOWLBUG_EGG+BOWLBUG_SILK": {
+          "accuracy": 1.0,
+          "correct": 4.0,
+          "total": 4.0
+        },
+        "BOWLBUG_NECTAR": {
+          "accuracy": 0.75,
+          "correct": 3.0,
+          "total": 4.0
+        },
+        "PHANTASMAL_GARDENER": {
+          "accuracy": 0.75,
+          "correct": 3.0,
+          "total": 4.0
+        },
+        "CUBEX_CONSTRUCT+PUNCH_CONSTRUCT": {
+          "accuracy": 1.0,
+          "correct": 3.0,
+          "total": 3.0
+        },
+        "FAT_GREMLIN+SNEAKY_GREMLIN": {
+          "accuracy": 0.3333333333333333,
+          "correct": 1.0,
+          "total": 3.0
+        },
+        "LEAF_SLIME_M": {
+          "accuracy": 1.0,
+          "correct": 3.0,
+          "total": 3.0
+        },
+        "CROSSBOW_RUBY_RAIDER": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 2.0
+        },
+        "TRACKER_RUBY_RAIDER": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "TWO_TAILED_RAT": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "WRIGGLER": {
+          "accuracy": 0.5,
+          "correct": 1.0,
+          "total": 2.0
+        },
+        "ASSASSIN_RUBY_RAIDER+CROSSBOW_RUBY_RAIDER": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        },
+        "EXOSKELETON": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "MAGI_KNIGHT": {
+          "accuracy": 0.0,
+          "correct": 0.0,
+          "total": 1.0
+        },
+        "PHANTASMAL_GARDENER+PHANTASMAL_GARDENER": {
+          "accuracy": 1.0,
+          "correct": 1.0,
+          "total": 1.0
+        }
+      },
+      "misclassified_saved": 100,
+      "top_1_accuracy": 0.7762154432793136,
+      "top_3_accuracy": 0.9628217349857007,
+      "top_5_accuracy": 0.9952335557673975
+    }
+  },
+  "training_time_seconds": 1265.4040449000022,
+  "checkpoint_dir": "C:\\STS2_RL\\Training\\checkpoints\\policy_teacher2000_seed_20260724",
+  "best_checkpoint": "C:\\STS2_RL\\Training\\checkpoints\\policy_teacher2000_seed_20260724\\best.pt"
+}

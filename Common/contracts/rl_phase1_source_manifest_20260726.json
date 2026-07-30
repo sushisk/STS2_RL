@@ -1,0 +1,113 @@
+{
+  "manifestId": "rl_phase1_source_manifest_20260726",
+  "generatedAt": "2026-07-26T16:56:13.193716",
+  "rlCommit": "not_a_git_repository",
+  "compatibleEmulatorCommit": "ce7ecc2cc66332c4c2a2abf2f2cd24040dd3baea",
+  "compatibleEmulatorReportCommit": "a4c3c028b54835b18536fe6ee8c78a6ffccf5301",
+  "emulatorDllSha256": "041a44cc3e250f13fb4dc5eed5edb2ee310fa42108249a0bb16928f62dfc5b00",
+  "emulatorStage1DllSha256": "c176109aa6c9887057c09e02245ebedaaf476fb6e604267d36e787bd3c055900",
+  "contractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.3.md",
+  "contractSha256": "6c0a9ecc228099f878b99d8eb43b1e095e6b2184b48e5aed2ab14920008757c9",
+  "files": [
+    {
+      "path": "C:\\STS2_RL\\Combat\\live_combat_session.py",
+      "sha256": "72b0be73c18865f194b937ca5cce6f121eac70d232b0181611368e74b23b24b8",
+      "size_bytes": 12658
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\env\\combat_env.py",
+      "sha256": "8b2557170505bbe95688a052b5eabe0ffd081eb980307b07852f384c5fad771d",
+      "size_bytes": 11272
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\battle_emulator.py",
+      "sha256": "292ee4d3f616fe91ad41cadf90d9384e7cd56d5d60dad76f88f11c281743339c",
+      "size_bytes": 45612
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\emulator_bridge.py",
+      "sha256": "72446cf06fe5be1412cdee585201007e5b71efb499d6b588a244dbf86e232216",
+      "size_bytes": 5853
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\policy_agent.py",
+      "sha256": "4778311ec392d8b75508bc2cee2666f7f8444acbe32ecb4759666e8541de7b92",
+      "size_bytes": 14359
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\choice_policy_agent.py",
+      "sha256": "00a5eb066edfbfe2edc6a5c54de714c2a2f409c6356245d660740a20169bfc26",
+      "size_bytes": 15875
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\choice_semantics.py",
+      "sha256": "48912bdb01cf9a56d8af7e1cc09246c4428be1de6bdb1c374927bd5308f18e6d",
+      "size_bytes": 22924
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\heuristic_agent.py",
+      "sha256": "e8321abd84aee681484e13db21c2580695ae940b256feaa5288b1155cba0333b",
+      "size_bytes": 15148
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\choice_policy_online_eval.py",
+      "sha256": "0ce4e73a6ee8f091da2a417c5d343e33054444e0c37372e1029a3404eeec2059",
+      "size_bytes": 31702
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\generate_choice_teacher_data.py",
+      "sha256": "abe22d1bcbb5ed0cf6c7c4733788a8ae587e33a8b157b901ec3204d8f4173f7d",
+      "size_bytes": 19861
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\verify_live_combat_session_6546_21.py",
+      "sha256": "5ecb2b603b71740057c54b0a6d51ea219386401fd9501a025d5216f8f0161ddb",
+      "size_bytes": 6366
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\audit_resynchronize_events.py",
+      "sha256": "779e95cced546a3653eccfffb900ebb971998df74188ff09af375cdd43da7f53",
+      "size_bytes": 9524
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\schemas\\combat_state_schema.json",
+      "sha256": "5854c722c4e5c81fdb7569ff75ed90b97a693e7646e618dc80075b17a7c43f6f",
+      "size_bytes": 9752
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\schemas\\transition_schema.json",
+      "sha256": "f1d8c0470d6c81ccd60e803eff546437bffd2c5761ccd1aa9c8998aa7b594e0c",
+      "size_bytes": 2889
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\schemas\\legal_action_schema.json",
+      "sha256": "1dbfdcb691fa5db190646383eaccea560b233c5571d4da1803750a00a27002ac",
+      "size_bytes": 4990
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\schemas\\combat_scenario_input_schema.json",
+      "sha256": "7723b77a9a1fae4215b69328f47e4881024684bac30e2af600da65a1a127139f",
+      "size_bytes": 10338
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.3.md",
+      "sha256": "6c0a9ecc228099f878b99d8eb43b1e095e6b2184b48e5aed2ab14920008757c9",
+      "size_bytes": 16919
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\policy_baseline\\combat_state_contract_phase1_emulator_baseline_v1_20260726.json",
+      "sha256": "2f98b1a191a7b855bd4b8491de88a61302d838efd4767707b996de03747cd094",
+      "size_bytes": 1837
+    },
+    {
+      "path": "C:\\STS2_RL\\Outputs\\reports\\rl_combat_state_contract_phase1_report_20260726.md",
+      "sha256": "ede7ec482e10c66d6552434e6638f483e4caf3a939d8e95d95b3698017076275",
+      "size_bytes": 18310
+    },
+    {
+      "path": "C:\\STS2_RL\\Outputs\\reports\\rl_phase1_resynchronize_audit_20260726.md",
+      "sha256": "922b2687e3fad5727dbafdf4b93e92a11815b32d7027322b1fe30c5570f27e8b",
+      "size_bytes": 13346
+    }
+  ]
+}

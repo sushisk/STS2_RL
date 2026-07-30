@@ -1,0 +1,116 @@
+{
+  "manifestId": "rl_phase3b_restore_bootstrap_acceptance_manifest_20260728",
+  "generatedAt": "2026-07-28T14:51:13.647590",
+  "rlCommit": "not_a_git_repository",
+  "compatibleEmulatorCommits": {
+    "restoreBootstrapCode": "7ef3c38babf66c4e8c46b6b8edb8a911ea36b600",
+    "test": "058b7c4ee36d548bc533739bf6b85c35c91a45af",
+    "implementationReport": "1d2a9222d6eb830fcbcbbda040026daaab0d7927",
+    "auditReport": "b6afb8abb985d10134386f9b6d0b45d63c69902e"
+  },
+  "emulatorDllSha256": "d415ee47c0beb8e51e3692e645c1b480614fd1ca065552a9e5236a7fe9f0c4f6",
+  "contractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.5.md",
+  "contractSha256": "e33b369e12543e04fe763c07196e2189460099cfcb3d22b5a35137e2a2b86b07",
+  "contractNote": "Reference only this round - not modified (Phase 3B instruction requests a new manifest + report, not a contract update).",
+  "schemaPath": "C:\\STS2_Emulator\\docs\\schemas\\combat_state_snapshot.schema.json",
+  "schemaSha256": "16643444fda085d62df435fa0290e73b356123ffd95981317da4ea3f86c23dc3",
+  "schemaNote": "Unchanged since Phase 2B - Restore bootstrap does not modify the Snapshot schema.",
+  "artifactChecks": {
+    "commitOrderConfirmed": "07dba13 (baseline) -> 7ef3c38 -> 058b7c4 -> 1d2a922 -> b6afb8a (HEAD), confirmed via git log --oneline",
+    "workingTreeClean": true,
+    "importedDiffEmpty": "git diff --stat 07dba13..b6afb8a -- Sts2Emulator/Imported/ produced no output",
+    "publicRestoreSnapshotApiAdded": false,
+    "restoreMethodVisibility": "GameInstance.BootstrapSnapshotRuntimeForTesting is internal, reached only via reflection (no public wrapper anywhere, including this manifest's own verification script)",
+    "rlSideFilesUnchanged": {
+      "live_combat_session.py_sha256": "6c3d173251ec63bd0e0db5e8aa7d88bb309d7038a7b88a8135bddbfc0037d72f",
+      "emulator_bridge.py_sha256": "ca05c99ecceba13bb7adf2e4fb673ecca8df825bcefed4cbba2b145736a99789",
+      "combat_env.py_sha256": "8b2557170505bbe95688a052b5eabe0ffd081eb980307b07852f384c5fad771d",
+      "battle_emulator.py_sha256": "292ee4d3f616fe91ad41cadf90d9384e7cd56d5d60dad76f88f11c281743339c",
+      "heuristic_agent.py_sha256": "e8321abd84aee681484e13db21c2580695ae940b256feaa5288b1155cba0333b",
+      "note": "All 5 hashes confirmed identical to values already recorded in prior-phase manifests - no RL-side code (Python, Heuristic, Training) was touched this round, confirmed by direct re-hash, not merely assumed."
+    }
+  },
+  "files": [
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\verify_restore_bootstrap_phase3b.py",
+      "sha256": "277932f308c0acf7caba2a6e84e4e0508531ae2b4c8e98585fb1b8dbe3d50a3a",
+      "size_bytes": 22830,
+      "note": "New, diagnostic/verification-only - independent RL-side reflection-based invocation of the internal BootstrapSnapshotRuntimeForTesting method. Not imported by CombatEnv/LiveCombatSession/any training code. Does not add a public Restore API."
+    }
+  ],
+  "testCommands": [
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case round_trip_no_power",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case round_trip_with_power",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_combat_history",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_pet",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_6546_21_dangling",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_pending_choice",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_pending_target",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_action_continuation",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_dangling_id",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_duplicate_id",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_unsupported_internal_data",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_unknown_schema_version",
+    "python Combat/evaluation/online_eval/verify_restore_bootstrap_phase3b.py --case reject_faulted_session",
+    "python Combat/evaluation/online_eval/verify_live_combat_session_6546_21.py",
+    "python Combat/evaluation/online_eval/verify_snapshot_phase2b.py",
+    "python Combat/tests/test_action_fault_contract.py",
+    "python Combat/evaluation/online_eval/qb_repro_driver_rl.py --order forward --iterations 20"
+  ],
+  "captureABComparisonResults": {
+    "roundTripNoPower": {
+      "canonicalSnapshotSignature": "match",
+      "observationHp": "match",
+      "observationEnemyHp": "match",
+      "legalActions": "match (id/type/parameters)",
+      "stableIds_player": "match",
+      "stableIds_enemy": "match",
+      "runRngStreams_12purposes": "match (compared as full sorted key-value signature)",
+      "playerRngStreams_3purposes": "match",
+      "monsterLocalRng": "match",
+      "piles_hand_draw_discard_exhaust_play_deck": "match",
+      "hpBlockEnergy": "match",
+      "turnRoundCurrentSide": "match",
+      "relics": "match (none present in this fixture)",
+      "powers": "match (none present in this fixture)",
+      "postRestoreCombatHistory": "empty (0 entries) - confirms no fresh hook fired",
+      "unexplainedDiffs": "none"
+    },
+    "roundTripWithPower": {
+      "fixture": "player STRENGTH_POWER amount=3 (PowerModel.ApplyInternal), enemy WEAK_POWER amount=2 (PowerModel.ApplyInternal)",
+      "playerPowerOwnerInstanceId": "match",
+      "playerPowerAmount": "match",
+      "playerPowerStackType": "match",
+      "playerPowerStableInstanceId": "match",
+      "enemyPowerApplierInstanceId": "match",
+      "enemyPowerTargetInstanceId": "match",
+      "fullSnapshotSignature": "match (includes RNG/piles/relics alongside Powers)",
+      "postRestoreCombatHistory": "empty (0 entries) - confirms ApplyInternal wrote no PowerReceivedEntry",
+      "unexplainedDiffs": "none"
+    }
+  },
+  "rejectionTestResults": {
+    "combat_history_non_empty": {"technique": "natural (unmutated Reset() capture)", "result": "rejected", "reason": "combat_history_non_empty:5"},
+    "pet_present": {"technique": "natural (Scenario 6546-21 live capture)", "result": "rejected", "reason_includes": "pet_count:1"},
+    "scenario_6546_21_dangling_snapshot": {"technique": "natural (Scenario 6546-21 live capture, unmutated)", "result": "rejected", "reason_includes": ["reference_integrity:Dangling reference 'card-000065'...", "reference_integrity:Dangling reference 'card-000066'...", "reference_integrity:Dangling reference 'card-000067'..."], "note": "This is the exact gap the Emulator's own audit report (b6afb8a §5-A/§7) flagged as unverified this round ('Scenario 6546-21の実Snapshotを用いた直接拒否試験は未実施') - closed here."},
+    "pending_choice_present": {"technique": "natural (TOOLBOX relic scenario, captured at combat-start choice boundary)", "result": "rejected", "reason": "pending_choice_present"},
+    "pending_target_present": {"technique": "mutated (Metadata.CaptureBoundary set to published_target on an otherwise-eligible snapshot)", "result": "rejected", "reason": "unsupported_capture_boundary:published_target"},
+    "action_continuation_present": {"technique": "mutated (Metadata.ContinuationStepIndex set to 1)", "result": "rejected", "reason": "action_continuation_present"},
+    "dangling_stable_id": {"technique": "mutated (PlayerRng[0].OwnerInstanceId set to non-existent id)", "result": "rejected", "reason": "reference_integrity:Dangling reference 'player-999999'..."},
+    "duplicate_stable_id": {"technique": "mutated (Hand[0].InstanceId set equal to Player.InstanceId)", "result": "rejected", "reason": "reference_integrity:Duplicate InstanceId 'player-000000'..."},
+    "unsupported_internal_data": {"technique": "mutated (Metadata.UnsupportedFields injected with a status=unsupported entry)", "result": "rejected", "reason": "unsupported_internal_data"},
+    "unknown_schema_version": {"technique": "mutated (Metadata.SchemaVersion set to phase99.9)", "result": "rejected", "reason": "unknown_schema_version:phase99.9"},
+    "faulted_session_origin": {"technique": "natural (Console.Out corruption fault-injection, then capture_snapshot() attempted)", "result": "rejected at the Capture layer itself (FaultedCombatSessionError) - a Snapshot can never even be produced from a faulted session", "note": "Confirms structurally rather than by feeding a snapshot into Restore, since none can exist."},
+    "totalCasesRun": 13,
+    "totalCasesPassed": 13,
+    "noAutoRepairObserved": true
+  },
+  "regressionResults": {
+    "scenario_6546_21_live": {"decisions": 49, "outcome": "victory", "quiescent_boundary_violations": 0},
+    "snapshot_pet_capture_suite": {"failing_checks": 0},
+    "action_fault_contract_suite": {"passed": 9, "failed": 0},
+    "console_io_isolation_suite": {"included_in_action_fault_contract_suite": true, "passed": 3, "failed": 0},
+    "wriggler_quarantine": {"status": "quarantined", "reasons": ["init_exception:TimeoutException"], "unchanged_from_prior_rounds": true},
+    "native_harness_forward_20x": {"total_test_executions": 1040, "quiescent_boundary_violations": 0, "wriggler_known_failures": 20, "other_unexpected_failures": 0, "elapsed_seconds": 327.4}
+  }
+}

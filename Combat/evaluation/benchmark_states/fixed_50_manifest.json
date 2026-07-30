@@ -1,0 +1,700 @@
+{
+  "seed": null,
+  "target_total": 50,
+  "kept": 50,
+  "candidates_tried": 50,
+  "failed": [],
+  "character_distribution": {
+    "REGENT": 10,
+    "IRONCLAD": 6,
+    "SILENT": 7,
+    "NECROBINDER": 12,
+    "DEFECT": 15
+  },
+  "act_pool_distribution": {},
+  "entries": [
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "CORPSE_SLUG"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:299-0"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "SLUDGE_SPINNER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:2200-1"
+    },
+    {
+      "character_id": "IRONCLAD",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "SEAPUNK"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1088-2"
+    },
+    {
+      "character_id": "SILENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "FUZZY_WURM_CRAWLER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:708-3"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "TOADPOLE"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3357-4"
+    },
+    {
+      "character_id": "SILENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "CALCIFIED_CULTIST",
+        "DAMP_CULTIST"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:236-5"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "FOSSIL_STALKER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1141-6"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "NIBBIT"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:7092-7"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "LEAF_SLIME_M",
+        "LEAF_SLIME_S",
+        "SLITHERING_STRANGLER",
+        "SNAPPING_JAXFRUIT",
+        "TWIG_SLIME_M",
+        "TWIG_SLIME_S"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1613-8"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "FLYCONID",
+        "LEAF_SLIME_M",
+        "TWIG_SLIME_M"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3315-9"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "PHROG_PARASITE",
+        "WRIGGLER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:2744-10"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "PHROG_PARASITE",
+        "WRIGGLER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:2428-11"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "TERROR_EEL"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6058-12"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "VANTOM"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3486-13"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "LAGAVULIN_MATRIARCH"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:2446-14"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "CEREMONIAL_BEAST"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5658-15"
+    },
+    {
+      "character_id": "IRONCLAD",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "KIN_FOLLOWER",
+        "KIN_PRIEST"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6964-16"
+    },
+    {
+      "character_id": "SILENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "KIN_FOLLOWER",
+        "KIN_PRIEST"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1310-17"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "TUNNELER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1016-18"
+    },
+    {
+      "character_id": "SILENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "TUNNELER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6420-19"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "EXOSKELETON"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5067-20"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "BOWLBUG_EGG",
+        "BOWLBUG_NECTAR",
+        "BOWLBUG_ROCK"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5069-21"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "OVICOPTER",
+        "TOUGH_EGG"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3337-22"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "BOWLBUG_EGG",
+        "BOWLBUG_NECTAR",
+        "BOWLBUG_ROCK",
+        "BOWLBUG_SILK"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:7522-23"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "BOWLBUG_EGG",
+        "BOWLBUG_NECTAR",
+        "BOWLBUG_ROCK",
+        "BOWLBUG_SILK"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6314-24"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "HUNTER_KILLER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6017-25"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "ENTOMANCER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:7482-26"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "ENTOMANCER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3342-27"
+    },
+    {
+      "character_id": "IRONCLAD",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "ENTOMANCER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1519-28"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "KNOWLEDGE_DEMON"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:2488-29"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "KNOWLEDGE_DEMON"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6773-30"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "KNOWLEDGE_DEMON"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1642-31"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "CRUSHER",
+        "ROCKET"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1046-32"
+    },
+    {
+      "character_id": "SILENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "DEVOTED_SCULPTOR"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5166-33"
+    },
+    {
+      "character_id": "IRONCLAD",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "DEVOTED_SCULPTOR"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:4228-34"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "DEVOTED_SCULPTOR"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:4978-35"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "DEVOTED_SCULPTOR"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3478-36"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "OWL_MAGISTRATE"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6485-37"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "SLIMED_BERSERKER"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3518-38"
+    },
+    {
+      "character_id": "IRONCLAD",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "GLOBE_HEAD"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:3118-39"
+    },
+    {
+      "character_id": "SILENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "FROG_KNIGHT"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:741-40"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "MECHA_KNIGHT"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5483-41"
+    },
+    {
+      "character_id": "SILENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "MECHA_KNIGHT"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5512-42"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "SOUL_NEXUS"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:6844-43"
+    },
+    {
+      "character_id": "NECROBINDER",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "SOUL_NEXUS"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:851-44"
+    },
+    {
+      "character_id": "IRONCLAD",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "QUEEN",
+        "TORCH_HEAD_AMALGAM"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:1946-45"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "QUEEN",
+        "TORCH_HEAD_AMALGAM"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5074-46"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "AEONGLASS"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5323-47"
+    },
+    {
+      "character_id": "REGENT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "AEONGLASS"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:4650-48"
+    },
+    {
+      "character_id": "DEFECT",
+      "act_number": null,
+      "pool_type": null,
+      "encounter": null,
+      "enemies": [
+        "AEONGLASS"
+      ],
+      "ascension": null,
+      "build_id": null,
+      "validation": "recovered_from_decision0_state",
+      "trajectory_id": "fixed50:5800-49"
+    }
+  ],
+  "restoration_note": "Recovered on 2026-07-21 from trajectories_fixed50_orbapi_20260721_3 decision_index=0 rows after benchmark JSON files were overwritten to 0 bytes.",
+  "restored_from_dir": "C:\\STS2_RL\\Combat\\data\\trajectories_fixed50_orbapi_20260721_3",
+  "trajectory_meta": {
+    "count": 50,
+    "terminal": 33,
+    "victory": 26,
+    "defeat": 7,
+    "truncated": 10
+  }
+}

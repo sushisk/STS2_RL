@@ -1,0 +1,61 @@
+{
+  "record_id": "choice_policy_online_eval_provenance_v1_20260725",
+  "recorded_on": "2026-07-25",
+  "purpose": "Pre-run provenance for this task's Choice Policy限定オンライン評価 (指示書2節) - all SHA256 recorded before Stage A/B/C execution.",
+  "emulator": {
+    "commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "sts2emulator_dll_sha256": "E3C3D26D7499E93E89F2718CCB51E18A2D66559021BBB5CDCA33980BB644C036",
+    "sts2imported_stage1_dll_sha256": "C176109AA6C9887057C09E02245EBEDAAF476FB6E604267D36E787BD3C055900",
+    "verified_before": ["stage_a", "stage_synthetic", "stage_b", "stage_c"]
+  },
+  "normal_policy_checkpoint": {
+    "path": "Training/checkpoints/policy_teacher2000_seed_20260724/best.pt",
+    "sha256": "eb3af996b7c151c47b5203dc811291cb3b05a65c355c05ffaa3fbbe47339994a",
+    "note": "identical hash to policy_baseline_v1_20260724.json - confirms this checkpoint is unchanged from the earlier Policy/Value online-eval baseline"
+  },
+  "value_checkpoint": {
+    "path": "Training/checkpoints/value_teacher2000_seed_20260724/best.pt",
+    "sha256": "24020cf571c76a4116613b2e5306f92c687b21dd7bcedf69f0f6139aa38790ba",
+    "note": "identical hash to policy_baseline_v1_20260724.json - log-only, never used for action selection, unchanged"
+  },
+  "choice_policy_checkpoint": {
+    "path": "Training/checkpoints/choice_policy_8token_best/best.pt",
+    "sha256": "f5299e4abf8a30a0400cba2e5094777276b84f9c3a70d7051b0ec886c457f29f",
+    "embedded_provenance": {
+      "emulator_commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+      "choice_semantics_baseline_version": "choice_semantics_baseline_722b019_v1_20260725",
+      "source_choice_dataset_sha256": "12F560F42E515FB72BBB52F0497D42E3E3FB7814FD0FDB070F8076C2CC3FE5BF",
+      "source_dir": "Combat/evaluation/reports/choice_teacher_data_full_20260725",
+      "in_scope_decisions": 628,
+      "in_scope_trajectories": 173,
+      "split_counts_decisions": {"train": 512, "validation": 48, "test": 68},
+      "selection_criteria": "validation MRR, then validation top-1, then illegal rate (validation, not test)"
+    }
+  },
+  "choice_inference_module": {"file": "Training/sts2_training/choice_inference.py", "note": "read-only import, not modified"},
+  "choice_meaning_merge_map": {
+    "version": "choice_meaning_merge_map.v1",
+    "file": "Training/exports/choice_policy_v1/merge_map.v1.json",
+    "sha256": "D6BBB9178550A6A2097E30946D056C91516D0BC6B673F426C07A4355BBB6D2EA",
+    "note": "matches checkpoint's embedded merge_map_sha256 exactly - not modified"
+  },
+  "choice_semantics": {
+    "lookup_version": "choice_semantics.v1",
+    "lookup_sha256": "5e7d260f076047b6d0ee02eb79fcd57a06067be49c923621e84ec0df06df8d44",
+    "schema_sha256": "0b101edd3a7e5ddcac150eab40e03ca7cb9811f7c06bd76ad53f2f834d1b9d4d",
+    "origin_alias_version": "choice_semantics_origin_type_aliases.v1",
+    "origin_alias_sha256": "a456f0a235c84c2ee815367593c479fb5ed8479916ad4257a55b2d9ea1a33814",
+    "baseline_ref": "Combat/policy_baseline/choice_semantics_baseline_722b019_v1_20260725.json",
+    "note": "unchanged, fixed version, same as Choice teacher-data generation baseline"
+  },
+  "code": {
+    "choice_policy_agent": {"file": "Combat/choice_policy_agent.py", "note": "new adapter, does not modify policy_agent.py"},
+    "eval_harness": {"file": "Combat/evaluation/online_eval/choice_policy_online_eval.py", "note": "new script, does not modify online_policy_eval.py"},
+    "manifest_builder": {"file": "Combat/evaluation/online_eval/build_choice_policy_online_eval_manifest.py"}
+  },
+  "manifests": {
+    "stage_c_30": {"file": "Combat/evaluation/online_eval/choice_policy_online_eval_manifest.jsonl", "scenario_count": 30},
+    "stage_b_10": {"file": "Combat/evaluation/online_eval/choice_policy_online_eval_stage_b_manifest.jsonl", "note": "first 10 rows of the 30-scenario manifest"},
+    "synthetic_1": {"file": "Combat/evaluation/online_eval/choice_policy_online_eval_synthetic_manifest.jsonl", "note": "run separately per 指示書5節"}
+  }
+}

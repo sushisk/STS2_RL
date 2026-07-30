@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sts2_rl:transition_schema:v1",
+  "title": "Transition (StepResult / ResetResult)",
+  "description": "Shape of one Step() return value (Sts2Emulator.Dto.StepResult) and, for the initial state, ResetFromScenario's ResetResult (same Observation/LegalActions shape, no ActionId/Reward/Done/Info). Source of truth: Sts2Emulator/Dto/StepResult.cs, Dto/ResetResult.cs, Dto/GameObservation.cs. STS2_RL/Combat/emulator_bridge.py currently only surfaces a reduced observation_to_dict() (turn/is_terminal/outcome/state) - a full RL-facing env wrapper (plan Phase 1's CombatEnv) should surface reward/done/legal_actions/info too, matching this schema, not just observation_to_dict's subset.",
+  "type": "object",
+  "required": ["action_id", "reward", "done", "observation", "legal_actions", "info"],
+  "properties": {
+    "action_id": {"type": "integer", "description": "Echoes the action_id that was passed to Step()."},
+    "reward": {"type": "number", "description": "Engine-native reward signal, if any is populated (plan section 7.1: STS2_RL should compute its own reward from `observation`/`info` deltas rather than relying solely on this - reward shaping stays a Python-side concern per the mid-term plan's architecture principle 12.6)."},
+    "done": {"type": "boolean", "description": "True once combat/run has ended (mirrors observation.is_terminal)."},
+    "observation": {"$ref": "sts2_rl:game_observation_schema:v1"},
+    "legal_actions": {"type": "array", "items": {"$ref": "sts2_rl:legal_action_schema:v1"}, "description": "Legal actions for the state observation reflects - i.e. for the NEXT decision, not the one just taken."},
+    "info": {"type": "object", "description": "Free-form diagnostic dict; shape not yet standardized. Extend/document here once STS2_RL/Combat/env consumes specific keys from it."}
+  },
+  "definitions": {
+    "game_observation": {
+      "$id": "sts2_rl:game_observation_schema:v1",
+      "type": "object",
+      "description": "Sts2Emulator.Dto.GameObservation. The typed Player/Enemies/Hand/Relics/StatusEffects/Metrics/Extras fields predate the 'State' full-state dict and are kept only for backward-compat CLI rendering (per GameObservation.cs's own doc comment) - STS2_RL code should read from 'state', not those typed fields.",
+      "properties": {
+        "seed": {"type": "integer"},
+        "seedText": {"type": "string"},
+        "characterId": {"type": "string"},
+        "ascension": {"type": "integer"},
+        "stepIndex": {"type": "integer"},
+        "turn": {"type": "integer"},
+        "isTerminal": {"type": "boolean"},
+        "outcome": {"type": "string", "description": "e.g. '', 'Victory', 'Defeat' - exact value set not yet enumerated from source; treat as opaque until confirmed."},
+        "state": {"$ref": "sts2_rl:combat_state_schema:v1"}
+      }
+    }
+  }
+}

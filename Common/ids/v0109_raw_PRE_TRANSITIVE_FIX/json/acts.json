@@ -1,0 +1,634 @@
+[
+  {
+    "act_index": 0,
+    "act_number": 1,
+    "base_number_of_rooms": 15,
+    "class_name": "Overgrowth",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BYGONE_EFFIGY_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BYRDONIS_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CEREMONIAL_BEAST_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CUBEX_CONSTRUCT_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FLYCONID_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FOGMOG_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FUZZY_WURM_CRAWLER_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "INKLETS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "MAWLER_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "NIBBITS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "NIBBITS_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OVERGROWTH_CRAWLERS"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PHROG_PARASITE_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "RUBY_RAIDERS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SHRINKER_BEETLE_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMES_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLITHERING_STRANGLER_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SNAPPING_JAXFRUIT_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_KIN_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "VANTOM_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "VINE_SHAMBLER_NORMAL"
+        },
+        "pool_type": "normal"
+      }
+    ],
+    "id": {
+      "category": "act",
+      "entry": "OVERGROWTH"
+    },
+    "is_default": true,
+    "number_of_weak_encounters": 3,
+    "source": {
+      "line": 15,
+      "path": "MegaCrit.Sts2.Core.Models.Acts\\Overgrowth.cs"
+    }
+  },
+  {
+    "act_index": 0,
+    "act_number": 1,
+    "base_number_of_rooms": 15,
+    "class_name": "Underdocks",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CORPSE_SLUGS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CORPSE_SLUGS_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CULTISTS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FOSSIL_STALKER_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "GREMLIN_MERC_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "HAUNTED_SHIP_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "LAGAVULIN_MATRIARCH_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "LIVING_FOG_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PHANTASMAL_GARDENERS_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "PUNCH_CONSTRUCT_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SEAPUNK_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SEAPUNK_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SEWER_CLAM_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SKULKING_COLONY_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLUDGE_SPINNER_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SOUL_FYSH_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TERROR_EEL_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TOADPOLES_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TWO_TAILED_RATS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "WATERFALL_GIANT_BOSS"
+        },
+        "pool_type": "boss"
+      }
+    ],
+    "id": {
+      "category": "act",
+      "entry": "UNDERDOCKS"
+    },
+    "is_default": false,
+    "number_of_weak_encounters": 3,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Acts\\Underdocks.cs"
+    }
+  },
+  {
+    "act_index": 1,
+    "act_number": 2,
+    "base_number_of_rooms": 14,
+    "class_name": "Hive",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "BOWLBUGS_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CHOMPERS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "DECIMILLIPEDE_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "ENTOMANCER_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "EXOSKELETONS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "EXOSKELETONS_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "HUNTER_KILLER_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KAISER_CRAB_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "INFESTED_PRISMS_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KNOWLEDGE_DEMON_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "LOUSE_PROGENITOR_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "MYTES_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OVICOPTER_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLUMBERING_BEETLE_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SPINY_TOAD_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_INSATIABLE_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_OBSCURA_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THIEVING_HOPPER_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TUNNELER_WEAK"
+        },
+        "pool_type": "weak"
+      }
+    ],
+    "id": {
+      "category": "act",
+      "entry": "HIVE"
+    },
+    "is_default": true,
+    "number_of_weak_encounters": 2,
+    "source": {
+      "line": 13,
+      "path": "MegaCrit.Sts2.Core.Models.Acts\\Hive.cs"
+    }
+  },
+  {
+    "act_index": 2,
+    "act_number": 3,
+    "base_number_of_rooms": 13,
+    "class_name": "Glory",
+    "encounters": [
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "AXEBOTS_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "CONSTRUCT_MENAGERIE_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "DEVOTED_SCULPTOR_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "AEONGLASS_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FABRICATOR_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "FROG_KNIGHT_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "GLOBE_HEAD_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "KNIGHTS_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "MECHA_KNIGHT_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "OWL_MAGISTRATE_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "QUEEN_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SCROLLS_OF_BITING_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SCROLLS_OF_BITING_WEAK"
+        },
+        "pool_type": "weak"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SLIMED_BERSERKER_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "SOUL_NEXUS_ELITE"
+        },
+        "pool_type": "elite"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TEST_SUBJECT_BOSS"
+        },
+        "pool_type": "boss"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "THE_LOST_AND_FORGOTTEN_NORMAL"
+        },
+        "pool_type": "normal"
+      },
+      {
+        "id": {
+          "category": "encounter",
+          "entry": "TURRET_OPERATOR_WEAK"
+        },
+        "pool_type": "weak"
+      }
+    ],
+    "id": {
+      "category": "act",
+      "entry": "GLORY"
+    },
+    "is_default": true,
+    "number_of_weak_encounters": 2,
+    "source": {
+      "line": 12,
+      "path": "MegaCrit.Sts2.Core.Models.Acts\\Glory.cs"
+    }
+  }
+]

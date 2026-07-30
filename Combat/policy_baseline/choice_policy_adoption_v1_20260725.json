@@ -1,0 +1,79 @@
+{
+  "adoption_id": "choice_policy_adoption_v1_20260725",
+  "recorded_on": "2026-07-25",
+  "purpose": "Fixes Choice Policy as the limited production configuration for the combat online adapter, per this task's 'Choice Policy採用固定'. Does NOT overwrite any earlier baseline/provenance/report file - all referenced by path/hash only.",
+  "adopted_configuration": {
+    "standard_actions": "normal Policy (Combat/policy_agent.py::PolicyAgent, unmodified) for card/potion/system decisions",
+    "choice_card": "8-token Choice Policy (Combat/choice_policy_agent.py::ChoicePolicyAgent) - Choice Semantics resolve -> Choice Policy inference -> top-1 legal action if all fallback conditions clear",
+    "choice_policy_inference_failure": "Heuristic fallback (PolicyAgent._heuristic_fallback, same helper the existing baseline already used)",
+    "choice_skip_choice_confirm": "always Heuristic fallback, never routed to Choice Policy",
+    "value": "log-only, never used for action selection",
+    "any_enemy_targeting": "first-alive (target_index=0), no extra search - unchanged from the original Policy/Value baseline",
+    "adapter_files": ["Combat/policy_agent.py (unmodified)", "Combat/choice_policy_agent.py (new)"]
+  },
+  "choice_policy_checkpoint": {
+    "path": "Training/checkpoints/choice_policy_8token_best/best.pt",
+    "sha256": "f5299e4abf8a30a0400cba2e5094777276b84f9c3a70d7051b0ec886c457f29f"
+  },
+  "normal_policy_checkpoint": {
+    "path": "Training/checkpoints/policy_teacher2000_seed_20260724/best.pt",
+    "sha256": "eb3af996b7c151c47b5203dc811291cb3b05a65c355c05ffaa3fbbe47339994a"
+  },
+  "value_checkpoint": {
+    "path": "Training/checkpoints/value_teacher2000_seed_20260724/best.pt",
+    "sha256": "24020cf571c76a4116613b2e5306f92c687b21dd7bcedf69f0f6139aa38790ba"
+  },
+  "emulator": {
+    "commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "sts2emulator_dll_sha256": "E3C3D26D7499E93E89F2718CCB51E18A2D66559021BBB5CDCA33980BB644C036",
+    "sts2imported_stage1_dll_sha256": "C176109AA6C9887057C09E02245EBEDAAF476FB6E604267D36E787BD3C055900"
+  },
+  "choice_semantics": {
+    "lookup_version": "choice_semantics.v1",
+    "lookup_sha256": "5e7d260f076047b6d0ee02eb79fcd57a06067be49c923621e84ec0df06df8d44",
+    "origin_alias_version": "choice_semantics_origin_type_aliases.v1",
+    "origin_alias_sha256": "a456f0a235c84c2ee815367593c479fb5ed8479916ad4257a55b2d9ea1a33814"
+  },
+  "choice_meaning_merge_map": {
+    "version": "choice_meaning_merge_map.v1",
+    "sha256": "D6BBB9178550A6A2097E30946D056C91516D0BC6B673F426C07A4355BBB6D2EA"
+  },
+  "evaluation_report": "Outputs/reports/rl_choice_policy_online_eval_report_20260725.md",
+  "evaluation_results_summary": {
+    "scope": "Stage A (direct integration) + synthetic nested Choice (1) + Stage B (10 scenarios) + Stage C (30 scenarios)",
+    "illegal_action_count": 0,
+    "exception_count": 0,
+    "mapping_mismatch_count": 0,
+    "choice_policy_usage_rate": 0.908,
+    "win_rate_ratio_choice_policy_over_heuristic_choice": 0.9545454545454546,
+    "choice_policy_inference_latency_ms_avg": 6.598577876389851,
+    "choice_policy_inference_latency_ms_max": 63.59759997576475,
+    "normal_completion_rate_stage_c": 0.8667,
+    "normal_completion_rate_note": "4/30 Stage C scenarios did not reach a terminal state within max_decisions=60 (3 hit the decision budget, 1 hit no_legal_actions_while_non_terminal) - identical across both arms, not Choice-Policy-specific; see max_decisions_recheck and no_legal_actions_investigation records below for the follow-up this task requested before finalizing adoption."
+  },
+  "supersedes_or_extends": [
+    "Combat/policy_baseline/choice_semantics_baseline_722b019_v1_20260725.json",
+    "Combat/policy_baseline/choice_teacher_data_generation_v1_20260725.json",
+    "Combat/policy_baseline/choice_policy_online_eval_provenance_v1_20260725.json"
+  ],
+  "follow_up_completed": {
+    "max_decisions_150_recheck": {
+      "manifest": "Combat/evaluation/online_eval/choice_policy_max_decisions_recheck_manifest.jsonl",
+      "out_dir": "Combat/evaluation/reports/choice_policy_max_decisions_recheck_150",
+      "result": "3/3 scenarios completed normally (not truncated) at max_decisions=150, both arms, 0 illegal/exception. 7376-7: victory/113 decisions/HP31 (both arms identical). 3340-17: defeat/111 vs 109 decisions/HP0 (both arms). 4535-4: victory/96 decisions/HP35 (both arms identical)."
+    },
+    "no_legal_actions_investigation": {
+      "scenario": "6546-21",
+      "report": "Outputs/reports/rl_no_legal_actions_investigation_6546-21_20260725.md",
+      "repro_script": "Combat/evaluation/online_eval/investigate_no_legal_actions_6546_21.py",
+      "classification": "emulator_legal_action_bug (primary) / normal_terminal_detection_issue (secondary) - confirmed independent of Policy/Choice Policy (reproduces identically via raw/fresh Emulator calls and via the Heuristic-only arm), Combat-side adapter/cache/restore ruled out. Not fixed by RL - repro submitted for Emulator team review."
+    }
+  },
+  "final_confirmation_20260725": {
+    "max_decisions_150_scenarios_complete_normally": true,
+    "no_legal_actions_not_choice_policy_specific": true,
+    "illegal_exception_mapping_mismatch_still_zero": true,
+    "verdict": "Choice Policy evaluation CONCLUDED. All final-confirmation criteria (指示書4節) satisfied."
+  },
+  "status": "ADOPTED - Choice Policy is the fixed limited production configuration for the combat online adapter's choice_card routing, per this task. Follow-up items (max_decisions recheck, no_legal_actions investigation) both completed and confirmed non-blocking."
+}

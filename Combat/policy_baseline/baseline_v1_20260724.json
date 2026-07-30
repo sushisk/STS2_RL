@@ -1,0 +1,74 @@
+{
+  "baseline_id": "policy_baseline_v1_20260724",
+  "recorded_on": "2026-07-24",
+  "purpose": "Frozen reference point for the currently-working, no-lookahead Policy/Value online adapter (Combat/policy_agent.py) before Choice Semantics integration work begins. Does not move, copy, or overwrite any existing checkpoint or evaluation output - this file only records paths + hashes + a summary of what is already true.",
+  "rl_repo_note": "C:\\STS2_RL is not a git repository (no commit hash available here) - see harness_code_provenance below for the one Combat-side code change this baseline depends on.",
+  "checkpoints": {
+    "policy": {
+      "path": "C:\\STS2_RL\\Training\\checkpoints\\policy_teacher2000_seed_20260724\\best.pt",
+      "sha256": "eb3af996b7c151c47b5203dc811291cb3b05a65c355c05ffaa3fbbe47339994a",
+      "embedded_provenance": {
+        "dataset_version": "v1",
+        "contract_version": "v1",
+        "dictionary_version": "v1",
+        "export_script_version": "v3",
+        "emulator_commit": "163bf040027abca2754393a949e612e42f46a3e7",
+        "emulator_dll_sha256": "673778A6452C7F066F5C0989345B1BA56504428BA249C121DA6E68F7BC8C88B0",
+        "heuristic_version": "greedy_v1_default_weights"
+      },
+      "state_dim": 4560,
+      "test_top1_accuracy": 0.7762
+    },
+    "value": {
+      "path": "C:\\STS2_RL\\Training\\checkpoints\\value_teacher2000_seed_20260724\\best.pt",
+      "sha256": "24020cf571c76a4116613b2e5306f92c687b21dd7bcedf69f0f6139aa38790ba",
+      "embedded_provenance": {
+        "dataset_version": "v1",
+        "contract_version": "v1",
+        "dictionary_version": "v1",
+        "export_script_version": "v3",
+        "emulator_commit": "163bf040027abca2754393a949e612e42f46a3e7",
+        "emulator_dll_sha256": "673778A6452C7F066F5C0989345B1BA56504428BA249C121DA6E68F7BC8C88B0",
+        "heuristic_version": "greedy_v1_default_weights"
+      },
+      "test_win_accuracy": 0.872
+    },
+    "encoder_note": "sts2_training/encoding.py::ExportEncoder has no separate explicit version field; dictionary_version=v1 (above) plus state_dim=4560/action_numeric_dim=7 serve as its practical fingerprint. Both checkpoints embed identical id_dictionaries content, verified at load time by sts2_training/inference.py's PolicyDecision/ValueDetermination constructors."
+  },
+  "emulator": {
+    "commit_used_for_online_eval": "0d1613050e3d6396004d328ba77f72177b6e872d",
+    "commit_checkpoints_were_trained_against": "163bf040027abca2754393a949e612e42f46a3e7",
+    "version_gap_note": "0d16130 is 163bf04 + 2 commits (12df954, 0d16130) that add choice_card/choice_skip/choice_confirm choice-context fields (operation/source/origin) to LegalActions.Parameters and pendingChoice. No pre-existing observation/legal_action keys were changed or removed, and choice_* decisions are structurally routed to Heuristic fallback regardless of Policy - so this version gap does not affect Policy/Value's own input/output shapes. See rl_policy_online_eval_initial_report_20260724.md section 1."
+  },
+  "execution_conditions": {
+    "action_routing": "card/potion/system -> PolicyDecision; choice_card/choice_skip/choice_confirm (and any other non-standard action_type) -> HeuristicAgent fallback, unconditionally, independent of confidence or lookup outcomes",
+    "value_usage": "scored and logged every decision; never used to select or override an action",
+    "low_confidence_handling": "flagged in logs (confidence < threshold, default 0.5); action selection unchanged",
+    "any_enemy_targeting": "first-alive (target_index=0) when 2+ enemies are alive and Policy's legal_actions carry no resolved target - no extra apply_action-based search; flagged as target_ambiguous in logs",
+    "adapter_file": "Combat/policy_agent.py"
+  },
+  "harness_code_provenance": {
+    "fix": "emulator_bridge.py::to_plain() now converts System.Decimal (orb basePassiveValue/baseEvokeValue) to a plain Python float instead of leaving a live CLR object in engine_state - BattleEmulator.clone_state()/with_shuffle_seed() could not copy.deepcopy() such a value ('cannot pickle Decimal object'). Combat-side only - C:\\STS2_Emulator and Training/ were not modified.",
+    "file_changed": "Combat/emulator_bridge.py",
+    "fixed_on": "2026-07-24",
+    "verification": "Combat/tests/test_scenario_v2.py: 32/32 passed"
+  },
+  "evaluation_reports": [
+    {
+      "report": "Outputs/reports/rl_policy_online_eval_initial_report_20260724.md",
+      "covers": "known10 (fixed50[:10]) + unused50 (validation/test/benchmark splits, never used for teacher2000)",
+      "result": "illegal/exception/mismatch=0; win rate 100% of Heuristic (known10), 100% of Heuristic after budget correction (unused50); 2.75-4.95x faster"
+    },
+    {
+      "report": "Outputs/reports/rl_policy_online_eval_unused200_report_20260724.md",
+      "covers": "unused200 (nested superset of unused50)",
+      "result": "illegal/exception/mismatch=0; normal completion 97.96%/98.47%; win rate 96.25% of Heuristic; 2.55x faster"
+    },
+    {
+      "report": "Outputs/reports/rl_policy_online_eval_unused500_batch01_interim_report_20260724.md",
+      "covers": "unused500 batch01 (first 100 of the nested unused500 pool), max_decisions=150/max_wall_seconds=240/--measure-agreement",
+      "result": "illegal/exception/mismatch=0; normal completion 98.97%/100%; win rate 97.44% of Heuristic; 2.46x faster (excluding shadow-eval instrumentation); remaining 400 scenarios paused by user decision, not a failure"
+    }
+  ],
+  "status": "Remaining 400 of the unused500 evaluation are PAUSED (user decision, not a stop-condition failure) while Choice Semantics integration work proceeds. This baseline is the reference point that work builds on top of without altering."
+}

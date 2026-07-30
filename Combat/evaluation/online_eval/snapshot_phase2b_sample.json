@@ -1,0 +1,1044 @@
+{
+  "Metadata": {
+    "SchemaVersion": "phase2b.2",
+    "SnapshotId": "1cf590be88c64856b8399f496d32bbe8",
+    "StepIndex": 0,
+    "CaptureBoundary": "published_choice",
+    "Completeness": "complete",
+    "UnsupportedFields": [],
+    "CapturedAtUtc": "2026-07-28T17:44:32.2433794Z",
+    "CombatSessionId": "0ed94c96374345588f1e49a1adbfbe11",
+    "ContinuationStepIndex": null,
+    "EmulatorCommit": null
+  },
+  "Player": {
+    "InstanceId": "player-000000",
+    "CreatureInstanceId": "creature-000001",
+    "NetId": 1,
+    "Hp": 59,
+    "MaxHp": 85,
+    "Block": 0,
+    "Energy": 7,
+    "MaxEnergy": 3,
+    "Stars": 0,
+    "Gold": 99,
+    "OrbSlotCapacity": 3,
+    "Hand": [
+      {
+        "InstanceId": "card-000002",
+        "CardId": "LOOP",
+        "Type": "Power",
+        "Rarity": "Uncommon",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "hand",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000003",
+        "CardId": "ECHO_FORM",
+        "Type": "Power",
+        "Rarity": "Rare",
+        "Cost": 3,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "hand",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000004",
+        "CardId": "DARKNESS",
+        "Type": "Skill",
+        "Rarity": "Uncommon",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": true,
+        "UpgradeLevel": 1,
+        "Zone": "hand",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000005",
+        "CardId": "CHILL",
+        "Type": "Skill",
+        "Rarity": "Uncommon",
+        "Cost": 0,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "hand",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000006",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "hand",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      }
+    ],
+    "DrawPile": [
+      {
+        "InstanceId": "card-000007",
+        "CardId": "HOLOGRAM",
+        "Type": "Skill",
+        "Rarity": "Common",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000008",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000009",
+        "CardId": "CLUMSY",
+        "Type": "Curse",
+        "Rarity": "Curse",
+        "Cost": 0,
+        "TargetType": "None",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000010",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000011",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000012",
+        "CardId": "ZAP",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000013",
+        "CardId": "DUALCAST",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 0,
+        "TargetType": "Self",
+        "IsUpgraded": true,
+        "UpgradeLevel": 1,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000014",
+        "CardId": "CHARGE_BATTERY",
+        "Type": "Skill",
+        "Rarity": "Common",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000015",
+        "CardId": "STRIKE_DEFECT",
+        "Type": "Attack",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "AnyEnemy",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000016",
+        "CardId": "COOLHEADED",
+        "Type": "Skill",
+        "Rarity": "Common",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000017",
+        "CardId": "ASCENDERS_BANE",
+        "Type": "Curse",
+        "Rarity": "Curse",
+        "Cost": 0,
+        "TargetType": "None",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000018",
+        "CardId": "HOTFIX",
+        "Type": "Skill",
+        "Rarity": "Common",
+        "Cost": 0,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "draw_pile",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      }
+    ],
+    "DiscardPile": [],
+    "ExhaustPile": [],
+    "PlayPile": [],
+    "Deck": [
+      {
+        "InstanceId": "card-000019",
+        "CardId": "STRIKE_DEFECT",
+        "Type": "Attack",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "AnyEnemy",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000020",
+        "CardId": "STRIKE_DEFECT",
+        "Type": "Attack",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "AnyEnemy",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000021",
+        "CardId": "STRIKE_DEFECT",
+        "Type": "Attack",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "AnyEnemy",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000022",
+        "CardId": "STRIKE_DEFECT",
+        "Type": "Attack",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "AnyEnemy",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000023",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000024",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000025",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000026",
+        "CardId": "DEFEND_DEFECT",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000027",
+        "CardId": "ZAP",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      },
+      {
+        "InstanceId": "card-000028",
+        "CardId": "DUALCAST",
+        "Type": "Skill",
+        "Rarity": "Basic",
+        "Cost": 1,
+        "TargetType": "Self",
+        "IsUpgraded": false,
+        "UpgradeLevel": 0,
+        "Zone": "deck",
+        "TinkerTimeType": null,
+        "TinkerTimeRider": null
+      }
+    ],
+    "Relics": [
+      {
+        "InstanceId": "relic-000029",
+        "RelicId": "CRACKED_CORE",
+        "Rarity": "Starter",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {},
+        "DisplayAmount": null
+      },
+      {
+        "InstanceId": "relic-000030",
+        "RelicId": "PRECISE_SCISSORS",
+        "Rarity": "Ancient",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {},
+        "DisplayAmount": null
+      },
+      {
+        "InstanceId": "relic-000031",
+        "RelicId": "VENERABLE_TEA_SET",
+        "Rarity": "Common",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {
+          "GainEnergyInNextCombat": false
+        },
+        "DisplayAmount": null
+      },
+      {
+        "InstanceId": "relic-000032",
+        "RelicId": "BOOK_OF_FIVE_RINGS",
+        "Rarity": "Common",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {
+          "CardsAdded": 0
+        },
+        "DisplayAmount": 0
+      },
+      {
+        "InstanceId": "relic-000033",
+        "RelicId": "GAMBLING_CHIP",
+        "Rarity": "Rare",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {},
+        "DisplayAmount": null
+      },
+      {
+        "InstanceId": "relic-000034",
+        "RelicId": "JUZU_BRACELET",
+        "Rarity": "Common",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {},
+        "DisplayAmount": null
+      },
+      {
+        "InstanceId": "relic-000035",
+        "RelicId": "VERY_HOT_COCOA",
+        "Rarity": "Ancient",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {},
+        "DisplayAmount": null
+      },
+      {
+        "InstanceId": "relic-000036",
+        "RelicId": "PEAR",
+        "Rarity": "Uncommon",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {},
+        "DisplayAmount": null
+      },
+      {
+        "InstanceId": "relic-000037",
+        "RelicId": "ORNAMENTAL_FAN",
+        "Rarity": "Uncommon",
+        "StackCount": 1,
+        "Status": "Normal",
+        "IsWax": false,
+        "IsMelted": false,
+        "HasBeenRemovedFromState": false,
+        "FloorAddedToDeck": 1,
+        "SavedProperties": {},
+        "DisplayAmount": 0
+      }
+    ],
+    "Powers": [],
+    "Potions": [
+      {
+        "InstanceId": "potion-000038",
+        "PotionId": "OROBIC_ACID",
+        "Slot": 0,
+        "Rarity": "Rare",
+        "TargetType": "AnyPlayer",
+        "IsQueued": false
+      },
+      {
+        "InstanceId": "potion-000039",
+        "PotionId": "EXPLOSIVE_AMPOULE",
+        "Slot": 1,
+        "Rarity": "Common",
+        "TargetType": "AllEnemies",
+        "IsQueued": false
+      },
+      null
+    ],
+    "Orbs": [
+      {
+        "InstanceId": "orb-000040",
+        "OrbId": "LIGHTNING_ORB",
+        "Index": 0,
+        "BasePassiveValue": null,
+        "BaseEvokeValue": null
+      }
+    ],
+    "Pets": []
+  },
+  "Enemies": [
+    {
+      "InstanceId": "creature-000041",
+      "Index": 0,
+      "Name": "",
+      "Hp": 29,
+      "MaxHp": 29,
+      "Block": 0,
+      "IsAlive": true,
+      "Powers": [
+        {
+          "InstanceId": "power-000042",
+          "PowerId": "HARD_TO_KILL_POWER",
+          "Amount": 9,
+          "AmountOnTurnStart": 0,
+          "SkipNextDurationTick": false,
+          "StackType": "Counter",
+          "OwnerInstanceId": "creature-000041",
+          "HasUnsupportedInternalData": false,
+          "ApplierInstanceId": "creature-000041",
+          "TargetInstanceId": null,
+          "AssociatedCard": null,
+          "InternalData": null,
+          "InternalDataSerializerVersion": null
+        }
+      ],
+      "StateLog": [
+        "SKITTER_MOVE"
+      ],
+      "CombatId": 1,
+      "MonsterId": "EXOSKELETON",
+      "SlotName": "first",
+      "Intent": {
+        "stateId": "SKITTER_MOVE",
+        "intentTypes": [
+          "Attack"
+        ],
+        "attackDamage": 1,
+        "attackRepeats": 3
+      }
+    },
+    {
+      "InstanceId": "creature-000043",
+      "Index": 1,
+      "Name": "",
+      "Hp": 29,
+      "MaxHp": 29,
+      "Block": 0,
+      "IsAlive": true,
+      "Powers": [
+        {
+          "InstanceId": "power-000044",
+          "PowerId": "HARD_TO_KILL_POWER",
+          "Amount": 9,
+          "AmountOnTurnStart": 0,
+          "SkipNextDurationTick": false,
+          "StackType": "Counter",
+          "OwnerInstanceId": "creature-000043",
+          "HasUnsupportedInternalData": false,
+          "ApplierInstanceId": "creature-000043",
+          "TargetInstanceId": null,
+          "AssociatedCard": null,
+          "InternalData": null,
+          "InternalDataSerializerVersion": null
+        }
+      ],
+      "StateLog": [
+        "MANDIBLES_MOVE"
+      ],
+      "CombatId": 2,
+      "MonsterId": "EXOSKELETON",
+      "SlotName": "second",
+      "Intent": {
+        "stateId": "MANDIBLES_MOVE",
+        "intentTypes": [
+          "Attack"
+        ],
+        "attackDamage": 8,
+        "attackRepeats": 1
+      }
+    },
+    {
+      "InstanceId": "creature-000045",
+      "Index": 2,
+      "Name": "",
+      "Hp": 29,
+      "MaxHp": 29,
+      "Block": 0,
+      "IsAlive": true,
+      "Powers": [
+        {
+          "InstanceId": "power-000046",
+          "PowerId": "HARD_TO_KILL_POWER",
+          "Amount": 9,
+          "AmountOnTurnStart": 0,
+          "SkipNextDurationTick": false,
+          "StackType": "Counter",
+          "OwnerInstanceId": "creature-000045",
+          "HasUnsupportedInternalData": false,
+          "ApplierInstanceId": "creature-000045",
+          "TargetInstanceId": null,
+          "AssociatedCard": null,
+          "InternalData": null,
+          "InternalDataSerializerVersion": null
+        }
+      ],
+      "StateLog": [
+        "ENRAGE_MOVE"
+      ],
+      "CombatId": 3,
+      "MonsterId": "EXOSKELETON",
+      "SlotName": "third",
+      "Intent": {
+        "stateId": "ENRAGE_MOVE",
+        "intentTypes": [
+          "Buff"
+        ]
+      }
+    },
+    {
+      "InstanceId": "creature-000047",
+      "Index": 3,
+      "Name": "",
+      "Hp": 29,
+      "MaxHp": 29,
+      "Block": 0,
+      "IsAlive": true,
+      "Powers": [
+        {
+          "InstanceId": "power-000048",
+          "PowerId": "HARD_TO_KILL_POWER",
+          "Amount": 9,
+          "AmountOnTurnStart": 0,
+          "SkipNextDurationTick": false,
+          "StackType": "Counter",
+          "OwnerInstanceId": "creature-000047",
+          "HasUnsupportedInternalData": false,
+          "ApplierInstanceId": "creature-000047",
+          "TargetInstanceId": null,
+          "AssociatedCard": null,
+          "InternalData": null,
+          "InternalDataSerializerVersion": null
+        }
+      ],
+      "StateLog": [
+        "MANDIBLES_MOVE"
+      ],
+      "CombatId": 4,
+      "MonsterId": "EXOSKELETON",
+      "SlotName": "fourth",
+      "Intent": {
+        "stateId": "MANDIBLES_MOVE",
+        "intentTypes": [
+          "Attack"
+        ],
+        "attackDamage": 8,
+        "attackRepeats": 1
+      }
+    }
+  ],
+  "TurnNumber": 1,
+  "RoundNumber": 1,
+  "CurrentSide": "Player",
+  "Phase": "Play",
+  "Rng": {
+    "RunRng": {
+      "UpFront": {
+        "Counter": 230,
+        "State0": 18183707800100300245,
+        "State1": 931119337968330934,
+        "State2": 5738762593264286549,
+        "State3": 14669402527736522659
+      },
+      "Shuffle": {
+        "Counter": 9,
+        "State0": 10637037953448273359,
+        "State1": 14361366547125896584,
+        "State2": 4069707682952106737,
+        "State3": 16739589599009723439
+      },
+      "UnknownMapPoint": {
+        "Counter": 0,
+        "State0": 9508918992744661494,
+        "State1": 1810286692423538081,
+        "State2": 3658536380498063910,
+        "State3": 1839447372148491380
+      },
+      "CombatCardGeneration": {
+        "Counter": 0,
+        "State0": 16937604836045087450,
+        "State1": 944914377547410857,
+        "State2": 12684838160352927888,
+        "State3": 15033390633792325106
+      },
+      "CombatPotionGeneration": {
+        "Counter": 0,
+        "State0": 14254585119093873650,
+        "State1": 14150577933611160708,
+        "State2": 8444992480379037591,
+        "State3": 11992778430436843370
+      },
+      "CombatCardSelection": {
+        "Counter": 0,
+        "State0": 8965623128345310216,
+        "State1": 6710235789113969801,
+        "State2": 13381426215713280477,
+        "State3": 17276708162788207377
+      },
+      "CombatEnergyCosts": {
+        "Counter": 0,
+        "State0": 15624942146809451603,
+        "State1": 15666091858306357100,
+        "State2": 2369727757796460296,
+        "State3": 3914260817038111304
+      },
+      "CombatTargets": {
+        "Counter": 0,
+        "State0": 8683292700469208578,
+        "State1": 15611803343161007314,
+        "State2": 10508147041270877035,
+        "State3": 1550840248992511079
+      },
+      "MonsterAi": {
+        "Counter": 1,
+        "State0": 3434476231287923431,
+        "State1": 1492414000691814410,
+        "State2": 15192857757598275764,
+        "State3": 3257658593494838805
+      },
+      "Niche": {
+        "Counter": 4,
+        "State0": 4061502072382384873,
+        "State1": 4011894526407860917,
+        "State2": 2303380179026569351,
+        "State3": 12416776189007821963
+      },
+      "CombatOrbs": {
+        "Counter": 0,
+        "State0": 6004974524635929627,
+        "State1": 11442812639395849318,
+        "State2": 14537102859521849566,
+        "State3": 8575441987537387328
+      },
+      "TreasureRoomRelics": {
+        "Counter": 0,
+        "State0": 18286173568741060350,
+        "State1": 10975239282700727512,
+        "State2": 4890976261410318401,
+        "State3": 12158246519972240311
+      }
+    },
+    "PlayerRng": [
+      {
+        "OwnerInstanceId": "player-000000",
+        "Purposes": {
+          "Rewards": {
+            "Counter": 0,
+            "State0": 12669398468759629963,
+            "State1": 18142278469592643852,
+            "State2": 1059416511904116132,
+            "State3": 7358291992419531401
+          },
+          "Shops": {
+            "Counter": 0,
+            "State0": 13202159083684883763,
+            "State1": 6659928612296907270,
+            "State2": 7117449661333201696,
+            "State3": 10088675098393577413
+          },
+          "Transformations": {
+            "Counter": 0,
+            "State0": 6490317483177106011,
+            "State1": 9268270425779507328,
+            "State2": 3477050239395300449,
+            "State3": 3992231842382317792
+          }
+        }
+      }
+    ],
+    "MonsterRng": [
+      {
+        "OwnerInstanceId": "creature-000041",
+        "Rng": {
+          "Counter": 0,
+          "State0": 14748940843398125965,
+          "State1": 6579660468105737465,
+          "State2": 15591551665123412402,
+          "State3": 14960615782125223629
+        }
+      },
+      {
+        "OwnerInstanceId": "creature-000043",
+        "Rng": {
+          "Counter": 0,
+          "State0": 7837979228677246425,
+          "State1": 11408210608383910269,
+          "State2": 18120803893636248422,
+          "State3": 15877728380227874497
+        }
+      },
+      {
+        "OwnerInstanceId": "creature-000045",
+        "Rng": {
+          "Counter": 0,
+          "State0": 1877217395853479594,
+          "State1": 3435853946355576314,
+          "State2": 6740500040779771436,
+          "State3": 2238155613022403804
+        }
+      },
+      {
+        "OwnerInstanceId": "creature-000047",
+        "Rng": {
+          "Counter": 0,
+          "State0": 15049668721016636005,
+          "State1": 5476730078593337357,
+          "State2": 5161367593338175507,
+          "State3": 16216738932267145654
+        }
+      }
+    ]
+  },
+  "CombatHistory": {
+    "Entries": [
+      {
+        "EntryType": "PowerReceivedEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "powerInstanceId": "power-000042",
+          "amount": 9,
+          "applierInstanceId": "creature-000041"
+        },
+        "ActorInstanceId": "creature-000041"
+      },
+      {
+        "EntryType": "PowerReceivedEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "powerInstanceId": "power-000044",
+          "amount": 9,
+          "applierInstanceId": "creature-000043"
+        },
+        "ActorInstanceId": "creature-000043"
+      },
+      {
+        "EntryType": "PowerReceivedEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "powerInstanceId": "power-000046",
+          "amount": 9,
+          "applierInstanceId": "creature-000045"
+        },
+        "ActorInstanceId": "creature-000045"
+      },
+      {
+        "EntryType": "PowerReceivedEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "powerInstanceId": "power-000048",
+          "amount": 9,
+          "applierInstanceId": "creature-000047"
+        },
+        "ActorInstanceId": "creature-000047"
+      },
+      {
+        "EntryType": "OrbChanneledEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "orbInstanceId": "orb-000040"
+        },
+        "ActorInstanceId": "creature-000001"
+      },
+      {
+        "EntryType": "CardDrawnEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "cardInstanceId": "card-000049",
+          "fromHandDraw": true
+        },
+        "ActorInstanceId": "creature-000001"
+      },
+      {
+        "EntryType": "CardDrawnEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "cardInstanceId": "card-000050",
+          "fromHandDraw": true
+        },
+        "ActorInstanceId": "creature-000001"
+      },
+      {
+        "EntryType": "CardDrawnEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "cardInstanceId": "card-000051",
+          "fromHandDraw": true
+        },
+        "ActorInstanceId": "creature-000001"
+      },
+      {
+        "EntryType": "CardDrawnEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "cardInstanceId": "card-000052",
+          "fromHandDraw": true
+        },
+        "ActorInstanceId": "creature-000001"
+      },
+      {
+        "EntryType": "CardDrawnEntry",
+        "RoundNumber": 1,
+        "CurrentSide": "Player",
+        "Fields": {
+          "cardInstanceId": "card-000053",
+          "fromHandDraw": true
+        },
+        "ActorInstanceId": "creature-000001"
+      }
+    ]
+  },
+  "IsTerminal": false,
+  "Outcome": "in_progress",
+  "PendingChoice": {
+    "choiceType": "GamblingChipDiscard",
+    "scope": "StartOfCombat",
+    "scenarioRestorable": true,
+    "minSelect": 0,
+    "maxSelect": 999999999,
+    "selectedCount": 0,
+    "options": [
+      {
+        "id": "LOOP",
+        "type": "Power",
+        "rarity": "Uncommon",
+        "cost": 1,
+        "targetType": "Self",
+        "upgraded": false,
+        "upgradeLevel": 0,
+        "tinkerTimeType": null,
+        "tinkerTimeRider": null
+      },
+      {
+        "id": "ECHO_FORM",
+        "type": "Power",
+        "rarity": "Rare",
+        "cost": 3,
+        "targetType": "Self",
+        "upgraded": false,
+        "upgradeLevel": 0,
+        "tinkerTimeType": null,
+        "tinkerTimeRider": null
+      },
+      {
+        "id": "DARKNESS",
+        "type": "Skill",
+        "rarity": "Uncommon",
+        "cost": 1,
+        "targetType": "Self",
+        "upgraded": true,
+        "upgradeLevel": 1,
+        "tinkerTimeType": null,
+        "tinkerTimeRider": null
+      },
+      {
+        "id": "CHILL",
+        "type": "Skill",
+        "rarity": "Uncommon",
+        "cost": 0,
+        "targetType": "Self",
+        "upgraded": false,
+        "upgradeLevel": 0,
+        "tinkerTimeType": null,
+        "tinkerTimeRider": null
+      },
+      {
+        "id": "DEFEND_DEFECT",
+        "type": "Skill",
+        "rarity": "Basic",
+        "cost": 1,
+        "targetType": "Self",
+        "upgraded": false,
+        "upgradeLevel": 0,
+        "tinkerTimeType": null,
+        "tinkerTimeRider": null
+      }
+    ],
+    "choiceOperation": "unknown",
+    "sourceZone": "hand",
+    "destinationZone": null,
+    "originEntityType": null,
+    "originEntityId": null,
+    "remainingSelectCount": 0,
+    "canSkip": true,
+    "canConfirm": false
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "n": 275,
+  "risk_category_counts": {
+    "Origin-dependent": 121,
+    "Safe": 144,
+    "Suspect": 10
+  },
+  "risk_category_rates": {
+    "Origin-dependent": 0.44,
+    "Safe": 0.5236363636363637,
+    "Suspect": 0.03636363636363636
+  },
+  "resolution_path_counts": {
+    "origin_entity_rule": 81,
+    "combined_rule": 55,
+    "origin_type_alias": 25,
+    "dedicated_choice_type_rule": 46,
+    "emulator_choice_operation": 53,
+    "passthrough_rule": 15
+  },
+  "training_eligible": 265,
+  "training_eligible_rate": 0.9636363636363636,
+  "training_excluded": 10,
+  "training_excluded_rate": 0.03636363636363636,
+  "exclusion_reason_counts": {
+    "origin_validation_suspected_context_leak": 10
+  },
+  "counterfactual": {
+    "null_origin": {
+      "n": 275,
+      "changed_full": 176,
+      "changed_semantic_only": 121
+    },
+    "prior_choice_origin": {
+      "n": 185,
+      "changed_full": 81,
+      "changed_semantic_only": 39
+    },
+    "unrelated_known_entity": {
+      "n": 275,
+      "changed_full": 220,
+      "changed_semantic_only": 80
+    }
+  }
+}

@@ -1,0 +1,424 @@
+{
+  "config": {
+    "seed": 20260725,
+    "split_seed": 20260725,
+    "source_dir": "C:\\STS2_RL\\Combat\\evaluation\\reports\\choice_teacher_data_full_20260725",
+    "state_dim": 4560,
+    "card_vocab": 548,
+    "choice_meaning_vocab": 13,
+    "card_embedding_dim": 32,
+    "choice_meaning_embedding_dim": 8,
+    "hidden_dim": 64,
+    "batch_size": 32,
+    "lr": 0.001,
+    "patience": 8,
+    "min_delta": 0.0001,
+    "in_scope_decisions": 628,
+    "in_scope_trajectories": 173,
+    "split_counts_decisions": {
+      "train": 512,
+      "validation": 48,
+      "test": 68
+    }
+  },
+  "provenance": {
+    "emulator_commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "emulator_dll_sha256": "E3C3D26D7499E93E89F2718CCB51E18A2D66559021BBB5CDCA33980BB644C036",
+    "choice_semantics_baseline_version": "choice_semantics_baseline_722b019_v1_20260725",
+    "choice_semantics_lookup_sha256": "5e7d260f076047b6d0ee02eb79fcd57a06067be49c923621e84ec0df06df8d44",
+    "choice_semantics_origin_alias_sha256": "a456f0a235c84c2ee815367593c479fb5ed8479916ad4257a55b2d9ea1a33814",
+    "source_choice_dataset_sha256": "12F560F42E515FB72BBB52F0497D42E3E3FB7814FD0FDB070F8076C2CC3FE5BF",
+    "training_commit": "not_a_git_repository (C:\\STS2_RL\\Training has no .git)",
+    "policy_checkpoint_used_for_shared_encoder": "checkpoints\\policy_teacher2000_seed_20260724\\best.pt"
+  },
+  "variants": {
+    "primary_freeze_meaning": {
+      "best_epoch": 6,
+      "best_validation_loss": 0.9597345590591431,
+      "validation": {
+        "top_1_accuracy": 0.5833333134651184,
+        "top_3_accuracy": 0.9791666865348816,
+        "top_5_accuracy": 1.0,
+        "mrr": 0.7690972685813904,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 48
+      },
+      "test": {
+        "top_1_accuracy": 0.6029411554336548,
+        "top_3_accuracy": 0.9411764740943909,
+        "top_5_accuracy": 0.9852941036224365,
+        "mrr": 0.7602941393852234,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68
+      }
+    },
+    "baseline_freeze_no_meaning": {
+      "best_epoch": 3,
+      "best_validation_loss": 1.0331186056137085,
+      "test": {
+        "top_1_accuracy": 0.6176470518112183,
+        "top_3_accuracy": 0.9264705777168274,
+        "top_5_accuracy": 0.9852941036224365,
+        "mrr": 0.7615196704864502,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68
+      }
+    },
+    "encoder_comparison_finetune_meaning": {
+      "best_epoch": 6,
+      "best_validation_loss": 0.9327507813771566,
+      "test": {
+        "top_1_accuracy": 0.6470588445663452,
+        "top_3_accuracy": 0.9411764740943909,
+        "top_5_accuracy": 0.9852941036224365,
+        "mrr": 0.7830882668495178,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68
+      }
+    }
+  },
+  "non_parametric_baselines": {
+    "random_candidate_selection": {
+      "validation": {
+        "top_1_accuracy": 0.3180208331346512,
+        "top_3_accuracy": 0.7744791656732559,
+        "top_5_accuracy": 0.9448958334326744,
+        "mrr": 0.5593777833878995,
+        "illegal_prediction_rate": 0.0,
+        "trials": 200,
+        "decisions": 48
+      },
+      "test": {
+        "top_1_accuracy": 0.28022059202194216,
+        "top_3_accuracy": 0.7388970595598221,
+        "top_5_accuracy": 0.952720585167408,
+        "mrr": 0.5299941423535347,
+        "illegal_prediction_rate": 0.0,
+        "trials": 200,
+        "decisions": 68
+      }
+    },
+    "fixed_card_frequency_order": {
+      "validation": {
+        "top_1_accuracy": 0.4166666567325592,
+        "top_3_accuracy": 0.7083333134651184,
+        "top_5_accuracy": 0.9583333134651184,
+        "mrr": 0.6145089268684387,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 48
+      },
+      "test": {
+        "top_1_accuracy": 0.3529411852359772,
+        "top_3_accuracy": 0.6764705777168274,
+        "top_5_accuracy": 0.9411764740943909,
+        "mrr": 0.5566351413726807,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68
+      }
+    }
+  },
+  "primary_breakdowns": {
+    "validation": {
+      "aggregate": {
+        "top_1_accuracy": 0.5833333134651184,
+        "top_3_accuracy": 0.9791666865348816,
+        "top_5_accuracy": 1.0,
+        "mrr": 0.7690972685813904,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 48
+      },
+      "by_candidate_count": {
+        "3": {
+          "accuracy": 0.5,
+          "total": 12,
+          "reference_only_low_n": false
+        },
+        "4": {
+          "accuracy": 0.7,
+          "total": 10,
+          "reference_only_low_n": false
+        },
+        "5": {
+          "accuracy": 0.5,
+          "total": 8,
+          "reference_only_low_n": true
+        },
+        "2": {
+          "accuracy": 0.3333333333333333,
+          "total": 6,
+          "reference_only_low_n": true
+        },
+        "6": {
+          "accuracy": 0.8,
+          "total": 5,
+          "reference_only_low_n": true
+        },
+        "1": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "8": {
+          "accuracy": 0.5,
+          "total": 2,
+          "reference_only_low_n": true
+        },
+        "9": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "15": {
+          "accuracy": 1.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "by_normalized_operation": {
+        "discard": {
+          "accuracy": 0.5555555555555556,
+          "total": 18,
+          "reference_only_low_n": false
+        },
+        "unknown": {
+          "accuracy": 0.5833333333333334,
+          "total": 12,
+          "reference_only_low_n": false
+        },
+        "retrieve_to_hand": {
+          "accuracy": 0.4,
+          "total": 5,
+          "reference_only_low_n": true
+        },
+        "retrieve_to_draw_pile_top": {
+          "accuracy": 1.0,
+          "total": 5,
+          "reference_only_low_n": true
+        },
+        "exhaust": {
+          "accuracy": 0.75,
+          "total": 4,
+          "reference_only_low_n": true
+        },
+        "add_generated_to_hand": {
+          "accuracy": 0.25,
+          "total": 4,
+          "reference_only_low_n": true
+        }
+      },
+      "by_passthrough_exception_entity": {
+        "unknown": {
+          "accuracy": 0.5833333333333334,
+          "total": 36,
+          "reference_only_low_n": false
+        },
+        "relic:GAMBLING_CHIP": {
+          "accuracy": 0.6,
+          "total": 10,
+          "reference_only_low_n": false
+        },
+        "card:SCULPTING_STRIKE": {
+          "accuracy": 0.5,
+          "total": 2,
+          "reference_only_low_n": true
+        }
+      },
+      "by_remaining_select_count": {
+        "1": {
+          "accuracy": 0.6333333333333333,
+          "total": 30,
+          "reference_only_low_n": false
+        },
+        "0": {
+          "accuracy": 0.5,
+          "total": 16,
+          "reference_only_low_n": false
+        },
+        "2": {
+          "accuracy": 0.5,
+          "total": 2,
+          "reference_only_low_n": true
+        }
+      }
+    },
+    "test": {
+      "aggregate": {
+        "top_1_accuracy": 0.6029411554336548,
+        "top_3_accuracy": 0.9411764740943909,
+        "top_5_accuracy": 0.9852941036224365,
+        "mrr": 0.7602941393852234,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68
+      },
+      "by_candidate_count": {
+        "5": {
+          "accuracy": 0.55,
+          "total": 20,
+          "reference_only_low_n": false
+        },
+        "4": {
+          "accuracy": 0.9473684210526315,
+          "total": 19,
+          "reference_only_low_n": false
+        },
+        "3": {
+          "accuracy": 0.3333333333333333,
+          "total": 15,
+          "reference_only_low_n": false
+        },
+        "2": {
+          "accuracy": 0.6666666666666666,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "1": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "8": {
+          "accuracy": 0.3333333333333333,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "7": {
+          "accuracy": 0.0,
+          "total": 2,
+          "reference_only_low_n": true
+        },
+        "15": {
+          "accuracy": 1.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "14": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "6": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "by_normalized_operation": {
+        "discard": {
+          "accuracy": 1.0,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "transform": {
+          "accuracy": 0.5294117647058824,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "return_to_draw_pile_top": {
+          "accuracy": 0.2727272727272727,
+          "total": 11,
+          "reference_only_low_n": false
+        },
+        "unknown": {
+          "accuracy": 0.6,
+          "total": 10,
+          "reference_only_low_n": false
+        },
+        "add_generated_to_hand": {
+          "accuracy": 0.2857142857142857,
+          "total": 7,
+          "reference_only_low_n": true
+        },
+        "retrieve_to_hand": {
+          "accuracy": 0.6666666666666666,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "retrieve_to_draw_pile_top": {
+          "accuracy": 1.0,
+          "total": 2,
+          "reference_only_low_n": true
+        },
+        "exhaust": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "by_passthrough_exception_entity": {
+        "unknown": {
+          "accuracy": 0.603448275862069,
+          "total": 58,
+          "reference_only_low_n": false
+        },
+        "relic:GAMBLING_CHIP": {
+          "accuracy": 0.6,
+          "total": 10,
+          "reference_only_low_n": false
+        }
+      },
+      "by_remaining_select_count": {
+        "1": {
+          "accuracy": 0.6382978723404256,
+          "total": 47,
+          "reference_only_low_n": false
+        },
+        "0": {
+          "accuracy": 0.5263157894736842,
+          "total": 19,
+          "reference_only_low_n": false
+        },
+        "2": {
+          "accuracy": 0.5,
+          "total": 2,
+          "reference_only_low_n": true
+        }
+      }
+    }
+  },
+  "synthetic_check": [
+    {
+      "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:0",
+      "candidate_count": 3,
+      "predicted_label": "STRIKE_REGENT",
+      "teacher_label": "STRIKE_REGENT",
+      "matched_teacher": true,
+      "ran_without_exception": true
+    },
+    {
+      "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:1",
+      "candidate_count": 4,
+      "predicted_label": "STRIKE_REGENT",
+      "teacher_label": "STRIKE_REGENT",
+      "matched_teacher": true,
+      "ran_without_exception": true
+    },
+    {
+      "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:2",
+      "candidate_count": 5,
+      "predicted_label": "STRIKE_REGENT",
+      "teacher_label": "STRIKE_REGENT",
+      "matched_teacher": true,
+      "ran_without_exception": true
+    }
+  ],
+  "dataset_audit": {
+    "rl_eligible": 656,
+    "rl_excluded": 11,
+    "synthetic_holdout": 3,
+    "training_scope_excluded_choice_confirm": 25,
+    "in_scope_for_training": 628,
+    "in_scope_trajectories": 173,
+    "split_counts_trajectories": {
+      "train": 138,
+      "validation": 17,
+      "test": 18
+    },
+    "split_counts_decisions": {
+      "train": 512,
+      "validation": 48,
+      "test": 68
+    }
+  },
+  "training_time_seconds": 143.1367586000124,
+  "checkpoint_path": "C:\\STS2_RL\\Training\\checkpoints\\choice_policy_seed_20260725\\best.pt"
+}

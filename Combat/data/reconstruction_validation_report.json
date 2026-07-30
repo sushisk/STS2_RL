@@ -1,0 +1,654 @@
+{
+  "stage1_v8_sample": {
+    "label": "stage1_v8_sample",
+    "total_runs": 8,
+    "total_encounters_found": 186,
+    "deck_match_rate": "7/8",
+    "relic_match_rate": "8/8",
+    "runs_with_warnings": "1/8",
+    "hp_status_distribution": {
+      "exact": 186
+    },
+    "per_run_details": [
+      {
+        "server_id": 4389,
+        "schema_version": 8,
+        "encounters_found": 26,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 537,
+        "schema_version": 8,
+        "encounters_found": 23,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 2184,
+        "schema_version": 8,
+        "encounters_found": 28,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1773,
+        "schema_version": 8,
+        "encounters_found": 26,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 3407,
+        "schema_version": 8,
+        "encounters_found": 22,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 4390,
+        "schema_version": 8,
+        "encounters_found": 24,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1383,
+        "schema_version": 8,
+        "encounters_found": 25,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 630,
+        "schema_version": 8,
+        "encounters_found": 12,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      }
+    ]
+  },
+  "stage2_v9_sample": {
+    "label": "stage2_v9_sample",
+    "total_runs": 8,
+    "total_encounters_found": 113,
+    "deck_match_rate": "7/8",
+    "relic_match_rate": "8/8",
+    "runs_with_warnings": "1/8",
+    "hp_status_distribution": {
+      "exact": 113
+    },
+    "per_run_details": [
+      {
+        "server_id": 1608,
+        "schema_version": 9,
+        "encounters_found": 23,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 868,
+        "schema_version": 9,
+        "encounters_found": 23,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 3608,
+        "schema_version": 9,
+        "encounters_found": 19,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 4109,
+        "schema_version": 9,
+        "encounters_found": 7,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 816,
+        "schema_version": 9,
+        "encounters_found": 8,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 3609,
+        "schema_version": 9,
+        "encounters_found": 15,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 817,
+        "schema_version": 9,
+        "encounters_found": 15,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 3610,
+        "schema_version": 9,
+        "encounters_found": 3,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      }
+    ]
+  },
+  "stage3_win_loss_abandoned_mix": {
+    "label": "stage3_win_loss_abandoned_mix",
+    "total_runs": 9,
+    "total_encounters_found": 114,
+    "deck_match_rate": "9/9",
+    "relic_match_rate": "9/9",
+    "runs_with_warnings": "0/9",
+    "hp_status_distribution": {
+      "exact": 114
+    },
+    "per_run_details": [
+      {
+        "server_id": 4389,
+        "schema_version": 8,
+        "encounters_found": 26,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 537,
+        "schema_version": 8,
+        "encounters_found": 23,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 2184,
+        "schema_version": 8,
+        "encounters_found": 28,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 630,
+        "schema_version": 8,
+        "encounters_found": 12,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1774,
+        "schema_version": 8,
+        "encounters_found": 6,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1551,
+        "schema_version": 8,
+        "encounters_found": 12,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1505,
+        "schema_version": 8,
+        "encounters_found": 0,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1506,
+        "schema_version": 8,
+        "encounters_found": 0,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 7279,
+        "schema_version": 8,
+        "encounters_found": 7,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      }
+    ]
+  },
+  "stage4_fifty_runs": {
+    "label": "stage4_fifty_runs",
+    "total_runs": 50,
+    "total_encounters_found": 911,
+    "deck_match_rate": "44/50",
+    "relic_match_rate": "50/50",
+    "runs_with_warnings": "6/50",
+    "hp_status_distribution": {
+      "exact": 911
+    },
+    "per_run_details": [
+      {
+        "server_id": 4389,
+        "schema_version": 8,
+        "encounters_found": 26,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 537,
+        "schema_version": 8,
+        "encounters_found": 23,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 2184,
+        "schema_version": 8,
+        "encounters_found": 28,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1773,
+        "schema_version": 8,
+        "encounters_found": 26,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 3407,
+        "schema_version": 8,
+        "encounters_found": 22,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 4390,
+        "schema_version": 8,
+        "encounters_found": 24,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1383,
+        "schema_version": 8,
+        "encounters_found": 25,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 630,
+        "schema_version": 8,
+        "encounters_found": 12,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1774,
+        "schema_version": 8,
+        "encounters_found": 6,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 538,
+        "schema_version": 8,
+        "encounters_found": 24,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 631,
+        "schema_version": 8,
+        "encounters_found": 28,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 2185,
+        "schema_version": 8,
+        "encounters_found": 26,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1551,
+        "schema_version": 8,
+        "encounters_found": 12,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1132,
+        "schema_version": 8,
+        "encounters_found": 29,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 5346,
+        "schema_version": 8,
+        "encounters_found": 18,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1020,
+        "schema_version": 8,
+        "encounters_found": 27,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 146,
+        "schema_version": 8,
+        "encounters_found": 9,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1384,
+        "schema_version": 8,
+        "encounters_found": 8,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1501,
+        "schema_version": 8,
+        "encounters_found": 1,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1502,
+        "schema_version": 8,
+        "encounters_found": 1,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1503,
+        "schema_version": 8,
+        "encounters_found": 1,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1504,
+        "schema_version": 8,
+        "encounters_found": 1,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 6550,
+        "schema_version": 8,
+        "encounters_found": 23,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 1385,
+        "schema_version": 8,
+        "encounters_found": 23,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 5345,
+        "schema_version": 8,
+        "encounters_found": 25,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1021,
+        "schema_version": 8,
+        "encounters_found": 17,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 539,
+        "schema_version": 8,
+        "encounters_found": 6,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 147,
+        "schema_version": 8,
+        "encounters_found": 22,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 4391,
+        "schema_version": 8,
+        "encounters_found": 25,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 540,
+        "schema_version": 8,
+        "encounters_found": 23,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 3408,
+        "schema_version": 8,
+        "encounters_found": 21,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 2186,
+        "schema_version": 8,
+        "encounters_found": 6,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1552,
+        "schema_version": 8,
+        "encounters_found": 10,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 6551,
+        "schema_version": 8,
+        "encounters_found": 24,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 5344,
+        "schema_version": 8,
+        "encounters_found": 4,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1022,
+        "schema_version": 8,
+        "encounters_found": 7,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 5343,
+        "schema_version": 8,
+        "encounters_found": 16,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 2187,
+        "schema_version": 8,
+        "encounters_found": 18,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 5792,
+        "schema_version": 8,
+        "encounters_found": 21,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1023,
+        "schema_version": 8,
+        "encounters_found": 19,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 632,
+        "schema_version": 8,
+        "encounters_found": 25,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 3409,
+        "schema_version": 8,
+        "encounters_found": 23,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 2080,
+        "schema_version": 8,
+        "encounters_found": 21,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 6852,
+        "schema_version": 8,
+        "encounters_found": 24,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 5342,
+        "schema_version": 8,
+        "encounters_found": 25,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1024,
+        "schema_version": 8,
+        "encounters_found": 26,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": true
+      },
+      {
+        "server_id": 633,
+        "schema_version": 8,
+        "encounters_found": 27,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 3410,
+        "schema_version": 8,
+        "encounters_found": 24,
+        "deck_matches": false,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 2081,
+        "schema_version": 8,
+        "encounters_found": 24,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      },
+      {
+        "server_id": 1025,
+        "schema_version": 8,
+        "encounters_found": 5,
+        "deck_matches": true,
+        "relics_match": true,
+        "warnings_present": false
+      }
+    ]
+  }
+}

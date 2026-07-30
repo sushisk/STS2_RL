@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sts2_rl:choice_semantics_schema:v1",
+  "title": "ChoiceSemanticsEntry",
+  "description": "RL-side (not Emulator-side) versioned lookup-table entry normalizing the real meaning of one choice_card/choice_skip/choice_confirm-triggering entity (card/relic/power/potion/monster move). Emulator deliberately does not hardcode this (see STS2_Emulator/docs/API_REFERENCE.md section 3.3.1's 'Known gaps' and Sts2Emulator/Imported/Stubs/CardSelectionContext.cs) - it exposes only what is mechanically observable (choiceOperation/sourceZone/destinationZone/originEntityType/originEntityId on Observation.State.pendingChoice and on choice_card/choice_skip/choice_confirm LegalActions.Parameters). This schema is RL's own semantic layer on top of that, keyed by (origin_entity_type, origin_entity_id), populated by reading the real card/relic/power/monster effect source (see Common/schemas/choice_semantics_lookup.v1.json for the populated table and its own provenance notes). Consumers must treat entries as an append-only, versioned dataset: re-derive/extend when STS2_Emulator's decompiled source changes (new cards/relics/powers, or CardSelectCmd call-site changes) - do not silently edit an existing entry's semantics without bumping schema_version.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "origin_entity_type",
+    "origin_entity_id",
+    "source_zone",
+    "normalized_choice_operation",
+    "destination_zone",
+    "semantic_confidence",
+    "semantic_source",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of this lookup-table entry's own schema, not the game/emulator version. Bump the minor part when adding entries or optional fields; bump the major part when changing an existing entry's normalized_choice_operation/destination_zone semantics or removing a field.",
+      "examples": ["choice_semantics.v1"]
+    },
+    "origin_entity_type": {
+      "type": ["string", "null"],
+      "enum": ["card", "relic", "power", "potion", "monster", null],
+      "description": "Matches Emulator's originEntityType where available (card/relic/power - see API_REFERENCE.md 3.3.1), extended with 'potion' and 'monster' for entities Emulator's CardSelectionContext does not itself label (potions have no explicit originEntityType today; monster-move-triggered choices are a new category this table introduces). null only for entries this table itself cannot key by entity (should not occur in a populated table - every row must have a concrete origin)."
+    },
+    "origin_entity_id": {
+      "type": "string",
+      "description": "Canonical SCREAMING_SNAKE_CASE id matching Common/ids/{cards,relics,powers,potions,monsters}.json keys. Primary key together with origin_entity_type."
+    },
+    "combat_scope": {
+      "type": "string",
+      "enum": ["combat", "non_combat_deck", "either"],
+      "description": "Whether this choice can occur inside a live CombatScenario (relevant to CombatPolicy's priority) or only outside combat (relic pickup, rest site, event, reward screen - deck-building choices that must be kept in a separate bucket per the RL analysis brief, not mixed into combat Policy's training/eligibility set). 'either' covers the rare case of a relic effect that can fire in both contexts (none identified as of this table's v1; reserved)."
+    },
+    "source_zone": {
+      "type": ["string", "null"],
+      "enum": ["hand", "draw_pile", "discard_pile", "exhaust_pile", "play_pile", "deck", "freshly_generated", null],
+      "description": "Where the offered options come from. Mirrors Emulator's sourceZone values for pile-backed choices, plus this table's own 'freshly_generated' for options created fresh from a card pool (never in a real pile) - Emulator itself reports these as sourceZone=null; this table distinguishes 'genuinely unknown/unset' (null) from 'known to be freshly generated' (freshly_generated)."
+    },
+    "normalized_choice_operation": {
+      "type": "string",
+      "description": "RL's own normalized operation id. Superset of Emulator's six canonical choiceOperation values (discard/exhaust/upgrade/transform/enchant/remove) plus operations Emulator cannot classify from CardSelectorPrefs alone. See choice_semantics_lookup.v1.json's header comment for the full enum and one example entity per value as of v1.",
+      "examples": [
+        "discard", "exhaust", "upgrade", "transform", "enchant", "remove",
+        "retrieve_to_hand", "retrieve_to_hand_free", "retrieve_to_draw_pile_top",
+        "return_to_draw_pile_top", "clone_to_hand", "add_generated_to_hand",
+        "add_generated_to_deck", "select_to_replay", "select_for_power_association",
+        "apply_effect_in_place", "bundle_select", "enemy_forced_deck_addition", "unknown"
+      ]
+    },
+    "destination_zone": {
+      "type": ["string", "null"],
+      "enum": ["hand", "draw_pile_top", "discard_pile", "exhaust_pile", "deck", null],
+      "description": "Where the selected card(s) end up, or null if the operation does not move the card at all (e.g. apply_effect_in_place, select_to_replay, select_for_power_association) or genuinely varies per-selection (enemy_forced_deck_addition - delegated to the chosen card's own OnChosen())."
+    },
+    "semantic_confidence": {
+      "type": "string",
+      "enum": ["confirmed", "prompt_confirmed", "inferred", "unknown"],
+      "description": "How sure this row is, independent of semantic_source: 'confirmed' - read directly from the effect's own source code (OnPlay/OnUse/AfterObtained/Before*/After* method body) by a human/agent for this table; 'prompt_confirmed' - Emulator's own choiceOperation already resolved this via a canonical CardSelectorPrefs prompt, this row only adds destination/scope; 'inferred' - plausible from naming/pattern but the exact source line was not read for this entry; 'unknown' - not yet resolved, placeholder row."
+    },
+    "semantic_source": {
+      "type": "string",
+      "enum": ["emulator_fact", "prompt_confirmed", "hardcoded_entity_rule", "unknown"],
+      "description": "The four-way provenance split requested for this table: 'emulator_fact' - value came directly from Observation.State.pendingChoice / choice_card Parameters at runtime, no RL-side guess involved; 'prompt_confirmed' - Emulator's choiceOperation already resolved via one of the six canonical CardSelectorPrefs prompts (still an emulator_fact in practice, kept distinct because it is the specific 61+/122 method-name/prompt-resolvable bucket referenced in the checkpoint report); 'hardcoded_entity_rule' - this table supplies the value from reading the entity's own effect source, because Emulator's own choiceOperation/destinationZone stayed 'unknown'/null for it; 'unknown' - neither Emulator nor this table has resolved it yet."
+    },
+    "evidence": {
+      "type": "object",
+      "description": "What Emulator itself reports at runtime for this entity's choice, kept separate from this table's own normalized/hardcoded values so a consumer can always see the raw signal alongside the RL interpretation.",
+      "properties": {
+        "emulator_choice_operation": {
+          "type": ["string", "null"],
+          "description": "Verbatim choiceOperation value Observation.State.pendingChoice/choice_card Parameters report for this entity ('discard'/'exhaust'/'upgrade'/'transform'/'enchant'/'remove'/'unknown', or null if this entity's choice never surfaces this field, e.g. a non-combat AfterObtained() pick)."
+        },
+        "emulator_destination_zone": {
+          "type": ["string", "null"],
+          "description": "Verbatim destinationZone Emulator reports, almost always null except discard/exhaust (the only two operations Emulator itself can derive a destination for by definition)."
+        },
+        "emulator_origin_resolvable": {
+          "type": "boolean",
+          "description": "Whether Emulator's originEntityType/originEntityId actually resolve to this entity at runtime (false for the small number of entries where no PlayerChoiceContext/explicit source is available - e.g. FromDeckGeneric-family calls, or a relic/monster move that deliberately opens a fresh BlockingPlayerChoiceContext instead of reusing the ambient one)."
+        },
+        "card_select_cmd_method": {
+          "type": "string",
+          "description": "The literal CardSelectCmd.From* method this entity calls, e.g. 'FromCombatPile', 'FromHandForDiscard'. Primary key for cross-referencing STS2_Emulator source."
+        },
+        "prompt_is_canonical": {
+          "type": "boolean",
+          "description": "True if this call site passes one of CardSelectorPrefs's six canonical prompt statics (TransformSelectionPrompt/ExhaustSelectionPrompt/RemoveSelectionPrompt/EnchantSelectionPrompt/DiscardSelectionPrompt/UpgradeSelectionPrompt) - the only condition under which Emulator's own choiceOperation is non-'unknown' for a generic entry-point method. False for entity-specific auto-generated prompts (e.g. CardModel.SelectionScreenPrompt), even when this table's own hardcoded_entity_rule assigns a real operation like exhaust (see PURITY/ASHWATER for the motivating counter-examples: real operation is exhaust, but the prompt is card/potion-specific text, not the shared ExhaustSelectionPrompt, so Emulator itself still reports 'unknown')."
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-text implementation detail worth keeping next to the row - e.g. multi-select bounds, a modifier the operation applies beyond the plain zone move (SetToFreeThisTurn, keyword grants), or a caveat about multiplayer-only/enemy-move-triggered scope."
+    }
+  }
+}

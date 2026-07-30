@@ -1,0 +1,26 @@
+[
+  {
+    "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:0",
+    "candidate_count": 3,
+    "predicted_label": "STRIKE_REGENT",
+    "teacher_label": "STRIKE_REGENT",
+    "matched_teacher": true,
+    "ran_without_exception": true
+  },
+  {
+    "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:1",
+    "candidate_count": 4,
+    "predicted_label": "STRIKE_REGENT",
+    "teacher_label": "STRIKE_REGENT",
+    "matched_teacher": true,
+    "ran_without_exception": true
+  },
+  {
+    "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:2",
+    "candidate_count": 5,
+    "predicted_label": "STRIKE_REGENT",
+    "teacher_label": "STRIKE_REGENT",
+    "matched_teacher": true,
+    "ran_without_exception": true
+  }
+]

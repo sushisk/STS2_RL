@@ -1,0 +1,164 @@
+{
+  "generated_from": {
+    "v108_source": "C:\\STS2_Decompiled",
+    "v109_source": "C:\\STS2_Decompiled_v0109",
+    "note": "v109 is the version STS2_Emulator's imported Source tree matches (verified by Core.Models.Cards/.Relics .cs file counts: v108=600/298, v109=603/300, emulator Imported/Source=603/300). Treat v109 as current."
+  },
+  "cards": {
+    "v108_count": 593,
+    "v109_count": 596,
+    "added_in_v109": [
+      "ABUNDANCE",
+      "DOWSING",
+      "TUTOR"
+    ],
+    "removed_since_v108": [],
+    "changed": [
+      {
+        "id": "ACCELERANT",
+        "class_name": "Accelerant",
+        "diffs": {
+          "rarity": {
+            "v108": "Rare",
+            "v109": "Uncommon"
+          }
+        }
+      },
+      {
+        "id": "BLADE_SYMPHONY",
+        "class_name": "BladeSymphony",
+        "diffs": {
+          "energy_cost": {
+            "v108": 1,
+            "v109": 2
+          }
+        }
+      },
+      {
+        "id": "BLOODLETTING",
+        "class_name": "Bloodletting",
+        "diffs": {
+          "rarity": {
+            "v108": "Common",
+            "v109": "Uncommon"
+          }
+        }
+      },
+      {
+        "id": "CRUELTY",
+        "class_name": "Cruelty",
+        "diffs": {
+          "rarity": {
+            "v108": "Rare",
+            "v109": "Uncommon"
+          }
+        }
+      },
+      {
+        "id": "DOMINATE",
+        "class_name": "Dominate",
+        "diffs": {
+          "rarity": {
+            "v108": "Uncommon",
+            "v109": "Rare"
+          }
+        }
+      },
+      {
+        "id": "MIRAGE",
+        "class_name": "Mirage",
+        "diffs": {
+          "energy_cost": {
+            "v108": 1,
+            "v109": 0
+          }
+        }
+      },
+      {
+        "id": "TAUNT",
+        "class_name": "Taunt",
+        "diffs": {
+          "rarity": {
+            "v108": "Uncommon",
+            "v109": "Common"
+          }
+        }
+      },
+      {
+        "id": "WELL_LAID_PLANS",
+        "class_name": "WellLaidPlans",
+        "diffs": {
+          "rarity": {
+            "v108": "Uncommon",
+            "v109": "Rare"
+          }
+        }
+      }
+    ],
+    "unchanged_count": 585
+  },
+  "relics": {
+    "v108_count": 297,
+    "v109_count": 299,
+    "added_in_v109": [
+      "DOWSING_ROD",
+      "NEOWS_SACRIFICE"
+    ],
+    "removed_since_v108": [],
+    "changed": [],
+    "unchanged_count": 297
+  },
+  "potions": {
+    "v108_count": 64,
+    "v109_count": 65,
+    "added_in_v109": [
+      "AMBERGRIS"
+    ],
+    "removed_since_v108": [],
+    "changed": [],
+    "unchanged_count": 64
+  },
+  "monsters": {
+    "v108_count": 119,
+    "v109_count": 120,
+    "added_in_v109": [
+      "MYSTERIOUS_KNIGHT"
+    ],
+    "removed_since_v108": [],
+    "changed": [],
+    "unchanged_count": 119
+  },
+  "powers": {
+    "v108_count": 265,
+    "v109_count": 265,
+    "added_in_v109": [
+      "AMBERGRIS_POWER"
+    ],
+    "removed_since_v108": [
+      "DIAMOND_DIADEM_POWER"
+    ],
+    "changed": [
+      {
+        "id": "HIBERNATE_POWER",
+        "class_name": "HibernatePower",
+        "diffs": {
+          "stack_type": {
+            "v108": "Single",
+            "v109": "Counter"
+          }
+        }
+      },
+      {
+        "id": "WELL_LAID_PLANS_POWER",
+        "class_name": "WellLaidPlansPower",
+        "diffs": {
+          "stack_type": {
+            "v108": "Counter",
+            "v109": "Single"
+          }
+        }
+      }
+    ],
+    "unchanged_count": 262
+  }
+}

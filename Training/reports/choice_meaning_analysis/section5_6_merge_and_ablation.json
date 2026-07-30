@@ -1,0 +1,40 @@
+{
+  "merge_map": {
+    "retrieve_to_hand": "retrieve",
+    "retrieve_to_draw_pile_top": "retrieve",
+    "apply_effect_in_place": "other_normalized_rare",
+    "select_for_power_association": "other_normalized_rare",
+    "upgrade": "other_normalized_rare",
+    "transform_to_specific_card": "other_normalized_rare"
+  },
+  "merged_token_count": 8,
+  "merged_tokens": [
+    "add_generated_to_hand",
+    "discard",
+    "exhaust",
+    "other_normalized_rare",
+    "relic:GAMBLING_CHIP",
+    "retrieve",
+    "return_to_draw_pile_top",
+    "transform"
+  ],
+  "three_way_test_comparison": {
+    "meaning_13_token": {
+      "top_1_accuracy": 0.6029411764705882,
+      "best_epoch": null
+    },
+    "no_meaning": {
+      "top_1_accuracy": 0.6176470588235294,
+      "best_epoch": 3
+    },
+    "meaning_merged_9_token": {
+      "top_1_accuracy": 0.6617646813392639,
+      "top_3_accuracy": 0.9558823704719543,
+      "top_5_accuracy": 1.0,
+      "mrr": 0.8002450466156006,
+      "illegal_prediction_rate": 0.0,
+      "decisions": 68,
+      "best_epoch": 7
+    }
+  }
+}

@@ -1,0 +1,2144 @@
+{
+  "AEONGLASS": {
+    "class_name": "Aeonglass",
+    "hp": {
+      "ascension10": {
+        "max": 535,
+        "min": 535
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 535, 512)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "ARCHITECT": {
+    "class_name": "Architect",
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "ASSASSIN_RUBY_RAIDER": {
+    "class_name": "AssassinRubyRaider",
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "AXEBOT": {
+    "class_name": "Axebot",
+    "hp": {
+      "ascension10": {
+        "max": 86,
+        "min": 76
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 86, 78)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 76, 70)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "AXE_RUBY_RAIDER": {
+    "class_name": "AxeRubyRaider",
+    "hp": {
+      "ascension10": {
+        "max": 23,
+        "min": 21
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 23, 22)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 21, 20)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BATTLE_FRIEND_V1": {
+    "class_name": "BattleFriendV1",
+    "hp": {
+      "ascension10": {
+        "max": 75,
+        "min": 75
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "75",
+        "min": "75"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BATTLE_FRIEND_V2": {
+    "class_name": "BattleFriendV2",
+    "hp": {
+      "ascension10": {
+        "max": 150,
+        "min": 150
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "150",
+        "min": "150"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BATTLE_FRIEND_V3": {
+    "class_name": "BattleFriendV3",
+    "hp": {
+      "ascension10": {
+        "max": 300,
+        "min": 300
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "300",
+        "min": "300"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BIG_DUMMY": {
+    "class_name": "BigDummy",
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BOWLBUG_EGG": {
+    "class_name": "BowlbugEgg",
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 23
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 22)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 23, 21)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BOWLBUG_NECTAR": {
+    "class_name": "BowlbugNectar",
+    "hp": {
+      "ascension10": {
+        "max": 39,
+        "min": 36
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 39, 38)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 36, 35)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BOWLBUG_ROCK": {
+    "class_name": "BowlbugRock",
+    "hp": {
+      "ascension10": {
+        "max": 49,
+        "min": 46
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 49, 48)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 45)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BOWLBUG_SILK": {
+    "class_name": "BowlbugSilk",
+    "hp": {
+      "ascension10": {
+        "max": 44,
+        "min": 41
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 44, 43)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 41, 40)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BRUTE_RUBY_RAIDER": {
+    "class_name": "BruteRubyRaider",
+    "hp": {
+      "ascension10": {
+        "max": 34,
+        "min": 31
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 34, 33)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 31, 30)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BYGONE_EFFIGY": {
+    "class_name": "BygoneEffigy",
+    "hp": {
+      "ascension10": {
+        "max": 132,
+        "min": 132
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 132, 127)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BYRDONIS": {
+    "class_name": "Byrdonis",
+    "hp": {
+      "ascension10": {
+        "max": 90,
+        "min": 90
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 90, 84)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 90, 81)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "BYRDPIP": {
+    "class_name": "Byrdpip",
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "CALCIFIED_CULTIST": {
+    "class_name": "CalcifiedCultist",
+    "hp": {
+      "ascension10": {
+        "max": 42,
+        "min": 39
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 42, 41)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 39, 38)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "CEREMONIAL_BEAST": {
+    "class_name": "CeremonialBeast",
+    "hp": {
+      "ascension10": {
+        "max": 262,
+        "min": 262
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 262, 252)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "CHOMPER": {
+    "class_name": "Chomper",
+    "hp": {
+      "ascension10": {
+        "max": 67,
+        "min": 63
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 67, 64)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 63, 60)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "CORPSE_SLUG": {
+    "class_name": "CorpseSlug",
+    "hp": {
+      "ascension10": {
+        "max": 29,
+        "min": 27
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 29, 27)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 27, 25)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "CROSSBOW_RUBY_RAIDER": {
+    "class_name": "CrossbowRubyRaider",
+    "hp": {
+      "ascension10": {
+        "max": 22,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "CRUSHER": {
+    "class_name": "Crusher",
+    "hp": {
+      "ascension10": {
+        "max": 219,
+        "min": 219
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 219, 209)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "CUBEX_CONSTRUCT": {
+    "class_name": "CubexConstruct",
+    "hp": {
+      "ascension10": {
+        "max": 70,
+        "min": 70
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 70, 65)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "DAMP_CULTIST": {
+    "class_name": "DampCultist",
+    "hp": {
+      "ascension10": {
+        "max": 54,
+        "min": 52
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 54, 53)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 51)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "DECIMILLIPEDE_SEGMENT_BACK": {
+    "class_name": "DecimillipedeSegmentBack",
+    "hp": {
+      "ascension10": {
+        "max": 52,
+        "min": 46
+      },
+      "inherited_from": "DecimillipedeSegment",
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "DECIMILLIPEDE_SEGMENT_FRONT": {
+    "class_name": "DecimillipedeSegmentFront",
+    "hp": {
+      "ascension10": {
+        "max": 52,
+        "min": 46
+      },
+      "inherited_from": "DecimillipedeSegment",
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "DECIMILLIPEDE_SEGMENT_MIDDLE": {
+    "class_name": "DecimillipedeSegmentMiddle",
+    "hp": {
+      "ascension10": {
+        "max": 52,
+        "min": 46
+      },
+      "inherited_from": "DecimillipedeSegment",
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 52, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 46, 40)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "DEPRECATED_MONSTER": {
+    "class_name": "DeprecatedMonster",
+    "hp": {
+      "ascension10": {
+        "max": 0,
+        "min": 0
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "0",
+        "min": "0"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "DEVOTED_SCULPTOR": {
+    "class_name": "DevotedSculptor",
+    "hp": {
+      "ascension10": {
+        "max": 172,
+        "min": 172
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 172, 162)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "ENTOMANCER": {
+    "class_name": "Entomancer",
+    "hp": {
+      "ascension10": {
+        "max": 155,
+        "min": 155
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 155, 145)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "EXOSKELETON": {
+    "class_name": "Exoskeleton",
+    "hp": {
+      "ascension10": {
+        "max": 29,
+        "min": 25
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 29, 28)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 25, 24)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "EYE_WITH_TEETH": {
+    "class_name": "EyeWithTeeth",
+    "hp": {
+      "ascension10": {
+        "max": 6,
+        "min": 6
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "6"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FABRICATOR": {
+    "class_name": "Fabricator",
+    "hp": {
+      "ascension10": {
+        "max": 155,
+        "min": 155
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 155, 150)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FAKE_MERCHANT_MONSTER": {
+    "class_name": "FakeMerchantMonster",
+    "hp": {
+      "ascension10": {
+        "max": 175,
+        "min": 175
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 175, 165)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 175, 165)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FAT_GREMLIN": {
+    "class_name": "FatGremlin",
+    "hp": {
+      "ascension10": {
+        "max": 18,
+        "min": 14
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 14, 13)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FLAIL_KNIGHT": {
+    "class_name": "FlailKnight",
+    "hp": {
+      "ascension10": {
+        "max": 108,
+        "min": 108
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 108, 101)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FLYCONID": {
+    "class_name": "Flyconid",
+    "hp": {
+      "ascension10": {
+        "max": 53,
+        "min": 51
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 53, 49)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 51, 47)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FOGMOG": {
+    "class_name": "Fogmog",
+    "hp": {
+      "ascension10": {
+        "max": 78,
+        "min": 78
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 78, 74)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FOSSIL_STALKER": {
+    "class_name": "FossilStalker",
+    "hp": {
+      "ascension10": {
+        "max": 56,
+        "min": 54
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 56, 53)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 54, 51)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FROG_KNIGHT": {
+    "class_name": "FrogKnight",
+    "hp": {
+      "ascension10": {
+        "max": 199,
+        "min": 199
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 199, 191)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "FUZZY_WURM_CRAWLER": {
+    "class_name": "FuzzyWurmCrawler",
+    "hp": {
+      "ascension10": {
+        "max": 59,
+        "min": 58
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 59, 57)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 58, 55)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "GAS_BOMB": {
+    "class_name": "GasBomb",
+    "hp": {
+      "ascension10": {
+        "max": 8,
+        "min": 8
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 8, 7)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "GLOBE_HEAD": {
+    "class_name": "GlobeHead",
+    "hp": {
+      "ascension10": {
+        "max": 158,
+        "min": 158
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 158, 148)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "GREMLIN_MERC": {
+    "class_name": "GremlinMerc",
+    "hp": {
+      "ascension10": {
+        "max": 53,
+        "min": 51
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 53, 49)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 51, 47)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "GUARDBOT": {
+    "class_name": "Guardbot",
+    "hp": {
+      "ascension10": {
+        "max": 21,
+        "min": 17
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 21, 20)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 17, 16)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "HAUNTED_SHIP": {
+    "class_name": "HauntedShip",
+    "hp": {
+      "ascension10": {
+        "max": 67,
+        "min": 67
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 67, 63)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "HUNTER_KILLER": {
+    "class_name": "HunterKiller",
+    "hp": {
+      "ascension10": {
+        "max": 126,
+        "min": 126
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 126, 121)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "INFESTED_PRISM": {
+    "class_name": "InfestedPrism",
+    "hp": {
+      "ascension10": {
+        "max": 171,
+        "min": 171
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 171, 161)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "INKLET": {
+    "class_name": "Inklet",
+    "hp": {
+      "ascension10": {
+        "max": 18,
+        "min": 12
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 12, 11)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "KIN_FOLLOWER": {
+    "class_name": "KinFollower",
+    "hp": {
+      "ascension10": {
+        "max": 63,
+        "min": 62
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 63, 59)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 62, 58)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "KIN_PRIEST": {
+    "class_name": "KinPriest",
+    "hp": {
+      "ascension10": {
+        "max": 199,
+        "min": 199
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 199, 190)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "KNOWLEDGE_DEMON": {
+    "class_name": "KnowledgeDemon",
+    "hp": {
+      "ascension10": {
+        "max": 399,
+        "min": 399
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 399, 379)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "LAGAVULIN_MATRIARCH": {
+    "class_name": "LagavulinMatriarch",
+    "hp": {
+      "ascension10": {
+        "max": 233,
+        "min": 233
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 233, 222)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "LEAF_SLIME_M": {
+    "class_name": "LeafSlimeM",
+    "hp": {
+      "ascension10": {
+        "max": 36,
+        "min": 33
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 36, 35)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 33, 32)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "LEAF_SLIME_S": {
+    "class_name": "LeafSlimeS",
+    "hp": {
+      "ascension10": {
+        "max": 16,
+        "min": 12
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 16, 15)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 12, 11)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "LIVING_FOG": {
+    "class_name": "LivingFog",
+    "hp": {
+      "ascension10": {
+        "max": 82,
+        "min": 82
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 82, 80)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "LIVING_SHIELD": {
+    "class_name": "LivingShield",
+    "hp": {
+      "ascension10": {
+        "max": 65,
+        "min": 65
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 65, 55)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "LOUSE_PROGENITOR": {
+    "class_name": "LouseProgenitor",
+    "hp": {
+      "ascension10": {
+        "max": 141,
+        "min": 138
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 141, 136)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 138, 134)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "MAGI_KNIGHT": {
+    "class_name": "MagiKnight",
+    "hp": {
+      "ascension10": {
+        "max": 89,
+        "min": 89
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 89, 82)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "MAWLER": {
+    "class_name": "Mawler",
+    "hp": {
+      "ascension10": {
+        "max": 76,
+        "min": 76
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 76, 72)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "MECHA_KNIGHT": {
+    "class_name": "MechaKnight",
+    "hp": {
+      "ascension10": {
+        "max": 320,
+        "min": 320
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 320, 300)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "MULTI_ATTACK_MOVE_MONSTER": {
+    "class_name": "MultiAttackMoveMonster",
+    "hp": {
+      "ascension10": {
+        "max": 999,
+        "min": 999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "999",
+        "min": "999"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "MYTE": {
+    "class_name": "Myte",
+    "hp": {
+      "ascension10": {
+        "max": 69,
+        "min": 64
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 69, 67)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 64, 61)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "NIBBIT": {
+    "class_name": "Nibbit",
+    "hp": {
+      "ascension10": {
+        "max": 48,
+        "min": 44
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 48, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 44, 42)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "NOISEBOT": {
+    "class_name": "Noisebot",
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "ONE_HP_MONSTER": {
+    "class_name": "OneHpMonster",
+    "hp": {
+      "ascension10": {
+        "max": 1,
+        "min": 1
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "1",
+        "min": "1"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "OSTY": {
+    "class_name": "Osty",
+    "hp": {
+      "ascension10": {
+        "max": 1,
+        "min": 1
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "1",
+        "min": "1"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "OVICOPTER": {
+    "class_name": "Ovicopter",
+    "hp": {
+      "ascension10": {
+        "max": 132,
+        "min": 126
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 132, 130)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 126, 124)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "OWL_MAGISTRATE": {
+    "class_name": "OwlMagistrate",
+    "hp": {
+      "ascension10": {
+        "max": 247,
+        "min": 247
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 247, 231)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "PAELS_LEGION": {
+    "class_name": "PaelsLegion",
+    "hp": {
+      "ascension10": {
+        "max": 9999,
+        "min": 9999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "9999",
+        "min": "9999"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "PARAFRIGHT": {
+    "class_name": "Parafright",
+    "hp": {
+      "ascension10": {
+        "max": 21,
+        "min": 21
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "21"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "PHANTASMAL_GARDENER": {
+    "class_name": "PhantasmalGardener",
+    "hp": {
+      "ascension10": {
+        "max": 32,
+        "min": 27
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 32, 31)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 27, 26)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "PHROG_PARASITE": {
+    "class_name": "PhrogParasite",
+    "hp": {
+      "ascension10": {
+        "max": 68,
+        "min": 66
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 68, 64)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 66, 61)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "PUNCH_CONSTRUCT": {
+    "class_name": "PunchConstruct",
+    "hp": {
+      "ascension10": {
+        "max": 60,
+        "min": 60
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 60, 55)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "QUEEN": {
+    "class_name": "Queen",
+    "hp": {
+      "ascension10": {
+        "max": 419,
+        "min": 419
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 419, 400)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "ROCKET": {
+    "class_name": "Rocket",
+    "hp": {
+      "ascension10": {
+        "max": 209,
+        "min": 209
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 209, 199)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SCROLL_OF_BITING": {
+    "class_name": "ScrollOfBiting",
+    "hp": {
+      "ascension10": {
+        "max": 39,
+        "min": 33
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 39, 37)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 33, 30)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SEAPUNK": {
+    "class_name": "Seapunk",
+    "hp": {
+      "ascension10": {
+        "max": 49,
+        "min": 47
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 49, 46)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 47, 44)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SEWER_CLAM": {
+    "class_name": "SewerClam",
+    "hp": {
+      "ascension10": {
+        "max": 58,
+        "min": 58
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 58, 56)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SHRINKER_BEETLE": {
+    "class_name": "ShrinkerBeetle",
+    "hp": {
+      "ascension10": {
+        "max": 42,
+        "min": 40
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 42, 40)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 40, 38)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SINGLE_ATTACK_MOVE_MONSTER": {
+    "class_name": "SingleAttackMoveMonster",
+    "hp": {
+      "ascension10": {
+        "max": 999,
+        "min": 999
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "999",
+        "min": "999"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SKULKING_COLONY": {
+    "class_name": "SkulkingColony",
+    "hp": {
+      "ascension10": {
+        "max": 80,
+        "min": 80
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 80, 75)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SLIMED_BERSERKER": {
+    "class_name": "SlimedBerserker",
+    "hp": {
+      "ascension10": {
+        "max": 281,
+        "min": 281
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 281, 261)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SLITHERING_STRANGLER": {
+    "class_name": "SlitheringStrangler",
+    "hp": {
+      "ascension10": {
+        "max": 56,
+        "min": 54
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 56, 55)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 54, 53)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SLUDGE_SPINNER": {
+    "class_name": "SludgeSpinner",
+    "hp": {
+      "ascension10": {
+        "max": 42,
+        "min": 41
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 42, 39)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 41, 37)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SLUMBERING_BEETLE": {
+    "class_name": "SlumberingBeetle",
+    "hp": {
+      "ascension10": {
+        "max": 89,
+        "min": 89
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 89, 86)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SNAPPING_JAXFRUIT": {
+    "class_name": "SnappingJaxfruit",
+    "hp": {
+      "ascension10": {
+        "max": 36,
+        "min": 34
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 36, 33)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 34, 31)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SNEAKY_GREMLIN": {
+    "class_name": "SneakyGremlin",
+    "hp": {
+      "ascension10": {
+        "max": 15,
+        "min": 11
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 15, 14)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 11, 10)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SOUL_FYSH": {
+    "class_name": "SoulFysh",
+    "hp": {
+      "ascension10": {
+        "max": 221,
+        "min": 221
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 221, 211)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SOUL_NEXUS": {
+    "class_name": "SoulNexus",
+    "hp": {
+      "ascension10": {
+        "max": 254,
+        "min": 254
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 254, 234)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SPECTRAL_KNIGHT": {
+    "class_name": "SpectralKnight",
+    "hp": {
+      "ascension10": {
+        "max": 97,
+        "min": 97
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 97, 93)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "SPINY_TOAD": {
+    "class_name": "SpinyToad",
+    "hp": {
+      "ascension10": {
+        "max": 124,
+        "min": 121
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 124, 119)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 121, 116)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "STABBOT": {
+    "class_name": "Stabbot",
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TEN_HP_MONSTER": {
+    "class_name": "TenHpMonster",
+    "hp": {
+      "ascension10": {
+        "max": 10,
+        "min": 10
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "10",
+        "min": "10"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TERROR_EEL": {
+    "class_name": "TerrorEel",
+    "hp": {
+      "ascension10": {
+        "max": 150,
+        "min": 150
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 150, 140)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TEST_SUBJECT": {
+    "class_name": "TestSubject",
+    "hp": {
+      "ascension10": {
+        "max": 111,
+        "min": 111
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "FirstFormHp"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THE_ADVERSARY_MK_ONE": {
+    "class_name": "TheAdversaryMkOne",
+    "hp": {
+      "ascension10": {
+        "max": 100,
+        "min": 100
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "100"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THE_ADVERSARY_MK_THREE": {
+    "class_name": "TheAdversaryMkThree",
+    "hp": {
+      "ascension10": {
+        "max": 300,
+        "min": 300
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 300, 300)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THE_ADVERSARY_MK_TWO": {
+    "class_name": "TheAdversaryMkTwo",
+    "hp": {
+      "ascension10": {
+        "max": 200,
+        "min": 200
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 200, 200)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THE_FORGOTTEN": {
+    "class_name": "TheForgotten",
+    "hp": {
+      "ascension10": {
+        "max": 111,
+        "min": 111
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 111, 106)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THE_INSATIABLE": {
+    "class_name": "TheInsatiable",
+    "hp": {
+      "ascension10": {
+        "max": 341,
+        "min": 341
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 341, 321)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THE_LOST": {
+    "class_name": "TheLost",
+    "hp": {
+      "ascension10": {
+        "max": 99,
+        "min": 99
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 99, 93)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THE_OBSCURA": {
+    "class_name": "TheObscura",
+    "hp": {
+      "ascension10": {
+        "max": 129,
+        "min": 129
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 129, 123)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "THIEVING_HOPPER": {
+    "class_name": "ThievingHopper",
+    "hp": {
+      "ascension10": {
+        "max": 84,
+        "min": 84
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 84, 79)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TOADPOLE": {
+    "class_name": "Toadpole",
+    "hp": {
+      "ascension10": {
+        "max": 26,
+        "min": 22
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 26, 25)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TORCH_HEAD_AMALGAM": {
+    "class_name": "TorchHeadAmalgam",
+    "hp": {
+      "ascension10": {
+        "max": 211,
+        "min": 211
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 211, 199)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TOUGH_EGG": {
+    "class_name": "ToughEgg",
+    "hp": {
+      "ascension10": {
+        "max": 19,
+        "min": 15
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 15, 14)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TRACKER_RUBY_RAIDER": {
+    "class_name": "TrackerRubyRaider",
+    "hp": {
+      "ascension10": {
+        "max": 26,
+        "min": 22
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 26, 25)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TUNNELER": {
+    "class_name": "Tunneler",
+    "hp": {
+      "ascension10": {
+        "max": 92,
+        "min": 92
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 92, 87)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TURRET_OPERATOR": {
+    "class_name": "TurretOperator",
+    "hp": {
+      "ascension10": {
+        "max": 51,
+        "min": 51
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 51, 41)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TWIG_SLIME_M": {
+    "class_name": "TwigSlimeM",
+    "hp": {
+      "ascension10": {
+        "max": 29,
+        "min": 27
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 29, 28)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 27, 26)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TWIG_SLIME_S": {
+    "class_name": "TwigSlimeS",
+    "hp": {
+      "ascension10": {
+        "max": 12,
+        "min": 8
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 12, 11)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 8, 7)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "TWO_TAILED_RAT": {
+    "class_name": "TwoTailedRat",
+    "hp": {
+      "ascension10": {
+        "max": 22,
+        "min": 18
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "VANTOM": {
+    "class_name": "Vantom",
+    "hp": {
+      "ascension10": {
+        "max": 183,
+        "min": 183
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 183, 173)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "VINE_SHAMBLER": {
+    "class_name": "VineShambler",
+    "hp": {
+      "ascension10": {
+        "max": 64,
+        "min": 64
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 64, 61)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "WATERFALL_GIANT": {
+    "class_name": "WaterfallGiant",
+    "hp": {
+      "ascension10": {
+        "max": 250,
+        "min": 250
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "MinInitialHp",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 250, 240)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "WRIGGLER": {
+    "class_name": "Wriggler",
+    "hp": {
+      "ascension10": {
+        "max": 22,
+        "min": 18
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 22, 21)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 18, 17)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  },
+  "ZAPBOT": {
+    "class_name": "Zapbot",
+    "hp": {
+      "ascension10": {
+        "max": 24,
+        "min": 19
+      },
+      "inherited_from": null,
+      "raw": {
+        "max": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 24, 23)",
+        "min": "AscensionHelper.GetValueIfAscension(AscensionLevel.ToughEnemies, 19, 18)"
+      }
+    },
+    "present_in": [
+      "v108",
+      "v109"
+    ]
+  }
+}

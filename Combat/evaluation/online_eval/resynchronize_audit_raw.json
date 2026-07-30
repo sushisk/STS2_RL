@@ -1,0 +1,3126 @@
+[
+  {
+    "run_index": 0,
+    "resync_events": [
+      {
+        "scenario_id": "302-13",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "ecf91fd8f8174b559f21d05e69dfe9e2",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "53b61d9155b3417fbdf3cb1d368c1a93",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "302-13",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "302-13",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "d645e9bfc5e443679f53e1bc37101492",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "bf4cdcbc0adc42da9edbb0973264ee45",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "302-13",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "2156-12",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "a854fec633f64ba88266183fbd56675c",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "34b89df7650d43bc83d9b2dc78f95a70",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "2156-12",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 153,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "2156-12",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "ae5b4caf30de45d293d97b0a37f98873",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "6d5f88ec703c43aeb4153dca0e41f142",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "2156-12",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 153,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "1814-7",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "9a72133b1e0a45d8aefa5de53beea649",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "d9adaf6db8c04991822e1abae718e39f",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "1814-7",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "1814-7",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "1e696dcf0d7d4675a848e44f99e6f048",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "31abad9ca6e54e7b8a1f68d8d630a38a",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "1814-7",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "4407-14",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "716c912dc5af403c98ce1683f86df8fb",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "bba13c6d26234586bed88887f554f851",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "4407-14",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "4407-14",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "e3a94cb44d7147b98f5ab2191c7e39ba",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "f4b46dd2602a49edb24b5a337f7fe52c",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "4407-14",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      }
+    ],
+    "resync_count": 8,
+    "scenario_results": [
+      {
+        "scenario_id": "302-13",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "2156-12",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "1814-7",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "7006-15",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "6180-7",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "1773-21",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "4407-14",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "5252-4",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "3353-23",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "7495-7",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      }
+    ]
+  },
+  {
+    "run_index": 1,
+    "resync_events": [
+      {
+        "scenario_id": "302-13",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "a92caedc1cfa4eacaca00df3e6aafe3b",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "c4064a6c27f944d08fa0b46f86dbdacf",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "302-13",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "302-13",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "b83e8723b20b4f5d967107185ddeb0bc",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "a37f518cc37c4f81a26bf2a8efb6a6a3",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "302-13",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "302-13",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 59,
+              "maxHp": 85,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 59,
+          "maxHp": 85,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "2156-12",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "ec470afb141244b0af957bc6ff926937",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "7dc612ab62ba4eed9ba204782f7a1401",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "2156-12",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 153,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "2156-12",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "1aeb3445233947e3be6c8cc3c03449ce",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "fde8bffbfea641a7b1a97b61a5b4b6c9",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "2156-12",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "2156-12",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 43,
+              "maxHp": 60,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "ENTOMANCER",
+                  "hp": 153,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 153,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 43,
+          "maxHp": 60,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "ENTOMANCER",
+              "hp": 152,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "1814-7",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "98af1abdc77f48c583439ad08df78fcf",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "aeb46072f95b470aaff3431b66afc71b",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "1814-7",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "1814-7",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "918703dc109a43e089bae109e7606c95",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "6720355e13a94bdbbb1f2d61c35b887d",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "1814-7",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "1814-7",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 42,
+              "maxHp": 66,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "TERROR_EEL",
+                  "hp": 150,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 42,
+          "maxHp": 66,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "TERROR_EEL",
+              "hp": 150,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "4407-14",
+        "arm": "choice_policy",
+        "decision_frame_expected": {
+          "combat_session_id": "94dd4d5a638945e7abd90f18081205d4",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "2d3324bda7de411eae8a52c8d760b9dc",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:290 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "4407-14",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "choice_policy",
+            "caller_frames": [
+              "audit_resynchronize_events.py:154 in run_audit",
+              "choice_policy_online_eval.py:290 in run_scenario_ab",
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:194 in run_episode_ab",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      },
+      {
+        "scenario_id": "4407-14",
+        "arm": "heuristic_choice",
+        "decision_frame_expected": {
+          "combat_session_id": "cbdbf2254d2a4184aecf5509aad08f4c",
+          "step_index": 0
+        },
+        "live_frame_actually_found_drifted_to": {
+          "combat_session_id": "2c3853394b3441d7804cbf4c5b577183",
+          "step_index": 1
+        },
+        "caller_frames_of_resynchronize": [
+          "audit_resynchronize_events.py:154 in run_audit",
+          "choice_policy_online_eval.py:294 in run_scenario_ab",
+          "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+          "choice_policy_online_eval.py:226 in run_episode_ab",
+          "combat_env.py:179 in step",
+          "live_combat_session.py:203 in step"
+        ],
+        "interference_source_sample": [
+          {
+            "scenario_id": "4407-14",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          },
+          {
+            "scenario_id": "4407-14",
+            "arm": "heuristic_choice",
+            "caller_frames": [
+              "audit_resynchronize_events.py:135 in instrumented_run_episode_ab",
+              "choice_policy_online_eval.py:176 in run_episode_ab",
+              "policy_agent.py:163 in decide",
+              "policy_agent.py:243 in _heuristic_fallback",
+              "heuristic_agent.py:132 in choose_action_with_detail",
+              "battle_emulator.py:922 in apply_action"
+            ],
+            "engine_state_summary": {
+              "hp": 61,
+              "maxHp": 86,
+              "turnNumber": 1,
+              "combatRoundNumber": 1,
+              "stepIndex": 0,
+              "enemies": [
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                },
+                {
+                  "id": "EXOSKELETON",
+                  "hp": 29,
+                  "isAlive": true
+                }
+              ]
+            }
+          }
+        ],
+        "restore_input_source": "mid_combat_observation (battle_state.engine_state, via build_scenario_from_state - NOT the original scenario spec)",
+        "drifted_state_summary": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 1,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "restored_state_summary_battle_state_own_data": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        },
+        "live_state_after_resync": {
+          "hp": 61,
+          "maxHp": 86,
+          "turnNumber": 1,
+          "combatRoundNumber": 1,
+          "stepIndex": 0,
+          "enemies": [
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            },
+            {
+              "id": "EXOSKELETON",
+              "hp": 29,
+              "isAlive": true
+            }
+          ]
+        }
+      }
+    ],
+    "resync_count": 8,
+    "scenario_results": [
+      {
+        "scenario_id": "302-13",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "2156-12",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "1814-7",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "7006-15",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "6180-7",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "1773-21",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "4407-14",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "5252-4",
+        "cp_outcome": "victory",
+        "hc_outcome": "victory"
+      },
+      {
+        "scenario_id": "3353-23",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      },
+      {
+        "scenario_id": "7495-7",
+        "cp_outcome": "defeat",
+        "hc_outcome": "defeat"
+      }
+    ]
+  }
+]

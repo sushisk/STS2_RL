@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sts2_rl:combat_state_schema:v1",
+  "title": "CombatState (GameObservation.State)",
+  "description": "Shape of the 'state' dict inside GameObservation (Sts2Emulator.Dto.GameObservation.State), as built by GameInstance.BuildFullStateDict() - the authoritative, no-normalization state surface for RL. Combat-only fields (hand/drawPile/.../enemies) are present only while a combat is in progress (_combatState != null); map-only fields (currentActIndex/actFloor/.../map) are present only when a run/map exists (HasMap). A pure combat-scenario reset via ResetFromScenario has no map, so only the base + combat fields appear. Source of truth: GameInstance.cs BuildFullStateDict/BuildCardListDict/BuildRelicsDict/BuildPotionsDict/BuildPowersDict/BuildEnemiesDict/BuildIntentDict/BuildMapDict - re-derive this schema from there if the emulator changes.",
+  "type": "object",
+  "properties": {
+    "seed": {"type": "integer"},
+    "seedText": {"type": "string"},
+    "characterId": {"type": "string", "description": "Raw entry id, e.g. 'IRONCLAD'."},
+    "ascension": {"type": "integer"},
+    "stepIndex": {"type": "integer", "description": "Monotonically increasing count of Step() calls processed by this GameInstance since Reset/ResetFromScenario."},
+    "gold": {"type": "integer"},
+    "hp": {"type": "integer"},
+    "maxHp": {"type": "integer"},
+    "block": {"type": "integer"},
+    "energy": {"type": ["integer", "null"]},
+    "stars": {"type": ["integer", "null"], "description": "Regent-flavored combat resource exposed by GameInstance.BuildFullStateDict(). Present during combat; null outside combat or if no PlayerCombatState exists."},
+    "maxEnergy": {"type": "integer"},
+    "relics": {"type": "array", "items": {"$ref": "#/definitions/relic"}},
+    "potions": {"type": "array", "items": {"anyOf": [{"$ref": "#/definitions/potion"}, {"type": "null"}]}, "description": "One entry per potion slot; null means that slot is empty."},
+    "deck": {"type": "array", "items": {"$ref": "#/definitions/card"}, "description": "The player's full deck (all piles combined at the model level, i.e. the persistent deck list, not any one pile)."},
+    "playerPowers": {"type": "array", "items": {"$ref": "#/definitions/power"}},
+
+    "hand": {"type": "array", "items": {"$ref": "#/definitions/card"}, "description": "combat-only"},
+    "drawPile": {"type": "array", "items": {"$ref": "#/definitions/card"}, "description": "combat-only. Index 0 is top-of-pile / next drawn."},
+    "discardPile": {"type": "array", "items": {"$ref": "#/definitions/card"}, "description": "combat-only"},
+    "exhaustPile": {"type": "array", "items": {"$ref": "#/definitions/card"}, "description": "combat-only"},
+    "playPile": {"type": "array", "items": {"$ref": "#/definitions/card"}, "description": "combat-only, transient cards currently mid-resolution"},
+    "pendingChoice": {"$ref": "#/definitions/pendingChoice", "description": "combat-only, present when the engine is waiting for a mid-effect card choice (e.g. WISH draw-to-hand, transform, discard, upgrade). The options list is ordered and corresponds 1:1 to currently offered choice_card legal actions."},
+    "turnNumber": {"type": ["integer", "null"], "description": "combat-only"},
+    "combatRoundNumber": {"type": "integer", "description": "combat-only"},
+    "enemies": {"type": "array", "items": {"$ref": "#/definitions/enemy"}, "description": "combat-only"},
+
+    "currentActIndex": {"type": "integer", "description": "map-only (HasMap)"},
+    "actFloor": {"type": "integer", "description": "map-only"},
+    "totalFloor": {"type": "integer", "description": "map-only"},
+    "currentRoomType": {"type": ["string", "null"], "description": "map-only, .NET room class name e.g. 'CombatRoom'"},
+    "isGameOver": {"type": "boolean", "description": "map-only"},
+    "map": {"type": "object", "description": "map-only, see BuildMapDict: columns, rows, points[] ({col,row,pointType,children[]}), startingPoint, bossPoint, secondBossPoint, visited[], currentCoord."}
+  },
+  "definitions": {
+    "card": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "description": "raw entry id, matches Common/ids/cards.json keys after normalization"},
+        "type": {"type": "string"},
+        "rarity": {"type": "string"},
+        "cost": {"type": "integer", "description": "with cost modifiers applied, floored at 0"},
+        "targetType": {"type": "string"},
+        "upgraded": {"type": "boolean"},
+        "upgradeLevel": {"type": "integer"},
+        "tinkerTimeType": {"type": ["string", "null"], "description": "MAD_SCIENCE-specific per-instance state exported by recent Emulator builds; required for exact scenario reconstruction once the card has taken on a concrete embedded effect."},
+        "tinkerTimeRider": {"type": ["string", "null"], "description": "MAD_SCIENCE-specific rider metadata paired with tinkerTimeType when present."}
+      }
+    },
+    "relic": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "rarity": {"type": "string"},
+        "status": {"type": "string"},
+        "stackCount": {"type": "integer"},
+        "displayAmount": {"type": ["integer", "number", "null"]}
+      }
+    },
+    "potion": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "rarity": {"type": "string"},
+        "targetType": {"type": "string"}
+      }
+    },
+    "power": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "description": "every power id ends in '_POWER', e.g. 'STRENGTH_POWER'"},
+        "amount": {"type": "integer"},
+        "type": {"type": "string"}
+      }
+    },
+    "enemy": {
+      "type": "object",
+      "properties": {
+        "index": {"type": "integer", "description": "Position within CombatState.Enemies at observation time - disambiguates duplicate monster types (e.g. two 'FLYCONID') within ONE decision, and matches Parameters.enemyIndex on a 'choice_target' LegalAction (see legal_action_schema.json) taken from the SAME state. CAVEAT (verified against engine source, contradicts GameInstance.cs's own doc comment on this field): this index is NOT stable across a death. CombatState.cs physically removes a dead creature from the underlying list (`_enemies.Remove(creature)`, not merely isAlive=false), so every enemy after it recompacts down by one position immediately - confirmed to happen even within a single Step() call, not only across separate emulator restores (see STS2_RL/Combat/tests/test_scenario_v2.py::test_target_tracking_after_death). Use 'index' to resolve a target choice within one get_legal_actions()->step() round trip; do NOT cache an index value across multiple steps once any enemy may have died since - re-resolve from the latest observation every time. DO NOT use 'name' (empty string under headless TestMode - confirmed) or 'id' (shared by every instance of the same monster type) or a 'choice_target' action's own ActionId (indexes only the currently-alive candidate list, which also shifts) as a substitute - 'index' is still the best available disambiguator for a single decision, just not a cross-turn tracking key."},
+        "id": {"type": "string", "description": "monster entry id, or LogName fallback for id-less mock/scenario enemies. Shared by every instance of the same monster type - use 'index' (not this) to address a specific enemy. Use this (not 'name') for human-readable display/logging."},
+        "name": {"type": "string", "description": "LogName - empty string in this headless harness (TestMode's headless localization produces no display text). Not useful for display; definitely not usable as a stable identifier."},
+        "hp": {"type": "integer"},
+        "maxHp": {"type": "integer", "description": "CAVEAT: EnemyScenario has no MaxHp input field - after ResetFromScenario, every restore treats the scenario's Hp as 100%, so this value 'chases' current hp down on repeated restores unless the caller patches it back (battle_emulator.py's BattleEmulator._wrap does this in Python - see its module comment)."},
+        "block": {"type": "integer"},
+        "isAlive": {"type": "boolean"},
+        "slotName": {"type": ["string", "null"]},
+        "powers": {"type": "array", "items": {"$ref": "#/definitions/power"}},
+        "intent": {
+          "type": "object",
+          "properties": {
+            "stateId": {"type": ["string", "null"]},
+            "intentTypes": {"type": "array", "items": {"type": "string"}},
+            "attackDamage": {"type": "integer", "description": "present only for Attack-shaped intents where the damage hook succeeded"},
+            "attackRepeats": {"type": "integer", "description": "present only alongside attackDamage"}
+          }
+        },
+        "stateLog": {"type": "array", "items": {"type": "string"}, "description": "move-state history, oldest first - required input for scenarios reproducing a monster mid-pattern (see EnemyScenario.StateLog)"}
+      }
+    },
+    "pendingChoice": {
+      "type": ["object", "null"],
+      "properties": {
+        "choiceType": {"type": ["string", "null"]},
+        "scope": {"type": ["string", "null"], "description": "\"StartOfCombat\" or \"ActionContinuation\" in current Emulator builds."},
+        "scenarioRestorable": {"type": ["boolean", "null"], "description": "True only for StartOfCombat choices that may be round-tripped through CombatScenario.PendingChoice."},
+        "minSelect": {"type": ["integer", "null"]},
+        "maxSelect": {"type": ["integer", "null"]},
+        "selectedCount": {"type": ["integer", "null"]},
+        "options": {"type": "array", "items": {"$ref": "#/definitions/card"}}
+      }
+    }
+  }
+}

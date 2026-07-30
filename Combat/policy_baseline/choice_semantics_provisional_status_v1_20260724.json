@@ -1,0 +1,25 @@
+{
+  "status_id": "choice_semantics_provisional_status_v1_20260724",
+  "recorded_on": "2026-07-24",
+  "purpose": "Freezes the origin-dependency audit's numeric results as PROVISIONAL pending the Emulator team's origin-context-leak investigation and fix decision. Nothing here is formal training data - see 'provisional_eligible' note below. References existing frozen files by path/hash; does not modify them.",
+  "blocked_on": "Emulator担当のorigin漏洩調査および修正判断 (see Outputs/reports/rl_choice_semantics_origin_audit_report_20260724.md section 3's Suspect findings: card:GUARDS leak x6, potion:POWER_POTION leak x2, potion:SKILL_POTION leak x2, all via GamblingChipDiscard's originValidationStatus=suspected_context_leak)",
+  "baseline_ref": "Combat/policy_baseline/choice_semantics_baseline_v1_20260724.json",
+  "audit_ref": "Outputs/reports/rl_choice_semantics_origin_audit_report_20260724.md",
+  "frozen_results": {
+    "total_choice_decisions": 275,
+    "risk_category_counts": {"Safe": 144, "Origin-dependent": 121, "Suspect": 10},
+    "provisional_eligible": {
+      "count": 265,
+      "note": "Safe(144) + Origin-dependent(121). NOT formal training data - explicitly labeled 'provisional_eligible', not 'training_eligible', pending Emulator fix confirmation. Choice Policy data generation must not start from this set."
+    },
+    "provisional_excluded": {
+      "count": 10,
+      "reason": "originValidationStatus=suspected_context_leak (all via GamblingChipDiscard); breakdown: card:GUARDS x6, potion:POWER_POTION x2, potion:SKILL_POTION x2, across 3 scenarios (1934-19, 7413-9, 7551-16)"
+    },
+    "counterfactual_null_origin_result": {
+      "changed_semantic_content": 121,
+      "note": "Exactly matches the Origin-dependent count (121/121) - internal consistency check between the static risk classification and the empirical null-origin re-resolution, both computed against Choice Semantics baseline v1."
+    }
+  },
+  "next_step": "Await Emulator team's fixed commit + DLL hash. Re-run the same choice_semantics_reverification_manifest.jsonl (Combat/evaluation/online_eval/) against both the current (pre-fix) and the fixed build, compare per Outputs/reports/rl_choice_semantics_origin_audit_report_20260724.md's follow-up plan. Do not generate Choice Policy training data before that comparison passes all adoption criteria."
+}

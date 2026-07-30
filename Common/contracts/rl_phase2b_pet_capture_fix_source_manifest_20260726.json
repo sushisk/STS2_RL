@@ -1,0 +1,44 @@
+{
+  "manifestId": "rl_phase2b_pet_capture_fix_source_manifest_20260726",
+  "generatedAt": "2026-07-26T22:05:12.180243",
+  "rlCommit": "not_a_git_repository",
+  "compatibleEmulatorCodeCommit": "f2343b13a8cee25a5730018bab3000166f333ba9",
+  "compatibleEmulatorInvestigationReportCommit": "b9109bf52193442b97299ebb5dba0abb409966e7",
+  "compatibleEmulatorFixReportCommit": "44c01d7",
+  "emulatorDllSha256": "790af6e390c6bbab5b92e78c8cc6cd6498bdc95fbb1df462b0e91ed82a873201",
+  "formalSchemaPath": "C:\\STS2_Emulator\\docs\\schemas\\combat_state_snapshot.schema.json",
+  "formalSchemaSha256": "16643444fda085d62df435fa0290e73b356123ffd95981317da4ea3f86c23dc3",
+  "contractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.4.md",
+  "contractSha256": "ddb632358cb02ba4755b4e064e4838882fb77e172974bd9953c5e817df2aec88",
+  "priorManifestPath": "C:\\STS2_RL\\Common\\contracts\\rl_phase2b_source_manifest_20260726.json",
+  "files": [
+    {
+      "path": "C:\\STS2_RL\\Combat\\combat_state_snapshot.py",
+      "sha256": "6a8be66bb710c098921950cb3c2ee237f622f695fd09b5613de88fb1e9669711",
+      "size_bytes": 33410,
+      "note": "Pet-capture-fix additions: CreatureSnapshot dataclass, PlayerSnapshot.Pets field, KNOWN_SCHEMA_VERSIONS+=phase2b.2, Pets/pet-Powers added to _collect_known_instance_ids and validate_snapshot_references' direct-reference checks, _CONFIRMED_SOURCE_LIVE_STATE_INCONSISTENCY_ENTRY_TYPES expanded to include CardGeneratedEntry (confirmed via Emulator's FUNERARY_MASK investigation, commit b9109bf)."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\live_combat_session.py",
+      "sha256": "056e1e9e976dfcfa7c93d3734d020a088078f7f835dd152b70b87e57f5daecb8",
+      "size_bytes": 14303,
+      "note": "Unchanged since Phase 2A/2B (hash still matches - confirms no drift, Capture-only changes stayed confined to combat_state_snapshot.py)."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\verify_snapshot_phase2b.py",
+      "sha256": "c9bc2346098a0789a04559e70bc2014d2d54b13fba4930060aaae6dd4fe3ffee",
+      "size_bytes": 28443,
+      "note": "Extended this session: CreatureSnapshot added to DTO<->Schema consistency check; new case_6546_21_pet_capture_fix_check() (Osty/DieForYouPower resolved, SOUL x3 remain source_live_state_inconsistency, no live side effect); new canonical round-trip check including Pets for Scenario 6546-21."
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.4.md",
+      "sha256": "ddb632358cb02ba4755b4e064e4838882fb77e172974bd9953c5e817df2aec88",
+      "size_bytes": null,
+      "note": "Emulator-side edit (§9-F/§13/§14/§15 correction: TOOLBOX/FESTIVE_POPPER attribution disproven, corrected to BOUND_PHYLACTERY (capture_bug, fixed)/FUNERARY_MASK (source_live_state_inconsistency, Phase 3A)). Not modified by RL this session - hash independently re-verified to match the instruction's stated value."
+    }
+  ],
+  "newly_discovered_open_item": {
+    "summary": "Non-deterministic QuiescentBoundaryViolationException observed under combined multi-file pytest runs (tests/test_scenario_v2.py + tests/test_choice_semantics.py in one process) after adopting DLL 790af6e3... (commit f2343b1). 0% failure rate when either file is run alone (repeated); ~60% run-level failure rate (3 of 5 combined runs had >=1 failure) when run together, always failing inside test_choice_semantics.py (never test_scenario_v2.py), always a PlayCardAction at action index 10. Confirmed unrelated to Snapshot Capture code (neither test file references combat_state_snapshot/capture_snapshot/LiveCombatSession). Root-cause attribution to commit f2343b1 vs. pre-existing latent flakiness NOT established - no old-DLL binary was retained for a clean A/B, and rebuilding Emulator's repo at an older commit was judged out of RL-tan's scope. See the report's dedicated section for full data.",
+    "requires": "Emulator-side investigation/bisection before this can be resolved."
+  }
+}

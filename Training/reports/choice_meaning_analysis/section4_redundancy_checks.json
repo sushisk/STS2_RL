@@ -1,0 +1,90 @@
+{
+  "candidate_set_almost_fixed_per_operation": {
+    "relic:GAMBLING_CHIP": {
+      "distinct_sets": 87,
+      "total": 96,
+      "top_set_share": 0.0312
+    },
+    "apply_effect_in_place": {
+      "distinct_sets": 19,
+      "total": 20,
+      "top_set_share": 0.1
+    },
+    "discard": {
+      "distinct_sets": 215,
+      "total": 238,
+      "top_set_share": 0.0294
+    },
+    "add_generated_to_hand": {
+      "distinct_sets": 72,
+      "total": 73,
+      "top_set_share": 0.0274
+    },
+    "retrieve_to_hand": {
+      "distinct_sets": 76,
+      "total": 79,
+      "top_set_share": 0.0253
+    },
+    "transform": {
+      "distinct_sets": 34,
+      "total": 35,
+      "top_set_share": 0.0571
+    },
+    "retrieve_to_draw_pile_top": {
+      "distinct_sets": 23,
+      "total": 24,
+      "top_set_share": 0.0833
+    },
+    "exhaust": {
+      "distinct_sets": 38,
+      "total": 40,
+      "top_set_share": 0.075
+    },
+    "upgrade": {
+      "distinct_sets": 2,
+      "total": 2,
+      "top_set_share": 0.5
+    },
+    "transform_to_specific_card": {
+      "distinct_sets": 4,
+      "total": 4,
+      "top_set_share": 0.25
+    },
+    "select_for_power_association": {
+      "distinct_sets": 2,
+      "total": 2,
+      "top_set_share": 0.5
+    },
+    "return_to_draw_pile_top": {
+      "distinct_sets": 14,
+      "total": 15,
+      "top_set_share": 0.1333
+    }
+  },
+  "operations_with_dominant_single_teacher_card_ge_80pct": {
+    "transform_to_specific_card": {
+      "top_card": "DAZED",
+      "share": 1.0
+    }
+  },
+  "candidate_set_purity": {
+    "distinct_candidate_sets": 584,
+    "sets_mapping_to_exactly_one_operation": 582,
+    "pure_set_fraction": 0.9966,
+    "weighted_purity_across_all_decisions": 0.9968,
+    "interpretation": "weighted_purity = fraction of decisions whose exact candidate-card-set is dominated by a single operation token; high values mean candidate identity alone (visible to the no-meaning model via card_embedding) already predicts the operation, explaining the small meaning-vs-no-meaning gap."
+  },
+  "split_leakage_check": {
+    "scenario_hash_appearing_in_multiple_splits": {},
+    "trajectory_id_appearing_in_multiple_splits": {},
+    "confirmed_no_leakage": true
+  },
+  "action_continuation_duplication": {
+    "source_counts": {
+      "top_level_decision": 27,
+      "action_continuation": 601
+    },
+    "trajectories_with_multiple_in_scope_decisions": 114,
+    "note": "multiple decisions per trajectory are expected for multi-step/multi-select choices (e.g. discard N cards one at a time); split is by trajectory_id so these can never straddle splits (see split_leakage_check)."
+  }
+}

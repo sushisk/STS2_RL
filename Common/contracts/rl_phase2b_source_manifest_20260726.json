@@ -1,0 +1,59 @@
+{
+  "manifestId": "rl_phase2b_source_manifest_20260726",
+  "generatedAt": "2026-07-26T21:16:12.619226",
+  "rlCommit": "not_a_git_repository",
+  "compatibleEmulatorCodeCommit": "6aa903ec8f656055e8c698e933412bff38115eba",
+  "compatibleEmulatorReportCommit": "326919eba5634efa22528b8c262c8c4fdf660677",
+  "emulatorDllSha256": "e40e7e3d812e73ac032f49cbd9095846a62dc82fc74431c37aa042f702e0bb53",
+  "formalSchemaPath": "C:\\STS2_Emulator\\docs\\schemas\\combat_state_snapshot.schema.json",
+  "formalSchemaSha256": "ab3f1c721fe70ca9a334cd114fb8d3224ed67df532a9a9e64c0e6b4f0bf0f158",
+  "contractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.4.md",
+  "contractSha256": "b46530309e79b6a52427d144b32dc08510539a90b9cf76504dec182dfdd119c8",
+  "priorContractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.3.md",
+  "priorContractSha256": "6c0a9ecc228099f878b99d8eb43b1e095e6b2184b48e5aed2ab14920008757c9",
+  "priorManifestPath": "C:\\STS2_RL\\Common\\contracts\\rl_phase1_source_manifest_20260726.json",
+  "files": [
+    {
+      "path": "C:\\STS2_RL\\Combat\\combat_state_snapshot.py",
+      "sha256": "5631f0c6224f61f1a1e7f826b5e754a1528309c9f3f45521281a4f82cc98adbc",
+      "size_bytes": 29778,
+      "note": "Phase 2B additions: phase2b.1 schema version, PowerSnapshot.InternalData/InternalDataSerializerVersion, PlayerRngSnapshot/MonsterRngSnapshot dataclasses, canonical_json(), validate_snapshot_references()/DanglingReference/SnapshotReferenceReport, restore_input_eligibility(), validate_against_formal_schema()/schema_sha256()."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\live_combat_session.py",
+      "sha256": "056e1e9e976dfcfa7c93d3734d020a088078f7f835dd152b70b87e57f5daecb8",
+      "size_bytes": 14303,
+      "note": "Unchanged since Phase 2A (hash matches rl_phase1_source_manifest's Phase 2A-era recording) - confirms no Phase 2B drift in this file."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\capture_snapshot_diagnostic.py",
+      "sha256": "9ddcaef4bf542f467fc8e929f0173461f9e001efd94302a16019a952d71e9d95",
+      "size_bytes": 4490,
+      "note": "Unchanged since Phase 2A."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\verify_snapshot_phase2a.py",
+      "sha256": "6e5e724309f153d0f76ac6ad288283e32cecfb878d07d5abf0171240fc7f59b1",
+      "size_bytes": 13272,
+      "note": "Unchanged since Phase 2A - re-run in Phase 2B as part of the unchanged-existing-path confirmation."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\verify_snapshot_phase2b.py",
+      "sha256": "a30b207ca30c332d871569a0fd94235cee54b7ee8a195d58b82e46473256c72e",
+      "size_bytes": 22087,
+      "note": "New this phase: DTO<->Schema consistency, unknown/missing/type-mismatch/malformed-id rejection tests, synthetic duplicate/dangling reference tests, 5-case comparison (Reset/ResetFromScenario/6546-21/natural-draw/double-capture), Emulator-validator cross-check, canonical-serialization stability."
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.4.md",
+      "sha256": "b46530309e79b6a52427d144b32dc08510539a90b9cf76504dec182dfdd119c8",
+      "size_bytes": 23060,
+      "note": "New canonical contract document, supersedes v0.3 as source of truth (v0.3 retained as historical record)."
+    },
+    {
+      "path": "C:\\STS2_RL\\Outputs\\reports\\rl_combat_state_snapshot_phase2a_report_20260726.md",
+      "sha256": "6018963325a471c19dd35bcdc28fa6f8ebb000c6ba8a0fc8ee6460e2a8d03a44",
+      "size_bytes": 11085,
+      "note": "Prior phase report, unchanged, referenced for provenance continuity."
+    }
+  ]
+}

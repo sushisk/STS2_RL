@@ -1,0 +1,1073 @@
+{
+  "seeds": [
+    20260722,
+    20260723,
+    20260724
+  ],
+  "config": {
+    "export_root": "C:\\STS2_RL\\Training\\exports\\train500_export_20260722_regression3_v1",
+    "dataset_kind": "complete",
+    "dataset_version": "v1",
+    "contract_version": "v1",
+    "dictionary_version": "v1",
+    "export_script_version": "v1",
+    "emulator_commit": "163bf040027abca2754393a949e612e42f46a3e7",
+    "emulator_dll_sha256": "673778A6452C7F066F5C0989345B1BA56504428BA249C121DA6E68F7BC8C88B0",
+    "heuristic_version": "greedy_v1_default_weights",
+    "split_seed_complete": 20260722,
+    "state_dim": 4433,
+    "action_numeric_dim": 7,
+    "hidden_dim": 64,
+    "lr": 0.001,
+    "batch_size": 256,
+    "patience": 3,
+    "min_delta": 0.0001,
+    "top_k": [
+      1,
+      3,
+      5
+    ]
+  },
+  "per_seed": [
+    {
+      "seed": 20260722,
+      "best_epoch": 8,
+      "best_validation_loss": 0.9236885695480138,
+      "train_loss": 0.6540608871825897,
+      "train_accuracy": 0.7986510117411941,
+      "validation_loss": 0.9236885695480138,
+      "validation_accuracy": 0.7098692033293698,
+      "test_loss": 0.8544702641594706,
+      "test_accuracy": 0.7304015296367112,
+      "test_top_3_accuracy": 0.9273422562141491,
+      "test_top_5_accuracy": 0.9703632887189293,
+      "illegal_action_rate_test": 0.0,
+      "training_time_seconds": 354.4235064000022,
+      "metrics_file": "reports\\official_baseline\\seed_20260722_metrics.json"
+    },
+    {
+      "seed": 20260723,
+      "best_epoch": 6,
+      "best_validation_loss": 0.9556174725471297,
+      "train_loss": 0.6748457449750546,
+      "train_accuracy": 0.7806645016237822,
+      "validation_loss": 0.9556174725471297,
+      "validation_accuracy": 0.6908442330558858,
+      "test_loss": 0.8353773778300896,
+      "test_accuracy": 0.737093690248566,
+      "test_top_3_accuracy": 0.9416826003824091,
+      "test_top_5_accuracy": 0.9847036328871893,
+      "illegal_action_rate_test": 0.0,
+      "training_time_seconds": 250.55037289999746,
+      "metrics_file": "reports\\official_baseline\\seed_20260723_metrics.json"
+    },
+    {
+      "seed": 20260724,
+      "best_epoch": 8,
+      "best_validation_loss": 0.9213405708637306,
+      "train_loss": 0.6241868213358862,
+      "train_accuracy": 0.800649512865351,
+      "validation_loss": 0.9213405708637306,
+      "validation_accuracy": 0.727705112960761,
+      "test_loss": 0.8030564578723726,
+      "test_accuracy": 0.7504780114722753,
+      "test_top_3_accuracy": 0.9407265774378585,
+      "test_top_5_accuracy": 0.9818355640535373,
+      "illegal_action_rate_test": 0.0,
+      "training_time_seconds": 255.90571700000146,
+      "metrics_file": "reports\\official_baseline\\seed_20260724_metrics.json"
+    }
+  ],
+  "aggregate": {
+    "train_loss": {
+      "mean": 0.6510311511645102,
+      "std": 0.025464997767999292,
+      "values": [
+        0.6540608871825897,
+        0.6748457449750546,
+        0.6241868213358862
+      ]
+    },
+    "train_accuracy": {
+      "mean": 0.7933216754101092,
+      "std": 0.011006885930124605,
+      "values": [
+        0.7986510117411941,
+        0.7806645016237822,
+        0.800649512865351
+      ]
+    },
+    "train_top_1_accuracy": {
+      "mean": 0.7933216754101092,
+      "std": 0.011006885930124605,
+      "values": [
+        0.7986510117411941,
+        0.7806645016237822,
+        0.800649512865351
+      ]
+    },
+    "train_top_3_accuracy": {
+      "mean": 0.9636938962444832,
+      "std": 0.004254767159903573,
+      "values": [
+        0.9661503872095928,
+        0.9587809143142643,
+        0.9661503872095928
+      ]
+    },
+    "train_top_5_accuracy": {
+      "mean": 0.992255808143892,
+      "std": 0.0011447853347379096,
+      "values": [
+        0.9920059955033724,
+        0.9912565575818136,
+        0.9935048713464901
+      ]
+    },
+    "train_illegal_action_rate": {
+      "mean": 0.0,
+      "std": 0.0,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "validation_loss": {
+      "mean": 0.9335488709862915,
+      "std": 0.01914799351351536,
+      "values": [
+        0.9236885695480138,
+        0.9556174725471297,
+        0.9213405708637306
+      ]
+    },
+    "validation_accuracy": {
+      "mean": 0.7094728497820055,
+      "std": 0.018433636074884657,
+      "values": [
+        0.7098692033293698,
+        0.6908442330558858,
+        0.727705112960761
+      ]
+    },
+    "validation_top_1_accuracy": {
+      "mean": 0.7094728497820055,
+      "std": 0.018433636074884657,
+      "values": [
+        0.7098692033293698,
+        0.6908442330558858,
+        0.727705112960761
+      ]
+    },
+    "validation_top_3_accuracy": {
+      "mean": 0.9231074118113357,
+      "std": 0.009684337473539938,
+      "values": [
+        0.929845422116528,
+        0.9120095124851367,
+        0.9274673008323424
+      ]
+    },
+    "validation_top_5_accuracy": {
+      "mean": 0.9742370194213238,
+      "std": 0.002475227109947817,
+      "values": [
+        0.9714625445897741,
+        0.9750297265160524,
+        0.976218787158145
+      ]
+    },
+    "validation_illegal_action_rate": {
+      "mean": 0.0,
+      "std": 0.0,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "test_loss": {
+      "mean": 0.830968033287311,
+      "std": 0.025988970905068732,
+      "values": [
+        0.8544702641594706,
+        0.8353773778300896,
+        0.8030564578723726
+      ]
+    },
+    "test_accuracy": {
+      "mean": 0.7393244104525175,
+      "std": 0.010222444188875378,
+      "values": [
+        0.7304015296367112,
+        0.737093690248566,
+        0.7504780114722753
+      ]
+    },
+    "test_top_1_accuracy": {
+      "mean": 0.7393244104525175,
+      "std": 0.010222444188875378,
+      "values": [
+        0.7304015296367112,
+        0.737093690248566,
+        0.7504780114722753
+      ]
+    },
+    "test_top_3_accuracy": {
+      "mean": 0.9365838113448056,
+      "std": 0.00801768363633468,
+      "values": [
+        0.9273422562141491,
+        0.9416826003824091,
+        0.9407265774378585
+      ]
+    },
+    "test_top_5_accuracy": {
+      "mean": 0.9789674952198854,
+      "std": 0.007588196876858286,
+      "values": [
+        0.9703632887189293,
+        0.9847036328871893,
+        0.9818355640535373
+      ]
+    },
+    "test_illegal_action_rate": {
+      "mean": 0.0,
+      "std": 0.0,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "by_action_type": {
+    "validation": {
+      "card": {
+        "accuracy_mean": 0.662330623306233,
+        "accuracy_std": 0.020068843990865733,
+        "total_mean": 615.0,
+        "values": [
+          0.656910569105691,
+          0.6455284552845528,
+          0.6845528455284553
+        ]
+      },
+      "choice_card": {
+        "accuracy_mean": 0.0,
+        "accuracy_std": 0.0,
+        "total_mean": 3.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "potion": {
+        "accuracy_mean": 0.8128654970760234,
+        "accuracy_std": 0.08290904607460713,
+        "total_mean": 57.0,
+        "values": [
+          0.8771929824561403,
+          0.7192982456140351,
+          0.8421052631578947
+        ]
+      },
+      "system": {
+        "accuracy_mean": 0.8614457831325302,
+        "accuracy_std": 0.0,
+        "total_mean": 166.0,
+        "values": [
+          0.8614457831325302,
+          0.8614457831325302,
+          0.8614457831325302
+        ]
+      }
+    },
+    "test": {
+      "card": {
+        "accuracy_mean": 0.6898326898326897,
+        "accuracy_std": 0.013559399939321388,
+        "total_mean": 777.0,
+        "values": [
+          0.676962676962677,
+          0.6885456885456885,
+          0.703989703989704
+        ]
+      },
+      "choice_card": {
+        "accuracy_mean": 0.0,
+        "accuracy_std": 0.0,
+        "total_mean": 1.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "potion": {
+        "accuracy_mean": 0.8279569892473119,
+        "accuracy_std": 0.01862420223192346,
+        "total_mean": 62.0,
+        "values": [
+          0.8387096774193549,
+          0.8064516129032258,
+          0.8387096774193549
+        ]
+      },
+      "system": {
+        "accuracy_mean": 0.9029126213592233,
+        "accuracy_std": 0.0,
+        "total_mean": 206.0,
+        "values": [
+          0.9029126213592233,
+          0.9029126213592233,
+          0.9029126213592233
+        ]
+      }
+    }
+  },
+  "by_legal_action_count": {
+    "validation": {
+      "1": {
+        "accuracy_mean": 1.0,
+        "accuracy_std": 0.0,
+        "total_mean": 143.0,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "10": {
+        "accuracy_mean": 0.3333333333333333,
+        "accuracy_std": 0.14433756729740643,
+        "total_mean": 4.0,
+        "values": [
+          0.5,
+          0.25,
+          0.25
+        ]
+      },
+      "11": {
+        "accuracy_mean": 0.23529411764705885,
+        "accuracy_std": 0.10188534162169867,
+        "total_mean": 17.0,
+        "values": [
+          0.29411764705882354,
+          0.11764705882352941,
+          0.29411764705882354
+        ]
+      },
+      "12": {
+        "accuracy_mean": 1.0,
+        "accuracy_std": 0.0,
+        "total_mean": 2.0,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "2": {
+        "accuracy_mean": 0.9565217391304347,
+        "accuracy_std": 0.010869565217391297,
+        "total_mean": 92.0,
+        "values": [
+          0.9565217391304348,
+          0.967391304347826,
+          0.9456521739130435
+        ]
+      },
+      "3": {
+        "accuracy_mean": 0.771689497716895,
+        "accuracy_std": 0.034474129841418975,
+        "total_mean": 73.0,
+        "values": [
+          0.7397260273972602,
+          0.7671232876712328,
+          0.8082191780821918
+        ]
+      },
+      "4": {
+        "accuracy_mean": 0.6888888888888888,
+        "accuracy_std": 0.046979836783964286,
+        "total_mean": 105.0,
+        "values": [
+          0.6666666666666666,
+          0.6571428571428571,
+          0.7428571428571429
+        ]
+      },
+      "5": {
+        "accuracy_mean": 0.5714285714285714,
+        "accuracy_std": 0.020408163265306145,
+        "total_mean": 147.0,
+        "values": [
+          0.5510204081632653,
+          0.5714285714285714,
+          0.5918367346938775
+        ]
+      },
+      "6": {
+        "accuracy_mean": 0.5850340136054422,
+        "accuracy_std": 0.024527559697033966,
+        "total_mean": 147.0,
+        "values": [
+          0.564625850340136,
+          0.5782312925170068,
+          0.6122448979591837
+        ]
+      },
+      "7": {
+        "accuracy_mean": 0.544973544973545,
+        "accuracy_std": 0.07157539290195072,
+        "total_mean": 63.0,
+        "values": [
+          0.6190476190476191,
+          0.47619047619047616,
+          0.5396825396825397
+        ]
+      },
+      "8": {
+        "accuracy_mean": 0.4857142857142857,
+        "accuracy_std": 0.07559289460184544,
+        "total_mean": 35.0,
+        "values": [
+          0.5714285714285714,
+          0.42857142857142855,
+          0.45714285714285713
+        ]
+      },
+      "9": {
+        "accuracy_mean": 0.6410256410256411,
+        "accuracy_std": 0.22205779584216376,
+        "total_mean": 13.0,
+        "values": [
+          0.7692307692307693,
+          0.38461538461538464,
+          0.7692307692307693
+        ]
+      }
+    },
+    "test": {
+      "1": {
+        "accuracy_mean": 1.0,
+        "accuracy_std": 0.0,
+        "total_mean": 186.0,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "10": {
+        "accuracy_mean": 0.38095238095238093,
+        "accuracy_std": 0.21821789023599236,
+        "total_mean": 21.0,
+        "values": [
+          0.14285714285714285,
+          0.42857142857142855,
+          0.5714285714285714
+        ]
+      },
+      "11": {
+        "accuracy_mean": 0.5,
+        "accuracy_std": 0.0,
+        "total_mean": 2.0,
+        "values": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      "2": {
+        "accuracy_mean": 0.9421487603305785,
+        "accuracy_std": 0.008264462809917383,
+        "total_mean": 121.0,
+        "values": [
+          0.9338842975206612,
+          0.9421487603305785,
+          0.9504132231404959
+        ]
+      },
+      "3": {
+        "accuracy_mean": 0.7814207650273225,
+        "accuracy_std": 0.00946475851130535,
+        "total_mean": 122.0,
+        "values": [
+          0.7704918032786885,
+          0.7868852459016393,
+          0.7868852459016393
+        ]
+      },
+      "4": {
+        "accuracy_mean": 0.6715328467153285,
+        "accuracy_std": 0.05263578504326991,
+        "total_mean": 137.0,
+        "values": [
+          0.6131386861313869,
+          0.7153284671532847,
+          0.6861313868613139
+        ]
+      },
+      "5": {
+        "accuracy_mean": 0.6666666666666666,
+        "accuracy_std": 0.03569079719762839,
+        "total_mean": 156.0,
+        "values": [
+          0.7051282051282052,
+          0.6346153846153846,
+          0.6602564102564102
+        ]
+      },
+      "6": {
+        "accuracy_mean": 0.5502008032128515,
+        "accuracy_std": 0.045613721653014264,
+        "total_mean": 166.0,
+        "values": [
+          0.6024096385542169,
+          0.5301204819277109,
+          0.5180722891566265
+        ]
+      },
+      "7": {
+        "accuracy_mean": 0.5539906103286385,
+        "accuracy_std": 0.09163953660067202,
+        "total_mean": 71.0,
+        "values": [
+          0.4647887323943662,
+          0.5492957746478874,
+          0.647887323943662
+        ]
+      },
+      "8": {
+        "accuracy_mean": 0.7037037037037037,
+        "accuracy_std": 0.04243125643477631,
+        "total_mean": 36.0,
+        "values": [
+          0.75,
+          0.6666666666666666,
+          0.6944444444444444
+        ]
+      },
+      "9": {
+        "accuracy_mean": 0.6071428571428571,
+        "accuracy_std": 0.14285714285714285,
+        "total_mean": 28.0,
+        "values": [
+          0.4642857142857143,
+          0.6071428571428571,
+          0.75
+        ]
+      }
+    }
+  },
+  "by_outcome": {
+    "validation": {
+      "defeat": {
+        "accuracy_mean": 0.6780952380952381,
+        "accuracy_std": 0.031471831698777715,
+        "total_mean": 175.0,
+        "values": [
+          0.68,
+          0.6457142857142857,
+          0.7085714285714285
+        ]
+      },
+      "victory": {
+        "accuracy_mean": 0.7177177177177178,
+        "accuracy_std": 0.01501501501501501,
+        "total_mean": 666.0,
+        "values": [
+          0.7177177177177178,
+          0.7027027027027027,
+          0.7327327327327328
+        ]
+      }
+    },
+    "test": {
+      "defeat": {
+        "accuracy_mean": 0.7278911564625851,
+        "accuracy_std": 0.012263779848516983,
+        "total_mean": 294.0,
+        "values": [
+          0.7414965986394558,
+          0.7244897959183674,
+          0.717687074829932
+        ]
+      },
+      "victory": {
+        "accuracy_mean": 0.7437943262411348,
+        "accuracy_std": 0.018680237150448132,
+        "total_mean": 752.0,
+        "values": [
+          0.726063829787234,
+          0.7420212765957447,
+          0.7632978723404256
+        ]
+      }
+    }
+  },
+  "by_encounter_top": {
+    "validation": [
+      {
+        "encounter_key": "LIVING_SHIELD+TURRET_OPERATOR",
+        "accuracy_mean": 0.6358974358974359,
+        "accuracy_std": 0.07270485578850164,
+        "total_sum": 195.0
+      },
+      {
+        "encounter_key": "CALCIFIED_CULTIST+TOADPOLE",
+        "accuracy_mean": 0.875,
+        "accuracy_std": 0.04724555912615343,
+        "total_sum": 168.0
+      },
+      {
+        "encounter_key": "SEAPUNK",
+        "accuracy_mean": 0.6289308176100629,
+        "accuracy_std": 0.039276716971059104,
+        "total_sum": 159.0
+      },
+      {
+        "encounter_key": "HAUNTED_SHIP",
+        "accuracy_mean": 0.8461538461538461,
+        "accuracy_std": 0.033308669376324575,
+        "total_sum": 156.0
+      },
+      {
+        "encounter_key": "OVICOPTER",
+        "accuracy_mean": 0.689922480620155,
+        "accuracy_std": 0.03552384259655685,
+        "total_sum": 129.0
+      },
+      {
+        "encounter_key": "HUNTER_KILLER",
+        "accuracy_mean": 0.3983739837398374,
+        "accuracy_std": 0.03725671296712065,
+        "total_sum": 123.0
+      },
+      {
+        "encounter_key": "SPINY_TOAD",
+        "accuracy_mean": 0.7560975609756097,
+        "accuracy_std": 0.06453051978206319,
+        "total_sum": 123.0
+      },
+      {
+        "encounter_key": "CEREMONIAL_BEAST",
+        "accuracy_mean": 0.7927927927927928,
+        "accuracy_std": 0.041284465720322856,
+        "total_sum": 111.0
+      },
+      {
+        "encounter_key": "SHRINKER_BEETLE",
+        "accuracy_mean": 0.5555555555555555,
+        "accuracy_std": 0.017495462702715982,
+        "total_sum": 99.0
+      },
+      {
+        "encounter_key": "BYGONE_EFFIGY",
+        "accuracy_mean": 0.75,
+        "accuracy_std": 0.08267972847076846,
+        "total_sum": 96.0
+      },
+      {
+        "encounter_key": "SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING",
+        "accuracy_mean": 0.46875,
+        "accuracy_std": 0.0625,
+        "total_sum": 96.0
+      },
+      {
+        "encounter_key": "FUZZY_WURM_CRAWLER",
+        "accuracy_mean": 0.7634408602150536,
+        "accuracy_std": 0.0492750074726434,
+        "total_sum": 93.0
+      },
+      {
+        "encounter_key": "EXOSKELETON+EXOSKELETON+EXOSKELETON",
+        "accuracy_mean": 0.7816091954022988,
+        "accuracy_std": 0.0717815861884873,
+        "total_sum": 87.0
+      },
+      {
+        "encounter_key": "TUNNELER",
+        "accuracy_mean": 0.7160493827160493,
+        "accuracy_std": 0.021383343303319438,
+        "total_sum": 81.0
+      },
+      {
+        "encounter_key": "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_FRONT+DECIMILLIPEDE_SEGMENT_MIDDLE",
+        "accuracy_mean": 0.7936507936507936,
+        "accuracy_std": 0.07273929674533076,
+        "total_sum": 63.0
+      },
+      {
+        "encounter_key": "CORPSE_SLUG+CORPSE_SLUG",
+        "accuracy_mean": 0.7833333333333333,
+        "accuracy_std": 0.028867513459481315,
+        "total_sum": 60.0
+      },
+      {
+        "encounter_key": "DEVOTED_SCULPTOR",
+        "accuracy_mean": 0.6296296296296297,
+        "accuracy_std": 0.06415002990995838,
+        "total_sum": 54.0
+      },
+      {
+        "encounter_key": "LIVING_FOG",
+        "accuracy_mean": 0.6666666666666666,
+        "accuracy_std": 0.1924500897298752,
+        "total_sum": 54.0
+      },
+      {
+        "encounter_key": "LEAF_SLIME_S+TWIG_SLIME_M+TWIG_SLIME_S",
+        "accuracy_mean": 0.8039215686274509,
+        "accuracy_std": 0.03396178054056623,
+        "total_sum": 51.0
+      },
+      {
+        "encounter_key": "PUNCH_CONSTRUCT+PUNCH_CONSTRUCT",
+        "accuracy_mean": 0.7254901960784315,
+        "accuracy_std": 0.08985442539129093,
+        "total_sum": 51.0
+      }
+    ],
+    "test": [
+      {
+        "encounter_key": "LIVING_FOG",
+        "accuracy_mean": 0.7868852459016393,
+        "accuracy_std": 0.09127482562016428,
+        "total_sum": 183.0
+      },
+      {
+        "encounter_key": "BYGONE_EFFIGY",
+        "accuracy_mean": 0.8641975308641975,
+        "accuracy_std": 0.03854937036048394,
+        "total_sum": 162.0
+      },
+      {
+        "encounter_key": "BYRDONIS",
+        "accuracy_mean": 0.7266666666666666,
+        "accuracy_std": 0.02309401076758505,
+        "total_sum": 150.0
+      },
+      {
+        "encounter_key": "KIN_FOLLOWER+KIN_FOLLOWER+KIN_PRIEST",
+        "accuracy_mean": 0.7414965986394558,
+        "accuracy_std": 0.023565317109780607,
+        "total_sum": 147.0
+      },
+      {
+        "encounter_key": "SLIMED_BERSERKER",
+        "accuracy_mean": 0.8125,
+        "accuracy_std": 0.10416666666666663,
+        "total_sum": 144.0
+      },
+      {
+        "encounter_key": "TUNNELER",
+        "accuracy_mean": 0.7446808510638299,
+        "accuracy_std": 0.021276595744680826,
+        "total_sum": 141.0
+      },
+      {
+        "encounter_key": "FLYCONID+SNAPPING_JAXFRUIT",
+        "accuracy_mean": 0.8650793650793651,
+        "accuracy_std": 0.06873217490352689,
+        "total_sum": 126.0
+      },
+      {
+        "encounter_key": "INFESTED_PRISM",
+        "accuracy_mean": 0.8292682926829268,
+        "accuracy_std": 0.04224514164802137,
+        "total_sum": 123.0
+      },
+      {
+        "encounter_key": "LOUSE_PROGENITOR",
+        "accuracy_mean": 0.8373983739837398,
+        "accuracy_std": 0.050772341450393464,
+        "total_sum": 123.0
+      },
+      {
+        "encounter_key": "SKULKING_COLONY",
+        "accuracy_mean": 0.8333333333333334,
+        "accuracy_std": 0.014433756729740658,
+        "total_sum": 120.0
+      },
+      {
+        "encounter_key": "MECHA_KNIGHT",
+        "accuracy_mean": 0.6495726495726496,
+        "accuracy_std": 0.30590649860125263,
+        "total_sum": 117.0
+      },
+      {
+        "encounter_key": "THE_OBSCURA",
+        "accuracy_mean": 0.6862745098039217,
+        "accuracy_std": 0.03396178054056623,
+        "total_sum": 102.0
+      },
+      {
+        "encounter_key": "SEAPUNK",
+        "accuracy_mean": 0.8064516129032259,
+        "accuracy_std": 0.08534681648595453,
+        "total_sum": 93.0
+      },
+      {
+        "encounter_key": "KNOWLEDGE_DEMON",
+        "accuracy_mean": 0.5888888888888889,
+        "accuracy_std": 0.10183501544346309,
+        "total_sum": 90.0
+      },
+      {
+        "encounter_key": "LIVING_SHIELD+TURRET_OPERATOR",
+        "accuracy_mean": 0.5777777777777778,
+        "accuracy_std": 0.06938886664887108,
+        "total_sum": 90.0
+      },
+      {
+        "encounter_key": "SCROLL_OF_BITING+SCROLL_OF_BITING+SCROLL_OF_BITING",
+        "accuracy_mean": 0.691358024691358,
+        "accuracy_std": 0.0565750085797017,
+        "total_sum": 81.0
+      },
+      {
+        "encounter_key": "THIEVING_HOPPER",
+        "accuracy_mean": 0.5733333333333334,
+        "accuracy_std": 0.10066445913694336,
+        "total_sum": 75.0
+      },
+      {
+        "encounter_key": "BATTLE_FRIEND_V2",
+        "accuracy_mean": 0.7101449275362318,
+        "accuracy_std": 0.025102185616940234,
+        "total_sum": 69.0
+      },
+      {
+        "encounter_key": "AXEBOT+AXEBOT",
+        "accuracy_mean": 0.712121212121212,
+        "accuracy_std": 0.06943296507508849,
+        "total_sum": 66.0
+      },
+      {
+        "encounter_key": "HUNTER_KILLER",
+        "accuracy_mean": 0.6818181818181818,
+        "accuracy_std": 0.0,
+        "total_sum": 66.0
+      }
+    ]
+  },
+  "misclassification_trends": {
+    "teacher_type_to_pred_type": [
+      {
+        "teacher": "card",
+        "predicted": "card",
+        "count": 236
+      },
+      {
+        "teacher": "system",
+        "predicted": "card",
+        "count": 41
+      },
+      {
+        "teacher": "potion",
+        "predicted": "card",
+        "count": 8
+      },
+      {
+        "teacher": "card",
+        "predicted": "potion",
+        "count": 6
+      },
+      {
+        "teacher": "potion",
+        "predicted": "potion",
+        "count": 4
+      },
+      {
+        "teacher": "choice_card",
+        "predicted": "choice_card",
+        "count": 4
+      },
+      {
+        "teacher": "potion",
+        "predicted": "system",
+        "count": 1
+      }
+    ],
+    "teacher_label_to_pred_label": [
+      {
+        "teacher": "STRIKE_DEFECT",
+        "predicted": "DUALCAST",
+        "count": 17
+      },
+      {
+        "teacher": "End Turn",
+        "predicted": "MINION_DIVE_BOMB",
+        "count": 16
+      },
+      {
+        "teacher": "DEFEND_DEFECT",
+        "predicted": "DUALCAST",
+        "count": 14
+      },
+      {
+        "teacher": "DEFEND_DEFECT",
+        "predicted": "STRIKE_DEFECT",
+        "count": 10
+      },
+      {
+        "teacher": "STRIKE_DEFECT",
+        "predicted": "BEAM_CELL",
+        "count": 9
+      },
+      {
+        "teacher": "SUMMON_FORTH",
+        "predicted": "MINION_DIVE_BOMB",
+        "count": 7
+      },
+      {
+        "teacher": "End Turn",
+        "predicted": "DEFEND_REGENT",
+        "count": 6
+      },
+      {
+        "teacher": "DEFEND_NECROBINDER",
+        "predicted": "INVOKE",
+        "count": 6
+      },
+      {
+        "teacher": "CHARGE",
+        "predicted": "MINION_DIVE_BOMB",
+        "count": 6
+      },
+      {
+        "teacher": "DEFEND_REGENT",
+        "predicted": "CRUSH_UNDER",
+        "count": 5
+      },
+      {
+        "teacher": "VENERATE",
+        "predicted": "MINION_DIVE_BOMB",
+        "count": 5
+      },
+      {
+        "teacher": "CRUSH_UNDER",
+        "predicted": "MINION_DIVE_BOMB",
+        "count": 5
+      },
+      {
+        "teacher": "DEFEND_REGENT",
+        "predicted": "ASTRAL_PULSE",
+        "count": 4
+      },
+      {
+        "teacher": "DEFEND_REGENT",
+        "predicted": "MINION_DIVE_BOMB",
+        "count": 4
+      },
+      {
+        "teacher": "STRIKE_DEFECT",
+        "predicted": "STRENGTH_POTION",
+        "count": 4
+      }
+    ],
+    "legal_action_count": [
+      {
+        "legal_action_count": "5",
+        "count": 93
+      },
+      {
+        "legal_action_count": "6",
+        "count": 84
+      },
+      {
+        "legal_action_count": "4",
+        "count": 40
+      },
+      {
+        "legal_action_count": "7",
+        "count": 37
+      },
+      {
+        "legal_action_count": "8",
+        "count": 19
+      },
+      {
+        "legal_action_count": "3",
+        "count": 18
+      },
+      {
+        "legal_action_count": "2",
+        "count": 7
+      },
+      {
+        "legal_action_count": "9",
+        "count": 2
+      }
+    ],
+    "encounter": [
+      {
+        "encounter_key": "HUNTER_KILLER",
+        "count": 74
+      },
+      {
+        "encounter_key": "SEAPUNK",
+        "count": 35
+      },
+      {
+        "encounter_key": "SPINY_TOAD",
+        "count": 30
+      },
+      {
+        "encounter_key": "TUNNELER",
+        "count": 23
+      },
+      {
+        "encounter_key": "SHRINKER_BEETLE",
+        "count": 20
+      },
+      {
+        "encounter_key": "EXOSKELETON+EXOSKELETON+EXOSKELETON",
+        "count": 19
+      },
+      {
+        "encounter_key": "OVICOPTER",
+        "count": 19
+      },
+      {
+        "encounter_key": "LIVING_SHIELD+TURRET_OPERATOR",
+        "count": 16
+      },
+      {
+        "encounter_key": "PUNCH_CONSTRUCT+PUNCH_CONSTRUCT",
+        "count": 14
+      },
+      {
+        "encounter_key": "DECIMILLIPEDE_SEGMENT_BACK+DECIMILLIPEDE_SEGMENT_FRONT+DECIMILLIPEDE_SEGMENT_MIDDLE",
+        "count": 13
+      }
+    ]
+  },
+  "artifacts": {
+    "checkpoints": [
+      "checkpoints\\official_seed_20260722\\best.pt",
+      "checkpoints\\official_seed_20260723\\best.pt",
+      "checkpoints\\official_seed_20260724\\best.pt"
+    ],
+    "metrics": [
+      "reports\\official_baseline\\seed_20260722_metrics.json",
+      "reports\\official_baseline\\seed_20260723_metrics.json",
+      "reports\\official_baseline\\seed_20260724_metrics.json"
+    ],
+    "misclassified_validation": [
+      "reports\\official_baseline\\seed_20260722_misclassified_validation.jsonl",
+      "reports\\official_baseline\\seed_20260723_misclassified_validation.jsonl",
+      "reports\\official_baseline\\seed_20260724_misclassified_validation.jsonl"
+    ],
+    "misclassified_test": [
+      "reports\\official_baseline\\seed_20260722_misclassified_validation_test.jsonl",
+      "reports\\official_baseline\\seed_20260723_misclassified_validation_test.jsonl",
+      "reports\\official_baseline\\seed_20260724_misclassified_validation_test.jsonl"
+    ]
+  }
+}

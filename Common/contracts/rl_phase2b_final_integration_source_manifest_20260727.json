@@ -1,0 +1,55 @@
+{
+  "manifestId": "rl_phase2b_final_integration_source_manifest_20260727",
+  "generatedAt": "2026-07-27T09:39:14.026425",
+  "rlCommit": "not_a_git_repository",
+  "compatibleEmulatorFixCommit": "ae56293a88ddd56b643aa8107bae402e948d7e87",
+  "compatibleEmulatorInvestigationReportCommit": "8b91e582046607e53cfded316bd96ec04a5b8934",
+  "emulatorDllSha256": "7afe01f20cf982e23d046d57fe23f057339c5466a9a1930f7eddb7edc601a392",
+  "contractPath": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.4.md",
+  "contractSha256": "d646c4537da5f5c156e15f1db82278b144921c50adce477c43d620420e2d7cbf",
+  "priorManifestPath": "C:\\STS2_RL\\Common\\contracts\\rl_phase2b_pet_capture_fix_source_manifest_20260726.json",
+  "files": [
+    {
+      "path": "C:\\STS2_RL\\Combat\\combat_state_snapshot.py",
+      "sha256": "6a8be66bb710c098921950cb3c2ee237f622f695fd09b5613de88fb1e9669711",
+      "size_bytes": 33410,
+      "note": "Unchanged since the pet-capture-fix integration - re-verified against DLL ae56293, no drift."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\live_combat_session.py",
+      "sha256": "056e1e9e976dfcfa7c93d3734d020a088078f7f835dd152b70b87e57f5daecb8",
+      "size_bytes": 14303,
+      "note": "Unchanged since Phase 2A/2B - re-verified against DLL ae56293, no drift."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\verify_snapshot_phase2b.py",
+      "sha256": "c9bc2346098a0789a04559e70bc2014d2d54b13fba4930060aaae6dd4fe3ffee",
+      "size_bytes": 28443,
+      "note": "Unchanged since the pet-capture-fix integration - re-run against DLL ae56293, all checks pass."
+    },
+    {
+      "path": "C:\\STS2_RL\\Combat\\evaluation\\online_eval\\qb_repro_driver_rl.py",
+      "sha256": "2c4925c03c6263c35b27e8297df685dfe4b7e3cb0d476c0627e061f1711bd254",
+      "size_bytes": null,
+      "note": "New this integration: independent same-process 100x forward/100x reverse repro driver (native main()-style test collection, not pytest), used for the step-4 acceptance runs."
+    },
+    {
+      "path": "C:\\STS2_RL\\Common\\contracts\\combat_state_contract.v0.4.md",
+      "sha256": "d646c4537da5f5c156e15f1db82278b144921c50adce477c43d620420e2d7cbf",
+      "size_bytes": 31363,
+      "note": "RL edit this integration: added §8-A (async combat-setup settlement guarantee, RL native-harness confirmation, pytest-specific discrepancy finding), extended §13 (WRIGGLER known-failure note, Emulator reference-file contractVersion sync-gap note)."
+    }
+  ],
+  "acceptance_test_results": {
+    "native_harness_forward_100x": {"total_test_executions": 5200, "quiescent_boundary_violations": 0, "wriggler_known_failures": 100, "other_unexpected_failures": 0, "elapsed_seconds": 1608.4},
+    "native_harness_reverse_100x": {"total_test_executions": 5200, "quiescent_boundary_violations": 0, "wriggler_known_failures": 100, "other_unexpected_failures": 0, "elapsed_seconds": 1607.8},
+    "pytest_combined_single_shot_runs": {"total_runs": 12, "runs_with_quiescent_boundary_violation": 6, "note": "non-deterministic, ~50% run-level failure rate observed; confirmed not caused by Snapshot Capture code (neither test file references combat_state_snapshot/capture_snapshot/LiveCombatSession); root cause not identified; see final integration report for full per-run detail"},
+    "scenario_6546_21_live_replay_3x": {"decisions": 49, "outcome": "victory", "quiescent_boundary_violations": 0, "no_legal_actions_hits": 0, "runs": 3},
+    "snapshot_capture_suite": {"result": "0 failing checks", "includes": ["DTO<->Schema 17/17", "rejection tests", "reference-integrity synthetic+real cross-check", "Scenario 6546-21 pet-fix acceptance (Osty/DieForYouPower resolved, SOUL x3 remain source_live_state_inconsistency)", "canonical serialization round-trip incl. Pets"]}
+  },
+  "known_open_items_recorded": [
+    "pytest-specific QuiescentBoundaryViolation recurrence post-fix, root cause not identified",
+    "test_wriggler_missing_slot_without_encounter_is_detected assertion now stale (expects old 'no_legal_actions' reason, actual is now 'init_exception:TimeoutException') - known/accepted, not fixed this session (out of RL's stated scope, test file edits not requested)",
+    "Sts2Emulator/docs/contracts/combat_state_contract.reference.json contractVersion stuck at '0.3', pre-existing gap, not newly introduced"
+  ]
+}

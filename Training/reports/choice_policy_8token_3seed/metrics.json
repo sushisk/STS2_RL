@@ -1,0 +1,583 @@
+{
+  "seeds": [
+    20260725,
+    20260726,
+    20260727
+  ],
+  "split_seed": 20260725,
+  "config_shared": {
+    "seed": 20260725,
+    "split_seed": 20260725,
+    "source_dir": "C:\\STS2_RL\\Combat\\evaluation\\reports\\choice_teacher_data_full_20260725",
+    "state_dim": 4560,
+    "card_vocab": 548,
+    "choice_meaning_vocab": 9,
+    "card_embedding_dim": 32,
+    "choice_meaning_embedding_dim": 8,
+    "hidden_dim": 64,
+    "batch_size": 32,
+    "lr": 0.001,
+    "patience": 8,
+    "min_delta": 0.0001,
+    "in_scope_decisions": 628,
+    "in_scope_trajectories": 173,
+    "split_counts_decisions": {
+      "train": 512,
+      "validation": 48,
+      "test": 68
+    },
+    "meaning_category_count": 9
+  },
+  "per_seed": {
+    "20260725": {
+      "best_epoch": 7,
+      "best_validation_loss": 0.9137760003407797,
+      "train": {
+        "top_1_accuracy": 0.865234375,
+        "top_3_accuracy": 0.98828125,
+        "top_5_accuracy": 0.998046875,
+        "mrr": 0.9244466423988342,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 512,
+        "loss": 0.5346448346972466
+      },
+      "validation": {
+        "top_1_accuracy": 0.75,
+        "top_3_accuracy": 1.0,
+        "top_5_accuracy": 1.0,
+        "mrr": 0.8576388359069824,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 48,
+        "loss": 0.9137760003407797
+      },
+      "test": {
+        "top_1_accuracy": 0.6617646813392639,
+        "top_3_accuracy": 0.9558823704719543,
+        "top_5_accuracy": 1.0,
+        "mrr": 0.8002450466156006,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68,
+        "loss": 1.0064366144292496
+      },
+      "by_category_test": {
+        "discard": {
+          "accuracy": 1.0,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "transform": {
+          "accuracy": 0.5882352941176471,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "return_to_draw_pile_top": {
+          "accuracy": 0.36363636363636365,
+          "total": 11,
+          "reference_only_low_n": false
+        },
+        "relic:GAMBLING_CHIP": {
+          "accuracy": 0.7,
+          "total": 10,
+          "reference_only_low_n": false
+        },
+        "add_generated_to_hand": {
+          "accuracy": 0.2857142857142857,
+          "total": 7,
+          "reference_only_low_n": true
+        },
+        "retrieve": {
+          "accuracy": 0.8,
+          "total": 5,
+          "reference_only_low_n": true
+        },
+        "exhaust": {
+          "accuracy": 1.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "by_candidate_count_test": {
+        "5": {
+          "accuracy": 0.75,
+          "total": 20,
+          "reference_only_low_n": false
+        },
+        "4": {
+          "accuracy": 0.8947368421052632,
+          "total": 19,
+          "reference_only_low_n": false
+        },
+        "3": {
+          "accuracy": 0.3333333333333333,
+          "total": 15,
+          "reference_only_low_n": false
+        },
+        "2": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "1": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "8": {
+          "accuracy": 0.3333333333333333,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "7": {
+          "accuracy": 0.0,
+          "total": 2,
+          "reference_only_low_n": true
+        },
+        "15": {
+          "accuracy": 1.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "14": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "6": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "synthetic_check": [
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:0",
+          "candidate_count": 3,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        },
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:1",
+          "candidate_count": 4,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        },
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:2",
+          "candidate_count": 5,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        }
+      ],
+      "shared_encoder_keys_copied": [
+        "card_embedding.weight",
+        "state_net.0.weight",
+        "state_net.0.bias",
+        "state_net.2.weight",
+        "state_net.2.bias"
+      ]
+    },
+    "20260726": {
+      "best_epoch": 3,
+      "best_validation_loss": 1.0645468831062317,
+      "train": {
+        "top_1_accuracy": 0.642578125,
+        "top_3_accuracy": 0.94140625,
+        "top_5_accuracy": 0.982421875,
+        "mrr": 0.7916387319564819,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 512,
+        "loss": 0.9734484888613224
+      },
+      "validation": {
+        "top_1_accuracy": 0.5416666865348816,
+        "top_3_accuracy": 0.9583333134651184,
+        "top_5_accuracy": 1.0,
+        "mrr": 0.7395833134651184,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 48,
+        "loss": 1.0645468831062317
+      },
+      "test": {
+        "top_1_accuracy": 0.529411792755127,
+        "top_3_accuracy": 0.8970588445663452,
+        "top_5_accuracy": 0.9852941036224365,
+        "mrr": 0.7072479128837585,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68,
+        "loss": 1.1457908013287712
+      },
+      "by_category_test": {
+        "discard": {
+          "accuracy": 0.9411764705882353,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "transform": {
+          "accuracy": 0.29411764705882354,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "return_to_draw_pile_top": {
+          "accuracy": 0.18181818181818182,
+          "total": 11,
+          "reference_only_low_n": false
+        },
+        "relic:GAMBLING_CHIP": {
+          "accuracy": 0.6,
+          "total": 10,
+          "reference_only_low_n": false
+        },
+        "add_generated_to_hand": {
+          "accuracy": 0.42857142857142855,
+          "total": 7,
+          "reference_only_low_n": true
+        },
+        "retrieve": {
+          "accuracy": 0.8,
+          "total": 5,
+          "reference_only_low_n": true
+        },
+        "exhaust": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "by_candidate_count_test": {
+        "5": {
+          "accuracy": 0.3,
+          "total": 20,
+          "reference_only_low_n": false
+        },
+        "4": {
+          "accuracy": 0.7894736842105263,
+          "total": 19,
+          "reference_only_low_n": false
+        },
+        "3": {
+          "accuracy": 0.4666666666666667,
+          "total": 15,
+          "reference_only_low_n": false
+        },
+        "2": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "1": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "8": {
+          "accuracy": 0.3333333333333333,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "7": {
+          "accuracy": 0.0,
+          "total": 2,
+          "reference_only_low_n": true
+        },
+        "15": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "14": {
+          "accuracy": 1.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "6": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "synthetic_check": [
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:0",
+          "candidate_count": 3,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        },
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:1",
+          "candidate_count": 4,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        },
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:2",
+          "candidate_count": 5,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        }
+      ],
+      "shared_encoder_keys_copied": [
+        "card_embedding.weight",
+        "state_net.0.weight",
+        "state_net.0.bias",
+        "state_net.2.weight",
+        "state_net.2.bias"
+      ]
+    },
+    "20260727": {
+      "best_epoch": 4,
+      "best_validation_loss": 1.099813461303711,
+      "train": {
+        "top_1_accuracy": 0.677734375,
+        "top_3_accuracy": 0.951171875,
+        "top_5_accuracy": 0.990234375,
+        "mrr": 0.8135090470314026,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 512,
+        "loss": 0.9005376249551773
+      },
+      "validation": {
+        "top_1_accuracy": 0.5833333134651184,
+        "top_3_accuracy": 0.9375,
+        "top_5_accuracy": 0.9791666865348816,
+        "mrr": 0.749504029750824,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 48,
+        "loss": 1.099813461303711
+      },
+      "test": {
+        "top_1_accuracy": 0.6323529481887817,
+        "top_3_accuracy": 0.9411764740943909,
+        "top_5_accuracy": 0.9852941036224365,
+        "mrr": 0.770098090171814,
+        "illegal_prediction_rate": 0.0,
+        "decisions": 68,
+        "loss": 1.0750250395606546
+      },
+      "by_category_test": {
+        "discard": {
+          "accuracy": 1.0,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "transform": {
+          "accuracy": 0.4117647058823529,
+          "total": 17,
+          "reference_only_low_n": false
+        },
+        "return_to_draw_pile_top": {
+          "accuracy": 0.45454545454545453,
+          "total": 11,
+          "reference_only_low_n": false
+        },
+        "relic:GAMBLING_CHIP": {
+          "accuracy": 0.7,
+          "total": 10,
+          "reference_only_low_n": false
+        },
+        "add_generated_to_hand": {
+          "accuracy": 0.42857142857142855,
+          "total": 7,
+          "reference_only_low_n": true
+        },
+        "retrieve": {
+          "accuracy": 0.8,
+          "total": 5,
+          "reference_only_low_n": true
+        },
+        "exhaust": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "by_candidate_count_test": {
+        "5": {
+          "accuracy": 0.45,
+          "total": 20,
+          "reference_only_low_n": false
+        },
+        "4": {
+          "accuracy": 0.9473684210526315,
+          "total": 19,
+          "reference_only_low_n": false
+        },
+        "3": {
+          "accuracy": 0.4666666666666667,
+          "total": 15,
+          "reference_only_low_n": false
+        },
+        "2": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "1": {
+          "accuracy": 1.0,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "8": {
+          "accuracy": 0.3333333333333333,
+          "total": 3,
+          "reference_only_low_n": true
+        },
+        "7": {
+          "accuracy": 0.0,
+          "total": 2,
+          "reference_only_low_n": true
+        },
+        "15": {
+          "accuracy": 1.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "14": {
+          "accuracy": 1.0,
+          "total": 1,
+          "reference_only_low_n": true
+        },
+        "6": {
+          "accuracy": 0.0,
+          "total": 1,
+          "reference_only_low_n": true
+        }
+      },
+      "synthetic_check": [
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:0",
+          "candidate_count": 3,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        },
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:1",
+          "candidate_count": 4,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        },
+        {
+          "decision_id": "synthetic:nested_choice_decisions_decisions_burning_pact:3:2",
+          "candidate_count": 5,
+          "predicted_label": "STRIKE_REGENT",
+          "teacher_label": "STRIKE_REGENT",
+          "matched_teacher": true,
+          "ran_without_exception": true
+        }
+      ],
+      "shared_encoder_keys_copied": [
+        "card_embedding.weight",
+        "state_net.0.weight",
+        "state_net.0.bias",
+        "state_net.2.weight",
+        "state_net.2.bias"
+      ]
+    }
+  },
+  "aggregate": {
+    "test_top_1_accuracy": {
+      "mean": 0.6078431407610575,
+      "std": 0.056744278855518915,
+      "values": [
+        0.6617646813392639,
+        0.529411792755127,
+        0.6323529481887817
+      ]
+    },
+    "test_top_3_accuracy": {
+      "mean": 0.9313725630442301,
+      "std": 0.024995190256014786,
+      "values": [
+        0.9558823704719543,
+        0.8970588445663452,
+        0.9411764740943909
+      ]
+    },
+    "test_top_5_accuracy": {
+      "mean": 0.9901960690816244,
+      "std": 0.006932426034667879,
+      "values": [
+        1.0,
+        0.9852941036224365,
+        0.9852941036224365
+      ]
+    },
+    "test_mrr": {
+      "mean": 0.7591970165570577,
+      "std": 0.03874051948584995,
+      "values": [
+        0.8002450466156006,
+        0.7072479128837585,
+        0.770098090171814
+      ]
+    },
+    "test_illegal_prediction_rate": {
+      "mean": 0.0,
+      "std": 0.0,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "stability": {
+    "top1_range_across_seeds": 0.13235288858413696,
+    "illegal_rate_all_zero": true,
+    "beats_random_baseline_on_average": true,
+    "beats_frequency_baseline_on_average": true,
+    "synthetic_ok_all_seeds": true,
+    "collapsed_categories_ge10n_all_seeds_zero": []
+  },
+  "baselines": {
+    "random_candidate_selection_test": {
+      "top_1_accuracy": 0.28022059202194216,
+      "top_3_accuracy": 0.7388970595598221,
+      "top_5_accuracy": 0.952720585167408,
+      "mrr": 0.5299941423535347,
+      "illegal_prediction_rate": 0.0,
+      "trials": 200,
+      "decisions": 68
+    },
+    "fixed_card_frequency_order_test": {
+      "top_1_accuracy": 0.3529411852359772,
+      "top_3_accuracy": 0.6764705777168274,
+      "top_5_accuracy": 0.9411764740943909,
+      "mrr": 0.5566351413726807,
+      "illegal_prediction_rate": 0.0,
+      "decisions": 68
+    }
+  },
+  "best_seed_selected": 20260725,
+  "best_checkpoint_path": "C:\\STS2_RL\\Training\\checkpoints\\choice_policy_8token_best\\best.pt",
+  "provenance": {
+    "emulator_commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "emulator_dll_sha256": "E3C3D26D7499E93E89F2718CCB51E18A2D66559021BBB5CDCA33980BB644C036",
+    "choice_semantics_baseline_version": "choice_semantics_baseline_722b019_v1_20260725",
+    "choice_semantics_lookup_sha256": "5e7d260f076047b6d0ee02eb79fcd57a06067be49c923621e84ec0df06df8d44",
+    "choice_semantics_origin_alias_sha256": "a456f0a235c84c2ee815367593c479fb5ed8479916ad4257a55b2d9ea1a33814",
+    "source_choice_dataset_sha256": "12F560F42E515FB72BBB52F0497D42E3E3FB7814FD0FDB070F8076C2CC3FE5BF",
+    "merge_map_version": "choice_meaning_merge_map.v1",
+    "merge_map_sha256": "D6BBB9178550A6A2097E30946D056C91516D0BC6B673F426C07A4355BBB6D2EA",
+    "split_manifest_sha256": "5C76A0FE609527015BF608D9B3E4DC57244FCC98AF3252386A7A75C23CA2C6AA",
+    "seed": 20260725,
+    "training_commit": "not_a_git_repository (C:\\STS2_RL\\Training has no .git)",
+    "policy_checkpoint_used_for_shared_encoder": "checkpoints\\policy_teacher2000_seed_20260724\\best.pt",
+    "selection_criteria": "validation MRR, then validation top-1, then illegal rate (validation, not test)"
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sts2_rl:combat_scenario_input_schema:v2",
+  "title": "CombatScenario input (the Python scenario spec dict)",
+  "description": "Shape of the Python dict STS2_RL/Combat/battle_emulator.py:build_scenario_from_spec() converts into a C# Sts2Emulator.Dto.CombatScenario for GameInstance.ResetFromScenario(). v2 (this file) adds HandCards/DrawPileCards/DiscardPileCards/ExhaustPileCards (per-card upgrade state), Potions (potion belt), PlayerHp/PlayerMaxHp independently-nullable fields, and Stars. v1 (bare Hand/DrawPile/etc. string lists, no Potions/Stars, HP always both-specified) is still accepted and still produced by callers that have no per-card upgrade/potion/HP/Stars data to offer - see 'v1_compat' notes below. Source of truth: Sts2Emulator/Dto/CombatScenario.cs, CardInstanceScenario.cs, PotionScenario.cs.",
+  "type": "object",
+  "required": ["character_id", "hand", "draw_pile", "discard_pile", "exhaust_pile", "relics", "seed", "enemies"],
+  "properties": {
+    "character_id": {"type": "string"},
+    "player_hp": {
+      "type": ["integer", "null"],
+      "description": "Maps to CombatScenario.PlayerHp. Null (or field omitted) = 'let nature take its course' (full HP at whichever max applies, post-relics). Independently nullable from player_max_hp - see the four PlayerHp/PlayerMaxHp combinations in CombatScenario.PlayerHp's/PlayerMaxHp's doc comments (both null / max-only / hp-only / both). Applied AFTER relics are granted, so a max-HP-changing relic (e.g. a Mango-style +14) is never double-counted with an explicit value here - do not attempt to pre-subtract/adjust for such a relic's effect when setting this."
+    },
+    "player_max_hp": {
+      "type": ["integer", "null"],
+      "description": "Maps to CombatScenario.PlayerMaxHp. Same null/independent-nullability semantics as player_hp - see that field's description."
+    },
+    "player_block": {"type": ["integer", "null"], "description": "Maps to CombatScenario.PlayerBlock. Optional."},
+    "hand": {"type": "array", "items": {"type": "string"}, "description": "v1 form - plain card id strings, every card created unupgraded. Ignored by the emulator if hand_cards is also non-empty (specifying both non-empty throws) - use hand_cards instead when upgrade state is known."},
+    "draw_pile": {"type": "array", "items": {"type": "string"}, "description": "v1 form - see 'hand'. Index 0 is top-of-pile / next drawn."},
+    "discard_pile": {"type": "array", "items": {"type": "string"}, "description": "v1 form - see 'hand'."},
+    "exhaust_pile": {"type": "array", "items": {"type": "string"}, "description": "v1 form - see 'hand'."},
+    "hand_cards": {"type": "array", "items": {"$ref": "#/definitions/card_instance"}, "description": "v2 structured form of 'hand' - use when per-card upgrade state is known. Not merged with 'hand'; specifying both non-empty for the same pile throws ArgumentException at ResetFromScenario time."},
+    "draw_pile_cards": {"type": "array", "items": {"$ref": "#/definitions/card_instance"}, "description": "v2 structured form of 'draw_pile'."},
+    "discard_pile_cards": {"type": "array", "items": {"$ref": "#/definitions/card_instance"}, "description": "v2 structured form of 'discard_pile'."},
+    "exhaust_pile_cards": {"type": "array", "items": {"$ref": "#/definitions/card_instance"}, "description": "v2 structured form of 'exhaust_pile'."},
+    "potions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slot", "potion_id"],
+        "properties": {
+          "slot": {"type": "integer", "description": "0-based potion slot index. Duplicate or out-of-range (for the player's post-relic MaxPotionCount, 3 by default, raised by relics like Potion Belt granted in the same scenario's relics list) throws ArgumentException."},
+          "potion_id": {"type": "string"}
+        }
+      },
+      "description": "Complete, exact potion-belt state - NOT additive to any default. Empty/omitted = no potions. Unlisted slots (up to MaxPotionCount) are empty. No AfterObtained-style pickup hook exists for potions (unlike relics), so there is nothing to auto-skip here."
+    },
+    "orb_slots": {
+      "type": ["integer", "null"],
+      "description": "Maps to CombatScenario.OrbSlots. Optional exact orb-slot count override for Orb-capable characters/states."
+    },
+    "orbs": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/orb_instance"},
+      "description": "Ordered orb queue state. Index 0 is the next orb to evoke, so order is gameplay-meaningful and must be preserved."
+    },
+    "pending_choice": {
+      "$ref": "#/definitions/pending_choice",
+      "description": "Optional exact restore of a StartOfCombat pending choice already visible in Observation.pendingChoice. ActionContinuation choices must not be fed back into CombatScenario.PendingChoice."
+    },
+    "player_powers": {"type": "array", "items": {"$ref": "#/definitions/power_stack"}},
+    "relics": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Granted via the real RelicCmd.Obtain, so AfterObtained() fires for real for every relic here. For relics whose AfterObtained() includes a genuine interactive card-choice pickup ritual (e.g. LEAD_PAPERWEIGHT, CLAWS - 24 total, see Sts2Emulator.Api.Internal.RealEngine.AutoSkipCardSelector's doc comment for the full list), that prompt is now automatically auto-declined rather than hanging (fixed in the 2026-07-20 15:49 build - see Combat/evaluation/reports/emulator_hang/ for the investigation that found this before the fix landed). Every other part of such a relic's AfterObtained() (unconditional side effects) still runs in full."
+    },
+    "energy": {"type": ["integer", "null"]},
+    "stars": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Maps to CombatScenario.Stars. Null (or field omitted) leaves the real combat-start sequence untouched, including Regent's DIVINE_RIGHT natural grant. When supplied, it is an exact non-negative override applied after normal turn-1 setup, at the same late timing as Energy."
+    },
+    "seed": {"type": "integer"},
+    "shuffle_rng_seed": {"type": ["integer", "null"]},
+    "enemies": {"type": "array", "items": {"$ref": "#/definitions/enemy_scenario"}},
+    "slot_name_manifest": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/slot_name_manifest_entry"},
+      "description": "RL-side provenance for EnemyScenario.SlotName restoration. Not passed directly to CombatScenario; written by Combat/slot_name_inference.py so teacher data can distinguish source-history slots from encounter-definition/order inference."
+    },
+    "source": {"type": "object", "description": "STS2_RL-side provenance metadata (server_id/build_id/act_number/pool_type/encounter/etc.) - not part of CombatScenario, stripped before conversion. Ascension is NOT settable via CombatScenario/ResetFromScenario at all (only the simpler Reset() takes an ascension parameter) - if present here it is documentation-only, not applied."}
+  },
+  "definitions": {
+    "card_instance": {
+      "type": "object",
+      "required": ["card_id"],
+      "properties": {
+        "card_id": {"type": "string"},
+        "is_upgraded": {"type": "boolean", "default": false, "description": "Requesting true for a non-upgradable card (most Status/Curse cards, or a card already at MaxUpgradeLevel) throws ArgumentException - do not set true speculatively; only set it from a source that actually recorded upgrade state (e.g. a real run's current_upgrade_level > 0)."},
+        "tinker_time_type": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeType."},
+        "tinker_time_rider": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeRider."}
+      }
+    },
+    "power_stack": {
+      "type": "object",
+      "properties": {
+        "power_id": {"type": "string"},
+        "amount": {"type": "integer"},
+        "dynamic_vars": {"type": "object", "description": "exact-match (case-sensitive) internal DynamicVar overrides; unknown keys throw."}
+      }
+    },
+    "orb_instance": {
+      "type": "object",
+      "required": ["orb_id"],
+      "properties": {
+        "orb_id": {"type": "string"},
+        "base_passive_value": {"type": ["number", "null"], "description": "Optional exact base passive value for mutable orbs such as Dark/Glass."},
+        "base_evoke_value": {"type": ["number", "null"], "description": "Optional exact base evoke value for mutable orbs such as Dark/Glass."}
+      }
+    },
+    "pending_choice": {
+      "type": ["object", "null"],
+      "properties": {
+        "choice_type": {"type": ["string", "null"]},
+        "scope": {"type": ["string", "null"]},
+        "scenario_restorable": {"type": ["boolean", "null"]},
+        "min_select": {"type": ["integer", "null"]},
+        "max_select": {"type": ["integer", "null"]},
+        "options": {"type": "array", "items": {"$ref": "#/definitions/card_instance"}}
+      }
+    },
+    "enemy_scenario": {
+      "type": "object",
+      "required": ["monster_id", "hp"],
+      "properties": {
+        "monster_id": {"type": "string"},
+        "hp": {"type": "integer"},
+        "max_hp": {"type": ["integer", "null"], "description": "Null = reuse hp as max (100% health)."},
+        "block": {"type": ["integer", "null"]},
+        "slot_name": {"type": ["string", "null"], "description": "Set for the handful of slot-dependent monsters (Exoskeleton/Myte/PhantasmalGardener/Wriggler) to avoid a silent 'UNSET_MOVE' placeholder intent."},
+        "powers": {"type": "array", "items": {"$ref": "#/definitions/power_stack"}}
+      }
+    },
+    "slot_name_manifest_entry": {
+      "type": "object",
+      "required": ["enemy_index", "monster_id", "slot_name_source"],
+      "properties": {
+        "enemy_index": {"type": "integer"},
+        "monster_id": {"type": "string"},
+        "slot_name": {"type": ["string", "null"]},
+        "slot_name_source": {
+          "type": "string",
+          "enum": ["source_history", "encounter_definition", "inferred_from_order", "unavailable"]
+        },
+        "slot_name_confidence": {"type": "string"}
+      }
+    }
+  }
+}

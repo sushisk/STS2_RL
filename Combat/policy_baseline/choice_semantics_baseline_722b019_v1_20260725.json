@@ -1,0 +1,85 @@
+{
+  "baseline_id": "choice_semantics_baseline_722b019_v1_20260725",
+  "recorded_on": "2026-07-25",
+  "purpose": "Formal adoption record: Emulator commit 722b019 is now the fixed baseline for Choice teacher-data generation. Supersedes choice_semantics_provisional_status_v1_20260724.json's PROVISIONAL label for the same audited choice population - does NOT overwrite it or choice_semantics_baseline_v1_20260724.json (both kept as history, per instruction '旧0d16130は履歴として保持し、上書きしない').",
+  "supersedes_provisional_status": "Combat/policy_baseline/choice_semantics_provisional_status_v1_20260724.json",
+  "history_kept_unmodified": [
+    "Combat/policy_baseline/baseline_v1_20260724.json (0d16130-era Policy/Value online-eval baseline)",
+    "Combat/policy_baseline/choice_semantics_baseline_v1_20260724.json (0d16130-era Choice Semantics code/lookup baseline)",
+    "Combat/policy_baseline/choice_semantics_provisional_status_v1_20260724.json (0d16130-era provisional audit numbers)"
+  ],
+  "emulator": {
+    "commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "commit_short": "722b019",
+    "sts2emulator_dll_sha256": "E3C3D26D7499E93E89F2718CCB51E18A2D66559021BBB5CDCA33980BB644C036",
+    "sts2imported_stage1_dll_sha256": "C176109AA6C9887057C09E02245EBEDAAF476FB6E604267D36E787BD3C055900",
+    "dll_path": "C:\\STS2_Emulator\\Sts2Emulator.Cli\\bin\\Debug\\net8.0\\Sts2Emulator.dll",
+    "verified_live_on": "2026-07-25",
+    "verification_method": "Re-hashed the currently-loaded DLL and re-read git HEAD in C:\\STS2_Emulator immediately before this baseline record and again before Choice teacher-data generation; both matched the user-supplied 722b019 values exactly (case-insensitive hash compare)."
+  },
+  "adoption_report": "Outputs/reports/rl_choice_semantics_722b019_adoption_report_20260724.md",
+  "reverification_manifest": {
+    "file": "Combat/evaluation/online_eval/choice_semantics_reverification_manifest.jsonl",
+    "scenario_count": 41
+  },
+  "reverification_analysis": "Combat/evaluation/online_eval/reverification_722b019_analysis.json",
+  "choice_semantics_lookup": {
+    "file": "Common/schemas/choice_semantics_lookup.v1.json",
+    "table_version": "choice_semantics.v1",
+    "sha256": "5e7d260f076047b6d0ee02eb79fcd57a06067be49c923621e84ec0df06df8d44"
+  },
+  "choice_semantics_schema": {
+    "file": "Common/schemas/choice_semantics_schema.json",
+    "sha256": "0b101edd3a7e5ddcac150eab40e03ca7cb9811f7c06bd76ad53f2f834d1b9d4d"
+  },
+  "origin_type_alias_lookup": {
+    "file": "Common/schemas/choice_semantics_origin_type_aliases.v1.json",
+    "table_version": "choice_semantics_origin_type_aliases.v1",
+    "sha256": "a456f0a235c84c2ee815367593c479fb5ed8479916ad4257a55b2d9ea1a33814",
+    "entry_count": 7
+  },
+  "code": {
+    "file": "Combat/choice_semantics.py",
+    "note": "unchanged since choice_semantics_baseline_v1_20260724.json - the 722b019 fix required no RL-side rule/code change; CHOICE_TYPE_RULES/lookup/alias table are identical to the 0d16130-era baseline. See 'audit_correction' below for what changed underneath (Emulator-side choiceType mislabel), not on this side."
+  },
+  "tests": {
+    "file": "Combat/tests/test_choice_semantics.py",
+    "result": "20/20 passed (unchanged from choice_semantics_baseline_v1_20260724.json - no test changes needed for 722b019 adoption)"
+  },
+  "reverification_results_summary": {
+    "gates": "illegal=0, exception=0, mapping_mismatch=0 (before AND after)",
+    "scenario_level_diffs": 0,
+    "choice_level_diffs": 13,
+    "diff_classification": {
+      "expected_choice_type_fix": 13,
+      "unintended_semantic_change": 0,
+      "unintended_action_change": 0,
+      "unintended_state_change": 0,
+      "unresolved": 0,
+      "expected_origin_fix": 0,
+      "known_reset_gambling_chip_null": 0
+    },
+    "determinism": "254/254 choice decisions identical across two independent AFTER runs",
+    "semantic_mismatch": "0 in both BEFORE and AFTER"
+  },
+  "audit_correction": {
+    "summary": "The 10 rows the 0d16130-era audit flagged as originValidationStatus=suspected_context_leak (card:GUARDS x6, potion:POWER_POTION x2, potion:SKILL_POTION x2, across scenarios 1934-19/7413-9/7551-16) were NOT a raw origin-context leak. Root cause confirmed via 722b019's diff: Emulator was mislabeling pendingChoice.choiceType as 'GamblingChipDiscard' for these genuinely-unrelated GUARDS/POWER_POTION/SKILL_POTION choices, while origin (originEntityType/originEntityId) was correct all along. RL-side CHOICE_TYPE_RULES's Tier-1 priority trusted that (mislabeled) choiceType and forced an incorrect passthrough/GAMBLING_CHIP result onto what were really GUARDS'/POWER_POTION's/SKILL_POTION's own choices.",
+    "resolved_by_722b019": "Emulator now reports the correct choiceType for these cases; RL-side CHOICE_TYPE_RULES (unchanged) then naturally falls through to normal origin-based resolution (Tier 2/3), which was already correct.",
+    "also_resolved": "3 ToolboxChooseCard rows that had likewise been mislabeled and were relabeled to their correct (non-special) choiceType under 722b019 - same root cause, same fix, no RL-side change required.",
+    "old_suspect_10_status_after_722b019": "0 remain Suspect; all 10 correctly re-classified (6 GUARDS + 2 POWER_POTION + 2 SKILL_POTION -> Origin-dependent, resolved via correct origin under the unchanged lookup rules).",
+    "not_reclassified_as_valid_by_relabeling_alone": "Gambling Chip's own genuine reset-time null-origin rows (choiceType=GamblingChipDiscard, origin=None, decision_index=0) are unaffected by this fix and remain originValidationStatus=missing - see eligibility note below; this is expected/benign, not a leak.",
+    "detailed_writeup": "Outputs/reports/rl_choice_semantics_722b019_adoption_report_20260724.md section on diff classification"
+  },
+  "origin_audit_after_722b019": {
+    "n": 247,
+    "risk_category_counts": {"Safe": 111, "Origin-dependent": 136, "Suspect": 0},
+    "provisional_eligible": 247,
+    "provisional_excluded": 0,
+    "note": "provisional_eligible here is still keyed to the 275-choice Stage B population re-resolved offline against 722b019's corrected facts, not yet the full teacher-data generation population (Choiceデータ生成 section below is a separate, larger extraction)."
+  },
+  "gambling_chip_reset_null_eligibility": {
+    "rule": "choiceType=GamblingChipDiscard with origin=null is decision_index=0 (Reset-time) is NOT excluded from training eligibility. choiceType alone uniquely determines the meaning (operationMode=passthrough, exceptionEntityKey=relic:GAMBLING_CHIP) independent of origin, per CHOICE_TYPE_RULES's Tier-1 priority. originValidationStatus=missing is tracked for quality-audit visibility only and does not block eligibility for this specific choiceType.",
+    "confirmed_reset_time_null_count_in_41_scenario_reverification": 36
+  },
+  "status": "ADOPTED. Emulator commit 722b019 is now the fixed baseline for Choice teacher-data generation (see choice_teacher_data_generation_v1_20260725.json for the generation run built on top of this baseline). This file is the authoritative baseline record for that generation; earlier 0d16130-era baseline/provisional files are retained unmodified as history only."
+}

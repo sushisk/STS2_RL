@@ -1,0 +1,1092 @@
+{
+  "schema_ref": "sts2_rl:choice_semantics_schema:v1",
+  "table_version": "choice_semantics.v1",
+  "generated": "2026-07-24",
+  "generated_by": "Choice Semantics / evaluation-analysis role, checkpoint 1 - see Outputs/reports/choice_semantics_analysis_report.md",
+  "coverage_note": "Populated from a full grep census of STS2_Emulator/Sts2Emulator/Imported/Source for CardSelectCmd.From* call sites (122 call sites / 113 files total). Six generic __GENERIC_*__ rows cover the 73 call sites Emulator itself already fully resolves (prompt-key or method-name driven - discard/exhaust-canonical/upgrade/transform/enchant/remove). One __EVENT_MODEL_GENERIC_REWARD_GRID__ row covers the 31 non-combat Event call sites at representative granularity. The remaining rows are the entity-specific hardcoded_entity_rule cases where Emulator's own choiceOperation/destinationZone/originEntity stayed unknown/null/unresolved and this table supplies the real semantics from direct source reading. combat_scope=combat rows are candidates for Policy's per-card lookup; combat_scope=non_combat_deck rows are the separate Deck-choice bucket per the analysis brief.",
+  "entries": [
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": null,
+      "origin_entity_id": "__GENERIC_DISCARD__",
+      "combat_scope": "either",
+      "source_zone": "hand",
+      "normalized_choice_operation": "discard",
+      "destination_zone": "discard_pile",
+      "semantic_confidence": "prompt_confirmed",
+      "semantic_source": "prompt_confirmed",
+      "evidence": {
+        "emulator_choice_operation": "discard",
+        "emulator_destination_zone": "discard_pile",
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHandForDiscard / FromHand+DiscardSelectionPrompt",
+        "prompt_is_canonical": true
+      },
+      "notes": "Applies to every card whose OnPlay calls FromHandForDiscard, or bare FromHand with CardSelectorPrefs.DiscardSelectionPrompt (e.g. SURVIVOR, GAMBLERS_BREW potion). Fully resolved by Emulator; no RL-side rule needed. Placeholder key, not a real entity id - one row stands in for all ~10 call sites of this shape."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": null,
+      "origin_entity_id": "__GENERIC_EXHAUST_CANONICAL_PROMPT__",
+      "combat_scope": "either",
+      "source_zone": "hand",
+      "normalized_choice_operation": "exhaust",
+      "destination_zone": "exhaust_pile",
+      "semantic_confidence": "prompt_confirmed",
+      "semantic_source": "prompt_confirmed",
+      "evidence": {
+        "emulator_choice_operation": "exhaust",
+        "emulator_destination_zone": "exhaust_pile",
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand+ExhaustSelectionPrompt",
+        "prompt_is_canonical": true
+      },
+      "notes": "BURNING_PACT-shaped calls only (bare FromHand using the shared ExhaustSelectionPrompt, not a card/potion-specific auto-generated prompt). Contrast with PURITY/ASHWATER below, which are real exhausts that Emulator itself still reports as 'unknown' because they use their own SelectionScreenPrompt text instead."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": null,
+      "origin_entity_id": "__GENERIC_UPGRADE__",
+      "combat_scope": "either",
+      "source_zone": "hand_or_deck",
+      "normalized_choice_operation": "upgrade",
+      "destination_zone": null,
+      "semantic_confidence": "prompt_confirmed",
+      "semantic_source": "prompt_confirmed",
+      "evidence": {
+        "emulator_choice_operation": "upgrade",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHandForUpgrade / FromDeckForUpgrade",
+        "prompt_is_canonical": true
+      },
+      "notes": "ARMAMENTS (hand, combat) and every SmithRestSiteOption-style deck upgrade (non-combat) reduce to this. Card stays in its zone, just becomes upgraded; no destination move."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": null,
+      "origin_entity_id": "__GENERIC_TRANSFORM__",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "deck",
+      "normalized_choice_operation": "transform",
+      "destination_zone": null,
+      "semantic_confidence": "prompt_confirmed",
+      "semantic_source": "prompt_confirmed",
+      "evidence": {
+        "emulator_choice_operation": "transform",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromDeckForTransformation",
+        "prompt_is_canonical": true
+      },
+      "notes": "Deck-level transform (card replaced by a random same-rarity card), e.g. Purge-style rest-site and event effects. Non-combat deck bucket per the analysis brief - not a combat Policy target. Distinct from GUARDS below, which replaces the card with one SPECIFIC named card, not a random one."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": null,
+      "origin_entity_id": "__GENERIC_ENCHANT__",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "deck",
+      "normalized_choice_operation": "enchant",
+      "destination_zone": null,
+      "semantic_confidence": "prompt_confirmed",
+      "semantic_source": "prompt_confirmed",
+      "evidence": {
+        "emulator_choice_operation": "enchant",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromDeckForEnchantment",
+        "prompt_is_canonical": true
+      },
+      "notes": "Deck-level enchantment application. Non-combat deck bucket."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": null,
+      "origin_entity_id": "__GENERIC_REMOVE__",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "deck",
+      "normalized_choice_operation": "remove",
+      "destination_zone": null,
+      "semantic_confidence": "prompt_confirmed",
+      "semantic_source": "prompt_confirmed",
+      "evidence": {
+        "emulator_choice_operation": "remove",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromDeckForRemoval",
+        "prompt_is_canonical": true
+      },
+      "notes": "Deck-level card removal (CookRestSiteOption and others). Non-combat deck bucket."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "SURVIVOR",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "discard",
+      "destination_zone": "discard_pile",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "emulator_fact",
+      "evidence": {
+        "emulator_choice_operation": "discard",
+        "emulator_destination_zone": "discard_pile",
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHandForDiscard",
+        "prompt_is_canonical": true
+      },
+      "notes": "Ground truth via STS2_Emulator/scripts/smoke_choice_context.py."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "BURNING_PACT",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "exhaust",
+      "destination_zone": "exhaust_pile",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "emulator_fact",
+      "evidence": {
+        "emulator_choice_operation": "exhaust",
+        "emulator_destination_zone": "exhaust_pile",
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare) + ExhaustSelectionPrompt",
+        "prompt_is_canonical": true
+      },
+      "notes": "Ground truth via smoke_choice_context.py. Also the nested-reattribution example: when auto-played by DECISIONS_DECISIONS, origin correctly re-attributes to BURNING_PACT, not the outer card."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "ARMAMENTS",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "upgrade",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "emulator_fact",
+      "evidence": {
+        "emulator_choice_operation": "upgrade",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHandForUpgrade",
+        "prompt_is_canonical": true
+      },
+      "notes": "Ground truth via smoke_choice_context.py."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "HEADBUTT",
+      "combat_scope": "combat",
+      "source_zone": "discard_pile",
+      "normalized_choice_operation": "retrieve_to_draw_pile_top",
+      "destination_zone": "draw_pile_top",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Ground truth via smoke_choice_context.py + direct source read. Emulator reports choiceOperation=unknown/destinationZone=null; real destination is draw pile top."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "HOLOGRAM",
+      "combat_scope": "combat",
+      "source_zone": "discard_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "The exact motivating example from the original spec. Ground truth via smoke_choice_context.py."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "GUARDS",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "transform_to_specific_card",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, 0..999999999)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Each selected hand card is replaced by a newly created MINION_SACRIFICE, not upgraded/randomly transformed. Distinct normalized_choice_operation from __GENERIC_TRANSFORM__."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "DECISIONS_DECISIONS",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "select_to_replay",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Selected Skill card is not moved; CardCmd.AutoPlay()'s it up to Repeat times. Nested choices raised by the auto-played card (e.g. BURNING_PACT) correctly re-attribute origin to that inner card, confirmed live."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "CHOICES_PARADOX",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromSimpleGrid",
+        "prompt_is_canonical": false
+      },
+      "notes": "Turn-1-only, AfterPlayerTurnStart. Ground truth via smoke_choice_context.py (choiceType=ChoicesParadoxAddToHand, a supported start-of-combat PendingChoice type)."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "power",
+      "origin_entity_id": "FOREGONE_CONCLUSION_POWER",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Fires once on BeforeHandDraw then removes itself. Ground truth via smoke_choice_context.py."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "ABUNDANCE",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 Power cards from pool (upgraded copy if Abundance itself upgraded); chosen one is SetToFreeThisTurn + added to hand."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "COSMIC_INDIFFERENCE",
+      "combat_scope": "combat",
+      "source_zone": "discard_pile",
+      "normalized_choice_operation": "retrieve_to_draw_pile_top",
+      "destination_zone": "draw_pile_top",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Only re-adds to draw pile top if the picked card's Pile.Type is Draw or Discard at resolution time (defensive check in source); source zone offered is always discard_pile."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "DISCOVERY",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 cards of any type from full pool, canSkip=true."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "DREDGE",
+      "combat_scope": "combat",
+      "source_zone": "discard_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Multi-select up to min(Cards, remaining hand space)."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "DUAL_WIELD",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "clone_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Selected card (Attack or Power) is NOT moved; N clones of it are added to hand."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "GLIMMER",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "return_to_draw_pile_top",
+      "destination_zone": "draw_pile_top",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Draws Cards first, then selects PutBack of them from hand to return to draw pile top."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "GRAVEBLAST",
+      "combat_scope": "combat",
+      "source_zone": "discard_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": ""
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "HAND_TRICK",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "apply_effect_in_place",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Selected Skill card (not already Sly this turn) gains single-turn Sly; card stays in hand."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "HEIRLOOM_HAMMER",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "clone_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Filter: colorless cards only. Selected card not moved; Repeat clones added to hand."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "NEOWS_FURY",
+      "combat_scope": "combat",
+      "source_zone": "discard_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Multi-select 0..min(Cards, remaining hand space)."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "NIGHTMARE",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "select_for_power_association",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Selected card is NOT moved; becomes NIGHTMARE_POWER's associatedCard (see Data Contract's 'associatedCard inside powers' optional field, and Combat/data/README.md's player_powers[].associated_card preservation requirement)."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "PHOTON_CUT",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "return_to_draw_pile_top",
+      "destination_zone": "draw_pile_top",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Draws Cards first, then selects PutBack of them from hand to return to draw pile top."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "PURITY",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "exhaust",
+      "destination_zone": "exhaust_pile",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Real operation IS exhaust (CardCmd.Exhaust per selection), but Emulator reports 'unknown' because the prompt is CardModel.SelectionScreenPrompt (per-card auto text), not the shared CardSelectorPrefs.ExhaustSelectionPrompt. Key counter-example proving prompt-key text alone is insufficient; method+source-code reading was required."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "QUASAR",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 Colorless cards, canSkip=true, upgraded if Quasar itself is upgraded."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "SCULPTING_STRIKE",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "apply_effect_in_place",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Selected non-Ethereal hand card gains Ethereal; card stays in hand."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "SECRET_TECHNIQUE",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Filter: Skill cards only."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "SECRET_WEAPON",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Filter: Attack cards only."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "SEEKER_STRIKE",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Offered options are a random shuffled subset (Cards count) of the draw pile, not the whole pile."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "SNAP",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "apply_effect_in_place",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Selected non-Retain hand card gains Retain; card stays in hand."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "SPLASH",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 Attack cards from OTHER characters' pools (cross-character), canSkip=true."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "THINKING_AHEAD",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "return_to_draw_pile_top",
+      "destination_zone": "draw_pile_top",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Draws Cards first, then selects exactly 1 of them from hand to return to draw pile top."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "TRANSFIGURE",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "apply_effect_in_place",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Selected hand card gets a PERMANENT (this-combat) energy-cost +1 and replay-count +1; card stays in hand. Distinct from the this-turn-only effects (SNAP/SCULPTING_STRIKE/HAND_TRICK)."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "TUTOR",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "inferred",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "MultiplayerConstraint=MultiplayerOnly, TargetType=AnyAlly - not reachable in the current single-player RL scenario pipeline; catalogued for completeness only."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "card",
+      "origin_entity_id": "WISH",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "The card referenced as a WISH ActionContinuation example in API_REFERENCE.md 3.3."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "monster",
+      "origin_entity_id": "KNOWLEDGE_DEMON",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "enemy_forced_deck_addition",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": false,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Enemy-move-triggered (Curse of Knowledge), not player-card/relic/power-triggered - its own category. Uses a FRESH BlockingPlayerChoiceContext (not the ambient one), so originEntityType/Id do NOT resolve at the Emulator layer even though the call is FromChooseACardScreen (which normally does resolve via context). Forces a choice between DISINTEGRATION and one of MIND_ROT/SLOTH/WASTE_AWAY; the chosen card's own IChoosable.OnChosen() decides its real destination/effect, which can differ per card and is not observable generically."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "ASHWATER",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "exhaust",
+      "destination_zone": "exhaust_pile",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, 0..N, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Same Emulator-reports-unknown-despite-being-exhaust situation as PURITY, via potion's own SelectionScreenPrompt."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "ATTACK_POTION",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 Attack cards from the player's own pool, canSkip=true."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "COLORLESS_POTION",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 Colorless cards, canSkip=true."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "DROPLET_OF_PRECOGNITION",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": ""
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "LIQUID_MEMORIES",
+      "combat_scope": "combat",
+      "source_zone": "discard_pile",
+      "normalized_choice_operation": "retrieve_to_hand_free",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Retrieved card is also SetToFreeThisTurn - richer than plain retrieve_to_hand."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "POWER_POTION",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 Power cards from the player's own pool, canSkip=true."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "SKILL_POTION",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Generates 3 Skill cards from the player's own pool, canSkip=true."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "potion",
+      "origin_entity_id": "TOUCH_OF_INSANITY",
+      "combat_scope": "combat",
+      "source_zone": "hand",
+      "normalized_choice_operation": "apply_effect_in_place",
+      "destination_zone": null,
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromHand (bare, source=this)",
+        "prompt_is_canonical": false
+      },
+      "notes": "Filter: cards that cost energy/stars. Selected card becomes free this combat; not moved."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "power",
+      "origin_entity_id": "STRATAGEM_POWER",
+      "combat_scope": "combat",
+      "source_zone": "draw_pile",
+      "normalized_choice_operation": "retrieve_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": "unknown",
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromCombatPile",
+        "prompt_is_canonical": false
+      },
+      "notes": "Triggers on AfterShuffle (does not remove itself, unlike FOREGONE_CONCLUSION_POWER); multi-select up to power Amount."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "DOLLYS_MIRROR",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "deck",
+      "normalized_choice_operation": "clone_to_deck",
+      "destination_zone": "deck",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": false,
+        "card_select_cmd_method": "FromDeckGeneric",
+        "prompt_is_canonical": false
+      },
+      "notes": "AfterObtained() (relic pickup, non-combat). API_REFERENCE.md's own named example of an originEntity-null case: no PlayerChoiceContext parameter exists on FromDeckGeneric at all."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "HEFTY_TABLET",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_deck",
+      "destination_zone": "deck",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "AfterObtained(). Generates 3 Rare-rarity reward cards; chosen one (or none, canSkip) added to deck. An INJURY curse card is unconditionally added to deck regardless of choice."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "LEAD_PAPERWEIGHT",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_deck",
+      "destination_zone": "deck",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "AfterObtained(). Generates 2 Colorless reward cards, canSkip."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "MASSIVE_SCROLL",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_deck",
+      "destination_zone": "deck",
+      "semantic_confidence": "inferred",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "AfterObtained(), IsAllowed requires >1 players - multiplayer-only, not reachable in current single-player RL scope; catalogued for completeness only."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "SCROLL_BOXES",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "bundle_select",
+      "destination_zone": "deck",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseABundleScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "AfterObtained(). Distinct UI pattern from every other entry: chooses among BUNDLES of 3 cards (not individual cards); ALL cards in the chosen bundle are added to deck. Not representable by a single card_id choice_card action the way other rows are - flag to Emulator/Training if this ever needs first-class support."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "SEA_GLASS",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_deck",
+      "destination_zone": "deck",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromSimpleGridForRewards",
+        "prompt_is_canonical": false
+      },
+      "notes": "AfterObtained(). Generates cardCount*3 reward cards (Common+Uncommon+Rare mix tied to a specific character); multi-select 0..all added to deck."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": "relic",
+      "origin_entity_id": "TOOLBOX",
+      "combat_scope": "combat",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_hand",
+      "destination_zone": "hand",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromChooseACardScreen",
+        "prompt_is_canonical": false
+      },
+      "notes": "Combat-triggered (BeforeHandDraw, turn 1 only) - unlike the other relic rows above, which are AfterObtained()/pickup-time. Matches the 'ToolboxChooseCard' supported start-of-combat PendingChoice type named in API_REFERENCE.md 3.4."
+    },
+    {
+      "schema_version": "choice_semantics.v1",
+      "origin_entity_type": null,
+      "origin_entity_id": "__EVENT_MODEL_GENERIC_REWARD_GRID__",
+      "combat_scope": "non_combat_deck",
+      "source_zone": "freshly_generated",
+      "normalized_choice_operation": "add_generated_to_deck",
+      "destination_zone": "deck",
+      "semantic_confidence": "confirmed",
+      "semantic_source": "hardcoded_entity_rule",
+      "evidence": {
+        "emulator_choice_operation": null,
+        "emulator_destination_zone": null,
+        "emulator_origin_resolvable": true,
+        "card_select_cmd_method": "FromSimpleGridForRewards",
+        "prompt_is_canonical": false
+      },
+      "notes": "EventModel.SelectCardsToAddToDeckFromGrid() - a shared helper many concrete Event subclasses call (e.g. Neow options). SealedDeck (Neow modifier) uses the same shape directly. All ~31 Events/*.cs call sites found in this census follow one of the patterns already covered by this table's rest_site/relic-pickup rows (add_generated_to_deck, __GENERIC_REMOVE__/__GENERIC_UPGRADE__/__GENERIC_TRANSFORM__/__GENERIC_ENCHANT__ for rest-site-shaped card-pool operations) or bundle_select; none introduce a new operation shape beyond what's listed here. Full per-event enumeration deferred - out of scope for combat Policy per the analysis brief, and lower priority than the combat-scope rows above."
+    }
+  ]
+}

@@ -1,0 +1,850 @@
+{
+  "provenance": {
+    "before_emulator_commit": "0d1613050e3d6396004d328ba77f72177b6e872d",
+    "after_emulator_commit": "722b019051e6f7ea368fef488abcc6451d6c9d47",
+    "before_dir": "C:\\STS2_RL\\Combat\\evaluation\\reports\\choice_reverification_BEFORE_20260724",
+    "after_dir": "C:\\STS2_RL\\Combat\\evaluation\\reports\\choice_reverification_AFTER_722b019",
+    "choice_semantics_provenance": {
+      "lookupVersion": "choice_semantics.v1",
+      "lookupSha256": "5e7d260f076047b6d0ee02eb79fcd57a06067be49c923621e84ec0df06df8d44",
+      "schemaSha256": "0b101edd3a7e5ddcac150eab40e03ca7cb9811f7c06bd76ad53f2f834d1b9d4d",
+      "schemaPath": "C:\\STS2_RL\\Common\\schemas\\choice_semantics_schema.json",
+      "lookupPath": "C:\\STS2_RL\\Common\\schemas\\choice_semantics_lookup.v1.json",
+      "entryCount": 57,
+      "loadError": null,
+      "originAliasesVersion": "choice_semantics_origin_type_aliases.v1",
+      "originAliasesSha256": "a456f0a235c84c2ee815367593c479fb5ed8479916ad4257a55b2d9ea1a33814",
+      "originAliasesPath": "C:\\STS2_RL\\Common\\schemas\\choice_semantics_origin_type_aliases.v1.json",
+      "originAliasesLoadError": null
+    }
+  },
+  "gates": {
+    "before": {
+      "illegal_action": 0,
+      "exception": 0,
+      "mapping_mismatch": 0,
+      "ok_scenarios": 41,
+      "quarantined": 0
+    },
+    "after": {
+      "illegal_action": 0,
+      "exception": 0,
+      "mapping_mismatch": 0,
+      "ok_scenarios": 41,
+      "quarantined": 0
+    }
+  },
+  "scenario_diffs": {
+    "real": [],
+    "synthetic": []
+  },
+  "choice_count_diffs": {
+    "real": [],
+    "synthetic": []
+  },
+  "diff_category_counts": {
+    "real": {
+      "expected_choice_type_fix": 13
+    },
+    "synthetic": {}
+  },
+  "diff_records": {
+    "real": [
+      {
+        "scenario_id": "1175-20",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 0,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'ToolboxChooseCard' to 'Unsupported'; origin before=ColorlessPotion/COLORLESS_POTION, after=ColorlessPotion/COLORLESS_POTION; origin_unchanged=True, semantic_unchanged=True",
+        "before": {
+          "originEntityType": "ColorlessPotion",
+          "originEntityId": "COLORLESS_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "ToolboxChooseCard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "ColorlessPotion",
+          "originEntityId": "COLORLESS_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "COLORLESS_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        },
+        "after_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "COLORLESS_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1175-20",
+        "arm": "policy",
+        "source": "action_continuation",
+        "sequence_index": 0,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'ToolboxChooseCard' to 'Unsupported'; origin before=ColorlessPotion/COLORLESS_POTION, after=ColorlessPotion/COLORLESS_POTION; origin_unchanged=True, semantic_unchanged=True",
+        "before": {
+          "originEntityType": "ColorlessPotion",
+          "originEntityId": "COLORLESS_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "ToolboxChooseCard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "ColorlessPotion",
+          "originEntityId": "COLORLESS_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "COLORLESS_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        },
+        "after_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "COLORLESS_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1175-20",
+        "arm": "policy",
+        "source": "action_continuation",
+        "sequence_index": 2,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'ToolboxChooseCard' to 'Unsupported'; origin before=card/DISCOVERY, after=card/DISCOVERY; origin_unchanged=True, semantic_unchanged=True",
+        "before": {
+          "originEntityType": "card",
+          "originEntityId": "DISCOVERY",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "ToolboxChooseCard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "card",
+          "originEntityId": "DISCOVERY",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "DISCOVERY",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        },
+        "after_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "DISCOVERY",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1934-19",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 5,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=card/GUARDS, after=card/GUARDS; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": "transform_to_specific_card",
+          "exceptionEntityKey": "card:GUARDS",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "GUARDS",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1934-19",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 6,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=card/GUARDS, after=card/GUARDS; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": "transform_to_specific_card",
+          "exceptionEntityKey": "card:GUARDS",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "GUARDS",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1934-19",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 7,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=card/GUARDS, after=card/GUARDS; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": "transform_to_specific_card",
+          "exceptionEntityKey": "card:GUARDS",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "GUARDS",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1934-19",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 8,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=card/GUARDS, after=card/GUARDS; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": "transform_to_specific_card",
+          "exceptionEntityKey": "card:GUARDS",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "GUARDS",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1934-19",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 9,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=card/GUARDS, after=card/GUARDS; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": "hand",
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": "transform_to_specific_card",
+          "exceptionEntityKey": "card:GUARDS",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "GUARDS",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "1934-19",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 10,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=card/GUARDS, after=card/GUARDS; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "card",
+          "originEntityId": "GUARDS",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": "transform_to_specific_card",
+          "exceptionEntityKey": "card:GUARDS",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "GUARDS",
+          "normalizedOriginEntityType": "card",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "7413-9",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 5,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=SkillPotion/SKILL_POTION, after=SkillPotion/SKILL_POTION; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "SkillPotion",
+          "originEntityId": "SKILL_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "SkillPotion",
+          "originEntityId": "SKILL_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "SKILL_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "7413-9",
+        "arm": "policy",
+        "source": "action_continuation",
+        "sequence_index": 5,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=SkillPotion/SKILL_POTION, after=SkillPotion/SKILL_POTION; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "SkillPotion",
+          "originEntityId": "SKILL_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "SkillPotion",
+          "originEntityId": "SKILL_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "SKILL_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "7551-16",
+        "arm": "heuristic",
+        "source": "action_continuation",
+        "sequence_index": 5,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=PowerPotion/POWER_POTION, after=PowerPotion/POWER_POTION; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "PowerPotion",
+          "originEntityId": "POWER_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "PowerPotion",
+          "originEntityId": "POWER_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "POWER_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        }
+      },
+      {
+        "scenario_id": "7551-16",
+        "arm": "policy",
+        "source": "action_continuation",
+        "sequence_index": 5,
+        "category": "expected_choice_type_fix",
+        "note": "choiceType corrected from 'GamblingChipDiscard' to 'Unsupported'; origin before=PowerPotion/POWER_POTION, after=PowerPotion/POWER_POTION; origin_unchanged=True, semantic_unchanged=False",
+        "before": {
+          "originEntityType": "PowerPotion",
+          "originEntityId": "POWER_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "GamblingChipDiscard",
+          "remainingSelectCount": 0
+        },
+        "after": {
+          "originEntityType": "PowerPotion",
+          "originEntityId": "POWER_POTION",
+          "sourceZone": null,
+          "choiceOperation": "unknown",
+          "destinationZone": null,
+          "choiceType": "Unsupported",
+          "remainingSelectCount": 0
+        },
+        "before_resolved": {
+          "operationMode": "passthrough",
+          "normalizedChoiceOperation": null,
+          "exceptionEntityKey": "relic:GAMBLING_CHIP",
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_choice_type_rule",
+          "matchedRuleId": "GamblingChipDiscard",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": "suspected_context_leak"
+        },
+        "after_resolved": {
+          "operationMode": "normalized",
+          "normalizedChoiceOperation": "add_generated_to_hand",
+          "exceptionEntityKey": null,
+          "semanticSource": "hardcoded_entity_rule",
+          "lookupStatus": "resolved_lookup",
+          "matchedRuleId": "POWER_POTION",
+          "normalizedOriginEntityType": "potion",
+          "originValidationStatus": null
+        }
+      }
+    ],
+    "synthetic": []
+  },
+  "semantic_mismatch": {
+    "before": 0,
+    "after": 0
+  },
+  "determinism": {
+    "total_compared": 254,
+    "mismatches": 0,
+    "deterministic": true
+  },
+  "origin_audit": {
+    "before": {
+      "n": 247,
+      "risk_category_counts": {
+        "Origin-dependent": 126,
+        "Safe": 111,
+        "Suspect": 10
+      },
+      "provisional_eligible": 237,
+      "provisional_excluded": 10,
+      "exclusion_reason_counts": {
+        "origin_validation_suspected_context_leak": 10
+      }
+    },
+    "after": {
+      "n": 247,
+      "risk_category_counts": {
+        "Origin-dependent": 136,
+        "Safe": 111
+      },
+      "provisional_eligible": 247,
+      "provisional_excluded": 0,
+      "exclusion_reason_counts": {}
+    }
+  },
+  "suspect_10_tracking": [
+    {
+      "scenario_id": "1934-19",
+      "arm": "heuristic",
+      "decision_index": 24,
+      "before_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "1934-19",
+      "arm": "heuristic",
+      "decision_index": 24,
+      "before_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "1934-19",
+      "arm": "heuristic",
+      "decision_index": 24,
+      "before_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "1934-19",
+      "arm": "heuristic",
+      "decision_index": 24,
+      "before_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "1934-19",
+      "arm": "heuristic",
+      "decision_index": 24,
+      "before_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "1934-19",
+      "arm": "heuristic",
+      "decision_index": 24,
+      "before_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "card",
+        "GUARDS"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "7413-9",
+      "arm": "policy",
+      "decision_index": 12,
+      "before_origin": [
+        "SkillPotion",
+        "SKILL_POTION"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "SkillPotion",
+        "SKILL_POTION"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "7413-9",
+      "arm": "heuristic",
+      "decision_index": 11,
+      "before_origin": [
+        "SkillPotion",
+        "SKILL_POTION"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "SkillPotion",
+        "SKILL_POTION"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "7551-16",
+      "arm": "policy",
+      "decision_index": 4,
+      "before_origin": [
+        "PowerPotion",
+        "POWER_POTION"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "PowerPotion",
+        "POWER_POTION"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    },
+    {
+      "scenario_id": "7551-16",
+      "arm": "heuristic",
+      "decision_index": 4,
+      "before_origin": [
+        "PowerPotion",
+        "POWER_POTION"
+      ],
+      "before_choiceType": "GamblingChipDiscard",
+      "after_origin": [
+        "PowerPotion",
+        "POWER_POTION"
+      ],
+      "after_choiceType": "Unsupported",
+      "after_originValidationStatus": null
+    }
+  ]
+}

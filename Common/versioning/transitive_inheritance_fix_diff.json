@@ -1,0 +1,20 @@
+{
+  "cards": {
+    "newly_resolved": [],
+    "no_longer_resolved": []
+  },
+  "monsters": {
+    "newly_resolved": [
+      "MYSTERIOUS_KNIGHT"
+    ],
+    "no_longer_resolved": []
+  },
+  "powers": {
+    "newly_resolved": [],
+    "no_longer_resolved": []
+  },
+  "relics": {
+    "newly_resolved": [],
+    "no_longer_resolved": []
+  }
+}

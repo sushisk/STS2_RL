@@ -1,0 +1,11 @@
+diff --git a/Sts2Emulator/Imported/Source/MegaCrit.Sts2.Core.Commands/OrbCmd.cs b/Sts2Emulator/Imported/Source/MegaCrit.Sts2.Core.Commands/OrbCmd.cs
+--- a/Sts2Emulator/Imported/Source/MegaCrit.Sts2.Core.Commands/OrbCmd.cs
++++ b/Sts2Emulator/Imported/Source/MegaCrit.Sts2.Core.Commands/OrbCmd.cs
+@@
+-		NCombatRoom.Instance?.GetCreatureNode(player.Creature).OrbManager?.AddSlotAnim(amount);
++		// Slot-capacity is real combat state and must update even in headless/TestMode restores where no
++		// creature node (and therefore no OrbManager visuals) exists.
++		NCombatRoom.Instance?.GetCreatureNode(player.Creature)?.OrbManager?.AddSlotAnim(amount);
+@@
+-			NCombatRoom.Instance?.GetCreatureNode(player.Creature).OrbManager?.RemoveSlotAnim(amount);
++			NCombatRoom.Instance?.GetCreatureNode(player.Creature)?.OrbManager?.RemoveSlotAnim(amount);

@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sts2_rl:legal_action_schema:v1",
+  "title": "LegalAction",
+  "description": "One entry of the array STS2_Emulator's GameInstance.GetLegalActions()/ResetResult.LegalActions/StepResult.LegalActions returns, as converted to a plain dict by STS2_RL/Combat/emulator_bridge.py:legal_action_to_dict(). Source of truth: STS2_Emulator/Sts2Emulator/Dto/LegalAction.cs and GameInstance.cs's BuildLegalActions()/BuildTargetLegalActions()/BuildChoiceLegalActions(). Only IsAvailable==true actions are ever included (BuildLegalActions filters this before returning).",
+  "type": "object",
+  "required": ["action_id", "action_type", "label", "is_available", "parameters"],
+  "properties": {
+    "action_id": {
+      "type": "integer",
+      "description": "Index to pass back into GameInstance.Step(). 0 is always End Turn (ActionIds.EndTurn). Not stable across states - re-derive from a fresh legal_actions list every step, never cache an action_id across a state change."
+    },
+    "action_type": {
+      "type": "string",
+      "description": "Dispatch category. Combat-phase values seen in-source: 'system' (End Turn), 'card' (play a hand card), 'potion' (use a potion). Non-combat / mid-effect values also emitted by the same API for run-level decisions: 'choice_target' (resolve a pending AnyEnemy/etc. target), 'choice_card' (mid-effect card pick, e.g. Smith upgrade), 'choice_reward_card', 'choice_rest_option', 'choice_shop_leave', 'choice_shop_buy_relic', 'choice_event_option', 'choice_event_throw_potion'. This list is not exhaustive by construction (grep GameInstance.cs for `ActionType = \"` to refresh) - treat it as documentation, not a closed enum to validate against.",
+      "examples": ["system", "card", "potion", "choice_target", "choice_reward_card"]
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label. For 'card'/'potion' this is the raw entry id (e.g. 'STRIKE_IRONCLAD'), NOT a display string - see Common/ids for id->title lookups."
+    },
+    "is_available": {
+      "type": "boolean",
+      "description": "Always true in practice (BuildLegalActions filters unavailable actions out before returning) - kept for schema completeness / defensive checks."
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Shape depends on action_type. 'card': {cardId, cost, targetType}. 'potion': {potionId, potionSlot, targetType}. 'system' (End Turn): {} (empty). 'choice_target': {enemyIndex, hp, maxHp, block} - one entry per currently-alive targetable candidate. Other choice_* types carry their own parameter sets - inspect GameInstance.cs's corresponding Build*LegalActions method for the exact keys before consuming a new action_type.",
+      "properties": {
+        "cardId": {"type": "string", "description": "card actions only - raw card entry id, matches Common/ids/cards.json keys after normalization. To find this card instance's upgrade state, cross-reference combat_state_schema.json's state.hand[i] by hand position - this action's action_id (i+1) maps to hand index i - a bare cardId does not carry upgrade state itself."},
+        "cost": {"type": "integer", "description": "card actions only - energy cost with modifiers applied."},
+        "targetType": {"type": "string", "description": "card/potion actions - e.g. 'Self', 'SingleEnemy', 'AllEnemies', 'AnyEnemy'. Determines whether playing this action requires a follow-up 'choice_target' resolution."},
+        "potionId": {"type": "string", "description": "potion actions only - raw potion entry id."},
+        "potionSlot": {"type": "integer", "description": "potion actions only - index into the player's potion slots, matches state.potions[] index and CombatScenario's PotionScenario.Slot."},
+        "enemyIndex": {"type": ["integer", "null"], "description": "choice_target actions only - matches combat_state_schema.json's state.enemies[i].index from the SAME observation exactly (not this action's own action_id, which only indexes currently-alive candidates). Use this to resolve which state.enemies[] entry a target choice refers to within one decision, especially with duplicate monster types. Per combat_state_schema.json's 'index' caveat, this value is only meaningful relative to the observation it was offered alongside - do not carry it forward across a later step() once any enemy may have died since. Can be null in principle if the candidate creature is not found in combatState.Enemies (IndexOf returns -1 boxed as int, not actually observed in practice) - treat null defensively, do not assume non-null."},
+        "hp": {"type": "integer", "description": "choice_target actions only - the candidate's current HP, provided so a target can be scored without a separate state lookup."},
+        "maxHp": {"type": "integer", "description": "choice_target actions only."},
+        "block": {"type": "integer", "description": "choice_target actions only."}
+      }
+    }
+  }
+}

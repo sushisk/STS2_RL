@@ -1,0 +1,5502 @@
+{
+  "act:GLORY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Acts\\Glory.cs"
+  },
+  "act:HIVE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Acts\\Hive.cs"
+  },
+  "act:OVERGROWTH": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Acts\\Overgrowth.cs"
+  },
+  "act:UNDERDOCKS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Acts\\Underdocks.cs"
+  },
+  "card:ABRASIVE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Abrasive.cs"
+  },
+  "card:ABUNDANCE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Abundance.cs"
+  },
+  "card:ACCELERANT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Accelerant.cs"
+  },
+  "card:ACCURACY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Accuracy.cs"
+  },
+  "card:ACROBATICS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Acrobatics.cs"
+  },
+  "card:ADAPTIVE_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\AdaptiveStrike.cs"
+  },
+  "card:ADRENALINE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Adrenaline.cs"
+  },
+  "card:AFTERIMAGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Afterimage.cs"
+  },
+  "card:AFTERLIFE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Afterlife.cs"
+  },
+  "card:AGGRESSION": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Aggression.cs"
+  },
+  "card:ALCHEMIZE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Alchemize.cs"
+  },
+  "card:ALIGNMENT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Alignment.cs"
+  },
+  "card:ALL_FOR_ONE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\AllForOne.cs"
+  },
+  "card:ANGER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Anger.cs"
+  },
+  "card:ANOINTED": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Anointed.cs"
+  },
+  "card:ANTICIPATE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Anticipate.cs"
+  },
+  "card:APOTHEOSIS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Apotheosis.cs"
+  },
+  "card:APPARITION": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Apparition.cs"
+  },
+  "card:ARMAMENTS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Armaments.cs"
+  },
+  "card:ARSENAL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Arsenal.cs"
+  },
+  "card:ASCENDERS_BANE": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\AscendersBane.cs"
+  },
+  "card:ASHEN_STRIKE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\AshenStrike.cs"
+  },
+  "card:ASSASSINATE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Assassinate.cs"
+  },
+  "card:ASTRAL_PULSE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\AstralPulse.cs"
+  },
+  "card:AUTOMATION": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Automation.cs"
+  },
+  "card:BACKFLIP": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Backflip.cs"
+  },
+  "card:BACKSTAB": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Backstab.cs"
+  },
+  "card:BAD_LUCK": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BadLuck.cs"
+  },
+  "card:BALL_LIGHTNING": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BallLightning.cs"
+  },
+  "card:BANSHEES_CRY": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BansheesCry.cs"
+  },
+  "card:BARRAGE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Barrage.cs"
+  },
+  "card:BARRICADE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Barricade.cs"
+  },
+  "card:BASH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bash.cs"
+  },
+  "card:BATTLE_TRANCE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BattleTrance.cs"
+  },
+  "card:BEACON_OF_HOPE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BeaconOfHope.cs"
+  },
+  "card:BEAM_CELL": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BeamCell.cs"
+  },
+  "card:BEAT_DOWN": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BeatDown.cs"
+  },
+  "card:BEAT_INTO_SHAPE": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BeatIntoShape.cs"
+  },
+  "card:BECKON": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Beckon.cs"
+  },
+  "card:BEGONE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Begone.cs"
+  },
+  "card:BELIEVE_IN_YOU": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BelieveInYou.cs"
+  },
+  "card:BIASED_COGNITION": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BiasedCognition.cs"
+  },
+  "card:BIG_BANG": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BigBang.cs"
+  },
+  "card:BLACK_HOLE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BlackHole.cs"
+  },
+  "card:BLADE_DANCE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BladeDance.cs"
+  },
+  "card:BLADE_OF_INK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BladeOfInk.cs"
+  },
+  "card:BLADE_SYMPHONY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BladeSymphony.cs"
+  },
+  "card:BLAZE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Blaze.cs"
+  },
+  "card:BLIGHT_STRIKE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BlightStrike.cs"
+  },
+  "card:BLOODLETTING": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bloodletting.cs"
+  },
+  "card:BLOOD_WALL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BloodWall.cs"
+  },
+  "card:BLUDGEON": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bludgeon.cs"
+  },
+  "card:BLUR": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Blur.cs"
+  },
+  "card:BODYGUARD": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bodyguard.cs"
+  },
+  "card:BODY_SLAM": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BodySlam.cs"
+  },
+  "card:BOLAS": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bolas.cs"
+  },
+  "card:BOMBARDMENT": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bombardment.cs"
+  },
+  "card:BONE_SHARDS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BoneShards.cs"
+  },
+  "card:BOOST_AWAY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BoostAway.cs"
+  },
+  "card:BOOT_SEQUENCE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BootSequence.cs"
+  },
+  "card:BORROWED_TIME": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BorrowedTime.cs"
+  },
+  "card:BOUNCING_FLASK": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BouncingFlask.cs"
+  },
+  "card:BRAND": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Brand.cs"
+  },
+  "card:BREAK": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Break.cs"
+  },
+  "card:BREAKTHROUGH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Breakthrough.cs"
+  },
+  "card:BRIGHTEST_FLAME": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BrightestFlame.cs"
+  },
+  "card:BUBBLE_BUBBLE": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BubbleBubble.cs"
+  },
+  "card:BUFFER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Buffer.cs"
+  },
+  "card:BULK_UP": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BulkUp.cs"
+  },
+  "card:BULLET_TIME": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BulletTime.cs"
+  },
+  "card:BULLY": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bully.cs"
+  },
+  "card:BULWARK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bulwark.cs"
+  },
+  "card:BUNDLE_OF_JOY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BundleOfJoy.cs"
+  },
+  "card:BURN": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Burn.cs"
+  },
+  "card:BURNING_PACT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\BurningPact.cs"
+  },
+  "card:BURST": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Burst.cs"
+  },
+  "card:BURY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Bury.cs"
+  },
+  "card:BYRDONIS_EGG": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ByrdonisEgg.cs"
+  },
+  "card:BYRD_SWOOP": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ByrdSwoop.cs"
+  },
+  "card:CACOPHONY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Cacophony.cs"
+  },
+  "card:CALAMITY": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Calamity.cs"
+  },
+  "card:CALCIFY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Calcify.cs"
+  },
+  "card:CALCULATED_GAMBLE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CalculatedGamble.cs"
+  },
+  "card:CALL_OF_THE_VOID": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CallOfTheVoid.cs"
+  },
+  "card:CALTROPS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Caltrops.cs"
+  },
+  "card:CAPACITOR": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Capacitor.cs"
+  },
+  "card:CAPTURE_SPIRIT": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CaptureSpirit.cs"
+  },
+  "card:CASCADE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Cascade.cs"
+  },
+  "card:CATASTROPHE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Catastrophe.cs"
+  },
+  "card:CELESTIAL_MIGHT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CelestialMight.cs"
+  },
+  "card:CHAOS": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Chaos.cs"
+  },
+  "card:CHARGE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Charge.cs"
+  },
+  "card:CHARGE_BATTERY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ChargeBattery.cs"
+  },
+  "card:CHILD_OF_THE_STARS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ChildOfTheStars.cs"
+  },
+  "card:CHILL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Chill.cs"
+  },
+  "card:CINDER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Cinder.cs"
+  },
+  "card:CLASH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Clash.cs"
+  },
+  "card:CLAW": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Claw.cs"
+  },
+  "card:CLEANSE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Cleanse.cs"
+  },
+  "card:CLOAK_AND_DAGGER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CloakAndDagger.cs"
+  },
+  "card:CLOAK_OF_STARS": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CloakOfStars.cs"
+  },
+  "card:CLUMSY": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Clumsy.cs"
+  },
+  "card:COLD_SNAP": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ColdSnap.cs"
+  },
+  "card:COLLISION_COURSE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CollisionCourse.cs"
+  },
+  "card:COLOSSUS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Colossus.cs"
+  },
+  "card:COMET": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Comet.cs"
+  },
+  "card:COMPACT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Compact.cs"
+  },
+  "card:COMPILE_DRIVER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CompileDriver.cs"
+  },
+  "card:CONCOCT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Concoct.cs"
+  },
+  "card:CONFLAGRATION": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Conflagration.cs"
+  },
+  "card:CONQUEROR": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Conqueror.cs"
+  },
+  "card:CONSTELLATION": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Constellation.cs"
+  },
+  "card:CONSUMING_SHADOW": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ConsumingShadow.cs"
+  },
+  "card:CONVERGENCE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Convergence.cs"
+  },
+  "card:COOLANT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Coolant.cs"
+  },
+  "card:COOLHEADED": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Coolheaded.cs"
+  },
+  "card:COORDINATE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Coordinate.cs"
+  },
+  "card:CORROSIVE_WAVE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CorrosiveWave.cs"
+  },
+  "card:CORRUPTION": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Corruption.cs"
+  },
+  "card:COSMIC_INDIFFERENCE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CosmicIndifference.cs"
+  },
+  "card:COUNTDOWN": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Countdown.cs"
+  },
+  "card:CRASH_LANDING": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CrashLanding.cs"
+  },
+  "card:CREATIVE_AI": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CreativeAi.cs"
+  },
+  "card:CRESCENT_SPEAR": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CrescentSpear.cs"
+  },
+  "card:CRIMSON_MANTLE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CrimsonMantle.cs"
+  },
+  "card:CRUELTY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Cruelty.cs"
+  },
+  "card:CRUSH_UNDER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CrushUnder.cs"
+  },
+  "card:CURSE_OF_THE_BELL": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\CurseOfTheBell.cs"
+  },
+  "card:DAGGER_SPRAY": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DaggerSpray.cs"
+  },
+  "card:DAGGER_THROW": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DaggerThrow.cs"
+  },
+  "card:DANSE_MACABRE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DanseMacabre.cs"
+  },
+  "card:DARKNESS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Darkness.cs"
+  },
+  "card:DARK_EMBRACE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DarkEmbrace.cs"
+  },
+  "card:DARK_SHACKLES": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DarkShackles.cs"
+  },
+  "card:DASH": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dash.cs"
+  },
+  "card:DAZED": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dazed.cs"
+  },
+  "card:DEADLY_POISON": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DeadlyPoison.cs"
+  },
+  "card:DEATHBRINGER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Deathbringer.cs"
+  },
+  "card:DEATHS_DOOR": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DeathsDoor.cs"
+  },
+  "card:DEATH_MARCH": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DeathMarch.cs"
+  },
+  "card:DEBILITATE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Debilitate.cs"
+  },
+  "card:DEBRIS": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Debris.cs"
+  },
+  "card:DEBT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Debt.cs"
+  },
+  "card:DECAY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Decay.cs"
+  },
+  "card:DECISIONS_DECISIONS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DecisionsDecisions.cs"
+  },
+  "card:DEFEND_DEFECT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DefendDefect.cs"
+  },
+  "card:DEFEND_IRONCLAD": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DefendIronclad.cs"
+  },
+  "card:DEFEND_NECROBINDER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DefendNecrobinder.cs"
+  },
+  "card:DEFEND_REGENT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DefendRegent.cs"
+  },
+  "card:DEFEND_SILENT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DefendSilent.cs"
+  },
+  "card:DEFILE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Defile.cs"
+  },
+  "card:DEFLECT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Deflect.cs"
+  },
+  "card:DEFRAGMENT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Defragment.cs"
+  },
+  "card:DEFY": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Defy.cs"
+  },
+  "card:DELAY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Delay.cs"
+  },
+  "card:DEMESNE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Demesne.cs"
+  },
+  "card:DEMONIC_SHIELD": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DemonicShield.cs"
+  },
+  "card:DEMON_FORM": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DemonForm.cs"
+  },
+  "card:DEPRECATED_CARD": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DeprecatedCard.cs"
+  },
+  "card:DEVASTATE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Devastate.cs"
+  },
+  "card:DEVOUR_LIFE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DevourLife.cs"
+  },
+  "card:DIRGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dirge.cs"
+  },
+  "card:DISCOVERY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Discovery.cs"
+  },
+  "card:DISINTEGRATION": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Disintegration.cs"
+  },
+  "card:DISMANTLE": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dismantle.cs"
+  },
+  "card:DISTRACTION": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Distraction.cs"
+  },
+  "card:DODGE_AND_ROLL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DodgeAndRoll.cs"
+  },
+  "card:DOMINATE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dominate.cs"
+  },
+  "card:DOUBLE_ENERGY": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DoubleEnergy.cs"
+  },
+  "card:DOUBT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Doubt.cs"
+  },
+  "card:DOWSING": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dowsing.cs"
+  },
+  "card:DRAIN_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DrainPower.cs"
+  },
+  "card:DRAMATIC_ENTRANCE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DramaticEntrance.cs"
+  },
+  "card:DREDGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dredge.cs"
+  },
+  "card:DRUM_OF_BATTLE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DrumOfBattle.cs"
+  },
+  "card:DUALCAST": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Dualcast.cs"
+  },
+  "card:DUAL_WIELD": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DualWield.cs"
+  },
+  "card:DYING_STAR": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\DyingStar.cs"
+  },
+  "card:ECHOING_SLASH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EchoingSlash.cs"
+  },
+  "card:ECHO_FORM": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EchoForm.cs"
+  },
+  "card:EIDOLON": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Eidolon.cs"
+  },
+  "card:END_OF_DAYS": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EndOfDays.cs"
+  },
+  "card:ENERGY_SURGE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EnergySurge.cs"
+  },
+  "card:ENFEEBLING_TOUCH": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EnfeeblingTouch.cs"
+  },
+  "card:ENLIGHTENMENT": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Enlightenment.cs"
+  },
+  "card:ENTHRALLED": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Enthralled.cs"
+  },
+  "card:ENTRENCH": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Entrench.cs"
+  },
+  "card:ENTROPY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Entropy.cs"
+  },
+  "card:ENVENOM": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Envenom.cs"
+  },
+  "card:EQUILIBRIUM": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Equilibrium.cs"
+  },
+  "card:ERADICATE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Eradicate.cs"
+  },
+  "card:ESCAPE_PLAN": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EscapePlan.cs"
+  },
+  "card:ETERNAL_ARMOR": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EternalArmor.cs"
+  },
+  "card:EVIL_EYE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\EvilEye.cs"
+  },
+  "card:EXPECT_AFIGHT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ExpectAFight.cs"
+  },
+  "card:EXPERTISE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Expertise.cs"
+  },
+  "card:EXPOSE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Expose.cs"
+  },
+  "card:EXTERMINATE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Exterminate.cs"
+  },
+  "card:FADE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Fade.cs"
+  },
+  "card:FALLING_STAR": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FallingStar.cs"
+  },
+  "card:FAN_OF_KNIVES": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FanOfKnives.cs"
+  },
+  "card:FASTEN": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Fasten.cs"
+  },
+  "card:FEAR": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Fear.cs"
+  },
+  "card:FEED": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Feed.cs"
+  },
+  "card:FEEDING_FRENZY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FeedingFrenzy.cs"
+  },
+  "card:FEEL_NO_PAIN": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FeelNoPain.cs"
+  },
+  "card:FERAL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Feral.cs"
+  },
+  "card:FETCH": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Fetch.cs"
+  },
+  "card:FIEND_FIRE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FiendFire.cs"
+  },
+  "card:FIGHT_ME": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FightMe.cs"
+  },
+  "card:FIGHT_THROUGH": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FightThrough.cs"
+  },
+  "card:FINESSE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Finesse.cs"
+  },
+  "card:FINISHER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Finisher.cs"
+  },
+  "card:FISTICUFFS": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Fisticuffs.cs"
+  },
+  "card:FLAK_CANNON": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FlakCannon.cs"
+  },
+  "card:FLAME_BARRIER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FlameBarrier.cs"
+  },
+  "card:FLANKING": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Flanking.cs"
+  },
+  "card:FLASH_OF_STEEL": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FlashOfSteel.cs"
+  },
+  "card:FLATTEN": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Flatten.cs"
+  },
+  "card:FLECHETTES": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Flechettes.cs"
+  },
+  "card:FLICK_FLACK": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FlickFlack.cs"
+  },
+  "card:FOCUSED_STRIKE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FocusedStrike.cs"
+  },
+  "card:FOLLY": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Folly.cs"
+  },
+  "card:FOOTWORK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Footwork.cs"
+  },
+  "card:FORBIDDEN_GRIMOIRE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ForbiddenGrimoire.cs"
+  },
+  "card:FOREGONE_CONCLUSION": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ForegoneConclusion.cs"
+  },
+  "card:FORGOTTEN_RITUAL": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ForgottenRitual.cs"
+  },
+  "card:FRANTIC_ESCAPE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\FranticEscape.cs"
+  },
+  "card:FRIENDSHIP": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Friendship.cs"
+  },
+  "card:FTL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Ftl.cs"
+  },
+  "card:FUEL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Fuel.cs"
+  },
+  "card:FURNACE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Furnace.cs"
+  },
+  "card:FUSION": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Fusion.cs"
+  },
+  "card:GAMMA_BLAST": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GammaBlast.cs"
+  },
+  "card:GANG_UP": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GangUp.cs"
+  },
+  "card:GATHER_LIGHT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GatherLight.cs"
+  },
+  "card:GENESIS": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Genesis.cs"
+  },
+  "card:GENETIC_ALGORITHM": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GeneticAlgorithm.cs"
+  },
+  "card:GIANT_ROCK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GiantRock.cs"
+  },
+  "card:GLACIER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Glacier.cs"
+  },
+  "card:GLASSWORK": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Glasswork.cs"
+  },
+  "card:GLIMMER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Glimmer.cs"
+  },
+  "card:GLIMPSE_BEYOND": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GlimpseBeyond.cs"
+  },
+  "card:GLITTERSTREAM": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Glitterstream.cs"
+  },
+  "card:GLOW": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Glow.cs"
+  },
+  "card:GOLD_AXE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GoldAxe.cs"
+  },
+  "card:GO_FOR_THE_EYES": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GoForTheEyes.cs"
+  },
+  "card:GRAND_FINALE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GrandFinale.cs"
+  },
+  "card:GRAVEBLAST": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Graveblast.cs"
+  },
+  "card:GRAVE_WARDEN": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GraveWarden.cs"
+  },
+  "card:GREED": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Greed.cs"
+  },
+  "card:GUARDS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Guards.cs"
+  },
+  "card:GUIDING_STAR": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GuidingStar.cs"
+  },
+  "card:GUILTY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Guilty.cs"
+  },
+  "card:GUNK_UP": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\GunkUp.cs"
+  },
+  "card:HAILSTORM": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hailstorm.cs"
+  },
+  "card:HAMMER_TIME": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HammerTime.cs"
+  },
+  "card:HAND_OF_GREED": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HandOfGreed.cs"
+  },
+  "card:HAND_TRICK": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HandTrick.cs"
+  },
+  "card:HANG": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hang.cs"
+  },
+  "card:HAUNT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Haunt.cs"
+  },
+  "card:HAVOC": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Havoc.cs"
+  },
+  "card:HAZE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Haze.cs"
+  },
+  "card:HEADBUTT": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Headbutt.cs"
+  },
+  "card:HEAVENLY_DRILL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HeavenlyDrill.cs"
+  },
+  "card:HEGEMONY": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hegemony.cs"
+  },
+  "card:HEIRLOOM_HAMMER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HeirloomHammer.cs"
+  },
+  "card:HELIX_DRILL": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HelixDrill.cs"
+  },
+  "card:HELLO_WORLD": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HelloWorld.cs"
+  },
+  "card:HELLRAISER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hellraiser.cs"
+  },
+  "card:HEMOKINESIS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hemokinesis.cs"
+  },
+  "card:HIBERNATE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hibernate.cs"
+  },
+  "card:HIDDEN_CACHE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HiddenCache.cs"
+  },
+  "card:HIDDEN_DAGGERS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HiddenDaggers.cs"
+  },
+  "card:HIDDEN_GEM": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HiddenGem.cs"
+  },
+  "card:HIGH_FIVE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HighFive.cs"
+  },
+  "card:HOLOGRAM": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hologram.cs"
+  },
+  "card:HOTFIX": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hotfix.cs"
+  },
+  "card:HOWL_FROM_BEYOND": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HowlFromBeyond.cs"
+  },
+  "card:HUDDLE_UP": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\HuddleUp.cs"
+  },
+  "card:HYPERBEAM": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Hyperbeam.cs"
+  },
+  "card:ICE_LANCE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\IceLance.cs"
+  },
+  "card:IGNITION": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Ignition.cs"
+  },
+  "card:IMITATION_LEARNING": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ImitationLearning.cs"
+  },
+  "card:IMPATIENCE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Impatience.cs"
+  },
+  "card:IMPERVIOUS": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Impervious.cs"
+  },
+  "card:INFECTION": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Infection.cs"
+  },
+  "card:INFERNAL_BLADE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\InfernalBlade.cs"
+  },
+  "card:INFERNO": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Inferno.cs"
+  },
+  "card:INFINITE_BLADES": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\InfiniteBlades.cs"
+  },
+  "card:INFLAME": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Inflame.cs"
+  },
+  "card:INJURY": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Injury.cs"
+  },
+  "card:INTERCEPT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Intercept.cs"
+  },
+  "card:INVOKE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Invoke.cs"
+  },
+  "card:IRON_WAVE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\IronWave.cs"
+  },
+  "card:ITERATION": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Iteration.cs"
+  },
+  "card:I_AM_INVINCIBLE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\IAmInvincible.cs"
+  },
+  "card:JACKPOT": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Jackpot.cs"
+  },
+  "card:JACK_OF_ALL_TRADES": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\JackOfAllTrades.cs"
+  },
+  "card:JUGGERNAUT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Juggernaut.cs"
+  },
+  "card:JUGGLING": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Juggling.cs"
+  },
+  "card:KINGLY_KICK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\KinglyKick.cs"
+  },
+  "card:KINGLY_PUNCH": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\KinglyPunch.cs"
+  },
+  "card:KNIFE_TRAP": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\KnifeTrap.cs"
+  },
+  "card:KNOCKDOWN": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Knockdown.cs"
+  },
+  "card:KNOCKOUT_BLOW": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\KnockoutBlow.cs"
+  },
+  "card:KNOW_THY_PLACE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\KnowThyPlace.cs"
+  },
+  "card:LANTERN_KEY": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\LanternKey.cs"
+  },
+  "card:LARGESSE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Largesse.cs"
+  },
+  "card:LEADING_STRIKE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\LeadingStrike.cs"
+  },
+  "card:LEAP": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Leap.cs"
+  },
+  "card:LEGION_OF_BONE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\LegionOfBone.cs"
+  },
+  "card:LEG_SWEEP": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\LegSweep.cs"
+  },
+  "card:LETHALITY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Lethality.cs"
+  },
+  "card:LIFT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Lift.cs"
+  },
+  "card:LIGHTNING_ROD": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\LightningRod.cs"
+  },
+  "card:LOOP": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Loop.cs"
+  },
+  "card:LUMINESCE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Luminesce.cs"
+  },
+  "card:LUNAR_BLAST": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\LunarBlast.cs"
+  },
+  "card:MACHINE_LEARNING": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MachineLearning.cs"
+  },
+  "card:MAD_SCIENCE": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MadScience.cs"
+  },
+  "card:MAKE_IT_SO": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MakeItSo.cs"
+  },
+  "card:MALAISE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Malaise.cs"
+  },
+  "card:MANGLE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Mangle.cs"
+  },
+  "card:MANIFEST_AUTHORITY": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ManifestAuthority.cs"
+  },
+  "card:MASTER_OF_STRATEGY": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MasterOfStrategy.cs"
+  },
+  "card:MASTER_PLANNER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MasterPlanner.cs"
+  },
+  "card:MAUL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Maul.cs"
+  },
+  "card:MAYHEM": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Mayhem.cs"
+  },
+  "card:MELANCHOLY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Melancholy.cs"
+  },
+  "card:MEMENTO_MORI": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MementoMori.cs"
+  },
+  "card:METAMORPHOSIS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Metamorphosis.cs"
+  },
+  "card:METEOR_SHOWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MeteorShower.cs"
+  },
+  "card:METEOR_STRIKE": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MeteorStrike.cs"
+  },
+  "card:MIDNIGHT": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Midnight.cs"
+  },
+  "card:MIMIC": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Mimic.cs"
+  },
+  "card:MIND_BLAST": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MindBlast.cs"
+  },
+  "card:MIND_ROT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MindRot.cs"
+  },
+  "card:MINION_DIVE_BOMB": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MinionDiveBomb.cs"
+  },
+  "card:MINION_SACRIFICE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MinionSacrifice.cs"
+  },
+  "card:MINION_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MinionStrike.cs"
+  },
+  "card:MIRAGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Mirage.cs"
+  },
+  "card:MISERY": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Misery.cs"
+  },
+  "card:MODDED": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Modded.cs"
+  },
+  "card:MOLTEN_FIST": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MoltenFist.cs"
+  },
+  "card:MOMENTUM_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MomentumStrike.cs"
+  },
+  "card:MONARCHS_GAZE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MonarchsGaze.cs"
+  },
+  "card:MONOLOGUE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Monologue.cs"
+  },
+  "card:MULTI_CAST": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\MultiCast.cs"
+  },
+  "card:MURDER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Murder.cs"
+  },
+  "card:NECRO_MASTERY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\NecroMastery.cs"
+  },
+  "card:NEGATIVE_PULSE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\NegativePulse.cs"
+  },
+  "card:NEOWS_FURY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\NeowsFury.cs"
+  },
+  "card:NEUROSURGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Neurosurge.cs"
+  },
+  "card:NEUTRALIZE": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Neutralize.cs"
+  },
+  "card:NEUTRON_AEGIS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\NeutronAegis.cs"
+  },
+  "card:NIGHTMARE": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Nightmare.cs"
+  },
+  "card:NORMALITY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Normality.cs"
+  },
+  "card:NOSTALGIA": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Nostalgia.cs"
+  },
+  "card:NOT_YET": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\NotYet.cs"
+  },
+  "card:NOXIOUS_FUMES": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\NoxiousFumes.cs"
+  },
+  "card:NO_ESCAPE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\NoEscape.cs"
+  },
+  "card:NULL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Null.cs"
+  },
+  "card:OBLIVION": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Oblivion.cs"
+  },
+  "card:OFFERING": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Offering.cs"
+  },
+  "card:OMNISLICE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Omnislice.cs"
+  },
+  "card:ONE_FOR_ALL": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\OneForAll.cs"
+  },
+  "card:ONE_TWO_PUNCH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\OneTwoPunch.cs"
+  },
+  "card:ORBIT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Orbit.cs"
+  },
+  "card:OUTBREAK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Outbreak.cs"
+  },
+  "card:OUTMANEUVER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Outmaneuver.cs"
+  },
+  "card:OUTRAGE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Outrage.cs"
+  },
+  "card:OVERCLOCK": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Overclock.cs"
+  },
+  "card:PACTS_END": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PactsEnd.cs"
+  },
+  "card:PAGESTORM": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Pagestorm.cs"
+  },
+  "card:PALE_BLUE_DOT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PaleBlueDot.cs"
+  },
+  "card:PANACHE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Panache.cs"
+  },
+  "card:PANIC_BUTTON": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PanicButton.cs"
+  },
+  "card:PARRY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Parry.cs"
+  },
+  "card:PARSE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Parse.cs"
+  },
+  "card:PARTICLE_WALL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ParticleWall.cs"
+  },
+  "card:PATTER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Patter.cs"
+  },
+  "card:PECK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Peck.cs"
+  },
+  "card:PERFECTED_STRIKE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PerfectedStrike.cs"
+  },
+  "card:PHANTOM_BLADES": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PhantomBlades.cs"
+  },
+  "card:PHOTON_CUT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PhotonCut.cs"
+  },
+  "card:PIERCING_WAIL": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PiercingWail.cs"
+  },
+  "card:PILLAGE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Pillage.cs"
+  },
+  "card:PILLAR_OF_CREATION": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PillarOfCreation.cs"
+  },
+  "card:PINPOINT": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Pinpoint.cs"
+  },
+  "card:PLOT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Plot.cs"
+  },
+  "card:POISONED_STAB": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PoisonedStab.cs"
+  },
+  "card:POKE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Poke.cs"
+  },
+  "card:POMMEL_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PommelStrike.cs"
+  },
+  "card:POOR_SLEEP": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PoorSleep.cs"
+  },
+  "card:POUNCE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Pounce.cs"
+  },
+  "card:PRECISE_CUT": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PreciseCut.cs"
+  },
+  "card:PREDATOR": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Predator.cs"
+  },
+  "card:PREPARED": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Prepared.cs"
+  },
+  "card:PREP_TIME": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PrepTime.cs"
+  },
+  "card:PRIMAL_FORCE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PrimalForce.cs"
+  },
+  "card:PRODUCTION": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Production.cs"
+  },
+  "card:PROLONG": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Prolong.cs"
+  },
+  "card:PROPHESIZE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Prophesize.cs"
+  },
+  "card:PROTECTOR": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Protector.cs"
+  },
+  "card:PROWESS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Prowess.cs"
+  },
+  "card:PULL_AGGRO": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PullAggro.cs"
+  },
+  "card:PULL_FROM_BELOW": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\PullFromBelow.cs"
+  },
+  "card:PURITY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Purity.cs"
+  },
+  "card:PUTREFY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Putrefy.cs"
+  },
+  "card:PYRE": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Pyre.cs"
+  },
+  "card:QUADCAST": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Quadcast.cs"
+  },
+  "card:QUASAR": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Quasar.cs"
+  },
+  "card:RADIATE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Radiate.cs"
+  },
+  "card:RAGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rage.cs"
+  },
+  "card:RAINBOW": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rainbow.cs"
+  },
+  "card:RALLY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rally.cs"
+  },
+  "card:RAMPAGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rampage.cs"
+  },
+  "card:RATTLE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rattle.cs"
+  },
+  "card:REANIMATE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Reanimate.cs"
+  },
+  "card:REAP": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Reap.cs"
+  },
+  "card:REAPER_FORM": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ReaperForm.cs"
+  },
+  "card:REAVE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Reave.cs"
+  },
+  "card:REBOOT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Reboot.cs"
+  },
+  "card:REBOUND": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rebound.cs"
+  },
+  "card:REFINE_BLADE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\RefineBlade.cs"
+  },
+  "card:REFLECT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Reflect.cs"
+  },
+  "card:REFLEX": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Reflex.cs"
+  },
+  "card:REFRACT": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Refract.cs"
+  },
+  "card:REGRET": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Regret.cs"
+  },
+  "card:RELAX": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Relax.cs"
+  },
+  "card:REND": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rend.cs"
+  },
+  "card:RESONANCE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Resonance.cs"
+  },
+  "card:RESTLESSNESS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Restlessness.cs"
+  },
+  "card:RICOCHET": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Ricochet.cs"
+  },
+  "card:RIGHT_HAND_HAND": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\RightHandHand.cs"
+  },
+  "card:RIP_AND_TEAR": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\RipAndTear.cs"
+  },
+  "card:ROCKET_PUNCH": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\RocketPunch.cs"
+  },
+  "card:ROLLING_BOULDER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\RollingBoulder.cs"
+  },
+  "card:ROYALTIES": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Royalties.cs"
+  },
+  "card:ROYAL_GAMBLE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\RoyalGamble.cs"
+  },
+  "card:RUPTURE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Rupture.cs"
+  },
+  "card:SACRIFICE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Sacrifice.cs"
+  },
+  "card:SALVO": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Salvo.cs"
+  },
+  "card:SCARE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Scare.cs"
+  },
+  "card:SCAVENGE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Scavenge.cs"
+  },
+  "card:SCOURGE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Scourge.cs"
+  },
+  "card:SCRAPE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Scrape.cs"
+  },
+  "card:SCRAWL": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Scrawl.cs"
+  },
+  "card:SCULPTING_STRIKE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SculptingStrike.cs"
+  },
+  "card:SEANCE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Seance.cs"
+  },
+  "card:SECOND_WIND": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SecondWind.cs"
+  },
+  "card:SECRET_TECHNIQUE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SecretTechnique.cs"
+  },
+  "card:SECRET_WEAPON": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SecretWeapon.cs"
+  },
+  "card:SEEKER_STRIKE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SeekerStrike.cs"
+  },
+  "card:SEEKING_EDGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SeekingEdge.cs"
+  },
+  "card:SENTRY_MODE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SentryMode.cs"
+  },
+  "card:SERPENT_FORM": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SerpentForm.cs"
+  },
+  "card:SETUP_STRIKE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SetupStrike.cs"
+  },
+  "card:SEVEN_STARS": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SevenStars.cs"
+  },
+  "card:SEVERANCE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Severance.cs"
+  },
+  "card:SHADOWMELD": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Shadowmeld.cs"
+  },
+  "card:SHADOW_SHIELD": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ShadowShield.cs"
+  },
+  "card:SHADOW_STEP": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ShadowStep.cs"
+  },
+  "card:SHAME": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Shame.cs"
+  },
+  "card:SHARED_FATE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SharedFate.cs"
+  },
+  "card:SHATTER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Shatter.cs"
+  },
+  "card:SHINING_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ShiningStrike.cs"
+  },
+  "card:SHIV": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Shiv.cs"
+  },
+  "card:SHOCKWAVE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Shockwave.cs"
+  },
+  "card:SHROUD": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Shroud.cs"
+  },
+  "card:SHRUG_IT_OFF": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ShrugItOff.cs"
+  },
+  "card:SIC_EM": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SicEm.cs"
+  },
+  "card:SIGNAL_BOOST": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SignalBoost.cs"
+  },
+  "card:SKEWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Skewer.cs"
+  },
+  "card:SKIM": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Skim.cs"
+  },
+  "card:SLEIGHT_OF_FLESH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SleightOfFlesh.cs"
+  },
+  "card:SLICE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Slice.cs"
+  },
+  "card:SLIMED": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Slimed.cs"
+  },
+  "card:SLOTH": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Sloth.cs"
+  },
+  "card:SMOKESTACK": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Smokestack.cs"
+  },
+  "card:SNAKEBITE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Snakebite.cs"
+  },
+  "card:SNAP": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Snap.cs"
+  },
+  "card:SNEAKY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Sneaky.cs"
+  },
+  "card:SOLAR_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SolarStrike.cs"
+  },
+  "card:SOOT": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Soot.cs"
+  },
+  "card:SOUL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Soul.cs"
+  },
+  "card:SOULBOUND": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Soulbound.cs"
+  },
+  "card:SOUL_STORM": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SoulStorm.cs"
+  },
+  "card:SOVEREIGN_BLADE": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SovereignBlade.cs"
+  },
+  "card:SOW": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Sow.cs"
+  },
+  "card:SPECTRUM_SHIFT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SpectrumShift.cs"
+  },
+  "card:SPEEDSTER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Speedster.cs"
+  },
+  "card:SPINNER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Spinner.cs"
+  },
+  "card:SPIRIT_OF_ASH": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SpiritOfAsh.cs"
+  },
+  "card:SPITE": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Spite.cs"
+  },
+  "card:SPLASH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Splash.cs"
+  },
+  "card:SPOILS_MAP": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SpoilsMap.cs"
+  },
+  "card:SPOILS_OF_BATTLE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SpoilsOfBattle.cs"
+  },
+  "card:SPORE_MIND": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SporeMind.cs"
+  },
+  "card:SPUR": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Spur.cs"
+  },
+  "card:SQUASH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Squash.cs"
+  },
+  "card:SQUEEZE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Squeeze.cs"
+  },
+  "card:STACK": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Stack.cs"
+  },
+  "card:STAMPEDE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Stampede.cs"
+  },
+  "card:STARDUST": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Stardust.cs"
+  },
+  "card:STOKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Stoke.cs"
+  },
+  "card:STOMP": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Stomp.cs"
+  },
+  "card:STONE_ARMOR": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\StoneArmor.cs"
+  },
+  "card:STORM": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Storm.cs"
+  },
+  "card:STORM_OF_STEEL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\StormOfSteel.cs"
+  },
+  "card:STRANGLE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Strangle.cs"
+  },
+  "card:STRATAGEM": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Stratagem.cs"
+  },
+  "card:STRIKE_DEFECT": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\StrikeDefect.cs"
+  },
+  "card:STRIKE_IRONCLAD": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\StrikeIronclad.cs"
+  },
+  "card:STRIKE_NECROBINDER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\StrikeNecrobinder.cs"
+  },
+  "card:STRIKE_REGENT": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\StrikeRegent.cs"
+  },
+  "card:STRIKE_SILENT": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\StrikeSilent.cs"
+  },
+  "card:SUBROUTINE": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Subroutine.cs"
+  },
+  "card:SUCKER_PUNCH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SuckerPunch.cs"
+  },
+  "card:SUMMON_FORTH": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SummonForth.cs"
+  },
+  "card:SUNDER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Sunder.cs"
+  },
+  "card:SUPERCRITICAL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Supercritical.cs"
+  },
+  "card:SUPERMASSIVE": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Supermassive.cs"
+  },
+  "card:SUPPRESS": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Suppress.cs"
+  },
+  "card:SURVIVOR": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Survivor.cs"
+  },
+  "card:SWEEPING_BEAM": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SweepingBeam.cs"
+  },
+  "card:SWEEPING_GAZE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SweepingGaze.cs"
+  },
+  "card:SWORD_BOOMERANG": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SwordBoomerang.cs"
+  },
+  "card:SWORD_SAGE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\SwordSage.cs"
+  },
+  "card:SYNCHRONIZE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Synchronize.cs"
+  },
+  "card:SYNTHESIS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Synthesis.cs"
+  },
+  "card:TACTICIAN": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Tactician.cs"
+  },
+  "card:TAG_TEAM": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TagTeam.cs"
+  },
+  "card:TANK": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Tank.cs"
+  },
+  "card:TAUNT": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Taunt.cs"
+  },
+  "card:TEAR_ASUNDER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TearAsunder.cs"
+  },
+  "card:TEMPEST": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Tempest.cs"
+  },
+  "card:TERRAFORMING": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Terraforming.cs"
+  },
+  "card:TESLA_COIL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TeslaCoil.cs"
+  },
+  "card:THE_BALL": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TheBall.cs"
+  },
+  "card:THE_BOMB": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TheBomb.cs"
+  },
+  "card:THE_GAMBIT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TheGambit.cs"
+  },
+  "card:THE_HUNT": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TheHunt.cs"
+  },
+  "card:THE_SCYTHE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TheScythe.cs"
+  },
+  "card:THE_SEALED_THRONE": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TheSealedThrone.cs"
+  },
+  "card:THE_SMITH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TheSmith.cs"
+  },
+  "card:THINKING_AHEAD": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ThinkingAhead.cs"
+  },
+  "card:THRASH": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Thrash.cs"
+  },
+  "card:THRUMMING_HATCHET": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ThrummingHatchet.cs"
+  },
+  "card:THUNDER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Thunder.cs"
+  },
+  "card:THUNDERCLAP": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Thunderclap.cs"
+  },
+  "card:TIMES_UP": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TimesUp.cs"
+  },
+  "card:TOOLS_OF_THE_TRADE": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ToolsOfTheTrade.cs"
+  },
+  "card:TORIC_TOUGHNESS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\ToricToughness.cs"
+  },
+  "card:TOXIC": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Toxic.cs"
+  },
+  "card:TRACKING": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Tracking.cs"
+  },
+  "card:TRANSFIGURE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Transfigure.cs"
+  },
+  "card:TRASH_TO_TREASURE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TrashToTreasure.cs"
+  },
+  "card:TREMBLE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Tremble.cs"
+  },
+  "card:TRUE_GRIT": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TrueGrit.cs"
+  },
+  "card:TURBO": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Turbo.cs"
+  },
+  "card:TUTOR": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Tutor.cs"
+  },
+  "card:TWIN_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\TwinStrike.cs"
+  },
+  "card:TYRANNY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Tyranny.cs"
+  },
+  "card:ULTIMATE_DEFEND": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\UltimateDefend.cs"
+  },
+  "card:ULTIMATE_STRIKE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\UltimateStrike.cs"
+  },
+  "card:UNDEATH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Undeath.cs"
+  },
+  "card:UNDERWORLD": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Underworld.cs"
+  },
+  "card:UNLEASH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Unleash.cs"
+  },
+  "card:UNMOVABLE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Unmovable.cs"
+  },
+  "card:UNRELENTING": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Unrelenting.cs"
+  },
+  "card:UNTOUCHABLE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Untouchable.cs"
+  },
+  "card:UPPERCUT": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Uppercut.cs"
+  },
+  "card:UPROAR": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Uproar.cs"
+  },
+  "card:UP_MY_SLEEVE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\UpMySleeve.cs"
+  },
+  "card:VEILPIERCER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Veilpiercer.cs"
+  },
+  "card:VENERATE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Venerate.cs"
+  },
+  "card:VICIOUS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Vicious.cs"
+  },
+  "card:VOID": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Void.cs"
+  },
+  "card:VOID_FORM": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\VoidForm.cs"
+  },
+  "card:VOLLEY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Volley.cs"
+  },
+  "card:VOLTAIC": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Voltaic.cs"
+  },
+  "card:WASTE_AWAY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\WasteAway.cs"
+  },
+  "card:WELL_LAID_PLANS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\WellLaidPlans.cs"
+  },
+  "card:WHIRLWIND": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Whirlwind.cs"
+  },
+  "card:WHISTLE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Whistle.cs"
+  },
+  "card:WHITE_NOISE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\WhiteNoise.cs"
+  },
+  "card:WISH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Wish.cs"
+  },
+  "card:WISP": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Wisp.cs"
+  },
+  "card:WITHER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Wither.cs"
+  },
+  "card:WOUND": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Wound.cs"
+  },
+  "card:WRAITH_FORM": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\WraithForm.cs"
+  },
+  "card:WRITHE": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Writhe.cs"
+  },
+  "card:WROUGHT_IN_WAR": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\WroughtInWar.cs"
+  },
+  "card:ZAP": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Cards\\Zap.cs"
+  },
+  "encounter:AEONGLASS_BOSS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\AeonglassBoss.cs"
+  },
+  "encounter:AXEBOTS_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\AxebotsNormal.cs"
+  },
+  "encounter:BATTLEWORN_DUMMY_EVENT_ENCOUNTER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\BattlewornDummyEventEncounter.cs"
+  },
+  "encounter:BOWLBUGS_NORMAL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\BowlbugsNormal.cs"
+  },
+  "encounter:BOWLBUGS_WEAK": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\BowlbugsWeak.cs"
+  },
+  "encounter:BYGONE_EFFIGY_ELITE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\BygoneEffigyElite.cs"
+  },
+  "encounter:BYRDONIS_ELITE": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ByrdonisElite.cs"
+  },
+  "encounter:CEREMONIAL_BEAST_BOSS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\CeremonialBeastBoss.cs"
+  },
+  "encounter:CHOMPERS_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ChompersNormal.cs"
+  },
+  "encounter:CONSTRUCT_MENAGERIE_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ConstructMenagerieNormal.cs"
+  },
+  "encounter:CORPSE_SLUGS_NORMAL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\CorpseSlugsNormal.cs"
+  },
+  "encounter:CORPSE_SLUGS_WEAK": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\CorpseSlugsWeak.cs"
+  },
+  "encounter:CUBEX_CONSTRUCT_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\CubexConstructNormal.cs"
+  },
+  "encounter:CULTISTS_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\CultistsNormal.cs"
+  },
+  "encounter:DECIMILLIPEDE_ELITE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\DecimillipedeElite.cs"
+  },
+  "encounter:DENSE_VEGETATION_EVENT_ENCOUNTER": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\DenseVegetationEventEncounter.cs"
+  },
+  "encounter:DEPRECATED_ENCOUNTER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\DeprecatedEncounter.cs"
+  },
+  "encounter:DEVOTED_SCULPTOR_WEAK": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\DevotedSculptorWeak.cs"
+  },
+  "encounter:ENTOMANCER_ELITE": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\EntomancerElite.cs"
+  },
+  "encounter:EXOSKELETONS_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ExoskeletonsNormal.cs"
+  },
+  "encounter:EXOSKELETONS_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ExoskeletonsWeak.cs"
+  },
+  "encounter:FABRICATOR_NORMAL": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\FabricatorNormal.cs"
+  },
+  "encounter:FAKE_MERCHANT_EVENT_ENCOUNTER": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\FakeMerchantEventEncounter.cs"
+  },
+  "encounter:FLYCONID_NORMAL": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\FlyconidNormal.cs"
+  },
+  "encounter:FOGMOG_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\FogmogNormal.cs"
+  },
+  "encounter:FOSSIL_STALKER_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\FossilStalkerNormal.cs"
+  },
+  "encounter:FROG_KNIGHT_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\FrogKnightNormal.cs"
+  },
+  "encounter:FUZZY_WURM_CRAWLER_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\FuzzyWurmCrawlerWeak.cs"
+  },
+  "encounter:GLOBE_HEAD_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\GlobeHeadNormal.cs"
+  },
+  "encounter:GREMLIN_MERC_NORMAL": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\GremlinMercNormal.cs"
+  },
+  "encounter:HAUNTED_SHIP_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\HauntedShipNormal.cs"
+  },
+  "encounter:HUNTER_KILLER_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\HunterKillerNormal.cs"
+  },
+  "encounter:INFESTED_PRISMS_ELITE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\InfestedPrismsElite.cs"
+  },
+  "encounter:INKLETS_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\InkletsNormal.cs"
+  },
+  "encounter:KAISER_CRAB_BOSS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\KaiserCrabBoss.cs"
+  },
+  "encounter:KNIGHTS_ELITE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\KnightsElite.cs"
+  },
+  "encounter:KNOWLEDGE_DEMON_BOSS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\KnowledgeDemonBoss.cs"
+  },
+  "encounter:LAGAVULIN_MATRIARCH_BOSS": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\LagavulinMatriarchBoss.cs"
+  },
+  "encounter:LIVING_FOG_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\LivingFogNormal.cs"
+  },
+  "encounter:LOUSE_PROGENITOR_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\LouseProgenitorNormal.cs"
+  },
+  "encounter:MAWLER_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\MawlerNormal.cs"
+  },
+  "encounter:MECHA_KNIGHT_ELITE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\MechaKnightElite.cs"
+  },
+  "encounter:MYSTERIOUS_KNIGHT_EVENT_ENCOUNTER": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\MysteriousKnightEventEncounter.cs"
+  },
+  "encounter:MYTES_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\MytesNormal.cs"
+  },
+  "encounter:NIBBITS_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\NibbitsNormal.cs"
+  },
+  "encounter:NIBBITS_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\NibbitsWeak.cs"
+  },
+  "encounter:OVERGROWTH_CRAWLERS": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\OvergrowthCrawlers.cs"
+  },
+  "encounter:OVICOPTER_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\OvicopterNormal.cs"
+  },
+  "encounter:OWL_MAGISTRATE_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\OwlMagistrateNormal.cs"
+  },
+  "encounter:PHANTASMAL_GARDENERS_ELITE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\PhantasmalGardenersElite.cs"
+  },
+  "encounter:PHROG_PARASITE_ELITE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\PhrogParasiteElite.cs"
+  },
+  "encounter:PUNCH_CONSTRUCT_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\PunchConstructNormal.cs"
+  },
+  "encounter:PUNCH_OFF_EVENT_ENCOUNTER": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\PunchOffEventEncounter.cs"
+  },
+  "encounter:QUEEN_BOSS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\QueenBoss.cs"
+  },
+  "encounter:RUBY_RAIDERS_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\RubyRaidersNormal.cs"
+  },
+  "encounter:SCROLLS_OF_BITING_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ScrollsOfBitingNormal.cs"
+  },
+  "encounter:SCROLLS_OF_BITING_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ScrollsOfBitingWeak.cs"
+  },
+  "encounter:SEAPUNK_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SeapunkNormal.cs"
+  },
+  "encounter:SEAPUNK_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SeapunkWeak.cs"
+  },
+  "encounter:SEWER_CLAM_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SewerClamNormal.cs"
+  },
+  "encounter:SHRINKER_BEETLE_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ShrinkerBeetleWeak.cs"
+  },
+  "encounter:SKULKING_COLONY_ELITE": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SkulkingColonyElite.cs"
+  },
+  "encounter:SLIMED_BERSERKER_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlimedBerserkerNormal.cs"
+  },
+  "encounter:SLIMES_NORMAL": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlimesNormal.cs"
+  },
+  "encounter:SLIMES_WEAK": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlimesWeak.cs"
+  },
+  "encounter:SLITHERING_STRANGLER_NORMAL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlitheringStranglerNormal.cs"
+  },
+  "encounter:SLUDGE_SPINNER_WEAK": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SludgeSpinnerWeak.cs"
+  },
+  "encounter:SLUMBERING_BEETLE_NORMAL": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SlumberingBeetleNormal.cs"
+  },
+  "encounter:SNAPPING_JAXFRUIT_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SnappingJaxfruitNormal.cs"
+  },
+  "encounter:SOUL_FYSH_BOSS": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SoulFyshBoss.cs"
+  },
+  "encounter:SOUL_NEXUS_ELITE": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SoulNexusElite.cs"
+  },
+  "encounter:SPINY_TOAD_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\SpinyToadNormal.cs"
+  },
+  "encounter:TERROR_EEL_ELITE": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TerrorEelElite.cs"
+  },
+  "encounter:TEST_SUBJECT_BOSS": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TestSubjectBoss.cs"
+  },
+  "encounter:THE_ARCHITECT_EVENT_ENCOUNTER": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheArchitectEventEncounter.cs"
+  },
+  "encounter:THE_INSATIABLE_BOSS": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheInsatiableBoss.cs"
+  },
+  "encounter:THE_KIN_BOSS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheKinBoss.cs"
+  },
+  "encounter:THE_LOST_AND_FORGOTTEN_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheLostAndForgottenNormal.cs"
+  },
+  "encounter:THE_OBSCURA_NORMAL": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TheObscuraNormal.cs"
+  },
+  "encounter:THIEVING_HOPPER_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ThievingHopperWeak.cs"
+  },
+  "encounter:TOADPOLES_WEAK": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\ToadpolesWeak.cs"
+  },
+  "encounter:TUNNELER_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TunnelerNormal.cs"
+  },
+  "encounter:TUNNELER_WEAK": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TunnelerWeak.cs"
+  },
+  "encounter:TURRET_OPERATOR_WEAK": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TurretOperatorWeak.cs"
+  },
+  "encounter:TWO_TAILED_RATS_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\TwoTailedRatsNormal.cs"
+  },
+  "encounter:VANTOM_BOSS": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\VantomBoss.cs"
+  },
+  "encounter:VINE_SHAMBLER_NORMAL": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\VineShamblerNormal.cs"
+  },
+  "encounter:WATERFALL_GIANT_BOSS": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Encounters\\WaterfallGiantBoss.cs"
+  },
+  "monster:AEONGLASS": {
+    "line": 22,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Aeonglass.cs"
+  },
+  "monster:ARCHITECT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Architect.cs"
+  },
+  "monster:ASSASSIN_RUBY_RAIDER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\AssassinRubyRaider.cs"
+  },
+  "monster:AXEBOT": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Axebot.cs"
+  },
+  "monster:AXE_RUBY_RAIDER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\AxeRubyRaider.cs"
+  },
+  "monster:BATTLE_FRIEND_V1": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BattleFriendV1.cs"
+  },
+  "monster:BATTLE_FRIEND_V2": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BattleFriendV2.cs"
+  },
+  "monster:BATTLE_FRIEND_V3": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BattleFriendV3.cs"
+  },
+  "monster:BIG_DUMMY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BigDummy.cs"
+  },
+  "monster:BOWLBUG_EGG": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugEgg.cs"
+  },
+  "monster:BOWLBUG_NECTAR": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugNectar.cs"
+  },
+  "monster:BOWLBUG_ROCK": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugRock.cs"
+  },
+  "monster:BOWLBUG_SILK": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BowlbugSilk.cs"
+  },
+  "monster:BRUTE_RUBY_RAIDER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BruteRubyRaider.cs"
+  },
+  "monster:BYGONE_EFFIGY": {
+    "line": 24,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\BygoneEffigy.cs"
+  },
+  "monster:BYRDONIS": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Byrdonis.cs"
+  },
+  "monster:BYRDPIP": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Byrdpip.cs"
+  },
+  "monster:CALCIFIED_CULTIST": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\CalcifiedCultist.cs"
+  },
+  "monster:CEREMONIAL_BEAST": {
+    "line": 25,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\CeremonialBeast.cs"
+  },
+  "monster:CHOMPER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Chomper.cs"
+  },
+  "monster:CORPSE_SLUG": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\CorpseSlug.cs"
+  },
+  "monster:CROSSBOW_RUBY_RAIDER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\CrossbowRubyRaider.cs"
+  },
+  "monster:CRUSHER": {
+    "line": 23,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Crusher.cs"
+  },
+  "monster:CUBEX_CONSTRUCT": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\CubexConstruct.cs"
+  },
+  "monster:DAMP_CULTIST": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\DampCultist.cs"
+  },
+  "monster:DECIMILLIPEDE_SEGMENT": {
+    "line": 27,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegment.cs"
+  },
+  "monster:DECIMILLIPEDE_SEGMENT_BACK": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegmentBack.cs"
+  },
+  "monster:DECIMILLIPEDE_SEGMENT_FRONT": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegmentFront.cs"
+  },
+  "monster:DECIMILLIPEDE_SEGMENT_MIDDLE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\DecimillipedeSegmentMiddle.cs"
+  },
+  "monster:DEPRECATED_MONSTER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\DeprecatedMonster.cs"
+  },
+  "monster:DEVOTED_SCULPTOR": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\DevotedSculptor.cs"
+  },
+  "monster:ENTOMANCER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Entomancer.cs"
+  },
+  "monster:EXOSKELETON": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Exoskeleton.cs"
+  },
+  "monster:EYE_WITH_TEETH": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\EyeWithTeeth.cs"
+  },
+  "monster:FABRICATOR": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Fabricator.cs"
+  },
+  "monster:FAKE_MERCHANT_MONSTER": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\FakeMerchantMonster.cs"
+  },
+  "monster:FAT_GREMLIN": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\FatGremlin.cs"
+  },
+  "monster:FLAIL_KNIGHT": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\FlailKnight.cs"
+  },
+  "monster:FLYCONID": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Flyconid.cs"
+  },
+  "monster:FOGMOG": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Fogmog.cs"
+  },
+  "monster:FOSSIL_STALKER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\FossilStalker.cs"
+  },
+  "monster:FROG_KNIGHT": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\FrogKnight.cs"
+  },
+  "monster:FUZZY_WURM_CRAWLER": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\FuzzyWurmCrawler.cs"
+  },
+  "monster:GAS_BOMB": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\GasBomb.cs"
+  },
+  "monster:GLOBE_HEAD": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\GlobeHead.cs"
+  },
+  "monster:GREMLIN_MERC": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\GremlinMerc.cs"
+  },
+  "monster:GUARDBOT": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Guardbot.cs"
+  },
+  "monster:HAUNTED_SHIP": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\HauntedShip.cs"
+  },
+  "monster:HUNTER_KILLER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\HunterKiller.cs"
+  },
+  "monster:INFESTED_PRISM": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\InfestedPrism.cs"
+  },
+  "monster:INKLET": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Inklet.cs"
+  },
+  "monster:KIN_FOLLOWER": {
+    "line": 24,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\KinFollower.cs"
+  },
+  "monster:KIN_PRIEST": {
+    "line": 23,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\KinPriest.cs"
+  },
+  "monster:KNOWLEDGE_DEMON": {
+    "line": 22,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\KnowledgeDemon.cs"
+  },
+  "monster:LAGAVULIN_MATRIARCH": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\LagavulinMatriarch.cs"
+  },
+  "monster:LEAF_SLIME_M": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\LeafSlimeM.cs"
+  },
+  "monster:LEAF_SLIME_S": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\LeafSlimeS.cs"
+  },
+  "monster:LIVING_FOG": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\LivingFog.cs"
+  },
+  "monster:LIVING_SHIELD": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\LivingShield.cs"
+  },
+  "monster:LOUSE_PROGENITOR": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\LouseProgenitor.cs"
+  },
+  "monster:MAGI_KNIGHT": {
+    "line": 23,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\MagiKnight.cs"
+  },
+  "monster:MAWLER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Mawler.cs"
+  },
+  "monster:MECHA_KNIGHT": {
+    "line": 26,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\MechaKnight.cs"
+  },
+  "monster:MULTI_ATTACK_MOVE_MONSTER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\MultiAttackMoveMonster.cs"
+  },
+  "monster:MYTE": {
+    "line": 22,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Myte.cs"
+  },
+  "monster:NIBBIT": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Nibbit.cs"
+  },
+  "monster:NOISEBOT": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Noisebot.cs"
+  },
+  "monster:ONE_HP_MONSTER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\OneHpMonster.cs"
+  },
+  "monster:OSTY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Osty.cs"
+  },
+  "monster:OVICOPTER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Ovicopter.cs"
+  },
+  "monster:OWL_MAGISTRATE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\OwlMagistrate.cs"
+  },
+  "monster:PAELS_LEGION": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\PaelsLegion.cs"
+  },
+  "monster:PARAFRIGHT": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Parafright.cs"
+  },
+  "monster:PHANTASMAL_GARDENER": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\PhantasmalGardener.cs"
+  },
+  "monster:PHROG_PARASITE": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\PhrogParasite.cs"
+  },
+  "monster:PUNCH_CONSTRUCT": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\PunchConstruct.cs"
+  },
+  "monster:QUEEN": {
+    "line": 22,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Queen.cs"
+  },
+  "monster:ROCKET": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Rocket.cs"
+  },
+  "monster:SCROLL_OF_BITING": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\ScrollOfBiting.cs"
+  },
+  "monster:SEAPUNK": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Seapunk.cs"
+  },
+  "monster:SEWER_CLAM": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SewerClam.cs"
+  },
+  "monster:SHRINKER_BEETLE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\ShrinkerBeetle.cs"
+  },
+  "monster:SINGLE_ATTACK_MOVE_MONSTER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SingleAttackMoveMonster.cs"
+  },
+  "monster:SKULKING_COLONY": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SkulkingColony.cs"
+  },
+  "monster:SLIMED_BERSERKER": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SlimedBerserker.cs"
+  },
+  "monster:SLITHERING_STRANGLER": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SlitheringStrangler.cs"
+  },
+  "monster:SLUDGE_SPINNER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SludgeSpinner.cs"
+  },
+  "monster:SLUMBERING_BEETLE": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SlumberingBeetle.cs"
+  },
+  "monster:SNAPPING_JAXFRUIT": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SnappingJaxfruit.cs"
+  },
+  "monster:SNEAKY_GREMLIN": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SneakyGremlin.cs"
+  },
+  "monster:SOUL_FYSH": {
+    "line": 24,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SoulFysh.cs"
+  },
+  "monster:SOUL_NEXUS": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SoulNexus.cs"
+  },
+  "monster:SPECTRAL_KNIGHT": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SpectralKnight.cs"
+  },
+  "monster:SPINY_TOAD": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\SpinyToad.cs"
+  },
+  "monster:STABBOT": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Stabbot.cs"
+  },
+  "monster:TEN_HP_MONSTER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TenHpMonster.cs"
+  },
+  "monster:TERROR_EEL": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TerrorEel.cs"
+  },
+  "monster:TEST_SUBJECT": {
+    "line": 25,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TestSubject.cs"
+  },
+  "monster:THE_ADVERSARY_MK_ONE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheAdversaryMkOne.cs"
+  },
+  "monster:THE_ADVERSARY_MK_THREE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheAdversaryMkThree.cs"
+  },
+  "monster:THE_ADVERSARY_MK_TWO": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheAdversaryMkTwo.cs"
+  },
+  "monster:THE_FORGOTTEN": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheForgotten.cs"
+  },
+  "monster:THE_INSATIABLE": {
+    "line": 24,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheInsatiable.cs"
+  },
+  "monster:THE_LOST": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheLost.cs"
+  },
+  "monster:THE_OBSCURA": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TheObscura.cs"
+  },
+  "monster:THIEVING_HOPPER": {
+    "line": 26,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\ThievingHopper.cs"
+  },
+  "monster:TOADPOLE": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Toadpole.cs"
+  },
+  "monster:TORCH_HEAD_AMALGAM": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TorchHeadAmalgam.cs"
+  },
+  "monster:TOUGH_EGG": {
+    "line": 24,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\ToughEgg.cs"
+  },
+  "monster:TRACKER_RUBY_RAIDER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TrackerRubyRaider.cs"
+  },
+  "monster:TUNNELER": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Tunneler.cs"
+  },
+  "monster:TURRET_OPERATOR": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TurretOperator.cs"
+  },
+  "monster:TWIG_SLIME_M": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TwigSlimeM.cs"
+  },
+  "monster:TWIG_SLIME_S": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TwigSlimeS.cs"
+  },
+  "monster:TWO_TAILED_RAT": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\TwoTailedRat.cs"
+  },
+  "monster:VANTOM": {
+    "line": 28,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Vantom.cs"
+  },
+  "monster:VINE_SHAMBLER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\VineShambler.cs"
+  },
+  "monster:WATERFALL_GIANT": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\WaterfallGiant.cs"
+  },
+  "monster:WRIGGLER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Wriggler.cs"
+  },
+  "monster:ZAPBOT": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Monsters\\Zapbot.cs"
+  },
+  "power:ACCELERANT_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AccelerantPower.cs"
+  },
+  "power:ACCURACY_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AccuracyPower.cs"
+  },
+  "power:ADAPTABLE_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AdaptablePower.cs"
+  },
+  "power:AFTERIMAGE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AfterimagePower.cs"
+  },
+  "power:AGGRESSION_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AggressionPower.cs"
+  },
+  "power:AMBERGRIS_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AmbergrisPower.cs"
+  },
+  "power:ANTICIPATE_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AnticipatePower.cs"
+  },
+  "power:ARSENAL_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ArsenalPower.cs"
+  },
+  "power:ARTIFACT_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ArtifactPower.cs"
+  },
+  "power:ASLEEP_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AsleepPower.cs"
+  },
+  "power:AUTOMATION_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\AutomationPower.cs"
+  },
+  "power:BACK_ATTACK_LEFT_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BackAttackLeftPower.cs"
+  },
+  "power:BACK_ATTACK_RIGHT_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BackAttackRightPower.cs"
+  },
+  "power:BARRICADE_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BarricadePower.cs"
+  },
+  "power:BATTLEWORN_DUMMY_TIME_LIMIT_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BattlewornDummyTimeLimitPower.cs"
+  },
+  "power:BEACON_OF_HOPE_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BeaconOfHopePower.cs"
+  },
+  "power:BIASED_COGNITION_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BiasedCognitionPower.cs"
+  },
+  "power:BLACK_HOLE_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BlackHolePower.cs"
+  },
+  "power:BLOCK_NEXT_TURN_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BlockNextTurnPower.cs"
+  },
+  "power:BLUR_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BlurPower.cs"
+  },
+  "power:BORROWED_TIME_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BorrowedTimePower.cs"
+  },
+  "power:BUFFER_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BufferPower.cs"
+  },
+  "power:BURROWED_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BurrowedPower.cs"
+  },
+  "power:BURST_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\BurstPower.cs"
+  },
+  "power:CACOPHONY_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CacophonyPower.cs"
+  },
+  "power:CALAMITY_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CalamityPower.cs"
+  },
+  "power:CALCIFY_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CalcifyPower.cs"
+  },
+  "power:CALL_OF_THE_VOID_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CallOfTheVoidPower.cs"
+  },
+  "power:CHAINS_OF_BINDING_POWER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ChainsOfBindingPower.cs"
+  },
+  "power:CHILD_OF_THE_STARS_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ChildOfTheStarsPower.cs"
+  },
+  "power:CLARITY_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ClarityPower.cs"
+  },
+  "power:COLOSSUS_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ColossusPower.cs"
+  },
+  "power:CONCOCT_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ConcoctPower.cs"
+  },
+  "power:CONFUSED_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ConfusedPower.cs"
+  },
+  "power:CONQUEROR_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ConquerorPower.cs"
+  },
+  "power:CONSTRICT_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ConstrictPower.cs"
+  },
+  "power:CONSUMING_SHADOW_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ConsumingShadowPower.cs"
+  },
+  "power:COOLANT_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CoolantPower.cs"
+  },
+  "power:COORDINATE_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CoordinatePower.cs"
+  },
+  "power:CORROSIVE_WAVE_POWER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CorrosiveWavePower.cs"
+  },
+  "power:CORRUPTION_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CorruptionPower.cs"
+  },
+  "power:COUNTDOWN_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CountdownPower.cs"
+  },
+  "power:COVERED_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CoveredPower.cs"
+  },
+  "power:CRAB_RAGE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CrabRagePower.cs"
+  },
+  "power:CREATIVE_AI_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CreativeAiPower.cs"
+  },
+  "power:CRIMSON_MANTLE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CrimsonMantlePower.cs"
+  },
+  "power:CRUELTY_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CrueltyPower.cs"
+  },
+  "power:CRUSH_UNDER_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CrushUnderPower.cs"
+  },
+  "power:CURIOUS_POWER": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CuriousPower.cs"
+  },
+  "power:CURL_UP_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\CurlUpPower.cs"
+  },
+  "power:DAMPEN_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DampenPower.cs"
+  },
+  "power:DANSE_MACABRE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DanseMacabrePower.cs"
+  },
+  "power:DARK_EMBRACE_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DarkEmbracePower.cs"
+  },
+  "power:DARK_SHACKLES_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DarkShacklesPower.cs"
+  },
+  "power:DEBILITATE_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DebilitatePower.cs"
+  },
+  "power:DEMESNE_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DemesnePower.cs"
+  },
+  "power:DEMISE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DemisePower.cs"
+  },
+  "power:DEMON_FORM_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DemonFormPower.cs"
+  },
+  "power:DEVOUR_LIFE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DevourLifePower.cs"
+  },
+  "power:DEXTERITY_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DexterityPower.cs"
+  },
+  "power:DIE_FOR_YOU_POWER": {
+    "line": 7,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DieForYouPower.cs"
+  },
+  "power:DISINTEGRATION_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DisintegrationPower.cs"
+  },
+  "power:DOOM_POWER": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DoomPower.cs"
+  },
+  "power:DOUBLE_DAMAGE_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DoubleDamagePower.cs"
+  },
+  "power:DRAW_CARDS_NEXT_TURN_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DrawCardsNextTurnPower.cs"
+  },
+  "power:DUPLICATION_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DuplicationPower.cs"
+  },
+  "power:DYING_STAR_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\DyingStarPower.cs"
+  },
+  "power:ECHO_FORM_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\EchoFormPower.cs"
+  },
+  "power:ENERGY_NEXT_TURN_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\EnergyNextTurnPower.cs"
+  },
+  "power:ENFEEBLING_TOUCH_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\EnfeeblingTouchPower.cs"
+  },
+  "power:ENRAGE_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\EnragePower.cs"
+  },
+  "power:ENTROPY_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\EntropyPower.cs"
+  },
+  "power:ENVENOM_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\EnvenomPower.cs"
+  },
+  "power:ESCAPE_ARTIST_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\EscapeArtistPower.cs"
+  },
+  "power:FADE_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FadePower.cs"
+  },
+  "power:FAN_OF_KNIVES_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FanOfKnivesPower.cs"
+  },
+  "power:FASTEN_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FastenPower.cs"
+  },
+  "power:FEEDING_FRENZY_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FeedingFrenzyPower.cs"
+  },
+  "power:FEEL_NO_PAIN_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FeelNoPainPower.cs"
+  },
+  "power:FERAL_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FeralPower.cs"
+  },
+  "power:FLAME_BARRIER_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FlameBarrierPower.cs"
+  },
+  "power:FLANKING_POWER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FlankingPower.cs"
+  },
+  "power:FLEX_POTION_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FlexPotionPower.cs"
+  },
+  "power:FLUTTER_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FlutterPower.cs"
+  },
+  "power:FOCUSED_STRIKE_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FocusedStrikePower.cs"
+  },
+  "power:FOCUS_POWER": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FocusPower.cs"
+  },
+  "power:FORBIDDEN_GRIMOIRE_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ForbiddenGrimoirePower.cs"
+  },
+  "power:FOREGONE_CONCLUSION_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ForegoneConclusionPower.cs"
+  },
+  "power:FRAIL_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FrailPower.cs"
+  },
+  "power:FREE_ATTACK_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FreeAttackPower.cs"
+  },
+  "power:FREE_POWER_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FreePowerPower.cs"
+  },
+  "power:FREE_SKILL_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FreeSkillPower.cs"
+  },
+  "power:FRIENDSHIP_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FriendshipPower.cs"
+  },
+  "power:FURNACE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\FurnacePower.cs"
+  },
+  "power:GALVANIC_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\GalvanicPower.cs"
+  },
+  "power:GENESIS_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\GenesisPower.cs"
+  },
+  "power:GIGANTIFICATION_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\GigantificationPower.cs"
+  },
+  "power:GRAVITY_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\GravityPower.cs"
+  },
+  "power:GUARDED_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\GuardedPower.cs"
+  },
+  "power:HAILSTORM_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HailstormPower.cs"
+  },
+  "power:HAMMER_TIME_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HammerTimePower.cs"
+  },
+  "power:HANG_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HangPower.cs"
+  },
+  "power:HARDENED_SHELL_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HardenedShellPower.cs"
+  },
+  "power:HARD_TO_KILL_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HardToKillPower.cs"
+  },
+  "power:HATCH_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HatchPower.cs"
+  },
+  "power:HAUNT_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HauntPower.cs"
+  },
+  "power:HEIST_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HeistPower.cs"
+  },
+  "power:HELICAL_DART_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HelicalDartPower.cs"
+  },
+  "power:HELLO_WORLD_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HelloWorldPower.cs"
+  },
+  "power:HELLRAISER_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HellraiserPower.cs"
+  },
+  "power:HEX_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HexPower.cs"
+  },
+  "power:HIBERNATE_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HibernatePower.cs"
+  },
+  "power:HIGH_VOLTAGE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HighVoltagePower.cs"
+  },
+  "power:HOTFIX_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\HotfixPower.cs"
+  },
+  "power:ILLUSION_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\IllusionPower.cs"
+  },
+  "power:IMBALANCED_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ImbalancedPower.cs"
+  },
+  "power:IMITATION_LEARNING_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ImitationLearningPower.cs"
+  },
+  "power:IMPROVEMENT_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ImprovementPower.cs"
+  },
+  "power:INFERNO_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\InfernoPower.cs"
+  },
+  "power:INFESTED_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\InfestedPower.cs"
+  },
+  "power:INFINITE_BLADES_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\InfiniteBladesPower.cs"
+  },
+  "power:INTANGIBLE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\IntangiblePower.cs"
+  },
+  "power:INTERCEPT_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\InterceptPower.cs"
+  },
+  "power:ITERATION_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\IterationPower.cs"
+  },
+  "power:JUGGERNAUT_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\JuggernautPower.cs"
+  },
+  "power:JUGGLING_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\JugglingPower.cs"
+  },
+  "power:KNOCKDOWN_POWER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\KnockdownPower.cs"
+  },
+  "power:LEADERSHIP_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\LeadershipPower.cs"
+  },
+  "power:LETHALITY_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\LethalityPower.cs"
+  },
+  "power:LIGHTNING_ROD_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\LightningRodPower.cs"
+  },
+  "power:LOOP_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\LoopPower.cs"
+  },
+  "power:MACHINE_LEARNING_POWER": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MachineLearningPower.cs"
+  },
+  "power:MAGIC_BOMB_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MagicBombPower.cs"
+  },
+  "power:MANGLE_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ManglePower.cs"
+  },
+  "power:MASTER_PLANNER_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MasterPlannerPower.cs"
+  },
+  "power:MAYHEM_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MayhemPower.cs"
+  },
+  "power:MIND_ROT_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MindRotPower.cs"
+  },
+  "power:MINION_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MinionPower.cs"
+  },
+  "power:MONARCHS_GAZE_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MonarchsGazePower.cs"
+  },
+  "power:MONARCHS_GAZE_STRENGTH_DOWN_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MonarchsGazeStrengthDownPower.cs"
+  },
+  "power:MONOLOGUE_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\MonologuePower.cs"
+  },
+  "power:NECRO_MASTERY_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NecroMasteryPower.cs"
+  },
+  "power:NEMESIS_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NemesisPower.cs"
+  },
+  "power:NEUROSURGE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NeurosurgePower.cs"
+  },
+  "power:NIGHTMARE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NightmarePower.cs"
+  },
+  "power:NOSTALGIA_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NostalgiaPower.cs"
+  },
+  "power:NOXIOUS_FUMES_POWER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NoxiousFumesPower.cs"
+  },
+  "power:NO_BLOCK_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NoBlockPower.cs"
+  },
+  "power:NO_DRAW_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NoDrawPower.cs"
+  },
+  "power:NO_ENERGY_GAIN_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\NoEnergyGainPower.cs"
+  },
+  "power:OBLIVION_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\OblivionPower.cs"
+  },
+  "power:ONE_FOR_ALL_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\OneForAllPower.cs"
+  },
+  "power:ONE_TWO_PUNCH_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\OneTwoPunchPower.cs"
+  },
+  "power:ORBIT_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\OrbitPower.cs"
+  },
+  "power:OUTBREAK_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\OutbreakPower.cs"
+  },
+  "power:PAGESTORM_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PagestormPower.cs"
+  },
+  "power:PAINFUL_STABS_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PainfulStabsPower.cs"
+  },
+  "power:PALE_BLUE_DOT_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PaleBlueDotPower.cs"
+  },
+  "power:PANACHE_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PanachePower.cs"
+  },
+  "power:PAPER_CUTS_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PaperCutsPower.cs"
+  },
+  "power:PARRY_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ParryPower.cs"
+  },
+  "power:PERSONAL_HIVE_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PersonalHivePower.cs"
+  },
+  "power:PHANTOM_BLADES_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PhantomBladesPower.cs"
+  },
+  "power:PIERCING_WAIL_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PiercingWailPower.cs"
+  },
+  "power:PILLAR_OF_CREATION_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PillarOfCreationPower.cs"
+  },
+  "power:PLATING_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PlatingPower.cs"
+  },
+  "power:PLOW_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PlowPower.cs"
+  },
+  "power:POISON_POWER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PoisonPower.cs"
+  },
+  "power:POSSESS_SPEED_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PossessSpeedPower.cs"
+  },
+  "power:POSSESS_STRENGTH_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PossessStrengthPower.cs"
+  },
+  "power:PREP_TIME_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PrepTimePower.cs"
+  },
+  "power:PYRE_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\PyrePower.cs"
+  },
+  "power:RADIANCE_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RadiancePower.cs"
+  },
+  "power:RAGE_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RagePower.cs"
+  },
+  "power:RAMPART_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RampartPower.cs"
+  },
+  "power:RAVENOUS_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RavenousPower.cs"
+  },
+  "power:REAPER_FORM_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ReaperFormPower.cs"
+  },
+  "power:REATTACH_POWER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ReattachPower.cs"
+  },
+  "power:REBOUND_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ReboundPower.cs"
+  },
+  "power:REFLECT_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ReflectPower.cs"
+  },
+  "power:REGEN_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RegenPower.cs"
+  },
+  "power:REPTILE_TRINKET_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ReptileTrinketPower.cs"
+  },
+  "power:RETAIN_HAND_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RetainHandPower.cs"
+  },
+  "power:RINGING_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RingingPower.cs"
+  },
+  "power:RITUAL_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RitualPower.cs"
+  },
+  "power:ROLLING_BOULDER_POWER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RollingBoulderPower.cs"
+  },
+  "power:ROYALTIES_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RoyaltiesPower.cs"
+  },
+  "power:RUPTURE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\RupturePower.cs"
+  },
+  "power:SANDPIT_POWER": {
+    "line": 21,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SandpitPower.cs"
+  },
+  "power:SEEKING_EDGE_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SeekingEdgePower.cs"
+  },
+  "power:SELF_FORMING_CLAY_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SelfFormingClayPower.cs"
+  },
+  "power:SENTRY_MODE_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SentryModePower.cs"
+  },
+  "power:SERPENT_FORM_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SerpentFormPower.cs"
+  },
+  "power:SETUP_STRIKE_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SetupStrikePower.cs"
+  },
+  "power:SHACKLING_POTION_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ShacklingPotionPower.cs"
+  },
+  "power:SHADOWMELD_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ShadowmeldPower.cs"
+  },
+  "power:SHADOW_STEP_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ShadowStepPower.cs"
+  },
+  "power:SHRIEK_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ShriekPower.cs"
+  },
+  "power:SHRINK_POWER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ShrinkPower.cs"
+  },
+  "power:SHROUD_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ShroudPower.cs"
+  },
+  "power:SIC_EM_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SicEmPower.cs"
+  },
+  "power:SIGNAL_BOOST_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SignalBoostPower.cs"
+  },
+  "power:SKITTISH_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SkittishPower.cs"
+  },
+  "power:SLEIGHT_OF_FLESH_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SleightOfFleshPower.cs"
+  },
+  "power:SLIPPERY_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SlipperyPower.cs"
+  },
+  "power:SLOTH_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SlothPower.cs"
+  },
+  "power:SLOW_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SlowPower.cs"
+  },
+  "power:SLUMBER_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SlumberPower.cs"
+  },
+  "power:SMOGGY_POWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SmoggyPower.cs"
+  },
+  "power:SMOKESTACK_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SmokestackPower.cs"
+  },
+  "power:SNEAKY_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SneakyPower.cs"
+  },
+  "power:SOAR_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SoarPower.cs"
+  },
+  "power:SOULBOUND_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SoulboundPower.cs"
+  },
+  "power:SPECTRUM_SHIFT_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SpectrumShiftPower.cs"
+  },
+  "power:SPEEDSTER_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SpeedsterPower.cs"
+  },
+  "power:SPEED_POTION_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SpeedPotionPower.cs"
+  },
+  "power:SPINNER_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SpinnerPower.cs"
+  },
+  "power:SPIRIT_OF_ASH_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SpiritOfAshPower.cs"
+  },
+  "power:STAMPEDE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\StampedePower.cs"
+  },
+  "power:STAR_NEXT_TURN_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\StarNextTurnPower.cs"
+  },
+  "power:STEAM_ERUPTION_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SteamEruptionPower.cs"
+  },
+  "power:STOCK_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\StockPower.cs"
+  },
+  "power:STORM_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\StormPower.cs"
+  },
+  "power:STRANGLE_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\StranglePower.cs"
+  },
+  "power:STRATAGEM_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\StratagemPower.cs"
+  },
+  "power:STRENGTH_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\StrengthPower.cs"
+  },
+  "power:SUBROUTINE_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SubroutinePower.cs"
+  },
+  "power:SUCK_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SuckPower.cs"
+  },
+  "power:SUMMON_NEXT_TURN_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SummonNextTurnPower.cs"
+  },
+  "power:SURPRISE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SurprisePower.cs"
+  },
+  "power:SURROUNDED_POWER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SurroundedPower.cs"
+  },
+  "power:SWIPE_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SwipePower.cs"
+  },
+  "power:SWORD_SAGE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SwordSagePower.cs"
+  },
+  "power:SYNCHRONIZE_POWER": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\SynchronizePower.cs"
+  },
+  "power:TAG_TEAM_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TagTeamPower.cs"
+  },
+  "power:TAINTED_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TaintedPower.cs"
+  },
+  "power:TANGLED_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TangledPower.cs"
+  },
+  "power:TANK_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TankPower.cs"
+  },
+  "power:TEMPORARY_DEXTERITY_POWER": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TemporaryDexterityPower.cs"
+  },
+  "power:TEMPORARY_FOCUS_POWER": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TemporaryFocusPower.cs"
+  },
+  "power:TEMPORARY_STRENGTH_POWER": {
+    "line": 23,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TemporaryStrengthPower.cs"
+  },
+  "power:TENDER_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TenderPower.cs"
+  },
+  "power:TERRITORIAL_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TerritorialPower.cs"
+  },
+  "power:THE_BOMB_POWER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TheBombPower.cs"
+  },
+  "power:THE_GAMBIT_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TheGambitPower.cs"
+  },
+  "power:THE_HUNT_POWER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TheHuntPower.cs"
+  },
+  "power:THE_SEALED_THRONE_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TheSealedThronePower.cs"
+  },
+  "power:THIEVERY_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ThieveryPower.cs"
+  },
+  "power:THORNS_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ThornsPower.cs"
+  },
+  "power:THUNDER_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ThunderPower.cs"
+  },
+  "power:TOOLS_OF_THE_TRADE_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ToolsOfTheTradePower.cs"
+  },
+  "power:TORIC_TOUGHNESS_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ToricToughnessPower.cs"
+  },
+  "power:TRACKING_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TrackingPower.cs"
+  },
+  "power:TRASH_TO_TREASURE_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TrashToTreasurePower.cs"
+  },
+  "power:TYRANNY_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\TyrannyPower.cs"
+  },
+  "power:UNDERWORLD_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\UnderworldPower.cs"
+  },
+  "power:UNMOVABLE_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\UnmovablePower.cs"
+  },
+  "power:VEILPIERCER_POWER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\VeilpiercerPower.cs"
+  },
+  "power:VICIOUS_POWER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\ViciousPower.cs"
+  },
+  "power:VIGOR_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\VigorPower.cs"
+  },
+  "power:VITAL_SPARK_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\VitalSparkPower.cs"
+  },
+  "power:VOID_FORM_POWER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\VoidFormPower.cs"
+  },
+  "power:VULNERABLE_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\VulnerablePower.cs"
+  },
+  "power:WASTE_AWAY_POWER": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\WasteAwayPower.cs"
+  },
+  "power:WEAK_POWER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\WeakPower.cs"
+  },
+  "power:WELL_LAID_PLANS_POWER": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\WellLaidPlansPower.cs"
+  },
+  "power:WITHERING_PRESENCE_POWER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\WitheringPresencePower.cs"
+  },
+  "power:WRAITH_FORM_POWER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Powers\\WraithFormPower.cs"
+  },
+  "relic:AKABEKO": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Akabeko.cs"
+  },
+  "relic:ALCHEMICAL_COFFER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\AlchemicalCoffer.cs"
+  },
+  "relic:AMETHYST_AUBERGINE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\AmethystAubergine.cs"
+  },
+  "relic:ANCHOR": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Anchor.cs"
+  },
+  "relic:ARCANE_SCROLL": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ArcaneScroll.cs"
+  },
+  "relic:ARCHAIC_TOOTH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ArchaicTooth.cs"
+  },
+  "relic:ART_OF_WAR": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ArtOfWar.cs"
+  },
+  "relic:ASTROLABE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Astrolabe.cs"
+  },
+  "relic:BAG_OF_MARBLES": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BagOfMarbles.cs"
+  },
+  "relic:BAG_OF_PREPARATION": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BagOfPreparation.cs"
+  },
+  "relic:BEATING_REMNANT": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BeatingRemnant.cs"
+  },
+  "relic:BEAUTIFUL_BRACELET": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BeautifulBracelet.cs"
+  },
+  "relic:BELLOWS": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Bellows.cs"
+  },
+  "relic:BELT_BUCKLE": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BeltBuckle.cs"
+  },
+  "relic:BIG_HAT": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BigHat.cs"
+  },
+  "relic:BIG_MUSHROOM": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BigMushroom.cs"
+  },
+  "relic:BIIIG_HUG": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BiiigHug.cs"
+  },
+  "relic:BING_BONG": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BingBong.cs"
+  },
+  "relic:BLACK_BLOOD": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BlackBlood.cs"
+  },
+  "relic:BLACK_STAR": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BlackStar.cs"
+  },
+  "relic:BLESSED_ANTLER": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BlessedAntler.cs"
+  },
+  "relic:BLOOD_SOAKED_ROSE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BloodSoakedRose.cs"
+  },
+  "relic:BLOOD_VIAL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BloodVial.cs"
+  },
+  "relic:BONE_FLUTE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BoneFlute.cs"
+  },
+  "relic:BONE_TEA": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BoneTea.cs"
+  },
+  "relic:BOOKMARK": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Bookmark.cs"
+  },
+  "relic:BOOK_OF_FIVE_RINGS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BookOfFiveRings.cs"
+  },
+  "relic:BOOK_REPAIR_KNIFE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BookRepairKnife.cs"
+  },
+  "relic:BOOMING_CONCH": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BoomingConch.cs"
+  },
+  "relic:BOUND_PHYLACTERY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BoundPhylactery.cs"
+  },
+  "relic:BOWLER_HAT": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BowlerHat.cs"
+  },
+  "relic:BREAD": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Bread.cs"
+  },
+  "relic:BRILLIANT_SCARF": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BrilliantScarf.cs"
+  },
+  "relic:BRIMSTONE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Brimstone.cs"
+  },
+  "relic:BRONZE_SCALES": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BronzeScales.cs"
+  },
+  "relic:BURNING_BLOOD": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BurningBlood.cs"
+  },
+  "relic:BURNING_STICKS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\BurningSticks.cs"
+  },
+  "relic:BYRDPIP": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Byrdpip.cs"
+  },
+  "relic:CALLING_BELL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\CallingBell.cs"
+  },
+  "relic:CANDELABRA": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Candelabra.cs"
+  },
+  "relic:CAPTAINS_WHEEL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\CaptainsWheel.cs"
+  },
+  "relic:CAULDRON": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Cauldron.cs"
+  },
+  "relic:CENTENNIAL_PUZZLE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\CentennialPuzzle.cs"
+  },
+  "relic:CHANDELIER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Chandelier.cs"
+  },
+  "relic:CHARONS_ASHES": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\CharonsAshes.cs"
+  },
+  "relic:CHEMICAL_X": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ChemicalX.cs"
+  },
+  "relic:CHOICES_PARADOX": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ChoicesParadox.cs"
+  },
+  "relic:CHOSEN_CHEESE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ChosenCheese.cs"
+  },
+  "relic:CIRCLET": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Circlet.cs"
+  },
+  "relic:CLAWS": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Claws.cs"
+  },
+  "relic:CLOAK_CLASP": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\CloakClasp.cs"
+  },
+  "relic:CRACKED_CORE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\CrackedCore.cs"
+  },
+  "relic:CROSSBOW": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Crossbow.cs"
+  },
+  "relic:CURSED_PEARL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\CursedPearl.cs"
+  },
+  "relic:DARKSTONE_PERIAPT": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DarkstonePeriapt.cs"
+  },
+  "relic:DATA_DISK": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DataDisk.cs"
+  },
+  "relic:DAUGHTER_OF_THE_WIND": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DaughterOfTheWind.cs"
+  },
+  "relic:DELICATE_FROND": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DelicateFrond.cs"
+  },
+  "relic:DEMON_TONGUE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DemonTongue.cs"
+  },
+  "relic:DEPRECATED_RELIC": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DeprecatedRelic.cs"
+  },
+  "relic:DIAMOND_DIADEM": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DiamondDiadem.cs"
+  },
+  "relic:DINGY_RUG": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DingyRug.cs"
+  },
+  "relic:DISTINGUISHED_CAPE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DistinguishedCape.cs"
+  },
+  "relic:DIVINE_DESTINY": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DivineDestiny.cs"
+  },
+  "relic:DIVINE_RIGHT": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DivineRight.cs"
+  },
+  "relic:DOLLYS_MIRROR": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DollysMirror.cs"
+  },
+  "relic:DOWSING_ROD": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DowsingRod.cs"
+  },
+  "relic:DRAGON_FRUIT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DragonFruit.cs"
+  },
+  "relic:DREAM_CATCHER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DreamCatcher.cs"
+  },
+  "relic:DRIFTWOOD": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Driftwood.cs"
+  },
+  "relic:DUSTY_TOME": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\DustyTome.cs"
+  },
+  "relic:ECTOPLASM": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Ectoplasm.cs"
+  },
+  "relic:ELECTRIC_SHRYMP": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ElectricShrymp.cs"
+  },
+  "relic:EMBER_TEA": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\EmberTea.cs"
+  },
+  "relic:EMOTION_CHIP": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\EmotionChip.cs"
+  },
+  "relic:EMPTY_CAGE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\EmptyCage.cs"
+  },
+  "relic:ETERNAL_FEATHER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\EternalFeather.cs"
+  },
+  "relic:FAKE_ANCHOR": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeAnchor.cs"
+  },
+  "relic:FAKE_BLOOD_VIAL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeBloodVial.cs"
+  },
+  "relic:FAKE_HAPPY_FLOWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeHappyFlower.cs"
+  },
+  "relic:FAKE_LEES_WAFFLE": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeLeesWaffle.cs"
+  },
+  "relic:FAKE_MANGO": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeMango.cs"
+  },
+  "relic:FAKE_MERCHANTS_RUG": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeMerchantsRug.cs"
+  },
+  "relic:FAKE_ORICHALCUM": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeOrichalcum.cs"
+  },
+  "relic:FAKE_SNECKO_EYE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeSneckoEye.cs"
+  },
+  "relic:FAKE_STRIKE_DUMMY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeStrikeDummy.cs"
+  },
+  "relic:FAKE_VENERABLE_TEA_SET": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FakeVenerableTeaSet.cs"
+  },
+  "relic:FENCING_MANUAL": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FencingManual.cs"
+  },
+  "relic:FESTIVE_POPPER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FestivePopper.cs"
+  },
+  "relic:FIDDLE": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Fiddle.cs"
+  },
+  "relic:FISHING_ROD": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FishingRod.cs"
+  },
+  "relic:FORGOTTEN_SOUL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ForgottenSoul.cs"
+  },
+  "relic:FRAGRANT_MUSHROOM": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FragrantMushroom.cs"
+  },
+  "relic:FRESNEL_LENS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FresnelLens.cs"
+  },
+  "relic:FROZEN_EGG": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FrozenEgg.cs"
+  },
+  "relic:FUNERARY_MASK": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FuneraryMask.cs"
+  },
+  "relic:FUR_COAT": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\FurCoat.cs"
+  },
+  "relic:GALACTIC_DUST": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GalacticDust.cs"
+  },
+  "relic:GAMBLING_CHIP": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GamblingChip.cs"
+  },
+  "relic:GAME_PIECE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GamePiece.cs"
+  },
+  "relic:GHOST_SEED": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GhostSeed.cs"
+  },
+  "relic:GIRYA": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Girya.cs"
+  },
+  "relic:GLASS_EYE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GlassEye.cs"
+  },
+  "relic:GLITTER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Glitter.cs"
+  },
+  "relic:GNARLED_HAMMER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GnarledHammer.cs"
+  },
+  "relic:GOLDEN_COMPASS": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GoldenCompass.cs"
+  },
+  "relic:GOLDEN_PEARL": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GoldenPearl.cs"
+  },
+  "relic:GOLD_PLATED_CABLES": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GoldPlatedCables.cs"
+  },
+  "relic:GORGET": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Gorget.cs"
+  },
+  "relic:GREMLIN_HORN": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\GremlinHorn.cs"
+  },
+  "relic:HAND_DRILL": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\HandDrill.cs"
+  },
+  "relic:HAPPY_FLOWER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\HappyFlower.cs"
+  },
+  "relic:HEFTY_TABLET": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\HeftyTablet.cs"
+  },
+  "relic:HELICAL_DART": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\HelicalDart.cs"
+  },
+  "relic:HISTORY_COURSE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\HistoryCourse.cs"
+  },
+  "relic:HORN_CLEAT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\HornCleat.cs"
+  },
+  "relic:ICE_CREAM": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\IceCream.cs"
+  },
+  "relic:INFUSED_CORE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\InfusedCore.cs"
+  },
+  "relic:INTIMIDATING_HELMET": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\IntimidatingHelmet.cs"
+  },
+  "relic:IRON_CLUB": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\IronClub.cs"
+  },
+  "relic:IVORY_TILE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\IvoryTile.cs"
+  },
+  "relic:JEWELED_MASK": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\JeweledMask.cs"
+  },
+  "relic:JEWELRY_BOX": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\JewelryBox.cs"
+  },
+  "relic:JOSS_PAPER": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\JossPaper.cs"
+  },
+  "relic:JUZU_BRACELET": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\JuzuBracelet.cs"
+  },
+  "relic:KALEIDOSCOPE": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Kaleidoscope.cs"
+  },
+  "relic:KIFUDA": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Kifuda.cs"
+  },
+  "relic:KUNAI": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Kunai.cs"
+  },
+  "relic:KUSARIGAMA": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Kusarigama.cs"
+  },
+  "relic:LANTERN": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Lantern.cs"
+  },
+  "relic:LARGE_CAPSULE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LargeCapsule.cs"
+  },
+  "relic:LASTING_CANDY": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LastingCandy.cs"
+  },
+  "relic:LAVA_LAMP": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LavaLamp.cs"
+  },
+  "relic:LAVA_ROCK": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LavaRock.cs"
+  },
+  "relic:LEAD_PAPERWEIGHT": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LeadPaperweight.cs"
+  },
+  "relic:LEAFY_POULTICE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LeafyPoultice.cs"
+  },
+  "relic:LEES_WAFFLE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LeesWaffle.cs"
+  },
+  "relic:LETTER_OPENER": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LetterOpener.cs"
+  },
+  "relic:LIZARD_TAIL": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LizardTail.cs"
+  },
+  "relic:LOOMING_FRUIT": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LoomingFruit.cs"
+  },
+  "relic:LORDS_PARASOL": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LordsParasol.cs"
+  },
+  "relic:LOST_COFFER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LostCoffer.cs"
+  },
+  "relic:LOST_WISP": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LostWisp.cs"
+  },
+  "relic:LUCKY_FYSH": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LuckyFysh.cs"
+  },
+  "relic:LUNAR_PASTRY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\LunarPastry.cs"
+  },
+  "relic:MANGO": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Mango.cs"
+  },
+  "relic:MASSIVE_SCROLL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MassiveScroll.cs"
+  },
+  "relic:MAW_BANK": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MawBank.cs"
+  },
+  "relic:MEAL_TICKET": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MealTicket.cs"
+  },
+  "relic:MEAT_CLEAVER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MeatCleaver.cs"
+  },
+  "relic:MEAT_ON_THE_BONE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MeatOnTheBone.cs"
+  },
+  "relic:MEMBERSHIP_CARD": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MembershipCard.cs"
+  },
+  "relic:MERCURY_HOURGLASS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MercuryHourglass.cs"
+  },
+  "relic:METRONOME": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Metronome.cs"
+  },
+  "relic:MINIATURE_CANNON": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MiniatureCannon.cs"
+  },
+  "relic:MINIATURE_TENT": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MiniatureTent.cs"
+  },
+  "relic:MINI_REGENT": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MiniRegent.cs"
+  },
+  "relic:MOLTEN_EGG": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MoltenEgg.cs"
+  },
+  "relic:MR_STRUGGLES": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MrStruggles.cs"
+  },
+  "relic:MUMMIFIED_HAND": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MummifiedHand.cs"
+  },
+  "relic:MUSIC_BOX": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MusicBox.cs"
+  },
+  "relic:MYSTIC_LIGHTER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\MysticLighter.cs"
+  },
+  "relic:NEOWS_BONES": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NeowsBones.cs"
+  },
+  "relic:NEOWS_SACRIFICE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NeowsSacrifice.cs"
+  },
+  "relic:NEOWS_TALISMAN": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NeowsTalisman.cs"
+  },
+  "relic:NEOWS_TORMENT": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NeowsTorment.cs"
+  },
+  "relic:NEW_LEAF": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NewLeaf.cs"
+  },
+  "relic:NINJA_SCROLL": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NinjaScroll.cs"
+  },
+  "relic:NUNCHAKU": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Nunchaku.cs"
+  },
+  "relic:NUTRITIOUS_OYSTER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NutritiousOyster.cs"
+  },
+  "relic:NUTRITIOUS_SOUP": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\NutritiousSoup.cs"
+  },
+  "relic:ODDLY_SMOOTH_STONE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\OddlySmoothStone.cs"
+  },
+  "relic:OLD_COIN": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\OldCoin.cs"
+  },
+  "relic:ORANGE_DOUGH": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\OrangeDough.cs"
+  },
+  "relic:ORICHALCUM": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Orichalcum.cs"
+  },
+  "relic:ORNAMENTAL_FAN": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\OrnamentalFan.cs"
+  },
+  "relic:ORRERY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Orrery.cs"
+  },
+  "relic:PAELS_BLOOD": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsBlood.cs"
+  },
+  "relic:PAELS_CLAW": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsClaw.cs"
+  },
+  "relic:PAELS_EYE": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsEye.cs"
+  },
+  "relic:PAELS_FLESH": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsFlesh.cs"
+  },
+  "relic:PAELS_GROWTH": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsGrowth.cs"
+  },
+  "relic:PAELS_HORN": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsHorn.cs"
+  },
+  "relic:PAELS_LEGION": {
+    "line": 20,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsLegion.cs"
+  },
+  "relic:PAELS_TEARS": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsTears.cs"
+  },
+  "relic:PAELS_TOOTH": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsTooth.cs"
+  },
+  "relic:PAELS_WING": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaelsWing.cs"
+  },
+  "relic:PANDORAS_BOX": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PandorasBox.cs"
+  },
+  "relic:PANTOGRAPH": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Pantograph.cs"
+  },
+  "relic:PAPER_KRANE": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaperKrane.cs"
+  },
+  "relic:PAPER_PHROG": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PaperPhrog.cs"
+  },
+  "relic:PARRYING_SHIELD": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ParryingShield.cs"
+  },
+  "relic:PEAR": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Pear.cs"
+  },
+  "relic:PENDULUM": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Pendulum.cs"
+  },
+  "relic:PEN_NIB": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PenNib.cs"
+  },
+  "relic:PERMAFROST": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Permafrost.cs"
+  },
+  "relic:PETRIFIED_TOAD": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PetrifiedToad.cs"
+  },
+  "relic:PHIAL_HOLSTER": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PhialHolster.cs"
+  },
+  "relic:PHILOSOPHERS_STONE": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PhilosophersStone.cs"
+  },
+  "relic:PHYLACTERY_UNBOUND": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PhylacteryUnbound.cs"
+  },
+  "relic:PLANISPHERE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Planisphere.cs"
+  },
+  "relic:POCKETWATCH": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Pocketwatch.cs"
+  },
+  "relic:POLLINOUS_CORE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PollinousCore.cs"
+  },
+  "relic:POMANDER": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Pomander.cs"
+  },
+  "relic:POTION_BELT": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PotionBelt.cs"
+  },
+  "relic:POWER_CELL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PowerCell.cs"
+  },
+  "relic:PRAYER_WHEEL": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PrayerWheel.cs"
+  },
+  "relic:PRECARIOUS_SHEARS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PrecariousShears.cs"
+  },
+  "relic:PRECISE_SCISSORS": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PreciseScissors.cs"
+  },
+  "relic:PRESERVED_FOG": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PreservedFog.cs"
+  },
+  "relic:PRISMATIC_GEM": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PrismaticGem.cs"
+  },
+  "relic:PUMPKIN_CANDLE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PumpkinCandle.cs"
+  },
+  "relic:PUNCH_DAGGER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\PunchDagger.cs"
+  },
+  "relic:RADIANT_PEARL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RadiantPearl.cs"
+  },
+  "relic:RAINBOW_RING": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RainbowRing.cs"
+  },
+  "relic:RAZOR_TOOTH": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RazorTooth.cs"
+  },
+  "relic:RED_MASK": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RedMask.cs"
+  },
+  "relic:RED_SKULL": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RedSkull.cs"
+  },
+  "relic:REGALITE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Regalite.cs"
+  },
+  "relic:REGAL_PILLOW": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RegalPillow.cs"
+  },
+  "relic:REPTILE_TRINKET": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ReptileTrinket.cs"
+  },
+  "relic:RINGING_TRIANGLE": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RingingTriangle.cs"
+  },
+  "relic:RING_OF_THE_DRAKE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RingOfTheDrake.cs"
+  },
+  "relic:RING_OF_THE_SNAKE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RingOfTheSnake.cs"
+  },
+  "relic:RIPPLE_BASIN": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RippleBasin.cs"
+  },
+  "relic:ROYAL_POISON": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RoyalPoison.cs"
+  },
+  "relic:ROYAL_STAMP": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RoyalStamp.cs"
+  },
+  "relic:RUINED_HELMET": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RuinedHelmet.cs"
+  },
+  "relic:RUNIC_CAPACITOR": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RunicCapacitor.cs"
+  },
+  "relic:RUNIC_PYRAMID": {
+    "line": 6,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\RunicPyramid.cs"
+  },
+  "relic:SAI": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Sai.cs"
+  },
+  "relic:SAND_CASTLE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SandCastle.cs"
+  },
+  "relic:SCREAMING_FLAGON": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ScreamingFlagon.cs"
+  },
+  "relic:SCROLL_BOXES": {
+    "line": 17,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ScrollBoxes.cs"
+  },
+  "relic:SEAL_OF_GOLD": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SealOfGold.cs"
+  },
+  "relic:SEA_GLASS": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SeaGlass.cs"
+  },
+  "relic:SELF_FORMING_CLAY": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SelfFormingClay.cs"
+  },
+  "relic:SERE_TALON": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SereTalon.cs"
+  },
+  "relic:SHOVEL": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Shovel.cs"
+  },
+  "relic:SHURIKEN": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Shuriken.cs"
+  },
+  "relic:SIGNET_RING": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SignetRing.cs"
+  },
+  "relic:SILKEN_TRESS": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SilkenTress.cs"
+  },
+  "relic:SILVER_CRUCIBLE": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SilverCrucible.cs"
+  },
+  "relic:SLING_OF_COURAGE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SlingOfCourage.cs"
+  },
+  "relic:SMALL_CAPSULE": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SmallCapsule.cs"
+  },
+  "relic:SNECKO_EYE": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SneckoEye.cs"
+  },
+  "relic:SNECKO_SKULL": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SneckoSkull.cs"
+  },
+  "relic:SOZU": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Sozu.cs"
+  },
+  "relic:SPARKLING_ROUGE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SparklingRouge.cs"
+  },
+  "relic:SPIKED_GAUNTLETS": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SpikedGauntlets.cs"
+  },
+  "relic:STONE_CALENDAR": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\StoneCalendar.cs"
+  },
+  "relic:STONE_CRACKER": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\StoneCracker.cs"
+  },
+  "relic:STONE_HUMIDIFIER": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\StoneHumidifier.cs"
+  },
+  "relic:STORYBOOK": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Storybook.cs"
+  },
+  "relic:STRAWBERRY": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Strawberry.cs"
+  },
+  "relic:STRIKE_DUMMY": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\StrikeDummy.cs"
+  },
+  "relic:STURDY_CLAMP": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SturdyClamp.cs"
+  },
+  "relic:SWORD_OF_JADE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SwordOfJade.cs"
+  },
+  "relic:SWORD_OF_STONE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SwordOfStone.cs"
+  },
+  "relic:SYMBIOTIC_VIRUS": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\SymbioticVirus.cs"
+  },
+  "relic:TANXS_WHISTLE": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TanxsWhistle.cs"
+  },
+  "relic:TEA_OF_DISCOURTESY": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TeaOfDiscourtesy.cs"
+  },
+  "relic:THE_ABACUS": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TheAbacus.cs"
+  },
+  "relic:THE_BOOT": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TheBoot.cs"
+  },
+  "relic:THE_COURIER": {
+    "line": 9,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TheCourier.cs"
+  },
+  "relic:THROWING_AXE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ThrowingAxe.cs"
+  },
+  "relic:TINGSHA": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Tingsha.cs"
+  },
+  "relic:TINY_MAILBOX": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TinyMailbox.cs"
+  },
+  "relic:TOASTY_MITTENS": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ToastyMittens.cs"
+  },
+  "relic:TOOLBOX": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Toolbox.cs"
+  },
+  "relic:TOUCH_OF_OROBAS": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TouchOfOrobas.cs"
+  },
+  "relic:TOUGH_BANDAGES": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ToughBandages.cs"
+  },
+  "relic:TOXIC_EGG": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ToxicEgg.cs"
+  },
+  "relic:TOY_BOX": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\ToyBox.cs"
+  },
+  "relic:TRI_BOOMERANG": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TriBoomerang.cs"
+  },
+  "relic:TUNGSTEN_ROD": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TungstenRod.cs"
+  },
+  "relic:TUNING_FORK": {
+    "line": 15,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TuningFork.cs"
+  },
+  "relic:TWISTED_FUNNEL": {
+    "line": 18,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\TwistedFunnel.cs"
+  },
+  "relic:UNCEASING_TOP": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\UnceasingTop.cs"
+  },
+  "relic:UNDYING_SIGIL": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\UndyingSigil.cs"
+  },
+  "relic:UNSETTLING_LAMP": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\UnsettlingLamp.cs"
+  },
+  "relic:VAJRA": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Vajra.cs"
+  },
+  "relic:VAMBRACE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Vambrace.cs"
+  },
+  "relic:VELVET_CHOKER": {
+    "line": 16,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\VelvetChoker.cs"
+  },
+  "relic:VENERABLE_TEA_SET": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\VenerableTeaSet.cs"
+  },
+  "relic:VERY_HOT_COCOA": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\VeryHotCocoa.cs"
+  },
+  "relic:VEXING_PUZZLEBOX": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\VexingPuzzlebox.cs"
+  },
+  "relic:VITRUVIAN_MINION": {
+    "line": 11,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\VitruvianMinion.cs"
+  },
+  "relic:WAR_HAMMER": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WarHammer.cs"
+  },
+  "relic:WAR_PAINT": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WarPaint.cs"
+  },
+  "relic:WHETSTONE": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\Whetstone.cs"
+  },
+  "relic:WHISPERING_EARRING": {
+    "line": 19,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WhisperingEarring.cs"
+  },
+  "relic:WHITE_BEAST_STATUE": {
+    "line": 8,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WhiteBeastStatue.cs"
+  },
+  "relic:WHITE_STAR": {
+    "line": 10,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WhiteStar.cs"
+  },
+  "relic:WINGED_BOOTS": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WingedBoots.cs"
+  },
+  "relic:WING_CHARM": {
+    "line": 14,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WingCharm.cs"
+  },
+  "relic:WONGOS_MYSTERY_TICKET": {
+    "line": 12,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WongosMysteryTicket.cs"
+  },
+  "relic:WONGO_CUSTOMER_APPRECIATION_BADGE": {
+    "line": 5,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\WongoCustomerAppreciationBadge.cs"
+  },
+  "relic:YUMMY_COOKIE": {
+    "line": 13,
+    "path": "MegaCrit.Sts2.Core.Models.Relics\\YummyCookie.cs"
+  }
+}
