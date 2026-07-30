@@ -1,0 +1,151 @@
+{
+  "purpose": "Phase 3C.3-3C.4(+3C.4.1) Python Restore integration manifest - records artifacts, hashes, and independently-verified test results for RL-side integration of the already-accepted Emulator CombatHistory full restore (3C.3), Power internal-state exact restore (3C.4), and RestoreSnapshotJson input validation hardening (3C.4.1).",
+  "createdAtUtc": "2026-07-31",
+  "repositoryRoot": "C:\\STS2_RL",
+  "branch": "feature/phase3c34-history-power-restore",
+  "worktree": "C:\\STS2_RL_worktrees\\phase3c34-history-power-restore",
+  "baseline": {
+    "rlMainCommit": "a98b423",
+    "rlTag": "rl-phase3c2-python-accepted-20260730",
+    "note": "rl-phase3c2-python-accepted-20260730 points at 1399f1a; a98b423 adds one unrelated docs-only commit (Beam Search design reference) on top."
+  },
+  "emulatorCommitsThisRound": {
+    "phase3c3CombatHistoryDtoCapture": "638ea96",
+    "phase3c3CombatHistoryRestore": "3f18fb2",
+    "phase3c3Tests": "0404d3c",
+    "phase3c3ImplementationReport": "1d4660d",
+    "phase3c3Audit": "cb85316",
+    "phase3c4PowerReclassification": "0c225d7",
+    "phase3c4PowerRestore": "880b61a",
+    "phase3c4Tests": "6c3807a",
+    "phase3c4ImplementationReport": "9fa9036",
+    "phase3c4Audit": "0bb55a2",
+    "phase3c3_3c4FinalStatus": "982de1b",
+    "phase3c41JsonValidationImplementation": "75ab118",
+    "phase3c41DtoDocsUpdate": "b91d1d8",
+    "phase3c41Tests": "10dc49b",
+    "phase3c41ImplementationReport": "5e289fb",
+    "phase3c41Audit": "4f1aebc"
+  },
+  "emulatorDllUsed": {
+    "path": "C:\\STS2_Emulator\\Sts2Emulator.Cli\\bin\\Debug\\net8.0\\Sts2Emulator.dll",
+    "sha256": "f79a91925c75f05bacaecdf5f614bdea01ad6c8f65f55d0e9585eff4d1074ecc",
+    "note": "Matches the Phase 3C.4.1 audit's own officially-built DLL hash exactly, recomputed independently before Codex launch."
+  },
+  "emulatorArtifactHashesVerifiedAgainstPhase3c41Audit": {
+    "schemaFile": {
+      "path": "C:\\STS2_Emulator\\docs\\schemas\\combat_state_snapshot.schema.json",
+      "sha256": "6bc628af6219a98ef8bb34c31e9d9d6c326606ae19b08d6da09a8722ad9227fc",
+      "verified": "matches audit report value exactly"
+    },
+    "dtoSpecFile": {
+      "path": "C:\\STS2_Emulator\\docs\\contracts\\combat_state_snapshot_dto.v0.8.md",
+      "sha256": "830cf66d5269492346578a671490b34f362f7fffef9eb55ff9bfdd3a454eb779",
+      "verified": "matches audit report value exactly"
+    },
+    "jsonExampleFile": {
+      "path": "C:\\STS2_Emulator\\docs\\contracts\\combat_state_snapshot_example.v0.8.json",
+      "sha256": "8beea8fa264cbdbe7e82afd974d57f192624518f79ef03645d164def5ee72bd0",
+      "verified": "matches audit report value exactly"
+    }
+  },
+  "codexExecution": {
+    "model": "gpt-5.5",
+    "reasoningEffort": "high",
+    "codexCliVersion": "codex-cli 0.145.0",
+    "launchCommand": "cat codex_prompt_phase3c34.md | codex exec -m gpt-5.5 -c model_reasoning_effort=high -s workspace-write -C \"C:\\STS2_RL_worktrees\\phase3c34-history-power-restore\" --skip-git-repo-check - --json",
+    "sandboxLimitationsObserved": [
+      ".git write access blocked",
+      "python.exe cannot launch: Windows logon-session error",
+      "py -3 launcher reports no installed Python",
+      "pytest not on PATH"
+    ],
+    "codexOwnChangedFiles": [
+      "Combat/combat_state_snapshot.py",
+      "Combat/emulator_bridge.py",
+      "Combat/live_combat_session.py",
+      "Combat/tests/test_restore_snapshot_phase3c1.py",
+      "Combat/evaluation/online_eval/verify_snapshot_phase2b.py",
+      "Outputs/reports/rl_restore_snapshot_phase3c34_integration_20260731_DRAFT.md"
+    ],
+    "codexIndependentFindings": [
+      "The official JSON example (combat_state_snapshot_example.v0.8.json) has empty CombatHistory.Entries despite phase3c.4 SchemaVersion - contrary to the governing instruction's assumption. Codex built a test-local fixture instead, ported from the Emulator's own accepted C# smoke test fixture shape, and documented the discrepancy rather than silently working around it.",
+      "The public RestoreCapabilities.RejectionCodes vocabulary lists combat_history_non_empty but not a bare unknown_combat_history_entry_type entry, even though actual rejection returns the suffixed unknown_combat_history_entry_type:{type} code. Codex adjusted its capability-vocabulary test to check actual published vocabulary while keeping the behavior test checking the real returned rejection code."
+    ],
+    "codexSelfReportedTestResults": "None executed (python.exe/py/pytest all unavailable in Codex's sandbox) - honestly reported as not run in its own draft report."
+  },
+  "supervisorIndependentAudit": {
+    "testFixtureBugFoundAndFixedDirectly": {
+      "location": "Combat/tests/test_restore_snapshot_phase3c1.py::_model_fixtures",
+      "description": "_model_fixtures() called ensure_loaded() then immediately iterated ModelDb.AllPowers/AllPotions/Monsters without first constructing a GameInstance. ModelDb is not populated until a GameInstance exists (confirmed by direct reproduction: iterating ModelDb.AllPowers before any GameInstance construction throws 'Exception has been thrown by the target of an invocation.'; after calling shared_game_instance() first, iteration succeeds and returns 281 powers). This caused 4 of the 5 new CombatHistory/Power tests to fail on first independent run.",
+      "classification": "test-fixture/test-isolation bug, not an implementation defect - fixed directly per the established audit permission boundary.",
+      "fix": "Added shared_game_instance() call (and its import) as the first statement inside _model_fixtures(), before any ModelDb access.",
+      "verifiedFix": "All 4 previously-failing tests (test_combat_history_all_17_entry_types_round_trip_via_json_fixture, test_combat_history_player_turn_numbers_and_cardplay_resources_preserved, test_power_internal_data_classifications_round_trip_and_reject_via_json_api, test_restore_step_determinism_with_non_empty_combat_history) pass individually and as part of the full suite after the fix."
+    },
+    "codexIndependentFindingsIndependentlyReverified": [
+      "Confirmed directly: combat_state_snapshot_example.v0.8.json has Metadata.SchemaVersion=phase3c.4 and len(CombatHistory.Entries)==0.",
+      "Confirmed directly: GameInstance.cs's RestoreRejectionCodes list contains combat_history_non_empty and fresh_combat_history_written but not unknown_combat_history_entry_type."
+    ],
+    "diagnosticNonDeterministicFilesDiscarded": [
+      "Combat/evaluation/online_eval/snapshot_phase2b_five_case_results.json",
+      "Combat/evaluation/online_eval/snapshot_phase2b_sample.json"
+    ]
+  },
+  "independentTestExecution": {
+    "testRestoreSnapshotPhase3c1Suite": {
+      "command": "python Combat/tests/test_restore_snapshot_phase3c1.py",
+      "resultBeforeFix": "24 passed, 4 failed (all 4 failures traced to the same _model_fixtures() root cause)",
+      "resultAfterFix": "28 passed, 0 failed",
+      "newTests": [
+        "test_official_json_example_validates_successfully",
+        "test_official_json_example_restores_successfully",
+        "test_validate_restore_snapshot_json_is_pure",
+        "test_invalid_json_restore_preserves_session_and_step_still_works",
+        "test_restore_snapshot_json_rejects_invalid_without_prior_validate",
+        "test_combat_history_all_17_entry_types_round_trip_via_json_fixture",
+        "test_combat_history_player_turn_numbers_and_cardplay_resources_preserved",
+        "test_restore_step_determinism_with_non_empty_combat_history",
+        "test_power_internal_data_classifications_round_trip_and_reject_via_json_api"
+      ],
+      "updatedTests": [
+        "test_get_restore_capabilities_hashes (phase3c.2->phase3c.4 literals, snapshot_schema_version phase2b.2->phase3c.4, supports_combat_history False->True, added power-classification/rejection-code vocabulary assertions)",
+        "test_rejection_categories_via_public_python_api (replaced unconditional combat_history_non_empty rejection with unknown_combat_history_entry_type:SyntheticUnknownEntry, since CombatHistory is now supported)"
+      ]
+    },
+    "fullPytestSuite": {
+      "command": "python -m pytest Combat/tests/ -q",
+      "result": "88 passed, 1 failed",
+      "knownFailure": "test_scenario_v2.py::test_wriggler_missing_slot_without_encounter_is_detected (pre-existing WRIGGLER quarantine reason-string mismatch, unrelated to this round, documented since Phase 3C.1)"
+    },
+    "verifySnapshotPhase2b": {
+      "command": "python Combat/evaluation/online_eval/verify_snapshot_phase2b.py",
+      "result": "PASS - 0 failing checks (this script's own KNOWN_SCHEMA_VERSIONS-vs-schema-enum assertion was broken before this round's fix and passes after it - direct evidence the fix addressed the stated gap)"
+    },
+    "verifyLiveCombatSession654621": {
+      "command": "python Combat/evaluation/online_eval/verify_live_combat_session_6546_21.py",
+      "result": "PASS - 49 decisions, victory, 0 QuiescentBoundaryViolation"
+    },
+    "testChoiceSemantics": {
+      "command": "python Combat/tests/test_choice_semantics.py",
+      "result": "20 passed, 0 failed"
+    },
+    "testScenarioV2": {
+      "command": "python Combat/tests/test_scenario_v2.py",
+      "result": "31 passed, 1 failed (same known WRIGGLER failure as above)"
+    },
+    "qbReproDriverRl": {
+      "command": "python Combat/evaluation/online_eval/qb_repro_driver_rl.py --order forward --iterations 15",
+      "result": "780 total test executions, 0 QuiescentBoundaryViolation, 15 known WRIGGLER, 0 unexpected (other) failures"
+    }
+  },
+  "referenceHashes": {
+    "combatStateContractV08Sha256": "30fcfaaa0cf51b684471de376c81d1306a1ba07460b440c850ec88778b7073c2",
+    "combatStateSnapshotPySha256": "cf03a46668bebc2b728e3e0460875a2d5c04e58b2924917b802b97fb934b8173",
+    "emulatorBridgePySha256": "17dace8d5e2de28dffee6aad94f8607929e4447d74eb28d7c5f377fac6254fad",
+    "liveCombatSessionPySha256": "01a5404d31786e9c371da3645bfb890dcc69525cd944c80a359176aaffe49d88",
+    "testRestoreSnapshotPhase3c1PySha256": "abcd8d261b05e31f4da0c47b0b4daa84ecd9aeaf0e6478af18bd9c984d65d79a",
+    "verifySnapshotPhase2bPySha256": "f6696f6d822f09b296ab56ce2c48bded0f1c0eba5ea365174e59a44856d64690"
+  },
+  "verdict": "See Outputs/reports/rl_restore_snapshot_phase3c34_audit_20260731.md for the full audit verdict and reasoning.",
+  "phase4ReadinessStatement": "Not started. Per the governing instruction, this round stops after merge/tag and does not proceed to Phase 4, Heuristic connection, or Training integration."
+}
