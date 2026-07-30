@@ -1,0 +1,143 @@
+{
+  "manifestId": "rl_phase3c1_python_restore_integration_manifest_20260729",
+  "status": "independently_verified",
+  "generatedAt": "2026-07-30T04:17:53.355721Z",
+  "rlWorktree": "C:\\STS2_RL_worktrees\\phase3c1-python-restore",
+  "rlBranch": "feature/phase3c1-python-restore-api",
+  "rlBaseCommit": "718cdc4200b583196b987a508577ea756874411c",
+  "note": "Codex implemented the code/tests/contract/report draft; Python could not launch in Codex's sandbox (same Windows logon-session error prior Emulator-side Codex rounds hit), so Codex's own manifest draft recorded zero executed tests. Every result below was independently run by the supervising session outside that sandbox.",
+  "compatibleEmulatorCommits": {
+    "api": "0bb11e88d8e9a69b17a4b9ada2464e81c45bb4f8",
+    "test": "45577c9c7fb90cc280aa8387f5184769751ab18e",
+    "implementationReport": "a1e3918d73d47dd40a1c6a001bd2700a50ca3b51",
+    "auditReport": "763ee2f68ebb382f63e03ff62497be536ca8a56b"
+  },
+  "emulatorDllSha256": "1fe6c5f41aa76174bfd712c04eaf79dd45da7cd361910558538f54ef205f118a",
+  "contracts": {
+    "phase3c1PythonContract": {
+      "path": "Common\\contracts\\combat_state_contract.v0.6.md",
+      "sha256": "edad19d8f555ad6d425e2dcfa7642da22f42d2c539f969da0dd5cba3753fa874",
+      "note": "Supervisor added \u00a79 (Known Limitations: Intent not preserved, GetRestoreCapabilities path bug) after independent testing surfaced both - not present in Codex's original draft."
+    },
+    "emulatorReportedRestoreContractV05": {
+      "path": "Common\\contracts\\combat_state_contract.v0.5.md",
+      "sha256": "e33b369e12543e04fe763c07196e2189460099cfcb3d22b5a35137e2a2b86b07",
+      "note": "unchanged, referenced only"
+    },
+    "snapshotSchema": {
+      "path": "C:\\STS2_Emulator\\docs\\schemas\\combat_state_snapshot.schema.json",
+      "sha256": "16643444fda085d62df435fa0290e73b356123ffd95981317da4ea3f86c23dc3"
+    }
+  },
+  "changedFiles": [
+    {
+      "path": "Combat\\live_combat_session.py",
+      "sha256": "dd51fbb3aa7b77d6cf0e36476cc63933d513dd0d520717ba27765f6d037494cc",
+      "size_bytes": 37987,
+      "kind": "modified_python",
+      "modifiedBySupervisor": false,
+      "summary": "Adds validate_restore_snapshot/restore_snapshot/restore_snapshot_json/get_restore_capabilities, RestoreValidationResult/RestoreCapabilities/SnapshotRestoreRejectedContext/SnapshotRestoreFailedContext dataclasses, SnapshotRestoreRejectedError/SnapshotRestoreFailedError."
+    },
+    {
+      "path": "Combat\\emulator_bridge.py",
+      "sha256": "400de795a1bc8c790c903e3c191fe15726e5ed30bf5908bc4c95a53570852327",
+      "size_bytes": 8660,
+      "kind": "modified_python",
+      "modifiedBySupervisor": false,
+      "summary": "Registers SnapshotRestoreRejectedException/SnapshotRestoreFailedException/CLR CombatStateSnapshot/JsonSerializer; adds snapshot_to_clr()/restore_snapshot()/restore_snapshot_json()/validate_restore_snapshot()/get_restore_capabilities() thin wrappers."
+    },
+    {
+      "path": "Combat\\tests\\test_restore_snapshot_phase3c1.py",
+      "sha256": "5825dbee4d32c5172c88d9c7e31c8d0170f302beaab88852b61b6c58b554c9a5",
+      "size_bytes": 21495,
+      "kind": "new_python_test",
+      "modifiedBySupervisor": true,
+      "supervisorChanges": [
+        "Added missing ensure_loaded() bootstrap calls in _eligible_snapshot() and test_rejection_categories_via_public_python_api() (test-fixture bug, not an implementation defect)",
+        "Rewrote test_canonical_json_round_trip's equality check to exclude EnemySnapshot.Intent and Metadata.CombatSessionId/StepIndex, both legitimate expected differences across a Restore boundary, with explanatory comments (_strip_known_restore_boundary_diffs)"
+      ]
+    },
+    {
+      "path": "Common\\contracts\\combat_state_contract.v0.6.md",
+      "sha256": "edad19d8f555ad6d425e2dcfa7642da22f42d2c539f969da0dd5cba3753fa874",
+      "size_bytes": 9114,
+      "kind": "new_contract",
+      "modifiedBySupervisor": true,
+      "supervisorChanges": ["Added \u00a79 Known Limitations (Intent gap, GetRestoreCapabilities path bug)"]
+    },
+    {
+      "path": "Outputs\\reports\\rl_restore_snapshot_phase3c1_python_implementation_20260729.md",
+      "sha256": "bbe1cbaf7df024927f5d300e04b98beac274fdb5b5410dfb4bf27a8e2647ef71",
+      "size_bytes": 9700,
+      "kind": "finalized_report",
+      "modifiedBySupervisor": true,
+      "supervisorChanges": ["Renamed from _DRAFT, appended \u00a78 Supervisor completion section"]
+    }
+  ],
+  "unrelatedFixLandedOnMainDirectly": {
+    "path": ".gitignore",
+    "commit": "b597ef1",
+    "reason": "Unanchored env/ pattern also matched Combat/env/ (combat_env.py), silently excluding it from the initial baseline commit and breaking `from combat_env import CombatEnv`. Discovered while running this round's regression suite. Fixed on main directly (Part A's own baseline defect, not Phase 3C.1 Codex work) and synced into this branch."
+  },
+  "testCommandsRun": [
+    "python Combat/tests/test_restore_snapshot_phase3c1.py",
+    "python Combat/tests/test_restore_snapshot_phase3c1.py --case <each of the 15 test_* cases individually>",
+    "python Combat/evaluation/online_eval/verify_live_combat_session_6546_21.py",
+    "python Combat/evaluation/online_eval/verify_snapshot_phase2b.py",
+    "python Combat/tests/test_choice_semantics.py",
+    "python Combat/tests/test_scenario_v2.py",
+    "python -m pytest tests/ -q  (informational, from Combat/)",
+    "python Combat/evaluation/online_eval/qb_repro_driver_rl.py --order forward --iterations 15",
+    "WRIGGLER quarantine spot-check via preflight_validate() directly"
+  ],
+  "testResults": {
+    "test_restore_snapshot_phase3c1.py": {
+      "passed": 14,
+      "failed": 1,
+      "failedTest": "test_get_restore_capabilities_hashes",
+      "failureReason": "confirmed Emulator-side GetRestoreCapabilities() bug, see contract v0.6 \u00a79-B - not a Python integration defect",
+      "note": "14/15 pass, including canonical JSON round trip, object/JSON restore, Power round trip, full RNG equality, restore-step determinism, all 9 rejection categories via the new public API, real Scenario 6546-21 rejection via the new public API, post-teardown failure injection with all 3 recovery paths (start_combat/resume_from/restore_snapshot)"
+    },
+    "verify_live_combat_session_6546_21.py": {"decisions": 49, "outcome": "victory", "quiescent_boundary_violations": 0, "no_legal_actions_hits": 0},
+    "verify_snapshot_phase2b.py": {"failingChecks": 0},
+    "test_choice_semantics.py": {"passed": 20, "failed": 0},
+    "test_scenario_v2.py": {"passed": 31, "failed": 1, "failedTest": "test_wriggler_missing_slot_without_encounter_is_detected", "note": "known/accepted, unrelated pre-existing MonsterMoveStateMachine bug, reason string init_exception:TimeoutException, unchanged since Phase 3B"},
+    "pytest_tests_informational": {"passed": 74, "failed": 2, "failedTests": ["test_restore_snapshot_phase3c1.py::test_get_restore_capabilities_hashes", "test_scenario_v2.py::test_wriggler_missing_slot_without_encounter_is_detected"], "note": "matches the Emulator audit's reported 60/61 baseline plus this round's own new suite's 1 known failure - both failures are the same previously-confirmed, non-blocking issues, no new pytest-specific regressions observed in this single run"},
+    "native_harness_forward_15x": {"totalTestExecutions": 780, "quiescentBoundaryViolations": 0, "wrigglerKnownFailures": 15, "otherUnexpectedFailures": 0, "note": "reduced sample (15 vs the historical 100), matching this round's own time-budget rationale, consistent with the Emulator audit's own 20x reduced-sample choice for the equivalent Phase 3B round - purpose is new-regression detection, not re-establishing statistical confidence in the underlying race, which prior full-scale rounds already did"},
+    "wrigglerQuarantineSpotCheck": {"status": "quarantined", "reasons": ["init_exception:TimeoutException"], "unchangedFromPriorRounds": true}
+  },
+  "genuineFindingsFromIndependentAudit": [
+    {
+      "id": "enemy_intent_not_preserved_across_restore",
+      "severity": "documented_scope_gap",
+      "origin": "emulator_csharp_snapshotrestorer",
+      "summary": "EnemySnapshot.Intent is never set by SnapshotRestorer (RollMove() correctly never called, a forbidden fresh-start hook) - a Capture->Restore->Capture round trip legitimately changes Intent to {intentTypes:[],stateId:UNSET_MOVE}. Never documented on either side before this round; no prior round-trip check (Emulator's own, or RL's Phase 3B verify_restore_bootstrap_phase3b.py) ever compared Intent, only this round's new full-canonical-JSON test caught it.",
+      "action": "Documented in combat_state_contract.v0.6.md \u00a79-A; test updated to exclude Intent with an explanatory comment rather than silently weakening the assertion."
+    },
+    {
+      "id": "get_restore_capabilities_throws_under_pythonnet_hosting",
+      "severity": "blocking_for_get_restore_capabilities_only",
+      "origin": "emulator_csharp_gameinstance_findfileupwards",
+      "summary": "GameInstance.GetRestoreCapabilities()'s FindFileUpwards()/CandidateRoots() throws ArgumentException: The path is empty when AppContext.BaseDirectory is empty, which it confirmed is under pythonnet's coreclr hosting (Environment.CurrentDirectory is valid but does not lead to the schema file from this process's actual working directory under C:\\STS2_RL). The intended `?? KnownSnapshotSchemaSha256` fallback never runs because the exception propagates first.",
+      "action": "Documented in combat_state_contract.v0.6.md \u00a79-B. NOT worked around from Python (rejected mutating Environment.CurrentDirectory as an unaudited global-state hack). Left as a failing canary (test_get_restore_capabilities_hashes). Requires Emulator\u62c5\u5f53 escalation before get_restore_capabilities() is usable from this project."
+    },
+    {
+      "id": "gitignore_env_pattern_collision",
+      "severity": "fixed_on_main_directly",
+      "origin": "rl_git_part_a_own_baseline",
+      "summary": "Unanchored env/ .gitignore pattern (intended for Python virtualenvs) also matched Combat/env/, the real source directory holding combat_env.py, silently excluding it from the initial git baseline commit and breaking `from combat_env import CombatEnv` for verify_live_combat_session_6546_21.py and anything else that imports it.",
+      "action": "Fixed on main directly, commit b597ef1 (anchored env/, .venv/, venv/, .conda/, bin/, obj/, tmp/, temp/ to repo root), synced into this feature branch's worktree."
+    }
+  ],
+  "publicApiScopeConfirmedUnchangedFromEmulatorDesign": {
+    "supportsCombatHistory": false,
+    "supportsPets": false,
+    "supportsPendingChoice": false,
+    "supportsPendingTarget": false,
+    "supportsActionContinuation": false,
+    "transactionModel": "validate_before_destroy",
+    "rollbackAfterTeardown": false,
+    "issuesNewCombatSession": true,
+    "preservesStableIds": true
+  }
+}
