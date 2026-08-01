@@ -136,3 +136,43 @@ mermaid_combat_commit_detail             : OK
 
 `MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
 (`mermaid_combat_fault_worker_detail.mermaid`のハッシュのみ前回commitから不変)。
+
+## 第4回検証(2026-08-01、用語・契約修正 — Authoritative/Hypothetical/Concrete分離、Search Hypothesis ID統一、PUBLIC_MULTISET再定義、StableShuffle 3要素化)
+
+`mermaid_rough_combat` / `mermaid_combat_candidate_pipeline_detail` /
+`mermaid_combat_branch_scheduler_detail` / `mermaid_combat_snapshot_replay_detail` /
+`mermaid_combat_rng_hypothesis_detail` / `mermaid_combat_commit_detail` の6図へ、
+以下4点を反映した。
+1. `OrderedDrawPile`を`Authoritative OrderedDrawPile`(Main実体)・
+   `Hypothetical OrderedDrawPile`(Belief Branch仮説)・両者の総称
+   `Concrete OrderedDrawPile`へ分離し、Belief Snapshotを「真の状態」と記載する箇所を排除した。
+2. `RNG Hypothesis ID`(RNG成分＋DrawPile Order成分を含むID)を`Search Hypothesis ID`へ改称し、
+   Decision Context(`snapshot_replay_detail`)・Lease(`branch_scheduler_detail`)・
+   WorkItem・Commit(`commit_detail`)の全箇所で統一した。
+3. `PUBLIC_MULTISET`の算出式を「Deck−他Pile」から「(戦闘開始時Deck由来の初期複製カード集合＋
+   CombatHistoryのCardGeneratedEntryが示す生成カード集合)−他Pile」へ修正し、
+   `BELIEF_GEN`の契約を「現在の配列indexを完全に破棄し、公開状態のみでcanonicalizeした
+   多重集合からHypothesis seedで順列を生成する」という形で明文化した
+   (Emulator実ソース調査により、`Deck`フィールドが戦闘中生成カードを構造的に除外することを確認)。
+4. `StableShuffle`の決定要因を「(canonicalizeされたcard multiset, 完全なShuffle RNG)」の2要素から
+   「(canonicalizeされたcard multiset, 完全なShuffle RNG, hook関連状態)」の3要素へ修正し、
+   仮説Branchと真のゲームが再shuffle地点で一致するのはこの3要素全てが一致する場合に限る旨を
+   明記した。
+
+`mermaid_combat_fault_worker_detail`は変更なし。使用ツール・実行コマンドは上記と同一
+(`@mermaid-js/mermaid-cli` v11.16.0)。全ての修正は既存の引用符付きラベル記法に従って行ったため、
+bracket balance検証・実レンダリングともに初回から全8図で成功した。
+
+```
+mermaid_rough_combat                     : OK
+mermaid_combat_main_loop_detail          : OK (用語統一のみ)
+mermaid_combat_candidate_pipeline_detail : OK
+mermaid_combat_branch_scheduler_detail   : OK
+mermaid_combat_snapshot_replay_detail    : OK
+mermaid_combat_rng_hypothesis_detail     : OK
+mermaid_combat_fault_worker_detail       : OK (無変更)
+mermaid_combat_commit_detail             : OK
+```
+
+`MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
+(`mermaid_combat_fault_worker_detail.mermaid`のハッシュのみ前回commitから不変)。

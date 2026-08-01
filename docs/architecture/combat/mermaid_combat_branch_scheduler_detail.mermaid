@@ -5,14 +5,14 @@
 %% 前提: State-Holding Workerは事前に確保・割当される「Body Worker」ではなく、
 %%       直前にStepを実行し、Pending Choiceまたは次の選択境界を返したGameInstanceを持つWorkerが
 %%       そのDecision ContextのState-Holding Workerとなる(Lease)。この再利用はその分岐地点から
-%%       次の評価境界(Stable／Terminal)までに限定される。Leaseは(Decision Context, RNG Hypothesis ID)
+%%       次の評価境界(Stable／Terminal)までに限定される。Leaseは(Decision Context, Search Hypothesis ID)
 %%       の組に紐づき、異なるRNG仮説のDecision Context間で使い回すことはない。
 %%       Sub WorkerもStepの結果Pendingへ到達すれば、その時点で新規Leaseを確立する
 %%       (「SubはLeaseを取得しない」という区別は誤り。区別すべきは
 %%       『WorkItem受領時点でLease済みかどうか』であり、Sub/Holderという固定的な種別ではない)。
 flowchart TD
     subgraph LEASE_MODEL["State-Holding Worker Lease (Workerは一時的な実行資源。Decision Contextの正本ではない)"]
-        LEASE_DEF["Lease構成要素(State Identity — Decision Signatureとは別物):<br/>・worker_id<br/>・worker_generation (Worker再起動を検出するための世代番号)<br/>・context_id (対象Decision Context)<br/>・RNG Hypothesis ID (対象Decision Contextと同じ組)<br/>・state epoch (このWorkerが成功したStepのたびに単調増加するカウンタ。<br/>  想定外の欠落/重複Stepを検出する)<br/>・CombatSessionId／StepIndex (EmulatorのStepResult/DecisionFrameが<br/>  返す権威ある識別情報。Search Coordinator側の推測ではない)<br/>・Decision Result digest (現在保持しているDecision Result全体のハッシュ。<br/>  Decision Signatureより強い/具体的な同一性証明)<br/><br/>注意: これらはWorker/Leaseの『信頼できるliveプロセスか』の検証専用であり、<br/>Choiceの意味的同一性を表すDecision Signature(→snapshot_replay詳細図の<br/>DC_SIGNATURE)とは別軸。意味的に同じChoiceに見えても、実際には異なる/<br/>信頼できないunderlying stateから生じている可能性を排除できないため、<br/>両方を独立に検証する。"]
+        LEASE_DEF["Lease構成要素(State Identity — Decision Signatureとは別物):<br/>・worker_id<br/>・worker_generation (Worker再起動を検出するための世代番号)<br/>・context_id (対象Decision Context)<br/>・Search Hypothesis ID (対象Decision Contextと同じ組)<br/>・state epoch (このWorkerが成功したStepのたびに単調増加するカウンタ。<br/>  想定外の欠落/重複Stepを検出する)<br/>・CombatSessionId／StepIndex (EmulatorのStepResult/DecisionFrameが<br/>  返す権威ある識別情報。Search Coordinator側の推測ではない)<br/>・Decision Result digest (現在保持しているDecision Result全体のハッシュ。<br/>  Decision Signatureより強い/具体的な同一性証明)<br/><br/>注意: これらはWorker/Leaseの『信頼できるliveプロセスか』の検証専用であり、<br/>Choiceの意味的同一性を表すDecision Signature(→snapshot_replay詳細図の<br/>DC_SIGNATURE)とは別軸。意味的に同じChoiceに見えても、実際には異なる/<br/>信頼できないunderlying stateから生じている可能性を排除できないため、<br/>両方を独立に検証する。"]
         LEASE_ESTABLISH["Lease確立の唯一の条件: あるWorkerが(既存Leaseの直接Stepか、<br/>Bootstrap/SubのRestore+Replayに続く候補Stepかを問わず)候補Stepを実行し、<br/>その結果Pendingへ到達したこと。Restore+Replayで親Contextへ到達しただけ<br/>(候補Stepを実行する前)の段階では、まだLeaseは確立しない。<br/>事前予約・種別(Sub/Holder)による区別は行わない。<br/>Stable/Terminalへ到達したWorkerはLeaseを確立せず即座に解放する。"]
         LEASE_RELEASE["Lease解放条件:<br/>・当該Decision Contextが枝刈りされた<br/>・Holder候補(継続候補)としてこのWorkerを使わないと決定した<br/>・Stable／Terminalへ正規化された(評価境界に到達)<br/>・WorkerがFault／Timeoutした<br/>・Search全体が終了した"]
     end
@@ -21,7 +21,7 @@ flowchart TD
     SPLIT_IN --> SUB_ROUTE
 
     subgraph COORD["Search Coordinator (責任: 候補配布・結果回収・Lease管理。GameInstanceは保持しない)"]
-        TOP_ROUTE{"このDecision Context(＋RNG Hypothesis ID)に<br/>Lease済みのState-Holding Workerが存在するか"}
+        TOP_ROUTE{"このDecision Context(＋Search Hypothesis ID)に<br/>Lease済みのState-Holding Workerが存在するか"}
         TOP_ROUTE -->|"Yes"| LEASE_VERIFY{"LeaseのState Identity<br/>(context_id・worker_generation・state epoch・<br/>CombatSessionId/StepIndex・Decision Result digest)が<br/>現在のDecision Contextと一致するか<br/>(Decision Signatureでは判定しない)"}
         LEASE_VERIFY -->|"一致"| TOP_TO_HOLDER["継続候補をそのLease済みWorkerへそのまま渡す<br/>(Leaseを維持したままQueueへは戻さない)"]
         LEASE_VERIFY -->|"不一致(stale等)"| LEASE_INVALIDATE["不一致のLeaseを破棄し解放する"]
@@ -50,7 +50,7 @@ flowchart TD
     BOOTSTRAP_STEP --> RETURN_CONTROL
     SUB_RESTORE --> RETURN_CONTROL
 
-    RETURN_CONTROL -->|"Pending<br/>新しい選択が発生<br/>ActionContinuationの連鎖含む"| CONTEXT_UPDATE["Replay Prefixへ今回の(Semantic Action, Observed<br/>Post-Step Signature)が追記済みの新しいDecision Contextを構成<br/>(LEASE_ESTABLISHの通り、Stepを行ったWorkerがこの新Decision Context＋<br/>RNG Hypothesis IDのLeaseを新規に確立する。<br/>これはHOLDER/BOOTSTRAP/SUBいずれの起源でも同じ扱い)"]
+    RETURN_CONTROL -->|"Pending<br/>新しい選択が発生<br/>ActionContinuationの連鎖含む"| CONTEXT_UPDATE["Replay Prefixへ今回の(Semantic Action, Observed<br/>Post-Step Signature)が追記済みの新しいDecision Contextを構成<br/>(LEASE_ESTABLISHの通り、Stepを行ったWorkerがこの新Decision Context＋<br/>Search Hypothesis IDのLeaseを新規に確立する。<br/>これはHOLDER/BOOTSTRAP/SUBいずれの起源でも同じ扱い)"]
     CONTEXT_UPDATE --> BACK_TO_CLASSIFY["→ mermaid_combat_candidate_pipeline_detail.mermaid<br/>CLASSIFYへ再突入<br/>(継続候補／Sub Branch候補は改めてこのDecision Contextで再選定)"]
 
     RETURN_CONTROL -->|"Stable"| CAPTURE["CaptureSnapshot<br/>(Emulator API境界)<br/>→ Leaseを解放しWorkerをQueueへ戻す(LEASE_RELEASE)"]
@@ -71,15 +71,15 @@ flowchart TD
     NOTE_DETERMINISM -.-> SUB_RESTORE
 
     %% 設計注記3: RNG HypothesisをまたぐLease共有の禁止
-    NOTE_RNG_LEASE["設計注記: Leaseは(Decision Context, RNG Hypothesis ID)の組に紐づく。<br/>RNG仮説H1で到達したWorkerのlive stateを、H2のDecision Contextへ<br/>再利用してはならない。共通仮説集合(H1..Hn)を使う場合も、<br/>Hごとに別個のLease/Branch stateとして扱う<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaid参照)。"]
+    NOTE_RNG_LEASE["設計注記: Leaseは(Decision Context, Search Hypothesis ID)の組に紐づく。<br/>RNG仮説H1で到達したWorkerのlive stateを、H2のDecision Contextへ<br/>再利用してはならない。共通仮説集合(H1..Hn)を使う場合も、<br/>Hごとに別個のLease/Branch stateとして扱う<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaid参照)。"]
     NOTE_RNG_LEASE -.-> LEASE_DEF
 
     %% 設計注記4: Sub/HolderはWorkerの固定属性ではない
     NOTE_NOT_FIXED_ROLE["設計注記: 『Sub Worker』『Holder Worker』は固定的なWorker種別ではなく、<br/>単に『WorkItem受領時点でLeaseを保持しているか』の違いに過ぎない。<br/>Sub起源のWorkerも、Stepの結果Pendingへ到達すれば直ちにLeaseを確立し、<br/>以後は(次の評価境界までは)Holder Workerと全く同じ扱いになる。"]
     NOTE_NOT_FIXED_ROLE -.-> LEASE_ESTABLISH
 
-    %% 設計注記5: OrderedDrawPileはWorker GameInstanceの正確な内部状態
-    NOTE_ORDERED_DRAWPILE["設計注記: HOLDER_WORKER・BOOTSTRAP_WORKER・SUB_WORKERいずれの<br/>GameInstanceも、Draw処理を正しく実行するため何らかのOrdered DrawPile<br/>(必ず具体的な1つの並び順)をそのまま保持・操作する。ただし、この並び順は<br/>常に真のOrderedDrawPileとは限らない。Action評価目的の標準比較経路<br/>(win/loss判定)では、DrawPile Belief仮説(H1..Hnのいずれか1つ、<br/>公開情報と整合するが真の順序である保証はない)が使われ、真のRNGを<br/>使ってよい例外用途(→ mermaid_combat_rng_hypothesis_detail.mermaidの<br/>TRUE_RNG_OK)でのみ真のOrderedDrawPileが使われる。<br/>いずれの場合も、Worker内部の正しい実行には具体的な並び順が必須であり<br/>Exact Emulator Stateとして扱うが、Worker自身が保持する並び順(仮説か真かを<br/>問わず)そのものをEvaluator/Policy側へ転送してはならない。また、真の<br/>OrderedDrawPileを使った単一Branchの探索結果をAction評価スコアとして<br/>使ってもならない<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE／<br/>NOTE_NO_SINGLE_BRANCH_TRUE_ORDER、<br/>mermaid_combat_snapshot_replay_detail.mermaidのNOTE_ORDERED_TRUTH)。"]
+    %% 設計注記5: Concrete OrderedDrawPileはWorker GameInstanceの正確な内部状態
+    NOTE_ORDERED_DRAWPILE["設計注記: HOLDER_WORKER・BOOTSTRAP_WORKER・SUB_WORKERいずれの<br/>GameInstanceも、Draw処理を正しく実行するため何らかのConcrete OrderedDrawPile<br/>(必ず具体的な1つの並び順。Authoritative OrderedDrawPileまたはHypothetical<br/>OrderedDrawPileのいずれか)をそのまま保持・操作する。Action評価目的の<br/>標準比較経路(win/loss判定)では、Hypothetical OrderedDrawPile<br/>(DrawPile Belief仮説H1..Hnのいずれか1つ。公開情報と整合するが、<br/>真の状態として扱ってはならない)が使われ、真のRNGを使ってよい例外用途<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのTRUE_RNG_OK)でのみ<br/>Authoritative OrderedDrawPileが使われる。<br/>いずれの場合も、Worker内部の正しい実行には具体的な並び順が必須であり<br/>Exact Emulator Stateとして扱うが、Worker自身が保持するConcrete<br/>OrderedDrawPile(Authoritative・Hypothetical問わず)そのものを<br/>Evaluator/Policy側へ転送してはならない。また、Authoritative<br/>OrderedDrawPileを使った単一Branchの探索結果をAction評価スコアとして<br/>使ってもならない<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE／<br/>NOTE_NO_SINGLE_BRANCH_TRUE_ORDER、<br/>mermaid_combat_snapshot_replay_detail.mermaidのNOTE_ORDERED_TRUTH)。"]
     NOTE_ORDERED_DRAWPILE -.-> HOLDER_STEP
     NOTE_ORDERED_DRAWPILE -.-> BOOTSTRAP_STEP
     NOTE_ORDERED_DRAWPILE -.-> SUB_RESTORE
