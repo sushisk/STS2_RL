@@ -1,10 +1,11 @@
 %% 責任主体: Search Coordinator (派生Snapshot作成) + Branch Worker (Restoreで反映)
 %% 参照上位図: mermaid_rough_combat.mermaid (RNG_NOTE)
 %% 目的: 候補分類・枝刈り完了後にのみRNG Hypothesisを決定すること(Candidate Pipelineとの順序統一)、
-%%       「未来の非公開RNGを消費し得るか」を判断基準とすること、Replay Prefixが非空の場合のRNG
-%%       Hypothesis継承(Main-observed Pendingは本図に到達しない)、標準比較(共通仮説集合)と
-%%       任意の追加評価(独立仮説集合、診断専用)の区別、RNG Hypothesis IDとLeaseの対応、
-%%       Main RNG非公開の責任境界を詳細化する
+%%       「未来の非公開RNGまたはOrderedDrawPileの並び順を消費/参照し得るか」を判断基準とすること、
+%%       Replay Prefixが非空の場合のRNG Hypothesis継承(Main-observed Pendingは本図に到達しない)、
+%%       標準比較(共通仮説集合)と任意の追加評価(独立仮説集合、診断専用)の区別、
+%%       RNG Hypothesis IDとLeaseの対応、Main RNG非公開・DrawPile Belief(山札順仮説集合)の生成、
+%%       実山札順を使った単一Branch探索をAction評価に使わないという責任境界を詳細化する
 %% 前提: 方式B — 新しいEmulator APIは追加しない。Restore前にSnapshot JSONを直接編集する。
 %%       Restore後にRNGを変更することはしない。初期実装ではRNG Hypothesisが関与する評価は
 %%       Root Action Evaluation Segment(Root Actionから規定された最初の評価境界までの探索区間。
@@ -17,26 +18,28 @@
 flowchart TD
     IN["枝刈り後に生存した候補群(継続候補＋Sub Branch候補)を受領<br/>(← mermaid_combat_snapshot_replay_detail.mermaidのTO_RNG。<br/>元をたどるとmermaid_combat_candidate_pipeline_detail.mermaidのSPLIT)"] --> PREFIX_GATE{"このDecision ContextのReplay Prefixは空か"}
 
-    PREFIX_GATE -->|"空<br/>Stable直後の起点<br/>(新規にHypothesis検討可能。<br/>RNG Hypothesis ID = None固定で始まる)"| CONSUME_CHECK{"この探索範囲(Decision Context以降)で<br/>未来の非公開RNGを消費し得るか<br/>(判断基準は『仮説が必要か』ではなく<br/>『Root RNGをそのまま使うと結果へ影響し得るか』)"}
+    PREFIX_GATE -->|"空<br/>Stable直後の起点<br/>(新規にHypothesis検討可能。<br/>RNG Hypothesis ID = None固定で始まる)"| CONSUME_CHECK{"この探索範囲(Decision Context以降)で<br/>未来の非公開RNG、または現在のOrderedDrawPileの<br/>並び順(真の隠れた山札順)を消費/参照し得るか<br/>(判断基準は『仮説が必要か』ではなく<br/>『Root Snapshotの真のRNG・真の山札順をそのまま使うと<br/>結果へ影響し得るか』。DrawPileはDrawが1度でも起こりうる<br/>候補は原則としてこちらに倒す — 安全側の既定)"}
     PREFIX_GATE -->|"非空<br/>Pending起点<br/>(Hypothesis-branch内部でのcascade継続。<br/>Main-observed Pendingは本図に到達しない<br/>— mermaid_combat_main_loop_detail.mermaidのPENDING_STATICで完結する)"| ROOT_HYP_KIND{"継承元のRNG Hypothesis IDは<br/>実際のH(≠None)か、PASSTHROUGH由来のNoneか"}
-    ROOT_HYP_KIND -->|"実際のH"| INHERIT_H["同じRNG Hypothesis IDをそのまま継承する<br/>(H由来のSnapshot上での継続なので実RNGへの依存はなく、<br/>再判定は不要)"]
-    ROOT_HYP_KIND -->|"PASSTHROUGH由来のNone"| RECHECK_CONSUME["この新しいDecision Context(=この時点のcascade)単体について、<br/>CONSUME_CHECKを再実行する。PASSTHROUGHの<br/>『RNGを消費しない』という判定は、それが下された時点の<br/>1手についてのみ有効であり、その結果生じたPendingの<br/>先の選択が自動的に安全とは限らないため<br/>(実RNGのまま分岐探索するとMain RNG非公開方針に反する)。<br/>判定不能な場合は安全側としてMODE(標準Hypothesis)へ倒す。"]
+    ROOT_HYP_KIND -->|"実際のH"| INHERIT_H["同じRNG Hypothesis ID(RNG成分＋DrawPile Order成分の組)を<br/>そのまま継承する(H由来のSnapshot上での継続なので<br/>実RNG・真の山札順への依存はなく、再判定は不要)"]
+    ROOT_HYP_KIND -->|"PASSTHROUGH由来のNone"| RECHECK_CONSUME["この新しいDecision Context(=この時点のcascade)単体について、<br/>CONSUME_CHECKを再実行する。PASSTHROUGHの<br/>『RNG・DrawPile順を消費/参照しない』という判定は、<br/>それが下された時点の1手についてのみ有効であり、<br/>その結果生じたPendingの先の選択が自動的に安全とは限らないため<br/>(実RNG・真の山札順のまま分岐探索すると<br/>Main RNG／OrderedDrawPile非公開方針に反する)。<br/>判定不能な場合は安全側としてMODE(標準Hypothesis)へ倒す。"]
     RECHECK_CONSUME --> CONSUME_CHECK
 
-    CONSUME_CHECK -->|"消費しないことが保証される<br/>(既に確定済みの情報のみで完結する候補評価等)"| PASSTHROUGH["Root SnapshotのRNGをそのまま使用<br/>RNG Hypothesis ID = None(Root自体)<br/>(RunRng・PlayerRng・MonsterRngは編集しない。<br/>RNGを消費しないことが前提のため、この後の探索でも<br/>Main RNG非公開方針への抵触はない)"]
-    CONSUME_CHECK -->|"消費する可能性がある<br/>(Draw順序・敵行動抽選等、未確定の未来RNGに依存し得る)"| MODE{"比較方式"}
-    CONSUME_CHECK -->|"真のRNGを使用してよい用途<br/>(厳密Replay／determinism test／デバッグ再現／<br/>実際にMainで採用Actionを実行する場合)"| TRUE_RNG_OK["Root SnapshotのRNGをそのまま使用してよい<br/>(方針上の例外用途として明示的に許可)"]
+    CONSUME_CHECK -->|"RNGを消費せず、かつDrawPileの並び順にも<br/>依存しないことが保証される<br/>(既に確定済みの情報のみで完結し、Drawを一切伴わない<br/>候補評価等。両条件を同時に満たす場合のみ)"| PASSTHROUGH["Root SnapshotのRNG・OrderedDrawPileをそのまま使用<br/>RNG Hypothesis ID = None(Root自体)<br/>(RunRng・PlayerRng・MonsterRng・DrawPileは編集しない。<br/>RNGを消費せずDrawPile順にも依存しないことが前提のため、<br/>この後の探索でもMain RNG／OrderedDrawPile非公開方針への<br/>抵触はない)"]
+    CONSUME_CHECK -->|"消費/参照する可能性がある<br/>(Draw順序・敵行動抽選等、未確定の未来RNGまたは<br/>現在の隠れた山札順に依存し得る)"| MODE{"比較方式"}
+    CONSUME_CHECK -->|"真のRNG・真のDrawPile順を使用してよい用途<br/>(厳密Replay／determinism test／デバッグ再現／<br/>実際にMainで採用Actionを実行する場合)"| TRUE_RNG_OK["Root SnapshotのRNG・OrderedDrawPileをそのまま使用してよい<br/>(方針上の例外用途として明示的に許可。<br/>Action評価目的の探索候補比較には使わない)"]
 
     subgraph COORD["Search Coordinator (責任: 派生Snapshotの作成。GameInstanceには触れない)"]
         MODE -->|"標準比較<br/>推奨・既定。win/loss判定に使う"| STANDARD_SET["共通仮説RNG集合 H1..Hnを1組作成<br/>各HにRNG Hypothesis IDを付与"]
         MODE -->|"独立集合による追加評価<br/>頑健性確認等・任意。診断専用<br/>(win/loss判定には一切使わない)"| INDEPENDENT_SET["候補ごとに独立したRNG集合を作成し<br/>それぞれに個別のRNG Hypothesis IDを付与<br/>(標準比較の対象集合とは完全に分離して扱う)"]
 
-        STANDARD_SET --> GRID["比較対象の全Root Actionに同じH1..Hnを適用<br/>Root Action A × H1,H2,H3<br/>Root Action B × H1,H2,H3<br/>Root Action C × H1,H2,H3<br/>(Root Action差とRNG差を分離しやすくするため。<br/>Root Actionとは、この探索呼び出しの起点Decision Contextで<br/>選ばれる最初の1手を指す — 深いPlan Pathではない)"]
-        GRID --> DERIVE_STD["Root Action×Hypothesisの組ごとに<br/>Root Snapshot JSONを複製し、対象RNGストリームへ<br/>そのHのSerializableRngSnapshot(Counter, State0..State3)を適用"]
+        STANDARD_SET --> PUBLIC_MULTISET["公開情報から残りDrawPileのカード多重集合を算出<br/>(既知のDeck全体からHand／DiscardPile／ExhaustPile／PlayPile等、<br/>観測可能な他Pileへ既に配置済みのCard Instanceを差し引いた残り。<br/>並び順は一切含まない集合情報)"]
+        PUBLIC_MULTISET --> BELIEF_GEN["DrawPile Belief: PUBLIC_MULTISETと整合する<br/>(同じ多重集合を持つ)Ordered DrawPile仮説を、<br/>H1..Hnそれぞれに対して1つずつ生成する<br/>(RNG Hypothesis H1..Hnと同じ添字集合を共有し、<br/>各HiはRNG成分＋DrawPile Order成分の組として扱う。<br/>具体的な仮説生成分布・アルゴリズムは本図の範囲外、実装時に決定。<br/>要件は『公開情報と整合すること』=同じ多重集合であることのみ。<br/>真のOrderedDrawPile(Root Snapshotが保持する実際の並び順)は<br/>ここでは一切参照しない → 下記NOTE_NO_SINGLE_BRANCH_TRUE_ORDER)"]
+        BELIEF_GEN --> GRID["比較対象の全Root Actionに同じH1..Hn<br/>(RNG成分＋DrawPile Order成分の組)を適用<br/>Root Action A × H1,H2,H3<br/>Root Action B × H1,H2,H3<br/>Root Action C × H1,H2,H3<br/>(Root Action差とRNG差／DrawPile順差を分離しやすくするため。<br/>Root Actionとは、この探索呼び出しの起点Decision Contextで<br/>選ばれる最初の1手を指す — 深いPlan Pathではない)"]
+        GRID --> DERIVE_STD["Root Action×Hypothesisの組ごとに<br/>Root Snapshot JSONを複製し、対象RNGストリームへ<br/>そのHのSerializableRngSnapshot(Counter, State0..State3)を適用し、<br/>あわせてPlayer.DrawPileをBELIEF_GENが生成した<br/>そのHiのOrdered DrawPile仮説へ置換する<br/>(真のDrawPileは複製元にも複製後にも一切現れない)"]
 
-        INDEPENDENT_SET --> DERIVE_IND["候補ごとにRoot Snapshot JSONを複製し、<br/>その候補専用の独立したRNGストリームを適用<br/>(他候補とは異なる仮説を用いる)"]
+        INDEPENDENT_SET --> DERIVE_IND["候補ごとにRoot Snapshot JSONを複製し、<br/>その候補専用の独立したRNGストリームを適用<br/>(他候補とは異なる仮説を用いる。DrawPileが関与する場合は<br/>STANDARD_SET経路と同様にPUBLIC_MULTISET整合のBelief仮説を<br/>個別に生成して適用する)"]
 
-        DERIVE_STD --> DERIVED_SNAP_STD["標準比較用の派生Snapshot群<br/>(いずれもRoot Snapshotとは別個体、Root自体は不変のまま保持。<br/>各SnapshotはそのRNG Hypothesis IDと1対1で対応する)"]
+        DERIVE_STD --> DERIVED_SNAP_STD["標準比較用の派生Snapshot群<br/>(いずれもRoot Snapshotとは別個体、Root自体は不変のまま保持。<br/>各SnapshotはそのRNG Hypothesis ID(RNG成分＋DrawPile Order成分)と<br/>1対1で対応する)"]
         DERIVE_IND --> DERIVED_SNAP_IND["診断専用の派生Snapshot群<br/>(標準比較用の集合とは別のRNG Hypothesis IDを持ち、<br/>後段でも混同しないようタグ付けする)"]
     end
 
@@ -60,7 +63,7 @@ flowchart TD
     subgraph PRIVACY["Main RNGとOrderedDrawPileの非公開 (責任境界の明記)"]
         MAIN_RNG["Main GameInstanceが保持する実際のRun/Player/Monster RNG"]
         DRAWPILE_ORDER["Main/Branch GameInstanceが保持する真のOrderedDrawPile<br/>(index 0が山札上/次に引くカード。<br/>→ mermaid_combat_snapshot_replay_detail.mermaidのDC_DEF／NOTE_ORDERED_TRUTH)"]
-        MAIN_RNG -.->|"CaptureSnapshotで含まれる"| BOUNDARY_TABLE["責任境界:<br/>・Emulator API(CaptureSnapshot等): RNG・OrderedDrawPileを完全に含む。正しい挙動。<br/>・Search Coordinator(Snapshot JSON操作ロジック): RNG・OrderedDrawPileへの機械的<br/>  アクセスは必須(Replay Prefix再生の忠実性・派生Snapshot生成の双方に必要)。<br/>  ただしこのアクセスをEvaluator入力へ転送してはならない。<br/>  Main自身のPending(観測済みPendingからの新規decision)は本図には<br/>  到達せず、mermaid_combat_main_loop_detail.mermaidのPENDING_STATICが<br/>  Restore/Step/Worker分岐なしの静的評価のみで完結させることで、<br/>  真の未来RNGおよび真のOrderedDrawPileがEvaluatorへ渡る経路自体を<br/>  構造的に作らない。<br/>・Branch Worker: GameInstanceを直接操作するため完全アクセスが必要かつ正しい<br/>  (StepでのDraw処理はOrderedDrawPileの真の並びに基づかなければ<br/>  正しい結果を生成できない)。<br/>・Evaluator(Heuristic/Model scoring関数): Observation／Choice Payload由来の<br/>  特徴量のみを入力とし、生のSnapshot DTO／RNGフィールド／<br/>  OrderedDrawPileの配列そのもの(並び順)を直接受け取ってはならない<br/>  (規約ではなく型/インターフェースレベルで分離する)。DrawPileに由来する<br/>  情報が必要な場合は、UnorderedDrawPile相当の集計特徴量<br/>  (残り枚数・カード種別頻度等、並び順を含まない)のみを渡す。<br/>  理由: 実ゲームでは山札順は非公開であり、Ordered情報をそのまま評価に<br/>  使うと、実際には利用できない特権情報にPolicy/Evaluatorが依存してしまい、<br/>  将来実ゲームへ接続した際の性能保証が崩れる(RNG非公開と同じ理由)。<br/>・Main Process: 真のRNGおよび真のOrderedDrawPileの唯一の所有者。"]
+        MAIN_RNG -.->|"CaptureSnapshotで含まれる"| BOUNDARY_TABLE["責任境界:<br/>・Emulator API(CaptureSnapshot等): RNG・OrderedDrawPileを完全に含む。正しい挙動。<br/>・Search Coordinator(Snapshot JSON操作ロジック): RNG・OrderedDrawPileへの機械的<br/>  アクセスは必須(Replay Prefix再生の忠実性・PUBLIC_MULTISET算出・派生Snapshot<br/>  生成の双方に必要)。ただしこのアクセスをEvaluator入力へ転送してはならず、<br/>  さらに真のOrderedDrawPileを使って実行した単一Branchの探索結果を<br/>  そのままAction評価スコアとして使ってもならない(→ NOTE_NO_SINGLE_BRANCH_TRUE_ORDER。<br/>  生DTOを渡さなくても、単一Branchのスコアを通じて間接的に山札順が漏洩するため)。<br/>  Main自身のPending(観測済みPendingからの新規decision)は本図には<br/>  到達せず、mermaid_combat_main_loop_detail.mermaidのPENDING_STATICが<br/>  Restore/Step/Worker分岐なしの静的評価のみで完結させることで、<br/>  真の未来RNGおよび真のOrderedDrawPileがEvaluatorへ渡る経路自体を<br/>  構造的に作らない。<br/>・Branch Worker: GameInstanceを直接操作するため完全アクセスが必要かつ正しい<br/>  (StepでのDraw処理はDrawPile Belief仮説(標準比較経路)または真の<br/>  OrderedDrawPile(TRUE_RNG_OK等の例外用途限定)いずれかの並びに<br/>  基づかなければ正しい結果を生成できない)。<br/>・Evaluator(Heuristic/Model scoring関数): Observation／Choice Payload由来の<br/>  特徴量のみを入力とし、生のSnapshot DTO／RNGフィールド／<br/>  OrderedDrawPileの配列そのもの(並び順)を直接受け取ってはならない<br/>  (規約ではなく型/インターフェースレベルで分離する)。DrawPileに由来する<br/>  情報が必要な場合は、Order-Masked Observation(Hidden-Order Features。<br/>  残り枚数・カード種別頻度等、並び順を含まない集計特徴量)のみを渡す。<br/>  理由: 実ゲームでは山札順は非公開であり、Ordered情報をそのまま評価に<br/>  使うと、実際には利用できない特権情報にPolicy/Evaluatorが依存してしまい、<br/>  将来実ゲームへ接続した際の性能保証が崩れる(RNG非公開と同じ理由)。<br/>・Main Process: 真のRNGおよび真のOrderedDrawPileの唯一の所有者。<br/>  正本保存・実行・Capture／Restoreにのみ使用し、Belief生成や<br/>  Action評価には使用しない(→ NOTE_EXACT_VS_BELIEF_LAYER)。"]
         DRAWPILE_ORDER -.->|"CaptureSnapshotで含まれる"| BOUNDARY_TABLE
     end
     MAIN_RNG --> PREFIX_GATE
@@ -82,3 +85,14 @@ flowchart TD
 
     NOTE_ORDER["設計注記: RNG Hypothesisの決定はCandidate Pipelineの分類・事前評価・<br/>枝刈りが完了した『後』にのみ行う。分類前の候補集合全体に対して<br/>RNG展開すると、後で枝刈りされる候補にも無駄なWorkItem/Workerリソースを<br/>割り当ててしまうため、順序をこの通りに固定する。"]
     NOTE_ORDER -.-> IN
+
+    NOTE_NO_SINGLE_BRANCH_TRUE_ORDER["設計注記(単一Branch真山札順の間接漏洩防止): PRIVACY/BOUNDARY_TABLEが<br/>禁止するのはEvaluatorへの生DrawPile DTO転送だけではない。<br/>『真のOrderedDrawPile(Root Snapshotが保持する実際の並び順)を使って<br/>実行した単一のBranch探索結果』を、そのままPolicyのAction評価<br/>(win/loss判定用のスコア)に使うことも禁止する。単一Branchのスコアは<br/>真の未来のDraw結果に直接依存するため、生DTOを渡さなくても<br/>結果を通じて真の山札順が間接的に漏洩する。<br/>この間接漏洩を構造的に防ぐため、標準比較経路(STANDARD_SET)は<br/>真のOrderedDrawPileを一切参照せず、必ずDrawPile Belief<br/>(PUBLIC_MULTISET整合の複数仮説H1..Hn)を経由してから<br/>Branch Workerへ投入する(→ BELIEF_GEN/DERIVE_STD)。<br/>PASSTHROUGH経路(RNG非消費かつDraw非依存が保証された候補のみ)を<br/>除き、Draw発生の可能性がある候補は必ずこの経路を通る。"]
+    NOTE_NO_SINGLE_BRANCH_TRUE_ORDER -.-> BELIEF_GEN
+    NOTE_NO_SINGLE_BRANCH_TRUE_ORDER -.-> STANDARD_SET
+
+    NOTE_EXACT_VS_BELIEF_LAYER["設計注記(Exact State層とBelief/Search層の分離): RL側の内部構造は<br/>2層に分離する。<br/>・Exact State層: Main GameInstance、Root Snapshot(真のOrderedDrawPile・<br/>  真のRNGを含む)の保持・CaptureSnapshot・RestoreSnapshotJson・<br/>  Replay Prefix再生による忠実な状態再現。Search Coordinatorが<br/>  Root Snapshotへ機械的アクセスするのはこの層に限られ、目的は<br/>  Restore/Replayの正しさを保証することのみ。<br/>・Belief/Search層: BELIEF_GEN以降、DrawPile Belief仮説H1..Hnおよび<br/>  RNG Hypothesis仮説を適用した派生Snapshotの生成・Branch Worker<br/>  投入・スコア集約。Action評価に使われるのはこの層の出力のみであり、<br/>  Exact State層の真のOrderedDrawPile・真のRNGはこの層に一切流入しない<br/>  (PUBLIC_MULTISET算出以外の経路でExact State層の値を読まない)。<br/>Main自身の真のOrderedDrawPileは、正本保存(CaptureSnapshot)・<br/>実行(Main GameInstance.Step)・Capture／Restoreにのみ使用し、<br/>Belief生成やAction評価には使用しない。"]
+    NOTE_EXACT_VS_BELIEF_LAYER -.-> BOUNDARY_TABLE
+    NOTE_EXACT_VS_BELIEF_LAYER -.-> PUBLIC_MULTISET
+
+    NOTE_BELIEF_DETERMINISM["設計注記(Belief仮説内の決定性と真の順序との関係、項目7): DrawPile Belief<br/>仮説Hi(BELIEF_GENが生成したOrdered DrawPile仮説)をRoot Snapshotへ<br/>適用してRestoreした場合も、通常のRestore決定性<br/>(→ mermaid_combat_snapshot_replay_detail.mermaidのNOTE_RESHUFFLE_DETERMINISM)は<br/>そのまま成立する。すなわち、同一の仮説Hi＋同一のSemantic Action系列を<br/>Replay/Stepすれば、その仮説の下での将来の再shuffle結果を含め、<br/>常に同じ結果が再現される(仮説内の自己無矛盾性・再現性)。<br/>ただし、この仮説内決定性は、仮説Hiが真のゲームの実際の山札順と<br/>一致することを一切保証しない。仮説Hiはあくまで<br/>PUBLIC_MULTISETと整合する『あり得る順序の1つ』であり、<br/>H1..Hn全体を集約してAction評価する(→ mermaid_combat_commit_detail.mermaidの<br/>GROUP_BY_ROOT_ACTION)ことで、特定の仮説への過学習を避ける設計としている。<br/>(mermaid_combat_snapshot_replay_detail.mermaidのNOTE_RESHUFFLE_DETERMINISMも<br/>参照。同ノートは戦闘中StableShuffleによる再shuffleが公開情報のみから<br/>真に予測可能な場合があることも扱う)"]
+    NOTE_BELIEF_DETERMINISM -.-> BELIEF_GEN

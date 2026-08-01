@@ -52,7 +52,7 @@ flowchart TD
     NOTE_KIND_VS_SCOPE["設計注記: choice_kind(意味的種別: Card/Target/Hand/Confirm等)と<br/>choice_scope(TopLevel/ActionContinuation)は直交した2軸。<br/>Evaluator選択はchoice_kindのみで行い、choice_scopeで<br/>Evaluatorの選び方自体を変えない(ActionContinuation専用Evaluatorは廃止)。"]
     NOTE_KIND_VS_SCOPE -.-> CHOICE_SCOPE
 
-    NOTE_DRAWPILE_HIDDEN["設計注記: 各Evaluator(EVAL_CARD/EVAL_TARGET/EVAL_HAND/EVAL_CONFIRM/<br/>EVAL_OTHER)への入力には、OrderedDrawPile(真の山札順。index 0が山札上/<br/>次に引くカード)をそのまま渡さない。DrawPile由来の特徴が必要な場合は<br/>UnorderedDrawPile相当の集計特徴量(残り枚数・カード種別頻度等、<br/>並び順を含まない)のみを渡す<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE。<br/>理由: 実ゲームでは山札順は非公開であり、Evaluatorに真の並び順を渡すと、<br/>将来実ゲームへ接続した際に利用できない特権情報にPolicy/Evaluatorが<br/>依存してしまい性能保証が崩れる。RNG非公開と同じ理由による制約)。"]
+    NOTE_DRAWPILE_HIDDEN["設計注記: 各Evaluator(EVAL_CARD/EVAL_TARGET/EVAL_HAND/EVAL_CONFIRM/<br/>EVAL_OTHER)への入力には、OrderedDrawPile(真の山札順。index 0が山札上/<br/>次に引くカード)をそのまま渡さない。DrawPile由来の特徴が必要な場合は<br/>Order-Masked Observation(Hidden-Order Features。残り枚数・カード種別頻度等、<br/>並び順を含まない集計特徴量)のみを渡す<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE。<br/>理由: 実ゲームでは山札順は非公開であり、Evaluatorに真の並び順を渡すと、<br/>将来実ゲームへ接続した際に利用できない特権情報にPolicy/Evaluatorが<br/>依存してしまい性能保証が崩れる。RNG非公開と同じ理由による制約)。"]
     NOTE_DRAWPILE_HIDDEN -.-> EVAL_CARD
     NOTE_DRAWPILE_HIDDEN -.-> EVAL_TARGET
     NOTE_DRAWPILE_HIDDEN -.-> EVAL_HAND

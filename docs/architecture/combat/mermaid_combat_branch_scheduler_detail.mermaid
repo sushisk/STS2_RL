@@ -79,7 +79,7 @@ flowchart TD
     NOTE_NOT_FIXED_ROLE -.-> LEASE_ESTABLISH
 
     %% 設計注記5: OrderedDrawPileはWorker GameInstanceの正確な内部状態
-    NOTE_ORDERED_DRAWPILE["設計注記: HOLDER_WORKER・BOOTSTRAP_WORKER・SUB_WORKERいずれの<br/>GameInstanceも、Draw処理を正しく実行するためOrderedDrawPile<br/>(真の山札順)をそのまま保持・操作する。これはWorker内部の<br/>正しい実行のために必須であり、Exact Emulator Stateとして扱う。<br/>この情報をEvaluator/Policy側へ転送してはならない<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE、<br/>mermaid_combat_snapshot_replay_detail.mermaidのNOTE_ORDERED_TRUTH)。"]
+    NOTE_ORDERED_DRAWPILE["設計注記: HOLDER_WORKER・BOOTSTRAP_WORKER・SUB_WORKERいずれの<br/>GameInstanceも、Draw処理を正しく実行するため何らかのOrdered DrawPile<br/>(必ず具体的な1つの並び順)をそのまま保持・操作する。ただし、この並び順は<br/>常に真のOrderedDrawPileとは限らない。Action評価目的の標準比較経路<br/>(win/loss判定)では、DrawPile Belief仮説(H1..Hnのいずれか1つ、<br/>公開情報と整合するが真の順序である保証はない)が使われ、真のRNGを<br/>使ってよい例外用途(→ mermaid_combat_rng_hypothesis_detail.mermaidの<br/>TRUE_RNG_OK)でのみ真のOrderedDrawPileが使われる。<br/>いずれの場合も、Worker内部の正しい実行には具体的な並び順が必須であり<br/>Exact Emulator Stateとして扱うが、Worker自身が保持する並び順(仮説か真かを<br/>問わず)そのものをEvaluator/Policy側へ転送してはならない。また、真の<br/>OrderedDrawPileを使った単一Branchの探索結果をAction評価スコアとして<br/>使ってもならない<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE／<br/>NOTE_NO_SINGLE_BRANCH_TRUE_ORDER、<br/>mermaid_combat_snapshot_replay_detail.mermaidのNOTE_ORDERED_TRUTH)。"]
     NOTE_ORDERED_DRAWPILE -.-> HOLDER_STEP
     NOTE_ORDERED_DRAWPILE -.-> BOOTSTRAP_STEP
     NOTE_ORDERED_DRAWPILE -.-> SUB_RESTORE

@@ -103,3 +103,36 @@ mermaid_combat_commit_detail             : OK
 
 `MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
 (`mermaid_combat_fault_worker_detail.mermaid`のハッシュのみ前回commitから不変)。
+
+## 第3回検証(2026-08-01、山札順の間接漏洩修正 — DrawPile Belief導入)
+
+`mermaid_rough_combat` / `mermaid_combat_candidate_pipeline_detail` /
+`mermaid_combat_branch_scheduler_detail` / `mermaid_combat_snapshot_replay_detail` /
+`mermaid_combat_rng_hypothesis_detail` / `mermaid_combat_commit_detail` の6図へ、
+「真のOrderedDrawPileを使った単一Branch探索結果をAction評価に使わない」
+「DrawPile Belief(公開情報と整合する複数のOrdered DrawPile仮説H1..Hn)をRNG Hypothesisと
+同じ仕組みへ統合する」「Exact State層／Belief-Search層の分離」
+「UnstableShuffle(戦闘開始時)／StableShuffle(戦闘中再shuffle)の区別」
+「UnorderedDrawPile→Order-Masked Observation(Hidden-Order Features)への改称」を反映した
+(`mermaid_combat_main_loop_detail`は用語改称のみ、`mermaid_combat_fault_worker_detail`は変更なし)。
+`StableShuffle`/`UnstableShuffle`の区別は、vendored engine
+(`Outputs/azure_stage_20260723_122305/STS2_Emulator/`配下)の実ソース
+(`ListExtensions.cs`のStableShuffle/UnstableShuffle定義、`CardPileCmd.Shuffle`・
+`Player.PopulateCombatState`の呼び出し箇所)を直接確認して裏付けた。
+使用ツール・実行コマンドは上記と同一(`@mermaid-js/mermaid-cli` v11.16.0)。
+全ての追記は既存の引用符付きラベル記法に従って行ったため、bracket balance検証・
+実レンダリングともに初回から全8図で成功した。
+
+```
+mermaid_rough_combat                     : OK
+mermaid_combat_main_loop_detail          : OK (用語改称のみ)
+mermaid_combat_candidate_pipeline_detail : OK
+mermaid_combat_branch_scheduler_detail   : OK
+mermaid_combat_snapshot_replay_detail    : OK
+mermaid_combat_rng_hypothesis_detail     : OK
+mermaid_combat_fault_worker_detail       : OK (無変更)
+mermaid_combat_commit_detail             : OK
+```
+
+`MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
+(`mermaid_combat_fault_worker_detail.mermaid`のハッシュのみ前回commitから不変)。
