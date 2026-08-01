@@ -59,3 +59,7 @@ flowchart TD
 
     NOTE_SINGLE_SEGMENT["設計注記: RNG Hypothesisが関与する評価は、今回は複数のRoot Action<br/>Evaluation Segmentにまたがる汎用的な確率的Beam Searchとして実装しない。<br/>理由は、Hごとに合法Actionや以降の分岐構造が異なりうる場合、Root Actionより<br/>深い階層でのグループ同一性が一般に定義できないためである。多段化する場合は、<br/>グループ同一性の定義とサンプル欠損時の集約規則(本図のAGGREGATE_RULE相当)を<br/>深さ非依存に一般化してから着手する。"]
     NOTE_SINGLE_SEGMENT -.-> COMPARE_HYP
+
+    NOTE_DRAWPILE_HIDDEN_COMMIT["設計注記: STAGE1(Hypothesis評価)・COMPARE_PLAIN(RNG非依存の<br/>Heuristic/Model scoring)のいずれも、各Decision Contextの<br/>OrderedDrawPile(真の山札順)をそのままスコア関数の入力として渡さない。<br/>DrawPile由来の特徴が必要な場合はUnorderedDrawPile相当の集計特徴量<br/>(残り枚数・カード種別頻度等)のみを渡す<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE、<br/>mermaid_combat_candidate_pipeline_detail.mermaidのNOTE_DRAWPILE_HIDDENと<br/>同一原則。理由: 実ゲームでは山札順は非公開であり、評価関数がOrdered情報に<br/>依存すると将来実ゲーム接続時の性能保証が崩れる)。"]
+    NOTE_DRAWPILE_HIDDEN_COMMIT -.-> STAGE1
+    NOTE_DRAWPILE_HIDDEN_COMMIT -.-> COMPARE_PLAIN

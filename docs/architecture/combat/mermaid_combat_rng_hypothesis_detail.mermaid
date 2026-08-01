@@ -56,12 +56,15 @@ flowchart TD
     TAG_CHECK -->|"標準"| COMPARE_STD["標準比較経路: Search Coordinatorは<br/>『同一Root Action×同一標準H』のスコアをHごとに集計し、<br/>Root Action間の差をRNG差から分離して評価する<br/>(mermaid_combat_commit_detail.mermaidのGROUP_BY_ROOT_ACTION/COMPAREへ。<br/>win/loss判定に使われるのはこの経路の結果のみ)"]
     TAG_CHECK -->|"診断"| COMPARE_IND["診断専用経路: 独立集合による結果は<br/>頑健性指標としてのみ記録・報告する。<br/>標準比較のスコアには一切混ぜず、win/loss判定にも使わない"]
 
-    %% Main RNGの非公開・責任境界
-    subgraph PRIVACY["Main RNGの非公開 (責任境界の明記)"]
+    %% Main RNGの非公開・OrderedDrawPileの非公開・責任境界
+    subgraph PRIVACY["Main RNGとOrderedDrawPileの非公開 (責任境界の明記)"]
         MAIN_RNG["Main GameInstanceが保持する実際のRun/Player/Monster RNG"]
-        MAIN_RNG -.->|"CaptureSnapshotで含まれる"| BOUNDARY_TABLE["責任境界:<br/>・Emulator API(CaptureSnapshot等): RNGを完全に含む。正しい挙動。<br/>・Search Coordinator(Snapshot JSON操作ロジック): RNGへの機械的アクセスは<br/>  必須(Replay Prefix再生の忠実性・派生Snapshot生成の双方に必要)。<br/>  ただしこのアクセスをEvaluator入力へ転送してはならない。<br/>  Main自身のPending(観測済みPendingからの新規decision)は本図には<br/>  到達せず、mermaid_combat_main_loop_detail.mermaidのPENDING_STATICが<br/>  Restore/Step/Worker分岐なしの静的評価のみで完結させることで、<br/>  真の未来RNGがEvaluatorへ渡る経路自体を構造的に作らない。<br/>・Branch Worker: GameInstanceを直接操作するため完全アクセスが必要かつ正しい。<br/>・Evaluator(Heuristic/Model scoring関数): Observation／Choice Payload由来の<br/>  特徴量のみを入力とし、生のSnapshot DTO／RNGフィールドを直接受け取っては<br/>  ならない(規約ではなく型/インターフェースレベルで分離する)。<br/>・Main Process: 真のRNGの唯一の所有者。"]
+        DRAWPILE_ORDER["Main/Branch GameInstanceが保持する真のOrderedDrawPile<br/>(index 0が山札上/次に引くカード。<br/>→ mermaid_combat_snapshot_replay_detail.mermaidのDC_DEF／NOTE_ORDERED_TRUTH)"]
+        MAIN_RNG -.->|"CaptureSnapshotで含まれる"| BOUNDARY_TABLE["責任境界:<br/>・Emulator API(CaptureSnapshot等): RNG・OrderedDrawPileを完全に含む。正しい挙動。<br/>・Search Coordinator(Snapshot JSON操作ロジック): RNG・OrderedDrawPileへの機械的<br/>  アクセスは必須(Replay Prefix再生の忠実性・派生Snapshot生成の双方に必要)。<br/>  ただしこのアクセスをEvaluator入力へ転送してはならない。<br/>  Main自身のPending(観測済みPendingからの新規decision)は本図には<br/>  到達せず、mermaid_combat_main_loop_detail.mermaidのPENDING_STATICが<br/>  Restore/Step/Worker分岐なしの静的評価のみで完結させることで、<br/>  真の未来RNGおよび真のOrderedDrawPileがEvaluatorへ渡る経路自体を<br/>  構造的に作らない。<br/>・Branch Worker: GameInstanceを直接操作するため完全アクセスが必要かつ正しい<br/>  (StepでのDraw処理はOrderedDrawPileの真の並びに基づかなければ<br/>  正しい結果を生成できない)。<br/>・Evaluator(Heuristic/Model scoring関数): Observation／Choice Payload由来の<br/>  特徴量のみを入力とし、生のSnapshot DTO／RNGフィールド／<br/>  OrderedDrawPileの配列そのもの(並び順)を直接受け取ってはならない<br/>  (規約ではなく型/インターフェースレベルで分離する)。DrawPileに由来する<br/>  情報が必要な場合は、UnorderedDrawPile相当の集計特徴量<br/>  (残り枚数・カード種別頻度等、並び順を含まない)のみを渡す。<br/>  理由: 実ゲームでは山札順は非公開であり、Ordered情報をそのまま評価に<br/>  使うと、実際には利用できない特権情報にPolicy/Evaluatorが依存してしまい、<br/>  将来実ゲームへ接続した際の性能保証が崩れる(RNG非公開と同じ理由)。<br/>・Main Process: 真のRNGおよび真のOrderedDrawPileの唯一の所有者。"]
+        DRAWPILE_ORDER -.->|"CaptureSnapshotで含まれる"| BOUNDARY_TABLE
     end
     MAIN_RNG --> PREFIX_GATE
+    DRAWPILE_ORDER -.-> PREFIX_GATE
 
     %% 設計注記
     NOTE_METHOD_B["設計注記(方式B): RNG差し替えは常にRestore『前』の<br/>Snapshot JSON編集で行う。Restore後に特定ストリームを<br/>再シードする新規Emulator APIは導入しない<br/>(rl_combat_target_worker_pool_review_20260731.md §13 該当項目、解決済み。<br/>当時のレビュー対象図は現在deprecated/mermaid_combat_target_worker_pool.mermaidへ<br/>移動済みであり、本方針自体は本図が正本として定義する)。"]

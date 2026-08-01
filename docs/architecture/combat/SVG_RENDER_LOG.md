@@ -77,3 +77,29 @@ mermaid_combat_commit_detail             : OK   (成功 — 元々エッジラ�
 検出できるが、エッジラベルの引用符省略に起因する構文エラーは検出できない。この種のバグは
 実際のparser/rendererにかけない限り検出不能であり、今後もMermaid図を修正した際は、
 括弧balance検証だけで完了とせず、本ログと同じ手順で実レンダリングによる検証を都度実施する。
+
+## 第2回検証(2026-08-01、OrderedDrawPile/UnorderedDrawPile区別の反映)
+
+`mermaid_rough_combat` / `mermaid_combat_main_loop_detail` /
+`mermaid_combat_candidate_pipeline_detail` / `mermaid_combat_branch_scheduler_detail` /
+`mermaid_combat_snapshot_replay_detail` / `mermaid_combat_rng_hypothesis_detail` /
+`mermaid_combat_commit_detail` の7図へ、OrderedDrawPile(Exact Emulator State)と
+Evaluator/Policyが用いるUnordered/Hidden-Order表現の区別を追記した
+(`mermaid_combat_fault_worker_detail`は変更なし)。使用ツール・実行コマンドは上記と同一
+(`@mermaid-js/mermaid-cli` v11.16.0)。全ての追記は既存の引用符付きノード/エッジラベル記法に
+従って行った(新規の未引用括弧を含む生ラベルは追加していない)ため、bracket balance検証・
+実レンダリングともに初回から全8図で成功した。
+
+```
+mermaid_rough_combat                     : OK
+mermaid_combat_main_loop_detail          : OK
+mermaid_combat_candidate_pipeline_detail : OK
+mermaid_combat_branch_scheduler_detail   : OK
+mermaid_combat_snapshot_replay_detail    : OK
+mermaid_combat_rng_hypothesis_detail     : OK
+mermaid_combat_fault_worker_detail       : OK (無変更)
+mermaid_combat_commit_detail             : OK
+```
+
+`MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
+(`mermaid_combat_fault_worker_detail.mermaid`のハッシュのみ前回commitから不変)。

@@ -89,3 +89,8 @@ flowchart TD
     SEARCH_FAIL -.-> COMBAT_ABORTED["CombatAbortedByDecisionFailure<br/>Main Combat Fault(=Mainの正本が壊れた)とも<br/>計画通りのCombat終了(Terminal)とも異なる第三の終了種別<br/>詳細: main_loop_detail.mermaidのSEARCH_FAIL_HANDLE/COMBAT_ABORTED"]
 
     ROUGH_NOTE["注記: Fault・Rejection・Timeout・Worker再起動・<br/>Training向けログschema等の詳細はfault_worker_detail／<br/>commit_detailで定義する。本図は入口・処理順・責任境界の<br/>要約であり、フィールドレベルの契約・例外分類・内部手順は<br/>意図的に省略している(詳細図を補足契約として参照すること)。<br/>本図と詳細図が矛盾する場合は、どちらかを自動的に正とせず、<br/>実装を停止して監督者判断を求める(上部の契約関係コメント参照)。"]
+
+    DRAWPILE_NOTE["注記(OrderedDrawPile／Unordered-Hidden-Orderの区別):<br/>EmulatorとのDTO契約上、DrawPileは常にOrdered配列(index 0が山札上/<br/>次に引くカード)であり、Main Game Instance・Root Snapshot・<br/>Branch WorkerのGameInstance(WORKER_STEP/WORKER_RESTORE)はいずれも<br/>この真のOrdered情報(=Exact Emulator State)を保持・操作する<br/>(SNAPSHOT・ROOT_CONTEXTが受け渡すRoot Snapshotにも含まれる)。<br/><br/>一方、PRE_EVAL・COMPARE(Evaluator/Heuristic・Model scoring)が<br/>受け取る入力には、この真のOrdered DrawPileをそのまま渡さない。<br/>DrawPile由来の特徴が必要な場合は、並び順を持たないUnordered<br/>(集計特徴量: 残り枚数・カード種別頻度等)表現のみを渡す。<br/>理由: 実ゲームでは山札順は非公開であり、探索・評価がOrdered情報に<br/>依存すると、将来実ゲームへ接続した際に得られない特権情報に<br/>依存してしまい性能保証が崩れる(Main RNG非公開と同じ理由)。<br/><br/>Restore(WORKER_RESTORE)がOrdered DrawPile全体と完全なShuffle RNGを<br/>復元すれば、同一Semantic Action系列に対する将来の再shuffleも一致する<br/>(決定性の根拠)。<br/>詳細: candidate_pipeline_detailのNOTE_DRAWPILE_HIDDEN、<br/>rng_hypothesis_detailのBOUNDARY_TABLE、<br/>snapshot_replay_detailのNOTE_ORDERED_TRUTH／NOTE_RESHUFFLE_DETERMINISM、<br/>commit_detailのNOTE_DRAWPILE_HIDDEN_COMMIT参照。"]
+    DRAWPILE_NOTE -.-> PRE_EVAL
+    DRAWPILE_NOTE -.-> COMPARE
+    DRAWPILE_NOTE -.-> ROOT_CONTEXT
