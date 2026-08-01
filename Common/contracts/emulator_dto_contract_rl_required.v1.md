@@ -1,4 +1,33 @@
-# RL側が要求するEmulator公開DTO契約 v1 (2026-08-01)
+# RL側が要求するEmulator公開DTO契約 v1 (作成: 2026-08-01、再確認: 2026-08-01)
+
+## 0. 再確認(2026-08-01、DrawPile Belief／Search Hypothesis ID／Exact State層導入後)
+
+最新のCombat Mermaidベースライン(commit `81006b3`。DrawPile Belief・Search Hypothesis ID・
+Exact State層／Belief-Search層分離・PUBLIC_MULTISET再定義・StableShuffle 3要素化を反映済み)を
+基準に本契約書を再確認した。**結論: Emulator側へ新たに要求するDTO・フィールドの追加は無い。**
+以下2点の記述更新のみを本書へ反映した。
+
+1. **§5の「不足」判定を修正**: 従来「山札順不明のCard Instance集合を入力として受け付けられる
+   こと」を新規要求(不足)としていたが、これは`Common/contracts/deck_unordered_input_shuffle_proposal.v1.md`
+   が提案する「Emulator側でUnordered入力を受け取りサーバサイドでshuffleする」方式を前提とした
+   記述だった。実際に採用されたDrawPile Belief設計(`mermaid_combat_rng_hypothesis_detail.mermaid`の
+   `BELIEF_GEN`)は、Hypothetical OrderedDrawPileをSearch Coordinator側(RL側)で生成し、
+   既存のOrdered Snapshot形式へ直接代入してから既存の`RestoreSnapshotJson`を呼ぶ(方式B、
+   RNG Hypothesisと同じ経路)。**新しいEmulator入力形式は不要であり、既存のOrdered
+   `CombatStateSnapshot`契約のみで足りる。** `deck_unordered_input_shuffle_proposal.v1.md`の
+   提案自体は撤回しないが、DrawPile Belief設計には不要になったことを明記する(§5参照)。
+2. **DrawPile Belief用のPUBLIC_MULTISET算出に必要な情報は、全て既存DTOで賄えることを確認**:
+   `Hand`/`DrawPile`/`DiscardPile`/`ExhaustPile`/`PlayPile`(残多重集合算出の減算対象)、
+   `CombatHistory`(`CardGeneratedEntry`、生成カード加算対象)、`Relics`/`Powers`
+   (StableShuffleのhook関連状態)はいずれも`Combat/combat_state_snapshot.py`に既存のフィールドで
+   あり、新規DTOフィールドの追加は不要(§5・§6参照)。
+
+Search Hypothesis ID・DrawPile Belief(PUBLIC_MULTISET／BELIEF_GEN)・Exact State層／
+Belief-Search層の分離・Concrete/Authoritative/Hypothetical OrderedDrawPileという用語は、
+いずれもSearch Coordinator内部でのみ使われるRL内部概念であり、Emulator公開DTOへの要求は
+生じない(§9「RL内部のみ」参照)。
+
+---
 
 **目的**: `docs/architecture/combat/`のCombat Mermaidベースライン(commit `40d2c2c`)で完成した設計フローから、
 RL側(Search Coordinator／Branch Worker Pool／Main Process)がEmulatorへ要求する公開DTO契約を逆算し、
@@ -32,7 +61,7 @@ RL側(Search Coordinator／Branch Worker Pool／Main Process)がEmulatorへ要�
 | 新規scenarioからの開始 | `GameInstance.ResetFromScenario(CombatScenario)`(`live_combat_session.py::start_combat`が1エピソードにつき1回のみ呼ぶ) | **一致** |
 | Scenario入力のカード情報 | `CombatScenario.{Hand,DrawPile,DiscardPile,ExhaustPile}Cards: List<CardInstanceScenario>`(`CardId`・`IsUpgraded`・`TinkerTimeType`・`TinkerTimeRider`) | **一致**(ただしOrdered必須。§9参照) |
 | Snapshotからの開始 | `RestoreSnapshotJson(string)`/`RestoreSnapshot(CombatStateSnapshot)` | **一致**(§3のRestoreと同一経路) |
-| 開始直後のRNG決定論性 | `CombatScenario.Seed`(単一int)がRunRng等を決定。`ShuffleRngSeed`という追加の任意上書きフィールドも存在(`battle_emulator.py::build_scenario_from_spec/build_scenario_from_state`) | **一致**(ただし`ShuffleRngSeed`の内部動作は§10「要確認」参照) |
+| 開始直後のRNG決定論性 | `CombatScenario.Seed`(単一int)がRunRng等を決定。`ShuffleRngSeed`という追加の任意上書きフィールドも存在(`battle_emulator.py::build_scenario_from_spec/build_scenario_from_state`) | **一致**(ただし`ShuffleRngSeed`の内部動作は§9「要確認事項」参照) |
 
 ---
 
@@ -104,17 +133,22 @@ StepResult/ResetResult/RestoreResultに含まれる一括戻り値の一部で�
 - Card Instanceは意味論的に安定な識別子(InstanceId)とカード定義ID(CardId)を持つこと。
 - 各Pile(Hand/DrawPile/DiscardPile/ExhaustPile/PlayPile/Deck)はOrderedなリストとして表現され、
   DrawPileは先頭(index 0)が次に引かれるカードであること。
-- 山札順不明のCard Instance集合を入力として受け付けられること(新規要求、§9参照)。
+- ~~山札順不明のCard Instance集合を入力として受け付けられること~~ →
+  **2026-08-01再確認により撤回**。DrawPile Belief設計(`BELIEF_GEN`)がSearch Coordinator側で
+  Hypothetical OrderedDrawPileを生成し既存のOrdered入力形式へ代入するため、Emulator側への
+  Unordered入力受け付け要求は不要と判明した(§9参照)。
 
 ### 現行Emulator DTOとの対応
 
 | 要求 | 現行実装 | 対応 |
 |---|---|---|
 | Card Instance型 | `CardInstanceSnapshot`(Snapshot側): `InstanceId, CardId, Type, Rarity, Cost, TargetType, IsUpgraded, UpgradeLevel, Zone?, TinkerTimeType?, TinkerTimeRider?` | **一致** |
-| Card Instance型(Scenario入力側) | `CardInstanceScenario`(Start入力側): `CardId, IsUpgraded, TinkerTimeType, TinkerTimeRider`(InstanceId/Zone/Rarity/Cost/TargetTypeは持たない。Reset時にEmulatorが採番) | **一致だが別型**。Snapshot側とScenario側で情報量が異なることに注意(§9で後述) |
+| Card Instance型(Scenario入力側) | `CardInstanceScenario`(Start入力側): `CardId, IsUpgraded, TinkerTimeType, TinkerTimeRider`(InstanceId/Zone/Rarity/Cost/TargetTypeは持たない。Reset時にEmulatorが採番) | **一致だが別型**。Snapshot側とScenario側で情報量が異なることに注意 |
 | Pileの型 | `PlayerSnapshot.{Hand,DrawPile,DiscardPile,ExhaustPile,PlayPile,Deck}: list[CardInstanceSnapshot]` | **一致** |
 | 順序方向(先頭=山札上) | `Common/schemas/combat_state_schema.json`の`drawPile`定義コメント「Index 0 is top-of-pile / next drawn」。エンジン側`CardPile.MoveToTopInternal`が`_cards.Insert(0, card)`、`CardPileCmd.DrawInternal`が`Cards.FirstOrDefault()`で確認済み | **一致** |
-| Orderedが必須か | 現行、全てのPile表現(エンジン内部`List<CardModel>`、Snapshot DTOの`list`、Scenario入力の`List<CardInstanceScenario>`)が例外なくOrderedなリストであり、Unordered(集合・多重集合)としての表現は一切存在しない | **不足**(Unordered入力については§9で新規仕様として提案) |
+| Orderedが必須か | 現行、全てのPile表現(エンジン内部`List<CardModel>`、Snapshot DTOの`list`、Scenario入力の`List<CardInstanceScenario>`)が例外なくOrderedなリストであり、Unordered(集合・多重集合)としての表現は一切存在しない | **一致(2026-08-01再確認)**。DrawPile Belief設計はEmulator側のOrdered必須制約をそのまま前提とし、Hypothetical OrderedDrawPileの生成をRL側で完結させるため、この制約自体がむしろ設計の前提として機能する。Unordered入力を要求する必要はない(→§9) |
+| PUBLIC_MULTISET算出に必要な情報(DrawPile Belief用) | `Hand`/`DiscardPile`/`ExhaustPile`/`PlayPile`(現在の他Pile。減算対象)＋`CombatHistorySnapshot.Entries`中の`CardGeneratedEntry`(生成カード。加算対象)。いずれも`combat_state_snapshot.py`に既存 | **一致**。新規DTOフィールド不要 |
+| StableShuffleのhook関連状態 | `PlayerSnapshot.Relics`/`PlayerSnapshot.Powers`(既存フィールド) | **一致**。新規DTOフィールド不要 |
 
 ---
 
@@ -137,7 +171,7 @@ StepResult/ResetResult/RestoreResultに含まれる一括戻り値の一部で�
 | Shuffle専用Purposeの独立性 | `RunRngType.Shuffle`が独立したenum値として既に存在し、`RngSnapshotSet.RunRng["Shuffle"]`として個別にCapture/Restore可能 | **一致**。山札shuffle用RNGは既に他用途から分離されている |
 | RunRng／PlayerRng／MonsterRngの3系統 | `RngSnapshotSet(RunRng: dict, PlayerRng: list[PlayerRngSnapshot], MonsterRng: list[MonsterRngSnapshot])` | **一致** |
 | Capture/Restoreでの完全往復性 | `CombatStateSnapshot.Rng: RngSnapshotSet`が必須トップレベルフィールドとして既に実装・テスト済み(`test_restore_snapshot_phase3c1.py`) | **一致** |
-| RNG Hypothesis用の簡易上書き機構 | `CombatScenario.ShuffleRngSeed`(単一int、`battle_emulator.py::with_shuffle_seed()`)という**別系統**の簡易機構が既に存在。`SerializableRng`(Counter+State0-3)を直接編集する「方式B」とは異なる粒度・経路 | **要確認**(§10)。`ShuffleRngSeed`が内部で`RunRng["Shuffle"]`をどう扱っているか(上書きか、別経路の一時Seedか)をEmulator担当に確認する必要がある |
+| RNG Hypothesis用の簡易上書き機構 | `CombatScenario.ShuffleRngSeed`(単一int、`battle_emulator.py::with_shuffle_seed()`)という**別系統**の簡易機構が既に存在。`SerializableRng`(Counter+State0-3)を直接編集する「方式B」とは異なる粒度・経路 | **要確認**(§9)。`ShuffleRngSeed`が内部で`RunRng["Shuffle"]`をどう扱っているか(上書きか、別経路の一時Seedか)をEmulator担当に確認する必要がある |
 
 ---
 
@@ -168,11 +202,43 @@ StepResult/ResetResult/RestoreResultに含まれる一括戻り値の一部で�
 |---|---|---|
 | 一致 | 多数 | Start/Reset、Capture/Restore、RNG基本型・Purpose分離、Card Instance型・Pile順序方向 |
 | Mappingで対応可能 | 数件 | choice_kind↔action_type、target制約↔LegalAction.parameters |
-| 不足 | 3件 | Unordered Card Instance集合入力(中核)、choice_scopeの明示的フィールド、意味的Decision Signatureによるreplay mismatch検証 |
+| 不足 | 2件 | choice_scopeの明示的フィールド、意味的Decision Signatureによるreplay mismatch検証<br/>(Unordered Card Instance集合入力は2026-08-01再確認で撤回。§0・§9参照) |
 | 不整合 | 3件 | 単一StepResult/Observation・LegalActionsの分離、Faultが例外表現であること |
-| RL内部のみ | — | `BattleState`・`CombatEnv`の`{action_id,reward,done,...}`辞書・`DecisionFrame`(Python側専用の合成型) |
-| 要確認 | 1件 | `ShuffleRngSeed`と`RunRng["Shuffle"]`の関係(Emulator担当への確認事項) |
+| RL内部のみ | — | `BattleState`・`CombatEnv`の`{action_id,reward,done,...}`辞書・`DecisionFrame`(Python側専用の合成型)。<br/>2026-08-01再確認で追加: Search Hypothesis ID・DrawPile Belief(PUBLIC_MULTISET／BELIEF_GEN)・<br/>Exact State層／Belief-Search層の分離・Concrete/Authoritative/Hypothetical OrderedDrawPileという<br/>用語(§9参照) |
+| 要確認 | 1件 | `ShuffleRngSeed`と`RunRng["Shuffle"]`の関係(Emulator担当への確認事項、§9参照) |
 
 「不整合」に分類した3件(単一StepResult化・Fault非例外化)は、Combat Mermaid設計が前提とする契約と
 現行実装の間の構造的な差であり、山札順DTO契約とは独立した、より大きなスコープの検討事項である。
 本書はこれを「調査結果」として記録するに留め、対応方針の決定は別途監督者判断を仰ぐ。
+
+---
+
+## 9. RL内部型・要確認事項の一覧(2026-08-01再確認で整理)
+
+### RL内部型(Emulatorへ要求しない項目)
+
+以下はいずれもSearch Coordinator/Main Process内部でのみ用いる概念・型であり、Emulator公開DTOへの
+新規要求を一切生じない。
+
+- `BattleState`・`DecisionFrame`・`CombatEnv`の`{action_id, reward, done, observation, legal_actions,
+  info}`辞書(RL内部の合成型。既存)。
+- **Search Hypothesis ID**(RNG成分＋DrawPile Order成分の組。Decision Context/Lease/WorkItem/Commit
+  図で使うRL内部の仮説識別子。Emulator側はこのIDの存在を一切知らず、単にRestore対象Snapshot JSONの
+  中身[RNGフィールド・DrawPileフィールド]が具体的な値へ置き換わっているだけとして扱う)。
+- **DrawPile Belief**(`PUBLIC_MULTISET`算出・`BELIEF_GEN`による Hypothetical OrderedDrawPile生成)。
+  入力は既存DTO(§5のPUBLIC_MULTISET算出行参照)のみで完結し、出力も既存のOrdered
+  `CombatStateSnapshot.DrawPile`形式へ代入されるだけであるため、Emulator側の新規処理は不要。
+- **Exact State層／Belief-Search層の分離**、および**Concrete／Authoritative／Hypothetical
+  OrderedDrawPile**という用語は、いずれもSearch Coordinatorが同じ既存DTOをどう扱うかについての
+  RL側の内部規律であり、Emulatorから見れば全てのRestore呼び出しは同一の`RestoreSnapshotJson`で
+  区別なく処理される。
+
+### 要確認事項(Emulator担当への確認が必要、変更なし)
+
+- `CombatScenario.ShuffleRngSeed`(単一int)と`RngSnapshotSet.RunRng["Shuffle"]`
+  (Counter+State0-3のフル状態)の関係(上書きか、別経路の一時Seedかを`battle_emulator.py::
+  with_shuffle_seed()`の実装から確認しきれていない)。2026-08-01再確認時点でも未解消。
+- `PUBLIC_MULTISET`算出式(§5)が実際に全ての生成カード経路を網羅しているか
+  (`CombatHistoryEntrySnapshot.CardGeneratedEntry`が常にCardIdを記録しているか、他に未把握の
+  生成経路がないか)。`Common/contracts/deck_unordered_input_shuffle_proposal.v1.md`は撤回して
+  いないが、DrawPile Belief設計には不要と判明したため、優先度は下げてよい。
