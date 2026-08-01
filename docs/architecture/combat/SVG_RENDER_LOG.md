@@ -176,3 +176,43 @@ mermaid_combat_commit_detail             : OK
 
 `MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
 (`mermaid_combat_fault_worker_detail.mermaid`のハッシュのみ前回commitから不変)。
+
+## 第5回検証(2026-08-01、RL安全性確認方針の修正 — Decision Signatureの軽量化)
+
+`mermaid_combat_snapshot_replay_detail` / `mermaid_combat_main_loop_detail` /
+`mermaid_combat_candidate_pipeline_detail` の3図へ、以下を反映した。
+
+- `DC_SIGNATURE`(Decision Signature)を「盤面Signature」から「Action実行とDecision Boundary制御情報を
+  確認する軽量な形式」へ縮小。Stable/Pending共通の確認項目を「State Identity(実行前後)・選択した
+  Semantic ActionとActionIdの対応・Emulatorが実際に解決したカード/対象/selection・到達した
+  Boundary種別」に限定し、Pendingの場合のみChoice scope・choice_kind・候補Semantic Key集合を追加する
+  構成へ変更した。min/max selection・target制約・continuation識別情報は撤廃した。
+- RL側(Search Coordinator/Main Process)がカード使用後の盤面(HP/Block/Energy/Pile/Power/Relic/
+  敵状態等)を予測・再計算せず、それらをReplay安全性の判定に使わないことを明記する新規ノート
+  `NOTE_NO_BOARD_PREDICTION`(snapshot_replay_detail)・`NOTE_NO_BOARD_PREDICTION_MAIN`
+  (main_loop_detail)を追加した。
+- `mermaid_combat_main_loop_detail`の`VERIFY_TRANSITION`、`mermaid_combat_snapshot_replay_detail`の
+  `CTX_SIG_CHECK`／`REPLAY_SIG_CHECK`の説明文を新しいDC_SIGNATUREへ合わせて更新した。
+- `mermaid_combat_candidate_pipeline_detail`の`CHOICE_SCOPE`ノートから、撤廃された
+  「continuation識別情報」への言及を削除し、Choice scope自体が継続識別を担う旨に修正した。
+
+`mermaid_combat_branch_scheduler_detail`・`mermaid_combat_rng_hypothesis_detail`・
+`mermaid_combat_fault_worker_detail`・`mermaid_combat_commit_detail`・`mermaid_rough_combat`は
+変更なし(State Identity検証は元々Decision Signatureと分離されており、今回の軽量化と矛盾しないため)。
+使用ツール・実行コマンドは上記と同一(`@mermaid-js/mermaid-cli` v11.16.0)。全ての修正は既存の
+引用符付きラベル記法に従って行ったため、bracket balance検証・実レンダリングともに初回から
+全8図で成功した。
+
+```
+mermaid_rough_combat                     : OK (無変更)
+mermaid_combat_main_loop_detail          : OK
+mermaid_combat_candidate_pipeline_detail : OK
+mermaid_combat_branch_scheduler_detail   : OK (無変更)
+mermaid_combat_snapshot_replay_detail    : OK
+mermaid_combat_rng_hypothesis_detail     : OK (無変更)
+mermaid_combat_fault_worker_detail       : OK (無変更)
+mermaid_combat_commit_detail             : OK (無変更)
+```
+
+`MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
+(4図のハッシュは前回commitから不変)。

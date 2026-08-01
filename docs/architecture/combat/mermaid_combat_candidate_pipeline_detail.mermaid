@@ -15,7 +15,7 @@ flowchart TD
 
     subgraph COORD["Search Coordinator (責任: 候補選定。GameInstanceは保持しない)"]
         PAYLOAD["Current Decision Result／Choice Payloadに含まれる<br/>choice_kind(意味的種別)・choice_scope(TopLevel／ActionContinuation)・<br/>selection constraints・target constraints・candidate semanticsを参照<br/>(Search Coordinatorが種別を推定するのではなく、<br/>Emulator契約の明示フィールドを分類根拠とする)"] --> CHOICE_KIND{"choice_kindフィールド<br/>(Evaluator routingの基準)"}
-        PAYLOAD --> CHOICE_SCOPE["choice_scopeフィールドを併記して保持<br/>(TopLevel／ActionContinuation。<br/>Evaluator routingには使わず、全候補へ属性として付随させる。<br/>Decision Signatureのcontinuation識別情報にも反映する)"]
+        PAYLOAD --> CHOICE_SCOPE["choice_scopeフィールドを併記して保持<br/>(TopLevel／ActionContinuation。<br/>Evaluator routingには使わず、全候補へ属性として付随させる。<br/>Pending時のDecision Signature(軽量形式)のChoice scope確認項目として<br/>使われる — 継続識別は独立フィールドではなくChoice scope自体が担う<br/>→ mermaid_combat_snapshot_replay_detail.mermaidのDC_SIGNATURE)"]
 
         CHOICE_KIND -->|"Card<br/>カード使用"| CLS_CARD["Card Evaluatorへroute"]
         CHOICE_KIND -->|"Target選択"| CLS_TARGET["Target Evaluatorへroute"]

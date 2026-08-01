@@ -60,7 +60,7 @@ flowchart TD
             STEP_FAULT_CHECK -->|"Yes"| STEP_FAULT_JUMP["Transition Recordへは追記せず、<br/>Planned Sequenceの破棄/再同期も行わず、<br/>即座にMain Combat Faultへ遷移する<br/>(DISCARD/RESYNCの『通常の計画不一致』経路とは別物。<br/>Emulator側の実行時異常であり、再探索で解決する性質のものではない)"]
             STEP_FAULT_CHECK -->|"No"| APPEND_RECORD["成功したStepの(Semantic Action, Observed Post-Step Signature)を<br/>Main Decision ContextのReplay Prefixへ追記する"]
             APPEND_RECORD --> LOG["Action・StepResult(DecisionFrame相当)・RNG識別情報を<br/>RL生ログへ記録"]
-            LOG --> VERIFY_TRANSITION{"想定した遷移と一致するか<br/>(この手のExpected Post-Step Signatureと比較:<br/>Boundary種別・Choice種別(choice_kind)・Choice scope・min/max selection・<br/>target制約・候補のSemantic Key集合(canonical multiset)・continuation識別情報。<br/>Direct／PENDING_STATIC、または(RNG Hypothesis由来のCOMMIT_FIRST_ONLYにより)<br/>Expected Post-Step Signatureが付与されていない場合は無条件で一致扱い<br/>= 不一致による誤ったDISCARDを起こさない)"}
+            LOG --> VERIFY_TRANSITION{"想定した遷移と一致するか<br/>(この手のExpected Post-Step Signatureと比較。<br/>mermaid_combat_snapshot_replay_detail.mermaidのDC_SIGNATURE(軽量形式)を<br/>使用: 共通確認=State Identity(実行前後)・選択したSemantic ActionとActionId<br/>の対応・Emulatorが実際に解決したカード/対象/selection・到達したBoundary種別。<br/>Pendingの場合のみ追加でChoice scope・choice_kind・候補Semantic Key集合<br/>(canonical multiset)。HP/Block/Energy/Pile/Power/Relic/敵状態等の盤面期待値は<br/>作成せず判定に使わない(→ snapshot_replay_detailのNOTE_NO_BOARD_PREDICTION)。<br/>Direct／PENDING_STATIC、または(RNG Hypothesis由来のCOMMIT_FIRST_ONLYにより)<br/>Expected Post-Step Signatureが付与されていない場合は無条件で一致扱い<br/>= 不一致による誤ったDISCARDを起こさない)"}
             VERIFY_TRANSITION -->|"不一致"| DISCARD
             VERIFY_TRANSITION -->|"一致"| TERMINAL_CHECK{"Terminalか"}
             TERMINAL_CHECK -->|"Yes<br/>計画通りの終端"| CONSUME_END["Sequence実行を終了"]
@@ -92,6 +92,9 @@ flowchart TD
 
     NOTE_DISCARD["設計注記: Planned Sequenceを破棄する(DISCARD/RESYNC経路)のは<br/>次の場合だけ:<br/>・Semantic Actionを現在のChoice Payloadへ解決できない<br/>・記録された想定Expected Post-Step Signatureと異なる<br/>・予定外のTerminalへ到達した<br/>・Mainの正本が探索開始時の前提から変化した<br/>StepResult自体がFaultの場合はこのDISCARD/RESYNC(通常の計画不一致)<br/>経路には含めない。STEP_FAULT_CHECKで検出され、Transition Recordへの<br/>追記より前に即座にMain Combat Faultへ遷移する<br/>(→ 下記NOTE_FAULT_FIRST／STEP_FAULT_JUMP)。<br/>StableになっただけでSequenceを終了することはなく、<br/>逆にSequenceが空になった時点でPendingであることも異常ではない<br/>(その場合はSTEP_BOUNDARY/SEQ_REMAIN_S/SEQ_REMAIN_P経由で<br/>MAIN_DC/MAIN_DC2から新しいdecisionを開始する)。"]
     NOTE_DISCARD -.-> VERIFY_TRANSITION
+
+    NOTE_NO_BOARD_PREDICTION_MAIN["設計注記(RL安全性確認方針、2026-08-01): MainのVERIFY_TRANSITIONも含め、<br/>RL側は盤面(HP/Block/Energy/Pile/Power/Relic/敵状態等)を予測・再計算しない。<br/>Power/Relic/Hook/カード固有処理を含む戦闘結果はEmulatorの責任範囲であり、<br/>StepResultの報告値をそのまま信頼する<br/>(→ mermaid_combat_snapshot_replay_detail.mermaidのNOTE_NO_BOARD_PREDICTION、<br/>DC_SIGNATURE)。"]
+    NOTE_NO_BOARD_PREDICTION_MAIN -.-> VERIFY_TRANSITION
 
     NOTE_NO_REREAD["設計注記: BOUNDARY判定・候補参照は常にCurrent Decision Result<br/>(StartCombat/Step/Restoreの戻り値)に基づく。GetObservation/<br/>GetLegalActionsによる別経路での状態再取得は行わない。"]
     NOTE_NO_REREAD -.-> CUR_RESULT
