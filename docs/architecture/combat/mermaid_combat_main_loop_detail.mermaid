@@ -1,0 +1,109 @@
+%% 責任主体: Main Process
+%% 参照上位図: mermaid_rough_combat.mermaid (MAIN_PROCESS subgraph)
+%% 目的: Mainが常に「採用済みSequenceの実行のみ」を行うこと、Decision Result(StartCombat/Step/
+%%       RestoreのいずれかがまとめてBoundary・Observation・Choice候補・Terminal/Fault・metadataを
+%%       返す一括戻り値)のみをdecision情報源とし、GetObservation/GetLegalActionsで別途読み直さない
+%%       ことを明示する。あわせてMain自身のPending時Replay Prefix管理、Step成功ごとの
+%%       (Semantic Action, Observed Post-Step Signature)記録追加、およびMain-observed Pending
+%%       (Replay Prefix非空)からの新規decisionを静的評価(PENDING_STATIC)に制限することを定義する。
+flowchart TD
+    ENTRY["Combat Entry<br/>(mermaid_combat.mermaidのENTRANCE群から接続)"] --> MAIN_INST
+
+    subgraph MAIN["Main Process (責任: Main GameInstanceの正本を保持)"]
+        MAIN_INST["Main GameInstance<br/>実際のCombat状態を保持<br/>このInstanceは仮説評価では一切変更されない"]
+        MAIN_INST --> CUR_RESULT["Current Decision Resultを保持<br/>(StartCombat／Restore／直前StepのいずれかがまとめてBoundary・<br/>Observation・Choice候補・Choice種別/scope/制約・Terminal/Fault・<br/>CombatSessionId/StepIndex等を返した一括戻り値)<br/>※GetObservation／GetLegalActionsでの再取得は行わない"]
+
+        CUR_RESULT --> BOUNDARY{"Current ResultのBoundary"}
+
+        BOUNDARY -->|"Terminal"| END["Combat終了<br/>CombatResultを確定"]
+        BOUNDARY -->|"Fault"| FAULT_OUT["Main Combat Fault<br/>詳細: mermaid_combat_fault_worker_detail.mermaid"]
+
+        BOUNDARY -->|"Stable"| STABLE_CAPTURE["CaptureSnapshot<br/>(Emulator API境界)<br/>Held Stable Snapshotとして保持し<br/>Replay Prefix = 空にリセット<br/>(次のStepを行う前に必ず再現元を確保する)"]
+        BOUNDARY -->|"Pending"| PENDING_HOLD["Held Stable Snapshot・Replay Prefixは<br/>直前のStable到達時のまま変更せず保持継続<br/>(Pending自体はCaptureしない)"]
+
+        STABLE_CAPTURE --> MAIN_DC["Main Decision Context確定:<br/>Held Stable Snapshot＋Replay Prefix(空)＋Current Result"]
+        PENDING_HOLD --> MAIN_DC2["Main Decision Context確定:<br/>Held Stable Snapshot(直前分)＋Replay Prefix(Stableから現在まで、<br/>各エントリは(Semantic Action, Observed Post-Step Signature))＋<br/>Current Result(直前StepのPending Choice Payload)"]
+
+        MAIN_DC --> SEQ_HAS_S{"採用中のPlanned Sequenceが残っているか"}
+        MAIN_DC2 --> SEQ_HAS_P{"採用中のPlanned Sequenceが残っているか"}
+
+        SEQ_HAS_S -->|"Yes"| SEQ_STEP["Sequence継続実行へ (下記EXEC_LOOP)"]
+        SEQ_HAS_P -->|"Yes"| SEQ_STEP
+
+        SEQ_HAS_S -->|"No"| NEW_DECISION{"新しいdecisionの決定方法<br/>(Stable起点。RNG Hypothesisを新規に検討可能)"}
+        SEQ_HAS_P -->|"No"| NEW_DECISION_PENDING{"新しいdecisionの決定方法<br/>(Pending起点。Replay Prefix非空につき制限あり)"}
+
+        NEW_DECISION -->|"Direct<br/>候補評価不要"| DIRECT["Current Decision Resultの候補から<br/>Semantic Actionを直接1つ選択<br/>(Planned Sequence長=1、Expected Post-Step Signatureは付与しない<br/>=自己決定であり事前検証対象ではない)"]
+        NEW_DECISION -->|"候補評価が必要<br/>Heuristic1段 or Beam Search"| NEED_SEARCH["Search CoordinatorへMain Decision Contextを渡す<br/>(Held Stable Snapshot＋Replay Prefix(空)＋Current Result。<br/>この時点のCurrent Result由来のシグネチャがCurrent Context Signatureとして<br/>Search Coordinator側に記録される)"]
+
+        NEW_DECISION_PENDING -->|"Direct<br/>候補評価不要"| DIRECT
+        NEW_DECISION_PENDING -->|"静的評価のみ<br/>(候補評価が必要な場合でも<br/>探索的Lookaheadは行わない — 下記NOTE_PENDING_FUTURE参照)"| PENDING_STATIC["mermaid_combat_candidate_pipeline_detail.mermaidと同じ<br/>choice_kind別の軽量Evaluatorを、Current Decision Resultの<br/>候補へ直接適用し、最上位1件を選択<br/>(Restore／Step／Worker分岐は一切行わない。Search Coordinator/<br/>Branch Worker Poolへは一切送らない。実RNGのまま分岐探索して<br/>Evaluatorへ結果が見える事態を避けるための初期実装時点の安全策<br/>→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE。<br/>Planned Sequence長=1、Expected Post-Step Signatureは付与しない)"]
+
+        DIRECT --> SET_SEQ["Planned Sequenceを確定<br/>(Semantic Action列＋各手のExpected Post-Step Signature。<br/>Direct／PENDING_STATICの場合はExpected Post-Step Signatureなし)"]
+        PENDING_STATIC --> SET_SEQ
+        NEED_SEARCH -.->|"Mainは変更しない<br/>Stableの場合のみCaptureSnapshotが必要になる可能性あり<br/>(既にSTABLE_CAPTUREで確保済みならRoot Snapshotとして再利用)"| TO_SEARCH["→ mermaid_combat_snapshot_replay_detail.mermaid<br/>Root Snapshot／Decision Context受け渡し"]
+        TO_SEARCH -.->|"探索完了<br/>戻り値は SearchSuccess(PlannedSequence)<br/>または SearchEvaluationFailure のいずれか"| SEARCH_RESULT{"探索結果"}
+        SEARCH_RESULT -->|"SearchSuccess<br/>(mermaid_combat_commit_detail.mermaidの方針により<br/>RNG Hypothesisが関与した場合は先頭1手のみ、<br/>かつExpected Post-Step Signatureなし)"| FROM_COMMIT["← mermaid_combat_commit_detail.mermaid<br/>COMMIT_SEQUENCE"]
+        SEARCH_RESULT -->|"SearchEvaluationFailure<br/>(全候補がFault等で評価不能<br/>→ mermaid_combat_fault_worker_detail.mermaidのALL_FAULT)"| SEARCH_FAIL_HANDLE["SearchEvaluationFailureとして記録する<br/>(Main自身は正常であり、Main Combat Faultへは変換しない。<br/>Branch評価から採用可能な候補を得られなかっただけであり、<br/>Main GameInstance・State Identityは無傷。<br/>暗黙のDirect fallbackは行わない — Mainの決定方針の切替は<br/>上位の運用判断であり、本図では自動フォールバックしない)"]
+        FROM_COMMIT --> SET_SEQ
+        SEARCH_FAIL_HANDLE --> ABORT_POLICY{"上位層(呼び出し元/運用方針)の対応"}
+        ABORT_POLICY -->|"現時点で定義済みの方針:<br/>この探索呼び出しを打ち切る"| COMBAT_ABORTED["CombatAbortedByDecisionFailure<br/>SearchEvaluationFailureを受け、上位方針によりこのCombatの<br/>決定継続を中止する(Main Combat Faultとも、計画通りの<br/>Combat終了(Terminal)とも異なる第三の終了種別として<br/>CombatResultへ記録する。将来的な再試行/代替方針の追加は<br/>本図の範囲外)"]
+
+        subgraph EXEC_LOOP["採用Sequenceの連続実行 (Mainの同一live Instance上で継続)"]
+            SET_SEQ --> RESOLVE["Planned Sequence先頭の未実行Semantic Actionを<br/>Current Decision Result／Choice Payloadの候補へ再解決"]
+            SEQ_STEP --> RESOLVE
+            RESOLVE --> RESOLVE_OK{"再解決できたか"}
+            RESOLVE_OK -->|"No"| DISCARD["残りのPlanned Sequenceを破棄"]
+            RESOLVE_OK -->|"Yes"| STEP["Main GameInstance.Stepを実行<br/>(Emulator API境界。1 Stepのみ)"]
+            STEP --> STEP_RESULT["StepResultを受領し<br/>Current Decision Resultへ差し替える<br/>(GetObservation等の再取得は行わない)"]
+            STEP_RESULT --> STEP_FAULT_CHECK{"StepResultのBoundaryはFaultか"}
+            STEP_FAULT_CHECK -->|"Yes"| STEP_FAULT_JUMP["Transition Recordへは追記せず、<br/>Planned Sequenceの破棄/再同期も行わず、<br/>即座にMain Combat Faultへ遷移する<br/>(DISCARD/RESYNCの『通常の計画不一致』経路とは別物。<br/>Emulator側の実行時異常であり、再探索で解決する性質のものではない)"]
+            STEP_FAULT_CHECK -->|"No"| APPEND_RECORD["成功したStepの(Semantic Action, Observed Post-Step Signature)を<br/>Main Decision ContextのReplay Prefixへ追記する"]
+            APPEND_RECORD --> LOG["Action・StepResult(DecisionFrame相当)・RNG識別情報を<br/>RL生ログへ記録"]
+            LOG --> VERIFY_TRANSITION{"想定した遷移と一致するか<br/>(この手のExpected Post-Step Signatureと比較:<br/>Boundary種別・Choice種別(choice_kind)・Choice scope・min/max selection・<br/>target制約・候補のSemantic Key集合(canonical multiset)・continuation識別情報。<br/>Direct／PENDING_STATIC、または(RNG Hypothesis由来のCOMMIT_FIRST_ONLYにより)<br/>Expected Post-Step Signatureが付与されていない場合は無条件で一致扱い<br/>= 不一致による誤ったDISCARDを起こさない)"}
+            VERIFY_TRANSITION -->|"不一致"| DISCARD
+            VERIFY_TRANSITION -->|"一致"| TERMINAL_CHECK{"Terminalか"}
+            TERMINAL_CHECK -->|"Yes<br/>計画通りの終端"| CONSUME_END["Sequence実行を終了"]
+            TERMINAL_CHECK -->|"No"| STEP_BOUNDARY{"このStepの到達Boundary(Stable／Pending)<br/>(Planned Sequenceに残りがあっても、<br/>この判定と直後のBoundary処理は毎Step必ず行う。<br/>Sequence完了まで遅延させない)"}
+            STEP_BOUNDARY -->|"Stable"| STEP_STABLE_CAPTURE["CaptureSnapshot<br/>(Emulator API境界)<br/>Held Stable SnapshotをこのStepの結果で更新し、<br/>Main Decision ContextのReplay Prefixを空へリセットする"]
+            STEP_BOUNDARY -->|"Pending"| STEP_PENDING_HOLD["Held Stable Snapshotは直前のStable到達時のまま維持する<br/>(このStep分のTransition Recordは既にAPPEND_RECORDで<br/>Replay Prefixへ追記済み。Pending自体はCaptureしない)"]
+            STEP_STABLE_CAPTURE --> SEQ_REMAIN_S{"Planned Sequenceに残りがあるか"}
+            STEP_PENDING_HOLD --> SEQ_REMAIN_P{"Planned Sequenceに残りがあるか"}
+            SEQ_REMAIN_S -->|"Yes"| RESOLVE
+            SEQ_REMAIN_P -->|"Yes"| RESOLVE
+            SEQ_REMAIN_S -->|"No"| MAIN_DC
+            SEQ_REMAIN_P -->|"No"| MAIN_DC2
+        end
+
+        DISCARD --> RESYNC["残りのPlanned Sequenceを破棄し、<br/>Current Decision Resultから通常の決定ループへ復帰<br/>(このStep自体はVERIFY_TRANSITION不一致によりSTEP_BOUNDARYを<br/>経ていないため、BOUNDARYへ戻り改めてStable／Pending処理を行う)"]
+        RESYNC --> BOUNDARY
+        CONSUME_END --> BOUNDARY
+    end
+
+    STEP_FAULT_JUMP --> FAULT_OUT
+
+    FAULT_OUT --> RETURN
+    COMBAT_ABORTED --> RETURN
+    END --> RETURN["呼び出し元へCombatResultとRL生ログを返す"]
+
+    %% 設計注記
+    NOTE_MAIN["注記: MainはEXEC_LOOP(採用Sequence連続実行)以外の目的で<br/>Restore/Reset/Stepを行わない<br/>(参考: deprecated/mermaid_combat_target_worker_pool.mermaidのRULE_MAINと<br/>同趣旨。当該図は現在deprecatedであり、本方針は本図自体が正本として定義する)"]
+    NOTE_MAIN -.-> STEP
+
+    NOTE_DISCARD["設計注記: Planned Sequenceを破棄する(DISCARD/RESYNC経路)のは<br/>次の場合だけ:<br/>・Semantic Actionを現在のChoice Payloadへ解決できない<br/>・記録された想定Expected Post-Step Signatureと異なる<br/>・予定外のTerminalへ到達した<br/>・Mainの正本が探索開始時の前提から変化した<br/>StepResult自体がFaultの場合はこのDISCARD/RESYNC(通常の計画不一致)<br/>経路には含めない。STEP_FAULT_CHECKで検出され、Transition Recordへの<br/>追記より前に即座にMain Combat Faultへ遷移する<br/>(→ 下記NOTE_FAULT_FIRST／STEP_FAULT_JUMP)。<br/>StableになっただけでSequenceを終了することはなく、<br/>逆にSequenceが空になった時点でPendingであることも異常ではない<br/>(その場合はSTEP_BOUNDARY/SEQ_REMAIN_S/SEQ_REMAIN_P経由で<br/>MAIN_DC/MAIN_DC2から新しいdecisionを開始する)。"]
+    NOTE_DISCARD -.-> VERIFY_TRANSITION
+
+    NOTE_NO_REREAD["設計注記: BOUNDARY判定・候補参照は常にCurrent Decision Result<br/>(StartCombat/Step/Restoreの戻り値)に基づく。GetObservation/<br/>GetLegalActionsによる別経路での状態再取得は行わない。"]
+    NOTE_NO_REREAD -.-> CUR_RESULT
+
+    NOTE_REPLAY_VS_PLAN["設計注記: MainのReplay Prefixは『直前のStableから現在までの<br/>再現用記録』であり、Stableに到達するたび空にリセットされる。<br/>Search CoordinatorがCommitまで保持する『Plan Path』<br/>(→ mermaid_combat_commit_detail.mermaid)とは別物であり、<br/>MainはPlan Pathを保持しない(受け取るのは既に確定したPlanned Sequenceのみ)。"]
+    NOTE_REPLAY_VS_PLAN -.-> APPEND_RECORD
+
+    NOTE_FAULT_FIRST["設計注記: StepResultがFaultの場合、Transition Recordへの追記<br/>(APPEND_RECORD)より前に判定し、即座にMain Combat Faultへ遷移する。<br/>Faultは『計画と実行結果が一致しない』という通常のDISCARD/RESYNC対象とは<br/>性質が異なり(Emulator側の実行時異常であり、Replay Prefix/Plan Pathへ<br/>記録して再現対象とすべきものではない)、再探索によって解決するものでもない。"]
+    NOTE_FAULT_FIRST -.-> STEP_FAULT_CHECK
+
+    NOTE_PENDING_FUTURE["設計注記: PENDING_STATICへの制限(探索的Lookahead不可・<br/>静的評価による1手選択のみ)は、最終的な機能方針ではなく、<br/>Main-observed Pendingの候補実行が未来の非公開RNGを消費し得るかを<br/>判定する機構が未実装であることに起因する、初期実装時点の安全策である。<br/>将来、候補実行が未来RNGを消費しないことをEmulator契約または<br/>明示的なmetadataで保証できるようになった場合は、その範囲に限り<br/>Worker展開(Search Coordinator経由の探索)を許可する余地を残す。<br/>現段階ではその判定機構自体が存在しないため、判定不能な場合を含め<br/>全て静的評価とする。この制限は『choice_scope=ActionContinuationも<br/>原則探索対象である』という上位方針<br/>(→ mermaid_combat_candidate_pipeline_detail.mermaidのNOTE_KIND_VS_SCOPE)を<br/>撤回するものではなく、あくまでMain-observed Pending(Mainの実RNG直下)<br/>という限定された経路にのみ適用される。"]
+    NOTE_PENDING_FUTURE -.-> PENDING_STATIC
+
+    classDef api fill:#333,color:#fff,stroke:#000;
+    class STEP api;

@@ -1,0 +1,91 @@
+%% 契約関係: 本図(Rough Diagram)はアーキテクチャ方針・責任境界・不変条件を示す上位契約であり、
+%%          7つの詳細図はそれを具体化する詳細契約である。両者が矛盾した場合、どちらかを自動的に
+%%          優先することはせず、実装を停止して監督者判断を求める。本図が意図的に省略している
+%%          フィールド・例外分類・内部手順(下記ROUGH_NOTE参照)については、詳細図を補足契約として扱う。
+%% 詳細: mermaid_combat_main_loop_detail / candidate_pipeline_detail / branch_scheduler_detail /
+%%       snapshot_replay_detail / rng_hypothesis_detail / fault_worker_detail / commit_detail
+flowchart TD
+    ENTRY["Combat Entry"] --> ENTRY_TYPE{"入口種別"}
+
+    ENTRY_TYPE -->|"全体Run"| RUN_MAIN["Main Processで<br/>RunのGameInstanceを継続使用"]
+    ENTRY_TYPE -->|"Combat再現"| REPLAY_MAIN["専用Main Processで<br/>SnapshotからGameInstanceを復元"]
+    ENTRY_TYPE -->|"Event戦闘Sample"| SAMPLE_MAIN["専用Sample Processで<br/>仮説RNGからGameInstanceを開始"]
+
+    RUN_MAIN --> MAIN
+    REPLAY_MAIN --> MAIN
+    SAMPLE_MAIN --> MAIN
+
+    subgraph MAIN_PROCESS["Main Process (詳細: main_loop_detail)"]
+        MAIN["Main Game Instance<br/>探索では一切変更されない正本"]
+        MAIN --> CUR_RESULT["Current Decision Resultを保持<br/>(StartCombat/Step/Restoreの一括戻り値のみを情報源とする。<br/>GetObservation/GetLegalActions等の別経路は使わない)"]
+        CUR_RESULT --> BOUNDARY{"現在の境界"}
+
+        BOUNDARY -->|"Terminal"| END["Combat終了"]
+        BOUNDARY -->|"Fault"| MAIN_FAULT["Main Combat Fault<br/>(詳細: fault_worker_detail)"]
+        BOUNDARY -->|"Stable / Pending"| DECISION{"Action決定方法<br/>(StableならDirect/Search、<br/>Main-observed Pendingは<br/>静的評価のみに制限)"}
+
+        DECISION -->|"Direct or<br/>Main-observed Pendingの<br/>静的評価"| DIRECT["Current Decision Resultの候補から<br/>直接1手選択(Restore/Step/Worker分岐なし)"]
+        DECISION -->|"StableからのSearch要求"| SNAPSHOT["Main状態からRoot Snapshotを取得<br/>Main Game Instanceは変更しない<br/>(Replay Prefix=空の新しいDecision Context)"]
+
+        DIRECT --> EXECUTE_MAIN["採用したPlanned Sequenceを<br/>Main Game Instance上で1手ずつ再解決してStep<br/>(途中のPendingは正常。想定外の遷移時のみ破棄・再同期)"]
+        EXECUTE_MAIN --> RECORD["Transition Recordを記録"]
+        RECORD --> CUR_RESULT
+    end
+
+    SNAPSHOT --> ROOT_CONTEXT
+
+    subgraph SEARCH_CONTROL["Search Coordinator (詳細: candidate_pipeline_detail, rng_hypothesis_detail)"]
+        ROOT_CONTEXT["Decision Contextを作成<br/>Stable Root Snapshot＋Replay Prefix(空)＋Plan Path"]
+        ROOT_CONTEXT --> CLASSIFY["Choice Payloadのchoice_kindで<br/>Card/Target/Hand/Confirm等へ分類<br/>(choice_scope=TopLevel/ActionContinuationは<br/>直交する属性として保持するのみ、分類には使わない)"]
+        CLASSIFY --> PRE_EVAL["分類別の軽量評価関数で事前評価<br/>(Restore/Step不要)"]
+        PRE_EVAL --> PRUNE["上位候補だけを展開対象にする"]
+
+        PRUNE --> SPLIT["最上位1件を継続候補、残りをSub Branch候補に分割<br/>(Body/Subという固定役割ではない。<br/>候補にはCurrent Context Signature＋未実行のAction<br/>のみを付与し、Expected Post-Step Signatureは付与しない)"]
+
+        SPLIT --> RNG_GATE["生存候補に対してのみRNG Hypothesisを決定<br/>(Replay Prefix空の場合のみ新規に検討可能。<br/>非空ならRoot由来のHypothesis IDをそのまま継承。<br/>必要な場合はRestore前に仮説RNGを組み込んだ<br/>派生Snapshotを作成する方式B。新規Emulator APIは使わない)"]
+    end
+
+    RNG_GATE --> DISPATCH{"継続候補か<br/>Sub Branch候補か"}
+    DISPATCH -->|"継続候補"| LEASE_CHECK["State-Holding Worker Leaseが<br/>存在し検証OKならそのままStep(live継続)<br/>存在しない/検証NGならBootstrap"]
+    DISPATCH -->|"Sub Branch候補"| QUEUE["Worker Queueへ投入<br/>Root Snapshot＋Replay Prefixを渡す"]
+
+    LEASE_CHECK --> WORKER_STEP
+    QUEUE --> WORKER_RESTORE
+
+    subgraph WORKER_POOL["常駐Branch Worker Pool (詳細: branch_scheduler_detail, snapshot_replay_detail)"]
+        WORKER_STEP["Lease済みWorkerのGameInstanceへ<br/>直接Step(Restore不要)"]
+        WORKER_RESTORE["別Worker ProcessでRoot Snapshotを復元し<br/>Replay Prefixを1手ずつ再生(各手でSignature照合)<br/>Current Context Signature照合の上で候補をStep"]
+    end
+
+    WORKER_STEP --> BRANCH_BOUNDARY{"Branchの境界"}
+    WORKER_RESTORE --> BRANCH_BOUNDARY
+
+    BRANCH_BOUNDARY -->|"新しい選択が発生"| CONTEXT_UPDATE["Replay Prefix／Plan Pathへ<br/>Transition Recordを追記した新しいDecision Contextを構成<br/>(Stepを行ったWorkerがこの新Decision ContextのLeaseを<br/>初めて確立する。親Contextへ到達しただけではLeaseは確立しない)"]
+    CONTEXT_UPDATE --> CLASSIFY
+
+    BRANCH_BOUNDARY -->|"Stable"| CAPTURE_CHILD["CaptureSnapshotでChild Snapshotを取得<br/>Leaseを解放"]
+    BRANCH_BOUNDARY -->|"Terminal"| TERMINAL_RESULT["Terminal Resultのみ作成(Captureしない)<br/>Leaseを解放"]
+    BRANCH_BOUNDARY -->|"Fault"| BRANCH_FAULT["詳細: fault_worker_detail<br/>(種別ごとにWorker再利用可否/再起動要否を判定)"]
+
+    CAPTURE_CHILD --> NORMALIZE["共通BranchResult形式(Optional構造)として返す:<br/>Observation・Plan Path・status・diagnostics・<br/>Child Snapshot(Stable時のみ)・Terminal Result(Terminal時のみ)<br/>(両方が同時に含まれることはない。詳細: branch_scheduler_detailのNORMALIZE)"]
+    TERMINAL_RESULT --> NORMALIZE
+
+    NORMALIZE --> COMPARE["Search Coordinatorが<br/>継続候補／Sub Branch候補を同じ評価関数で比較<br/>(詳細: commit_detail)"]
+    COMPARE --> HYP_CHECK{"この評価にRNG Hypothesisが関与したか"}
+
+    HYP_CHECK -->|"Yes"| ROOT_ACTION_GROUP["Root Action単位(Hypothesis IDを除くキー)で<br/>H1..Hnの結果を集約してから比較<br/>(Beam widthとRNG sample countを分離。<br/>Root Action Evaluation Segment(Root Actionから規定された最初の<br/>評価境界までの探索区間)で完結し、次の区間へは継続しない)"]
+    ROOT_ACTION_GROUP --> FIRST_ACTION_ONLY["最善Root Actionの先頭1手のみを<br/>Expected Post-Step Signatureなしで決定<br/>(深い計画はスコアリング専用。実行には反映しない)"]
+    FIRST_ACTION_ONLY --> EXECUTE_MAIN
+
+    HYP_CHECK -->|"No<br/>RNG非依存の比較のみ"| SEARCH_DONE{"探索を続けるか"}
+    SEARCH_DONE -->|"続ける"| SELECT_NEXT["上位Decision Context(width件)を選択"]
+    SELECT_NEXT --> NEXT_ROOTS["選択したDecision ContextのChild Snapshotを<br/>次のDecision Context群のRoot Snapshotにする<br/>(RNG非依存経路専用。Hypothesis由来のChild Snapshotを<br/>次Rootとして継続することはしない)"]
+    NEXT_ROOTS --> ROOT_CONTEXT
+
+    SEARCH_DONE -->|"終了"| BEST["最善のPlanned Sequenceを決定<br/>(RNG非依存のため複数手を安全にCommit可能)"]
+    BEST --> EXECUTE_MAIN
+
+    RNG_GATE -.->|"全候補Fault等"| SEARCH_FAIL["Search Evaluation Failure<br/>詳細: fault_worker_detail<br/>(Mainは正常。Main Combat Faultへは変換しない)"]
+    SEARCH_FAIL -.-> COMBAT_ABORTED["CombatAbortedByDecisionFailure<br/>Main Combat Fault(=Mainの正本が壊れた)とも<br/>計画通りのCombat終了(Terminal)とも異なる第三の終了種別<br/>詳細: main_loop_detail.mermaidのSEARCH_FAIL_HANDLE/COMBAT_ABORTED"]
+
+    ROUGH_NOTE["注記: Fault・Rejection・Timeout・Worker再起動・<br/>Training向けログschema等の詳細はfault_worker_detail／<br/>commit_detailで定義する。本図は入口・処理順・責任境界の<br/>要約であり、フィールドレベルの契約・例外分類・内部手順は<br/>意図的に省略している(詳細図を補足契約として参照すること)。<br/>本図と詳細図が矛盾する場合は、どちらかを自動的に正とせず、<br/>実装を停止して監督者判断を求める(上部の契約関係コメント参照)。"]

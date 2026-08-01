@@ -1,0 +1,53 @@
+%% 責任主体: Search Coordinator (Root Python Process)
+%% 参照上位図: mermaid_rough_combat.mermaid (SEARCH_CONTROL subgraph: CLASSIFY/PRE_EVAL/PRUNE)
+%% 目的: Choice Payloadの明示フィールド(choice_kind等)を分類の第一根拠とすること、
+%%       choice_kind(意味的種別)とchoice_scope(TopLevel／ActionContinuation)を分離すること、
+%%       分類別に単一Evaluatorへroutingすること、軽量事前評価と枝刈りを詳細化する
+%% 前提: ActionContinuationは「choice_kind」ではなく「choice_scope」である。Evaluator routingは
+%%       Card／Target／Hand／Confirm等の意味的choice_kindを基準に行い、TopLevel／ActionContinuationの
+%%       scopeは全候補に付随する直交した属性として扱う(自動解決はしない。他の選択と同列に扱う)。
+%%       C#側Step()は1回分のengine stepのみを行うため、本パイプラインはDecision Contextが
+%%       1 Stepを終えて制御を返すたびに再実行される。「ラウンド」という単位は用いない。
+%%       候補はCurrent Decision Result／Choice Payload(StartCombat/Step/Restoreの戻り値)から
+%%       直接参照し、GetLegalActions等の別APIによる再取得は行わない。
+flowchart TD
+    IN["現在のDecision Contextを受領<br/>Root Snapshot・Replay Prefix・<br/>Current Decision Result／Choice Payload・<br/>State-Holding Worker Lease(あれば)<br/>(mermaid_combat_snapshot_replay_detail.mermaidから)"] --> PAYLOAD
+
+    subgraph COORD["Search Coordinator (責任: 候補選定。GameInstanceは保持しない)"]
+        PAYLOAD["Current Decision Result／Choice Payloadに含まれる<br/>choice_kind(意味的種別)・choice_scope(TopLevel／ActionContinuation)・<br/>selection constraints・target constraints・candidate semanticsを参照<br/>(Search Coordinatorが種別を推定するのではなく、<br/>Emulator契約の明示フィールドを分類根拠とする)"] --> CHOICE_KIND{"choice_kindフィールド<br/>(Evaluator routingの基準)"}
+        PAYLOAD --> CHOICE_SCOPE["choice_scopeフィールドを併記して保持<br/>(TopLevel／ActionContinuation。<br/>Evaluator routingには使わず、全候補へ属性として付随させる。<br/>Decision Signatureのcontinuation識別情報にも反映する)"]
+
+        CHOICE_KIND -->|"Card<br/>カード使用"| CLS_CARD["Card Evaluatorへroute"]
+        CHOICE_KIND -->|"Target選択"| CLS_TARGET["Target Evaluatorへroute"]
+        CHOICE_KIND -->|"Hand選択<br/>(捨てる／選ぶ等)"| CLS_HAND["Hand Evaluatorへroute"]
+        CHOICE_KIND -->|"Confirm/Skip"| CLS_CONFIRM["Confirm Evaluatorへroute"]
+        CHOICE_KIND -->|"その他Potion使用等"| CLS_OTHER["対応するEvaluatorへroute"]
+
+        CLS_CARD --> EVAL_CARD["Card Evaluator:<br/>静的スコア(カード効果見積り等)でこの候補群のみを順位付け<br/>(Restore/Step不要の軽量評価。choice_scopeを入力特徴として利用可)"]
+        CLS_TARGET --> EVAL_TARGET["Target Evaluator:<br/>静的スコア(敵HP・意図等の既知情報)でこの候補群のみを順位付け"]
+        CLS_HAND --> EVAL_HAND["Hand Evaluator:<br/>静的スコア(手札構成等)でこの候補群のみを順位付け"]
+        CLS_CONFIRM --> EVAL_CONFIRM["Confirm Evaluator:<br/>既存Heuristic相当のルールベース評価でこの候補群のみを順位付け<br/>(heuristic_agent.pyの分類ロジックに相当するPython側評価<br/>Emulator Stepは呼ばない)"]
+        CLS_OTHER --> EVAL_OTHER["対応するEvaluator: 同様に軽量静的スコアで順位付け"]
+
+        EVAL_CARD --> RANKED["順位付き候補リスト<br/>(通常1つのDecision Resultは単一choice_kindのみを含むため、<br/>複数Evaluatorの結果を混在させる必要は無い。<br/>契約上まれに複数種別が同時提示される場合のみ結合する。<br/>choice_scopeがActionContinuationであっても、<br/>choice_kindに応じた同じEvaluatorへ普通にrouteする)"]
+        EVAL_TARGET --> RANKED
+        EVAL_HAND --> RANKED
+        EVAL_CONFIRM --> RANKED
+        EVAL_OTHER --> RANKED
+        CHOICE_SCOPE -.-> RANKED
+
+        RANKED --> PRUNE_STEP["上位候補だけを展開対象に選択<br/>(width上限・スコア閾値で枝刈り)"]
+        PRUNE_STEP --> PRUNED{"枝刈り後の候補が0件か"}
+
+        PRUNED -->|"Yes"| NO_CANDIDATE["評価不能として記録<br/>→ mermaid_combat_fault_worker_detail.mermaid"]
+        PRUNED -->|"No"| SPLIT["最上位1件を継続候補、<br/>残りをSub Branch候補に分割<br/>(候補にはCurrent Context Signature＋Candidate Semantic Actionのみを付与。<br/>まだ実行していない候補にExpected Post-Step Signatureは存在しないため付与しない<br/>— 実行後にObserved Post-Step SignatureがTransition Recordとして記録され、<br/>それが以後の再実行時にのみExpected値として使われる)"]
+    end
+
+    SPLIT --> OUT_RNG["→ mermaid_combat_snapshot_replay_detail.mermaidのTO_RNG経由<br/>→ mermaid_combat_rng_hypothesis_detail.mermaid<br/>枝刈りで生存した継続候補＋Sub Branch候補に対してのみ、<br/>ここで初めてRNG Hypothesisを決定する<br/>(Search CoordinatorからBranch Worker Poolへの投入経路はこの1本のみ。<br/>Candidate PipelineからSchedulerへ直接WorkItemを渡す経路は設けない)"]
+
+    %% 設計注記: このパイプラインは1 Stepごとに再実行される
+    NOTE_LOOP["注記: Decision Contextが1 Step実行して制御を返すたび<br/>(mermaid_combat_branch_scheduler_detail.mermaidから)、<br/>本パイプラインへ再突入する。ActionContinuationの連鎖(choice_scope=ActionContinuation)も<br/>この経路で扱われ、『ラウンド』のような大きな単位での一括処理は行わない。"]
+    NOTE_LOOP -.-> PAYLOAD
+
+    NOTE_KIND_VS_SCOPE["設計注記: choice_kind(意味的種別: Card/Target/Hand/Confirm等)と<br/>choice_scope(TopLevel/ActionContinuation)は直交した2軸。<br/>Evaluator選択はchoice_kindのみで行い、choice_scopeで<br/>Evaluatorの選び方自体を変えない(ActionContinuation専用Evaluatorは廃止)。"]
+    NOTE_KIND_VS_SCOPE -.-> CHOICE_SCOPE

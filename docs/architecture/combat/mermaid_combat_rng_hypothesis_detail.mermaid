@@ -1,0 +1,81 @@
+%% 責任主体: Search Coordinator (派生Snapshot作成) + Branch Worker (Restoreで反映)
+%% 参照上位図: mermaid_rough_combat.mermaid (RNG_NOTE)
+%% 目的: 候補分類・枝刈り完了後にのみRNG Hypothesisを決定すること(Candidate Pipelineとの順序統一)、
+%%       「未来の非公開RNGを消費し得るか」を判断基準とすること、Replay Prefixが非空の場合のRNG
+%%       Hypothesis継承(Main-observed Pendingは本図に到達しない)、標準比較(共通仮説集合)と
+%%       任意の追加評価(独立仮説集合、診断専用)の区別、RNG Hypothesis IDとLeaseの対応、
+%%       Main RNG非公開の責任境界を詳細化する
+%% 前提: 方式B — 新しいEmulator APIは追加しない。Restore前にSnapshot JSONを直接編集する。
+%%       Restore後にRNGを変更することはしない。初期実装ではRNG Hypothesisが関与する評価は
+%%       Root Action Evaluation Segment(Root Actionから規定された最初の評価境界までの探索区間。
+%%       日本語ではRoot Action評価区間)に限定する(→ mermaid_combat_commit_detail.mermaid)。
+%%       旧来の「ラウンド」という一括処理単位(mermaid_combat_candidate_pipeline_detail.mermaidの
+%%       NOTE_LOOP参照。既に廃止済み)とは異なる概念であり、混同を避けるため
+%%       「単一ラウンド」という表現は用いない。
+%%       本図はmermaid_combat_candidate_pipeline_detail.mermaidのSPLIT(枝刈り後の生存候補)を
+%%       受け取ってから動作する。分類・枝刈り前の候補集合に対してRNG展開は行わない。
+flowchart TD
+    IN["枝刈り後に生存した候補群(継続候補＋Sub Branch候補)を受領<br/>(← mermaid_combat_snapshot_replay_detail.mermaidのTO_RNG。<br/>元をたどるとmermaid_combat_candidate_pipeline_detail.mermaidのSPLIT)"] --> PREFIX_GATE{"このDecision ContextのReplay Prefixは空か"}
+
+    PREFIX_GATE -->|"空<br/>Stable直後の起点<br/>(新規にHypothesis検討可能。<br/>RNG Hypothesis ID = None固定で始まる)"| CONSUME_CHECK{"この探索範囲(Decision Context以降)で<br/>未来の非公開RNGを消費し得るか<br/>(判断基準は『仮説が必要か』ではなく<br/>『Root RNGをそのまま使うと結果へ影響し得るか』)"}
+    PREFIX_GATE -->|"非空<br/>Pending起点<br/>(Hypothesis-branch内部でのcascade継続。<br/>Main-observed Pendingは本図に到達しない<br/>— mermaid_combat_main_loop_detail.mermaidのPENDING_STATICで完結する)"| ROOT_HYP_KIND{"継承元のRNG Hypothesis IDは<br/>実際のH(≠None)か、PASSTHROUGH由来のNoneか"}
+    ROOT_HYP_KIND -->|"実際のH"| INHERIT_H["同じRNG Hypothesis IDをそのまま継承する<br/>(H由来のSnapshot上での継続なので実RNGへの依存はなく、<br/>再判定は不要)"]
+    ROOT_HYP_KIND -->|"PASSTHROUGH由来のNone"| RECHECK_CONSUME["この新しいDecision Context(=この時点のcascade)単体について、<br/>CONSUME_CHECKを再実行する。PASSTHROUGHの<br/>『RNGを消費しない』という判定は、それが下された時点の<br/>1手についてのみ有効であり、その結果生じたPendingの<br/>先の選択が自動的に安全とは限らないため<br/>(実RNGのまま分岐探索するとMain RNG非公開方針に反する)。<br/>判定不能な場合は安全側としてMODE(標準Hypothesis)へ倒す。"]
+    RECHECK_CONSUME --> CONSUME_CHECK
+
+    CONSUME_CHECK -->|"消費しないことが保証される<br/>(既に確定済みの情報のみで完結する候補評価等)"| PASSTHROUGH["Root SnapshotのRNGをそのまま使用<br/>RNG Hypothesis ID = None(Root自体)<br/>(RunRng・PlayerRng・MonsterRngは編集しない。<br/>RNGを消費しないことが前提のため、この後の探索でも<br/>Main RNG非公開方針への抵触はない)"]
+    CONSUME_CHECK -->|"消費する可能性がある<br/>(Draw順序・敵行動抽選等、未確定の未来RNGに依存し得る)"| MODE{"比較方式"}
+    CONSUME_CHECK -->|"真のRNGを使用してよい用途<br/>(厳密Replay／determinism test／デバッグ再現／<br/>実際にMainで採用Actionを実行する場合)"| TRUE_RNG_OK["Root SnapshotのRNGをそのまま使用してよい<br/>(方針上の例外用途として明示的に許可)"]
+
+    subgraph COORD["Search Coordinator (責任: 派生Snapshotの作成。GameInstanceには触れない)"]
+        MODE -->|"標準比較<br/>推奨・既定。win/loss判定に使う"| STANDARD_SET["共通仮説RNG集合 H1..Hnを1組作成<br/>各HにRNG Hypothesis IDを付与"]
+        MODE -->|"独立集合による追加評価<br/>頑健性確認等・任意。診断専用<br/>(win/loss判定には一切使わない)"| INDEPENDENT_SET["候補ごとに独立したRNG集合を作成し<br/>それぞれに個別のRNG Hypothesis IDを付与<br/>(標準比較の対象集合とは完全に分離して扱う)"]
+
+        STANDARD_SET --> GRID["比較対象の全Root Actionに同じH1..Hnを適用<br/>Root Action A × H1,H2,H3<br/>Root Action B × H1,H2,H3<br/>Root Action C × H1,H2,H3<br/>(Root Action差とRNG差を分離しやすくするため。<br/>Root Actionとは、この探索呼び出しの起点Decision Contextで<br/>選ばれる最初の1手を指す — 深いPlan Pathではない)"]
+        GRID --> DERIVE_STD["Root Action×Hypothesisの組ごとに<br/>Root Snapshot JSONを複製し、対象RNGストリームへ<br/>そのHのSerializableRngSnapshot(Counter, State0..State3)を適用"]
+
+        INDEPENDENT_SET --> DERIVE_IND["候補ごとにRoot Snapshot JSONを複製し、<br/>その候補専用の独立したRNGストリームを適用<br/>(他候補とは異なる仮説を用いる)"]
+
+        DERIVE_STD --> DERIVED_SNAP_STD["標準比較用の派生Snapshot群<br/>(いずれもRoot Snapshotとは別個体、Root自体は不変のまま保持。<br/>各SnapshotはそのRNG Hypothesis IDと1対1で対応する)"]
+        DERIVE_IND --> DERIVED_SNAP_IND["診断専用の派生Snapshot群<br/>(標準比較用の集合とは別のRNG Hypothesis IDを持ち、<br/>後段でも混同しないようタグ付けする)"]
+    end
+
+    PASSTHROUGH --> WORK_ITEM["WorkItemのRoot Snapshotとして使用<br/>(RNG Hypothesis ID = None)"]
+    TRUE_RNG_OK --> WORK_ITEM
+    INHERIT_H --> WORK_ITEM
+    DERIVED_SNAP_STD --> WORK_ITEM_MULTI_STD["Root Action(×標準仮説)ごとに異なる派生SnapshotをRoot Snapshotとして持つ<br/>複数のWorkItemを作成(各WorkItemに『標準』タグ付きRNG Hypothesis IDを付与)<br/>→ mermaid_combat_commit_detail.mermaidのGROUP_BY_ROOT_ACTIONで<br/>Root Action単位(Hypothesis IDを除くキー)に集約されてから比較・枝刈りされる。<br/>Plan Prefix単位ではなくRoot Action単位でのみグルーピングする理由は、<br/>Hごとに合法Actionや以降の分岐構造が異なり得るため、深い階層での<br/>グループ同一性が一般には定義できないからである(→NOTE_ROOT_ONLY)"]
+    DERIVED_SNAP_IND --> WORK_ITEM_MULTI_IND["Root Action(×独立仮説)ごとの派生SnapshotをRoot Snapshotとして持つ<br/>WorkItemを作成(各WorkItemに『診断』タグ付きRNG Hypothesis IDを付与。<br/>GROUP_BY_ROOT_ACTIONの標準比較対象には含めない)"]
+
+    WORK_ITEM --> TO_SCHEDULER["→ mermaid_combat_branch_scheduler_detail.mermaidへ<br/>(Search CoordinatorからBranch Worker Poolへの唯一の投入経路。<br/>Leaseは(Decision Context, RNG Hypothesis ID)の組で確立される)"]
+    WORK_ITEM_MULTI_STD --> TO_SCHEDULER
+    WORK_ITEM_MULTI_IND --> TO_SCHEDULER
+
+    TO_SCHEDULER --> WORKER_RESTORE["Branch WorkerがValidateRestoreSnapshotJson→RestoreSnapshotJsonで<br/>派生Snapshotをそのまま復元<br/>(Emulator API境界。RNG専用の新規APIは不要。<br/>Restore後にRNGを再シードすることはしない)"]
+
+    WORKER_RESTORE --> TAG_CHECK{"WorkItemのRNG Hypothesis IDタグは<br/>『標準』か『診断』か"}
+    TAG_CHECK -->|"標準"| COMPARE_STD["標準比較経路: Search Coordinatorは<br/>『同一Root Action×同一標準H』のスコアをHごとに集計し、<br/>Root Action間の差をRNG差から分離して評価する<br/>(mermaid_combat_commit_detail.mermaidのGROUP_BY_ROOT_ACTION/COMPAREへ。<br/>win/loss判定に使われるのはこの経路の結果のみ)"]
+    TAG_CHECK -->|"診断"| COMPARE_IND["診断専用経路: 独立集合による結果は<br/>頑健性指標としてのみ記録・報告する。<br/>標準比較のスコアには一切混ぜず、win/loss判定にも使わない"]
+
+    %% Main RNGの非公開・責任境界
+    subgraph PRIVACY["Main RNGの非公開 (責任境界の明記)"]
+        MAIN_RNG["Main GameInstanceが保持する実際のRun/Player/Monster RNG"]
+        MAIN_RNG -.->|"CaptureSnapshotで含まれる"| BOUNDARY_TABLE["責任境界:<br/>・Emulator API(CaptureSnapshot等): RNGを完全に含む。正しい挙動。<br/>・Search Coordinator(Snapshot JSON操作ロジック): RNGへの機械的アクセスは<br/>  必須(Replay Prefix再生の忠実性・派生Snapshot生成の双方に必要)。<br/>  ただしこのアクセスをEvaluator入力へ転送してはならない。<br/>  Main自身のPending(観測済みPendingからの新規decision)は本図には<br/>  到達せず、mermaid_combat_main_loop_detail.mermaidのPENDING_STATICが<br/>  Restore/Step/Worker分岐なしの静的評価のみで完結させることで、<br/>  真の未来RNGがEvaluatorへ渡る経路自体を構造的に作らない。<br/>・Branch Worker: GameInstanceを直接操作するため完全アクセスが必要かつ正しい。<br/>・Evaluator(Heuristic/Model scoring関数): Observation／Choice Payload由来の<br/>  特徴量のみを入力とし、生のSnapshot DTO／RNGフィールドを直接受け取っては<br/>  ならない(規約ではなく型/インターフェースレベルで分離する)。<br/>・Main Process: 真のRNGの唯一の所有者。"]
+    end
+    MAIN_RNG --> PREFIX_GATE
+
+    %% 設計注記
+    NOTE_METHOD_B["設計注記(方式B): RNG差し替えは常にRestore『前』の<br/>Snapshot JSON編集で行う。Restore後に特定ストリームを<br/>再シードする新規Emulator APIは導入しない<br/>(rl_combat_target_worker_pool_review_20260731.md §13 該当項目、解決済み。<br/>当時のレビュー対象図は現在deprecated/mermaid_combat_target_worker_pool.mermaidへ<br/>移動済みであり、本方針自体は本図が正本として定義する)。"]
+    NOTE_METHOD_B -.-> DERIVE_STD
+    NOTE_METHOD_B -.-> DERIVE_IND
+
+    NOTE_STANDARD_DEFAULT["設計注記: 通常のAction比較では標準比較経路(共通仮説集合)を<br/>既定とする。独立集合による追加評価は禁止されないが、<br/>あくまで診断専用であり、標準比較のスコアとは物理的に別のタグを持つ<br/>Hypothesis IDとして扱うことで混同を防ぐ。"]
+    NOTE_STANDARD_DEFAULT -.-> STANDARD_SET
+
+    NOTE_LEASE_BOUNDARY["設計注記: RNG Hypothesis ID(Noneを含む)が異なれば<br/>別個のDecision Context/Leaseとして扱う。同一Decision Contextでも<br/>H1のWorker live stateをH2の評価へ転用してはならない<br/>(→ mermaid_combat_branch_scheduler_detail.mermaidのNOTE_RNG_LEASE)。"]
+    NOTE_LEASE_BOUNDARY -.-> WORK_ITEM_MULTI_STD
+
+    NOTE_ROOT_ONLY["設計注記: 汎用的な多段(複数のRoot Action Evaluation Segmentに<br/>またがる)確率的Beam Searchは、Hごとに合法Actionや分岐構造が<br/>異なりうる場合のグループ同一性定義が未確立であるため、今回は実装しない。<br/>初期実装ではRNG Hypothesisが関与する評価はRoot Action単位の<br/>単一のRoot Action Evaluation Segment(Root Actionから規定された<br/>最初の評価境界までの探索区間)に限定し(GRID参照)、先頭1手のみを<br/>Commitして実Step後に再探索する<br/>(→ mermaid_combat_commit_detail.mermaidのCOMMIT_FIRST_ONLY)。<br/>多段化する場合は、グループ同一性の定義とサンプル欠損時の集約規則を<br/>別途設計してから着手する。"]
+    NOTE_ROOT_ONLY -.-> WORK_ITEM_MULTI_STD
+
+    NOTE_ORDER["設計注記: RNG Hypothesisの決定はCandidate Pipelineの分類・事前評価・<br/>枝刈りが完了した『後』にのみ行う。分類前の候補集合全体に対して<br/>RNG展開すると、後で枝刈りされる候補にも無駄なWorkItem/Workerリソースを<br/>割り当ててしまうため、順序をこの通りに固定する。"]
+    NOTE_ORDER -.-> IN

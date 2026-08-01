@@ -1,0 +1,113 @@
+%% 責任主体: Main Process (Root Snapshot取得/保持) + Search Coordinator (Decision Context管理) + Branch Worker (Restore・Replay)
+%% 参照上位図: mermaid_rough_combat.mermaid (SNAPSHOT/ROOT_CONTEXT, RESTORE_1..N)
+%% 目的: Canonical Decision Contextの定義(Replay PrefixとPlan Pathの分離込み)、Main起点(Stableのみ。
+%%       Main-observed Pendingはmermaid_combat_main_loop_detail.mermaidのPENDING_STATICで完結し、
+%%       本図には到達しない)の受け渡し、Sub Branchの逐次検証付きReplay Prefix再生、
+%%       Decision Signature(意味的同一性の検証専用)とState Identity(Worker/Leaseの信頼性検証専用)の
+%%       分離、候補分類・枝刈り完了後にのみRNG Hypothesisを決定する順序を詳細化する
+%% 前提: Pending状態そのものをCapture／Restoreの対象にしない。
+%%       Pendingを別Workerで再現する場合は、直前のStable SnapshotをRestoreし、
+%%       そこから実行済みのSemantic Action SequenceをReplayして同じPendingへ自然に再到達させる。
+%%       候補参照は常にRestoreResult／StepResultに含まれるChoice Payloadから行い、
+%%       GetLegalActions等の別APIによる再取得は行わない。
+%%       RNG Hypothesisの決定は、必ずmermaid_combat_candidate_pipeline_detail.mermaidの
+%%       分類・事前評価・枝刈りが完了した「後」に、生き残った候補に対してのみ行う
+%%       (→ mermaid_combat_rng_hypothesis_detail.mermaid)。Search CoordinatorからBranch Worker Pool
+%%       (mermaid_combat_branch_scheduler_detail.mermaid)へのWorkItem投入経路はこの1本のみとする。
+flowchart TD
+    subgraph DECISION_CONTEXT["Canonical Decision Context (探索状態の正本。Workerとは独立)"]
+        DC_DEF["構成要素:<br/>・Stable Root Snapshot<br/>・Replay Prefix (Stable Rootから現在地点までの<br/>  Transition Record(Semantic Action, Observed Post-Step Signature)の<br/>  逐次記録。Sub Branch再構築専用。評価境界ごとに空へリセットされる)<br/>・Plan Path (探索開始点からこのDecision Contextまでの<br/>  Transition Recordの累積。新Decision Context生成時に<br/>  親のPlan Pathをそのまま引き継ぎ、以後は自身のStep成功のたびに<br/>  追記される。評価境界を跨いでもリセットされない)<br/>・現在のDecision Result／Choice Payload<br/>・Current Context Signature (現在地点への到達確認用。意味的同一性のみ)<br/>・RNG Hypothesis ID<br/><br/>State-Holding Workerは正本に含めず、Leaseとして別管理する<br/>(→ mermaid_combat_branch_scheduler_detail.mermaidのLease参照)。"]
+        DC_STABLE["Stable地点(新Decision Context生成時)の形:<br/>Root Snapshot = 現在地点のStable Snapshot(=親のChild Snapshot)<br/>Replay Prefix = 空<br/>Plan Path = 親Decision ContextのPlan Pathをそのまま継承<br/>Current Result = 現在のStable Decision Result"]
+        DC_PENDING["Pending地点(同一Decision Context内でのStep継続)の形:<br/>Root Snapshot = 直前のStable Snapshot(既にCapture済み、変更なし)<br/>Replay Prefix = Stableから現在Pendingまでの<br/>  Transition Recordの逐次記録<br/>Plan Path = 継承済みのものへ、この地点までのTransition Recordを<br/>  逐次追記した状態<br/>Current Result = 直前StepのChoice Payload<br/>(Pending地点自体を新たにCaptureすることはない)"]
+        DC_SIGNATURE["Decision Signature(意味的同一性の検証専用。<br/>Current Context Signature・Expected Post-Step Signature双方で共通):<br/>・Boundary種別<br/>・Choice種別(choice_kind)<br/>・Choice scope(TopLevel／ActionContinuation)<br/>・min/max selection<br/>・target制約<br/>・候補のSemantic Key集合<br/>  (canonical multiset — 重複を保持したまま比較する。<br/>   setに潰して重複情報を失ってはならない)<br/>・continuation識別情報<br/>action_idは一時値のため比較に使わない。<br/><br/>用途の区別: Current Context Signature=候補実行前(Candidate適用前)から<br/>存在し、その候補を適用する親Decision Contextへ実際に到達したかの<br/>確認に使う(『今この地点に到達したChoiceが意味的に想定通りか』の確認)。<br/>Expected Post-Step Signature=初回のCandidate実行前には存在しない。<br/>Step後に得られたObserved Post-Step Signatureを記録したものであり、<br/>後続のReplayまたはCommit時にのみExpected値として使われる。<br/><br/>注意: Decision Signatureは『Choiceの意味的同一性』のみを検証するものであり、<br/>『このWorkerのGameInstanceが本当に信頼できるlive processか』の検証には使わない。<br/>後者はState Identity(→ mermaid_combat_branch_scheduler_detail.mermaidのLEASE_DEF)で行う。<br/>意味的に同一のChoiceが、実際には異なる(あるいは信頼できない)underlying stateから<br/>生じている可能性を排除できないため。"]
+    end
+
+    START["Decision Contextの起点"] --> WHO{"Root Snapshot／Current Result／Plan Pathの出処<br/>(Main-observed Pendingはここに到達しない。<br/>→ mermaid_combat_main_loop_detail.mermaidのPENDING_STATICで完結する)"}
+
+    WHO -->|"Main ProcessがStableで探索開始"| MAIN_CAP["Main GameInstanceからCaptureSnapshot<br/>(Emulator API境界)<br/>※Main Instanceは変更しない<br/>Current Result = 現在のStable Decision Result<br/>Replay Prefix = 空<br/>Plan Path = 空(この探索呼び出しの起点)<br/>RNG Hypothesis ID = None(このRoot自体はMainの実RNGそのもの)"]
+    WHO -->|"直前の評価境界で確定した<br/>Child Snapshot(RNG非依存のBeam Search続行時のみ。<br/>Hypothesis評価は単一のRoot Action Evaluation Segmentで<br/>完結するため本経路には来ない)"| PREV_CHILD["前の評価境界で採択したDecision ContextのChild Snapshot<br/>(mermaid_combat_commit_detail.mermaidから)<br/>これは必ずStable。Replay Prefix = 空で再開<br/>Plan Path = 親Decision ContextのPlan Pathをそのまま継承<br/>RNG Hypothesis ID = None(RNG非依存経路のため)<br/>(→ mermaid_combat_commit_detail.mermaidのEXPAND)"]
+
+    MAIN_CAP --> ROOT_SNAP["Stable Root Snapshot確定<br/>(Replay Prefix = 空)"]
+    PREV_CHILD --> ROOT_SNAP
+
+    ROOT_SNAP --> TO_PIPELINE["→ mermaid_combat_candidate_pipeline_detail.mermaid<br/>CLASSIFY→PRE_EVAL→PRUNEへ<br/>(RNG Hypothesisの決定はまだ行わない。<br/>まずChoice Payloadの候補を絞り込む)"]
+
+    TO_PIPELINE -.->|"枝刈り後に生存した候補群<br/>(継続候補＋Sub Branch候補)"| FROM_PIPELINE_SPLIT["← mermaid_combat_candidate_pipeline_detail.mermaidのSPLIT"]
+    FROM_PIPELINE_SPLIT --> TO_RNG["→ mermaid_combat_rng_hypothesis_detail.mermaid<br/>生存候補に対してのみRNG Hypothesisを決定する<br/>(Replay Prefixが空=新規決定可能、非空=既存Hをそのまま継承)"]
+    TO_RNG -.-> FROM_RNG["← mermaid_combat_rng_hypothesis_detail.mermaidのWORK_ITEM／WORK_ITEM_MULTI<br/>(RNG Hypothesis IDが確定したWorkItem群。これ以降のみがScheduler投入対象)"]
+
+    FROM_RNG -.->|"継続候補<br/>State-Holding Worker Leaseが存在"| LEASE_CHECK_REF["→ mermaid_combat_branch_scheduler_detail.mermaidの<br/>LEASE_VERIFY (State Identity: context_id・worker_generation・<br/>state epoch・CombatSessionId/StepIndex・Decision Result digestを検証。<br/>Decision Signatureでは検証しない)"]
+    LEASE_CHECK_REF -.->|"検証OK"| LIVE_RESOLVE["継続候補のCandidate Semantic Actionを、<br/>そのWorkerが現在保持しているDecision Result／Choice Payloadの<br/>候補へ再解決する(Restore/Replay経路のRESOLVE_CANDIDATEと同じ手順。<br/>live継続だからthough action_idの再解決を省略してよいわけではない)"]
+    LIVE_RESOLVE --> LIVE_RESOLVABLE{"再解決できたか"}
+    LIVE_RESOLVABLE -->|"No"| LIVE_UNRESOLVABLE["Fault(再解決不能)として記録<br/>→ mermaid_combat_fault_worker_detail.mermaid<br/>(種別: replay mismatch)"]
+    LIVE_RESOLVABLE -->|"Yes"| LIVE_CONTINUE["既存WorkerのGameInstanceへ直接Step<br/>(Restore・Replay不要)"]
+    LEASE_CHECK_REF -.->|"検証NG(stale等)"| BOOTSTRAP
+    FROM_RNG -.->|"継続候補だがLeaseが未確立<br/>(Decision Context開始直後で誰も未到達)"| BOOTSTRAP["いずれかの空きWorkerでRestore+Replayを実行し<br/>このDecision Contextへ到達させる<br/>(WorkItem = Current Context Signature＋Candidate Semantic Action。<br/>この時点ではまだLeaseを確立しない — 確立条件は下記APPEND_RECORD後を参照)"]
+    FROM_RNG -.->|"Sub Branch候補"| SUB_ENTRY["別Workerで下記のRestore+Replayを実行<br/>(WorkItem = Current Context Signature＋Candidate Semantic Action。<br/>WorkItem受領時点ではLease未確立)"]
+
+    subgraph SUB_REPLAY["Sub Branch側の処理 (責任: Branch Worker、別GameInstance)"]
+        SUB_ENTRY --> VALIDATE["ValidateRestoreSnapshotJson<br/>(Emulator API境界)"]
+        BOOTSTRAP --> VALIDATE
+        VALIDATE --> VALID{"Restore可能か"}
+        VALID -->|"No"| REJECT["rejection code + UnsupportedFieldPathsを返す<br/>→ mermaid_combat_fault_worker_detail.mermaid<br/>(種別: validation rejection。GameInstance未変更のためWorkerは再利用可能)"]
+        VALID -->|"Yes"| RESTORE["RestoreSnapshotJson<br/>(Emulator API境界)<br/>RestoreResultを受領しCurrent Decision Resultとする<br/>RunRng・PlayerRng・MonsterRngを含め厳密復元"]
+
+        RESTORE --> PREFIX_EMPTY{"Replay Prefixは空か"}
+        PREFIX_EMPTY -->|"Yes"| AT_ROOT_S["RestoreResultがそのままDecision Contextの起点"]
+        PREFIX_EMPTY -->|"No"| REPLAY_STEP["Replay Prefix先頭の未実行Transition RecordのActionを、<br/>現在のDecision Result／Choice Payloadの候補へ再解決<br/>(RestoreResultまたは直前StepResultに含まれる候補のみを参照)"]
+
+        REPLAY_STEP --> REPLAY_RESOLVABLE{"再解決できたか"}
+        REPLAY_RESOLVABLE -->|"No"| UNRESOLVABLE_MID["Fault(Replay Prefix再生中に再解決不能)として記録<br/>→ mermaid_combat_fault_worker_detail.mermaid<br/>(種別: replay mismatch)"]
+        REPLAY_RESOLVABLE -->|"Yes"| REPLAY_ONE_STEP["Step (Emulator API境界。1手分のみ)<br/>StepResultを受領しCurrent Decision Resultへ差し替える"]
+
+        REPLAY_ONE_STEP --> REPLAY_SIG_CHECK{"このエントリのObserved Post-Step Signature(過去の記録)を<br/>Expected値として、実際のStepResultから得たDecision Signatureと<br/>一致するか(DC_SIGNATURE参照。candidate Semantic Key集合は<br/>canonical multisetで比較。意味的同一性のみの検証)"}
+        REPLAY_SIG_CHECK -->|"No"| MISMATCH_MID["Fault(Replay Prefix再生中の中間Signature不一致)として記録<br/>→ mermaid_combat_fault_worker_detail.mermaid<br/>(種別: replay mismatch)"]
+        REPLAY_SIG_CHECK -->|"Yes"| REPLAY_DONE{"Replay Prefix末尾まで再生したか"}
+        REPLAY_DONE -->|"No"| REPLAY_STEP
+        REPLAY_DONE -->|"Yes"| AT_ROOT_R["Replay Prefix再生完了"]
+
+        AT_ROOT_S --> CTX_SIG_CHECK{"Current Context Signatureと一致するか<br/>(このDecision Context自体への到達確認。意味的同一性のみ。<br/>WorkItem生成時にSearch Coordinatorが記録したものと比較)"}
+        AT_ROOT_R --> CTX_SIG_CHECK
+        CTX_SIG_CHECK -->|"No<br/>想定と異なるChoice Payloadへ到達"| CTX_MISMATCH["Fault(到達地点のContext Signature不一致)として記録<br/>→ mermaid_combat_fault_worker_detail.mermaid<br/>(種別: replay mismatch)"]
+        CTX_SIG_CHECK -->|"Yes"| RESOLVE_CANDIDATE["WorkItemのCandidate Semantic Actionを<br/>現在のDecision Result／Choice Payloadの候補へ再解決<br/>(この候補は未実行のため、Expected Post-Step Signatureは<br/>まだ存在しない=事前検証は行わない)"]
+
+        RESOLVE_CANDIDATE --> RESOLVABLE{"再解決できたか"}
+        RESOLVABLE -->|"No"| UNRESOLVABLE["Fault(再解決不能)として記録<br/>→ mermaid_combat_fault_worker_detail.mermaid<br/>(種別: replay mismatch)"]
+        RESOLVABLE -->|"Yes"| STEP_CANDIDATE["候補のActionをStep<br/>(Emulator API境界: Step。1 Stepのみ)"]
+    end
+
+    STEP_CANDIDATE --> STEP_FAULT_CHECK{"StepのBoundaryはFaultか<br/>(Action fault — Emulator内部での実行時異常)"}
+    STEP_FAULT_CHECK -->|"Yes"| ACTION_FAULT["Transition Recordへは追記せず<br/>Fault(action fault)として記録<br/>→ mermaid_combat_fault_worker_detail.mermaid"]
+    STEP_FAULT_CHECK -->|"No"| OBSERVE["StepResultからObserved Post-Step Signatureを取得する<br/>(これが今回初めて確定する値であり、事前のExpectedはない)"]
+    LIVE_CONTINUE --> LIVE_FAULT_CHECK{"StepのBoundaryはFaultか(action fault)"}
+    LIVE_FAULT_CHECK -->|"Yes"| ACTION_FAULT
+    LIVE_FAULT_CHECK -->|"No"| OBSERVE
+
+    OBSERVE --> APPEND_RECORD["Transition Record(Semantic Action, Observed Post-Step Signature)を<br/>このDecision ContextのReplay PrefixとPlan Pathの<br/>両方へ追記する(同じ操作を同じタイミングで実施)"]
+    APPEND_RECORD --> RETURN_BOUNDARY["StepResultを即座に返す<br/>(Boundary・Choice候補・Choice種別/制約・metadataを含む一括戻り値)<br/>→ mermaid_combat_branch_scheduler_detail.mermaid"]
+
+    RETURN_BOUNDARY -.->|"Stableに到達"| CHILD_CAP["CaptureSnapshot<br/>(Emulator API境界)<br/>Child Snapshotとして返す(Plan Pathも合わせて返す)<br/>→ mermaid_combat_commit_detail.mermaidのNORMALIZEへ"]
+    RETURN_BOUNDARY -.->|"Terminalに到達"| TERMINAL_RESULT_ONLY["Terminal Resultのみ作成<br/>(CaptureSnapshotは行わない。Plan Pathは合わせて返す)<br/>→ mermaid_combat_commit_detail.mermaidのNORMALIZEへ"]
+    RETURN_BOUNDARY -.->|"Pendingに到達"| NEXT_DC["同一Decision Context系列の継続として<br/>(Root Snapshot・Plan Path・RNG Hypothesis IDは変更なし)、<br/>Replay Prefix・Current Resultのみ更新済みの状態で<br/>→ mermaid_combat_candidate_pipeline_detail.mermaidへ再突入<br/>(この時点で初めて、Stepを行ったWorkerがこの新Decision Contextの<br/>Leaseを新規に確立/継続する。Restore+Replayで親Contextへ到達しただけの<br/>段階(CTX_SIG_CHECK通過時点)ではLeaseは確立しない<br/>→ mermaid_combat_branch_scheduler_detail.mermaidのLEASE_ESTABLISH)"]
+
+    %% 設計注記
+    NOTE_NO_REGEN["設計注記: PendingはStable Root SnapshotからのReplay Prefix再生の<br/>『自然な結果』として到達するものであり、独立した再生成処理(REGEN_PENDING)は存在しない。<br/>Pending自体をCapture／Restoreの対象にもしない。"]
+    NOTE_NO_REGEN -.-> REPLAY_SIG_CHECK
+
+    NOTE_REUSE["設計注記: すでに目的の状態(このDecision Context)へ到達している<br/>State-Holding Worker(Lease)が存在する場合、Restore＋Replayを省略して<br/>そのlive GameInstanceを直接Stepする(LIVE_CONTINUE経路)。<br/>これはRestore/Replayコストが探索時間の主要なボトルネックであるという<br/>実測知見に基づく。Lease検証・成立・解放条件はBranch Scheduler図を参照。"]
+    NOTE_REUSE -.-> LIVE_CONTINUE
+
+    NOTE_NO_REREAD["設計注記: 候補参照は常にRestoreResult／StepResultに含まれる<br/>Choice Payloadから行う。GetLegalActions等の別API呼び出しによる<br/>再取得は行わない。"]
+    NOTE_NO_REREAD -.-> RESOLVE_CANDIDATE
+
+    NOTE_NO_PREDICT["設計注記: 未実行のCandidate Semantic ActionにExpected Post-Step Signatureを<br/>付与することはない(実行前には存在しない値であり予測できない)。<br/>Signatureが必要になるのは、実行して得たObserved値を、後で同じActionを<br/>再実行(Replay)する際の照合対象として使う時だけである。"]
+    NOTE_NO_PREDICT -.-> RESOLVE_CANDIDATE
+
+    NOTE_PLAN_PATH["設計注記: Plan Pathは評価境界(Stable)ごとにリセットされるReplay Prefixとは異なり、<br/>探索開始点から現在のDecision Contextまでの全Transition Recordを、<br/>親からの継承＋自身のAPPEND_RECORDによって連続的に保持し続ける。<br/>Stable到達時にリセットされるのはReplay Prefixのみであり、Plan Pathは<br/>リセットされない(→ mermaid_combat_commit_detail.mermaid)。"]
+    NOTE_PLAN_PATH -.-> DC_DEF
+
+    NOTE_SINGLE_PATH["設計注記: Search CoordinatorからBranch Worker Poolへの投入経路は<br/>FROM_RNG(候補分類・枝刈り→RNG Hypothesis決定を経た後)の1本のみとする。<br/>候補分類前にRNG展開を行う経路や、Candidate PipelineからSchedulerへ<br/>直接WorkItemを渡す経路は設けない(二重経路の解消)。"]
+    NOTE_SINGLE_PATH -.-> TO_RNG
+
+    NOTE_NO_LEASE_ON_ARRIVAL["設計注記: BootstrapはRoot Snapshot(またはState-Holding Worker)への<br/>到達(CTX_SIG_CHECK通過)だけではLeaseを確立しない。同じWorkItem内で<br/>Candidate Semantic ActionをStepし、その結果Pendingになった<br/>『子』Decision ContextにのみLeaseを確立する(NEXT_DCの時点)。"]
+    NOTE_NO_LEASE_ON_ARRIVAL -.-> CTX_SIG_CHECK

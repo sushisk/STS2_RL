@@ -1,0 +1,154 @@
+%% DEPRECATED
+%% 履歴参照専用。現在の実装契約として使用禁止。
+%% 正本はmermaid_rough_combat.mermaidおよび7詳細図
+%% (mermaid_combat_main_loop_detail / candidate_pipeline_detail / branch_scheduler_detail /
+%%  snapshot_replay_detail / rng_hypothesis_detail / fault_worker_detail / commit_detail)。
+%% 本図はBranchWorkItem batch単位の一括処理・固定Body/Sub構造・MAIN_SIGNATURE単独検証・
+%% Sequence Prefix用語など、現行契約(State-Holding Worker Lease・Decision Context・
+%% State Identity・Plan Path等)以前の初期設計を記録した歴史的資料である。
+%% アーカイブ日: 2026-08-01(rl_combat_mermaid_scope_review_20260801.md参照)
+
+flowchart TD
+    subgraph ENTRY_RUN["入口A: 全体Runからの実戦Combat"]
+        RUN_FLOW["0. Run全体フロー"] --> RUN_MAIN["Root Python Process<br/>Main Run GameInstanceを保持"]
+        RUN_MAIN --> RUN_ENTER["Main Run InstanceのままCombat Roomへ進入"]
+        RUN_ENTER --> RUN_CONTEXT["Main Combat Contextを作成<br/>このGameInstanceを戦闘終了まで正本として保持"]
+    end
+
+    subgraph ENTRY_REPLAY["入口B: 学習用Combat再現"]
+        TRAINING["Training担当<br/>特定Combatの再現要求"] --> REPLAY_RUNNER["RL Replay Runner"]
+        REPLAY_RUNNER --> REPLAY_ALLOCATE["専用Replay Root Processを割り当て<br/>1 process = 1 GameInstance"]
+        REPLAY_ALLOCATE --> REPLAY_VALIDATE["ValidateRestoreSnapshotJson"]
+        REPLAY_VALIDATE --> REPLAY_VALID{"Restore可能か"}
+        REPLAY_VALID -->|No| REPLAY_REJECT["拒否codeとprovenanceをRL生ログへ記録"]
+        REPLAY_VALID -->|Yes| REPLAY_RESTORE["RestoreSnapshotJson<br/>Combat状態とRNGを厳密復元"]
+        REPLAY_RESTORE --> REPLAY_CONTEXT["Main Replay Combat Contextを作成<br/>このGameInstanceを再現終了まで正本として保持"]
+    end
+
+    subgraph ENTRY_EVENT["入口C: Event戦闘sample"]
+        EVENT_FLOW["Event Room図<br/>戦闘分岐sample"] --> SAMPLE_ALLOCATE["専用Sample Root Processを割り当て<br/>sampleごとに独立したGameInstance"]
+        SAMPLE_ALLOCATE --> SAMPLE_CONTEXT["Event図で設定済みのsample RNGから戦闘開始<br/>Main Sample Combat Contextを作成"]
+    end
+
+    RUN_CONTEXT --> MAIN_READY
+    REPLAY_CONTEXT --> MAIN_READY
+    SAMPLE_CONTEXT --> MAIN_READY
+
+    subgraph MAIN_STREAM["Main Stream Combat Loop"]
+        MAIN_READY["Main Combat Instanceを受け取る<br/>Run・Replay・Sampleのいずれでも正本は1個"] --> READ_STATE["Observation・DecisionFrame・LegalActionsを取得"]
+        READ_STATE --> BOUNDARY{"現在の境界"}
+
+        BOUNDARY -->|Terminal| TERMINAL["CombatResultを確定"]
+        BOUNDARY -->|Fault| MAIN_FAULT["Fault・Snapshot・RNG・直前ActionをRL生ログへ記録"]
+        BOUNDARY -->|Pending| PENDING_SOURCE{"採用済みLogicalActionSequenceに<br/>次のSelectionがあるか"}
+        BOUNDARY -->|Stable| MODE{"Action決定方針"}
+
+        MODE -->|Direct Policy| DIRECT["現在状態からSemantic Actionを直接選択"]
+        MODE -->|Heuristic| HEURISTIC["1段候補評価を要求"]
+        MODE -->|Beam Search| BEAM["depth・width・branch上限を含む探索を要求"]
+
+        PENDING_SOURCE -->|Yes| NEXT_SELECTION["Sequence内の次Selectionを取得"]
+        PENDING_SOURCE -->|No| PENDING_POLICY["Pending PolicyでSelectionを選択"]
+
+        DIRECT --> SET_SEQUENCE["実行するLogicalActionSequenceを設定"]
+        NEXT_SELECTION --> EXECUTOR
+        PENDING_POLICY --> EXECUTOR
+        SET_SEQUENCE --> EXECUTOR["LogicalActionExecutor"]
+
+        EXECUTOR --> RESOLVE_MAIN["Mainの最新LegalActionsから<br/>Semantic Actionを現在frameのaction_idへ解決"]
+        RESOLVE_MAIN --> STEP_MAIN["Main GameInstanceにEmulator.Stepを実行"]
+        STEP_MAIN --> LOG_MAIN["Action・DecisionFrame・RNG識別情報・結果をRL生ログへ記録"]
+        LOG_MAIN --> READ_STATE
+
+        TERMINAL --> RETURN_RESULT["呼び出し元へCombatResultとRL生ログを返す"]
+        MAIN_FAULT --> RETURN_RESULT
+    end
+
+    HEURISTIC --> CAPTURE_ROOT
+    BEAM --> CAPTURE_ROOT
+
+    subgraph SEARCH_COORDINATOR["Root Python Process: Search Coordinator"]
+        CAPTURE_ROOT["MainからCaptureSnapshot<br/>DTOをcanonical JSONへ直列化<br/>Main Instanceは変更せず保持"] --> MAIN_SIGNATURE["Main不変性確認用signatureを保存<br/>CombatSessionId・StepIndex・DecisionFrame・LegalActions・Snapshot hash"]
+        MAIN_SIGNATURE --> BUILD_WORK["BranchWorkItem batchを作成<br/>Root Snapshot JSON・Semantic Sequence Prefix・探索設定・明示的seed"]
+        BUILD_WORK --> DISPATCH["空いている常駐C# Branch Workerへbatchを割り当て"]
+
+        COLLECT_PENDING["Pendingから生成されたWorkItemを収集"] --> DISPATCH
+        COLLECT_RESULT["Branch展開結果をbatchで収集"] --> BATCH_DONE{"現在batchの全WorkItemが完了したか"}
+        BATCH_DONE -->|No| WAIT_RESULT["残りのWorker結果を待つ"]
+        WAIT_RESULT --> BATCH_DONE
+        BATCH_DONE -->|Yes| SCORE_BATCH["Python Evaluatorで候補状態を一括評価<br/>HeuristicまたはModel scoring"]
+        SCORE_BATCH --> SEARCH_KIND{"探索方針"}
+
+        SEARCH_KIND -->|Heuristic| CHOOSE_BEST["最高評価のLogicalActionSequenceを選択"]
+        SEARCH_KIND -->|Beam Search| DEPTH_CHECK{"探索終了条件に到達したか"}
+
+        DEPTH_CHECK -->|No| PRUNE["上位候補をwidthまで選択"]
+        PRUNE --> NEXT_DEPTH["Child Snapshot JSONから次深度のWorkItem batchを作成"]
+        NEXT_DEPTH --> DISPATCH
+        DEPTH_CHECK -->|Yes| CHOOSE_BEST
+
+        CHOOSE_BEST --> VERIFY_MAIN["Main signatureを再取得して比較"]
+        VERIFY_MAIN --> MAIN_UNCHANGED{"探索中にMainが不変か"}
+
+        MAIN_UNCHANGED -->|No| INVARIANT_FAULT["deterministic violationとして記録<br/>探索結果をMainへ適用しない"]
+        MAIN_UNCHANGED -->|Yes| COMMIT_SEQUENCE["最良LogicalActionSequenceだけをMainへ返す"]
+
+        COMMIT_SEQUENCE --> SET_SEQUENCE
+        INVARIANT_FAULT --> MAIN_FAULT
+    end
+
+    subgraph WORKER_POOL["常駐C# Branch Worker Pool"]
+        WORKER_READY["Worker起動時にCoreCLR・ModelDb・GameInstanceを1回初期化<br/>各processにGameInstanceは1個だけ"] --> RECEIVE_TASK["BranchWorkItemを受信"]
+        RECEIVE_TASK --> VALIDATE_BRANCH["ValidateRestoreSnapshotJson"]
+        VALIDATE_BRANCH --> BRANCH_VALID{"Restore可能か"}
+
+        BRANCH_VALID -->|No| RETURN_REJECT["rejection codeを返す"]
+        BRANCH_VALID -->|Yes| RESTORE_BRANCH["RestoreSnapshotJson<br/>RunRng・PlayerRng・MonsterRngを厳密復元"]
+
+        RESTORE_BRANCH --> REPLAY_PREFIX["最新DecisionFrameとLegalActionsを取得し<br/>Semantic Sequence Prefixを先頭から再実行"]
+        REPLAY_PREFIX --> BRANCH_BOUNDARY{"Branchの境界"}
+
+        BRANCH_BOUNDARY -->|Pending| ENUM_PENDING["最新LegalActionsからPending候補を列挙"]
+        ENUM_PENDING --> RETURN_PENDING["Root Snapshotと1操作延長Prefixを持つ<br/>新しいWorkItem候補を返す"]
+
+        BRANCH_BOUNDARY -->|Stable| CAPTURE_CHILD["CaptureSnapshot<br/>Child Snapshot JSONと候補状態を作成"]
+        BRANCH_BOUNDARY -->|Terminal| RETURN_TERMINAL["Terminal結果と候補状態を返す"]
+        BRANCH_BOUNDARY -->|Fault| RETURN_FAULT["Faultと再現情報を返す"]
+
+        CAPTURE_CHILD --> RETURN_EXPANSION["候補状態・Child Snapshot JSON・Sequence・診断情報を返す"]
+
+        RETURN_REJECT --> WORKER_DONE["WorkerをReadyへ戻す"]
+        RETURN_PENDING --> WORKER_DONE
+        RETURN_TERMINAL --> WORKER_DONE
+        RETURN_FAULT --> WORKER_DONE
+        RETURN_EXPANSION --> WORKER_DONE
+        WORKER_DONE --> RECEIVE_TASK
+    end
+
+    DISPATCH --> RECEIVE_TASK
+    RETURN_REJECT --> COLLECT_RESULT
+    RETURN_PENDING --> COLLECT_PENDING
+    RETURN_TERMINAL --> COLLECT_RESULT
+    RETURN_FAULT --> COLLECT_RESULT
+    RETURN_EXPANSION --> COLLECT_RESULT
+
+    subgraph WORKER_MANAGEMENT["Worker障害管理"]
+        DISPATCH --> TASK_WATCH["task timeout・process healthを監視"]
+        TASK_WATCH --> WORKER_STATUS{"Workerは正常終了したか"}
+        WORKER_STATUS -->|Yes| NORMAL_RESULT["通常のWorker結果経路を継続"]
+        WORKER_STATUS -->|No| RESTART["該当Workerを停止して再起動"]
+        RESTART --> FAILURE_POLICY{"同じWorkItemを再試行するか"}
+        FAILURE_POLICY -->|Yes| DISPATCH
+        FAILURE_POLICY -->|No| REJECT_TASK["該当BranchをFaultとして収集<br/>暗黙のDirect fallbackは行わない"]
+        REJECT_TASK --> COLLECT_RESULT
+    end
+
+    REPLAY_REJECT --> REPLAY_RETURN["Training担当へ拒否結果を返す"]
+
+    subgraph RULES["不変条件"]
+        RULE_MAIN["探索中にMain GameInstanceをRestore・Reset・Stepしない"]
+        RULE_PROCESS["1 process = 1 GameInstance"]
+        RULE_IPC["process境界はSnapshot JSON・Semantic Sequence・候補状態・Score情報のみ"]
+        RULE_COMMIT["Branch状態をMainへコピーせず、採用SequenceだけをMainで再実行"]
+        RULE_RNG["Snapshot内RNGと探索用seedを明示し、同一入力の決定性を保証"]
+    end

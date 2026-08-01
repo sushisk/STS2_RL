@@ -1,0 +1,61 @@
+%% 責任主体: Search Coordinator (評価・決定) + Main Process (再解決・実行)
+%% 参照上位図: mermaid_rough_combat.mermaid (COMPARE/SEARCH_DONE/BEST/NEXT_ROOTS)
+%% 目的: RNG Hypothesis関与時はRoot Action単位・単一のRoot Action Evaluation Segment
+%%       (Root Actionから規定された最初の評価境界までの探索区間)に限定すること(グループ同一性問題の回避)、
+%%       欠損サンプルの集約規則、Plan Pathの継続的な積み上げ(評価境界での一括追記ではない)、
+%%       RNG Hypothesisが関与した場合の単一Action限定Commit(Expected Post-Step Signatureなし)、
+%%       Mainでの連続実行への引き渡しを詳細化する
+%% 前提: 「ラウンド」という旧来の一括処理単位は用いない(RNG Hypothesisの評価範囲を指す
+%%       「Root Action Evaluation Segment」とは異なる概念であり、混同を避けるため
+%%       「単一ラウンド」という表現も用いない)。各Decision Contextは自身の評価境界(Stable/Terminal)に
+%%       到達した時点で個別に正規化・報告される。Stable評価境界を跨いだState-Holding Worker Leaseの
+%%       再利用は本設計の基本経路には含めない(未決定事項。§NOTE_FUTURE_REUSE参照)。
+%%       Plan Pathは各Decision Context自身がStep成功のたびに追記済み(→snapshot_replay詳細図)であり、
+%%       本図では追記操作は行わず、確定したPlan Pathを読み出すだけである。
+flowchart TD
+    IN["正規化済みBranchResult群<br/>(Observation・Plan Path・status・diagnostics・<br/>Child Snapshot[Stable時のみ]・Terminal Result[Terminal時のみ])<br/>(mermaid_combat_branch_scheduler_detail.mermaidのNORMALIZEから)<br/>Fault分は除外/最低評価<br/>(mermaid_combat_fault_worker_detail.mermaidから。<br/>WorkItem状態がFinalSuccess/FinalFaultのもののみを対象とし、<br/>Retrying中のものは含めない → NOTE_WORKITEM_STATE参照)<br/>『診断』タグのRNG Hypothesis(独立集合)による結果は<br/>ここに含めない(→ mermaid_combat_rng_hypothesis_detail.mermaidの<br/>COMPARE_IND。標準比較・win/loss判定には一切混ぜない)"] --> HYP_SPLIT{"この結果群にRNG Hypothesis(Noneでないもの)が<br/>1件でも関与しているか"}
+
+    subgraph COORD["Search Coordinator (責任: 評価・探索継続判断)"]
+        HYP_SPLIT -->|"Yes<br/>Hypothesis評価"| STAGE1["第1段階: 各(Root Action, H)ペアの探索木内では、<br/>CLASSIFY/PRUNE/SPLITにより継続候補とSub Branch候補が枝分かれし、<br/>複数のControllable Continuation Branch(AIが選択できる分岐)が<br/>生じうる(単一の直線的な結果に収束するとは限らない)。<br/>これらのうち、この(Root Action,H)ペア内でSearch Coordinatorが<br/>到達したStable/Terminal結果群の中から、有効な<br/>(Fault/評価不能を除く)最善スコアを持つものを<br/>そのペアの代表スコアとする(既存のDecision Context比較ロジックを<br/>この(Root Action,H)の部分木内で適用した結果であり、<br/>本図で新たな評価アルゴリズムを追加するものではない)。<br/>ここで初めて(Root Action,H)単位の単一代表スコアが確定する"]
+        STAGE1 --> GROUP_BY_ROOT_ACTION["第2段階: Root Action単位(RNG Hypothesis IDを除いたキー、<br/>かつこの探索呼び出しの起点から見た最初の1手のみで比較。<br/>深いPlan Prefixはキーに含めない)で、STAGE1の代表スコアをグルーピングする。<br/>理由: Hごとに合法Actionや以降の分岐構造が異なりうるため、<br/>Root Actionより深い階層でのグループ同一性は一般に定義できない<br/>(→ mermaid_combat_rng_hypothesis_detail.mermaidのNOTE_ROOT_ONLY)"]
+        GROUP_BY_ROOT_ACTION --> AGGREGATE_RULE["集約規則(共通H集合＋最低coverage＋欠損ペナルティを併用):<br/>・GRID生成時点で全Root Actionに同じ名目上のH集合H1..Hnが<br/>  割り当てられている(共通H集合が前提。欠損はFault由来のみ)<br/>・最低coverage: 有効な(Faultでない)サンプル数が n の過半数<br/>  (例: ceil(n/2))未満のRoot Actionは評価不能として比較対象から除外する<br/>  (→ mermaid_combat_fault_worker_detail.mermaidのSRC_NOCANDIDATE相当)<br/>・欠損ペナルティ: 最低coverageを満たすRoot Actionについては、<br/>  有効サンプルの単純平均ではなく、欠損したHをそのRoot Actionの<br/>  有効サンプル中『最低スコア』で補完した上で平均する(悲観的補完)。<br/>  これにより、たまたま不利なHでFaultした結果として見かけ上有利になる<br/>  偏りを避ける(有効サンプルのみの平均は、少数の good サンプルしか<br/>  残らなかった候補を不当に高評価してしまう)"]
+        AGGREGATE_RULE --> COMPARE_HYP["集約後のRoot Actionグループを比較し、<br/>最高集計スコアのグループを選択する<br/>(初期実装ではHypothesis評価は単一のRoot Action Evaluation Segment<br/>のみで完結させ、複数のSegmentに跨るBeam継続は行わない)"]
+        COMPARE_HYP --> BEST_ROOT_ACTION["最善Root Actionを確定"]
+        BEST_ROOT_ACTION --> COMMIT_FIRST_ONLY["Planned Sequence = そのRoot Action1手のみ。<br/>Expected Post-Step Signatureは付与しない<br/>(H上で観測した結果はHypothesis依存であり、Mainの実RNGとは<br/>一致しない可能性が高いため、厳密条件として課さない。<br/>Mainは無条件にこの1手を実行し、実StepResult観測後に<br/>必ず新しいdecisionとして再評価する。<br/>再評価がSearchを伴うかPENDING_STATICになるかは<br/>実Step後の到達境界次第 — 下記RESEARCH参照)"]
+
+        HYP_SPLIT -->|"No<br/>RNGを消費しない範囲の候補比較のみ"| COMPARE_PLAIN["同一の評価関数で全Decision Contextを区別なく評価<br/>(HeuristicスコアまたはModel scoring)<br/>※State-Holding Worker経由かSub Branch経由かは評価に影響しない"]
+        COMPARE_PLAIN --> DONE{"探索を継続するか<br/>(depth上限・width・Heuristic1段完了等)"}
+
+        DONE -->|"続ける<br/>Beam Search"| SELECT_NEXT["上位Decision Context(width件)を選択<br/>(RNG非依存のため通常のBeam幅プルーニングをそのまま適用可能)"]
+        SELECT_NEXT --> EXPAND["選択各Decision ContextのChild Snapshotを、<br/>次のBeam Search展開深度のDecision Context<br/>(Root Snapshot、Replay Prefix=空、Plan Pathは選択元から継承済み)<br/>として展開する(RNG非依存のBeam Search自身の深度反復であり、<br/>RNG HypothesisのRoot Action Evaluation Segmentとは別概念。<br/>→ mermaid_combat_snapshot_replay_detail.mermaidのPREV_CHILD)"]
+        EXPAND --> RELEASE_LEASE["選択されなかった/選択されたが継続不要なDecision Contextの<br/>State-Holding Worker Leaseを解放する<br/>(→ mermaid_combat_branch_scheduler_detail.mermaidのLEASE_RELEASE)"]
+        RELEASE_LEASE --> PER_CONTEXT["各Decision Contextごとに独立して<br/>→ mermaid_combat_snapshot_replay_detail.mermaidのROOT_SNAPへ"]
+
+        DONE -->|"終了"| BEST_PLAIN["最高評価のDecision Contextを最善候補として確定<br/>(RNG非依存のため、Plan Path上の複数手をまとめて安全にCommit可能)"]
+        BEST_PLAIN --> COMMIT_FULL["Planned Sequence = そのDecision ContextのPlan Path上の<br/>未Commitな手を全て含める。各手にはPlan Pathへ既に記録済みの<br/>Observed Post-Step SignatureをそのままExpected Post-Step Signatureとして付与する<br/>(RNG非依存のため、探索時に観測した値が実行時にもそのまま再現される)"]
+    end
+
+    COMMIT_FIRST_ONLY --> BUILD_PLANNED["Planned Sequenceを確定する<br/>(COMMIT_FIRST_ONLY由来: Signatureなしの1手。<br/>COMMIT_FULL由来: Plan PathのObserved値をExpectedとして付与した複数手)"]
+    COMMIT_FULL --> BUILD_PLANNED
+
+    BUILD_PLANNED --> VERIFY{"MainのInstanceは探索中に不変か<br/>(参考: deprecated/mermaid_combat_target_worker_pool.mermaidの<br/>MAIN_SIGNATURE検証と同趣旨。当該図は現在deprecatedであり、<br/>本検証方式は本図自体が正本として定義する。State Identity<br/>— CombatSessionId／StepIndex／Decision Result digest —<br/>で判定する(意味的同一性のみのDecision Signatureでは判定しない。<br/>二つの異なるMain状態が偶然同じDecision Signatureを<br/>持ちうるため)。本設計ではMainはSearch中一切Step/Restoreされないため<br/>不変性は構造的に保証されるが、念のため検証する)"}
+
+    VERIFY -->|"Yes"| COMMIT["Planned Sequenceのみを<br/>→ mermaid_combat_main_loop_detail.mermaidのFROM_COMMITへ渡す<br/>(Branch Worker/Search Coordinatorの内部状態・Plan Path自体は渡さない)"]
+    VERIFY -->|"No<br/>構造的に想定外"| INVARIANT_VIOLATION["deterministic violationとして記録<br/>→ mermaid_combat_fault_worker_detail.mermaidのSRC_MAIN_INVARIANT<br/>(Branch Worker再利用判断は経由せず、常にMain Combat Faultへ直行)"]
+
+    COMMIT --> MAIN_EXEC["Mainの同一live Instance上でPlanned Sequenceを連続実行<br/>(1手ごとにCurrent Decision Result／Choice Payloadの候補へ再解決してStep。<br/>Expected Post-Step Signatureが付与されている手のみ照合する。<br/>詳細は mermaid_combat_main_loop_detail.mermaid の EXEC_LOOP を参照。<br/>Sequence途中のPendingは正常な途中状態として扱う)"]
+
+    MAIN_EXEC -.->|"COMMIT_FIRST_ONLYだった場合<br/>Mainの実Step後"| RESEARCH["新しいdecisionとしてMainの通常の決定ループへ戻る<br/>(→ mermaid_combat_main_loop_detail.mermaidのSTEP_BOUNDARY経由で<br/>MAIN_DC/MAIN_DC2からNEW_DECISION/NEW_DECISION_PENDINGへ。<br/>Search Coordinatorを『必ず』呼ぶわけではない — 実Step後の到達点が<br/>StableならNEED_SEARCH、Main-observed PendingならPENDING_STATICへ<br/>通常のルーティングに従う。Plan Pathは新しい探索のために<br/>再度空から積み上げる)"]
+
+    %% 設計注記
+    NOTE_NO_COPY["設計注記: MainはBranch Workerの状態を一切コピーしない。<br/>受け取るのはPlanned Sequenceのみであり、<br/>実行は必ずMain自身のCurrent Decision Resultに基づき<br/>1手ずつ再解決される<br/>(参考: deprecated/mermaid_combat_target_worker_pool.mermaidのRULE_COMMITと<br/>同趣旨。当該図は現在deprecatedであり、本方針は本図自体が正本として定義する)。"]
+    NOTE_NO_COPY -.-> MAIN_EXEC
+
+    NOTE_FUTURE_REUSE["設計注記(未決定・将来の任意最適化候補): Stable評価境界を跨いだ<br/>State-Holding Worker Leaseの再利用(選択したDecision ContextのWorkerが<br/>まだ生存しており、かつそのlive状態がChild Snapshotと一致する場合に<br/>Restoreを省略して次のDecision Contextでも同じWorkerを使うこと)は、<br/>これまで合意した再利用範囲(Pending地点内でのState-Holding Worker再利用)を<br/>超えるため、本図の基本経路には含めない。採否は実測結果を踏まえた<br/>監督者判断を経てから正式採用する。現時点の基本設計は次に留める:<br/>Pending地点内=Leaseを再利用する／Stable評価境界=Child Snapshotへ正規化し、<br/>次Decision Contextの正本はChild Snapshotとする(RELEASE_LEASEで都度解放)。"]
+    NOTE_FUTURE_REUSE -.-> RELEASE_LEASE
+
+    NOTE_NO_SIGNATURE["設計注記: COMMIT_FIRST_ONLYの1手にExpected Post-Step Signatureを<br/>付与しないのは、H上で観測した値がMain実RNGでも再現される保証がなく、<br/>不一致による不要なDISCARD(mermaid_combat_main_loop_detail.mermaidの<br/>VERIFY_TRANSITION)を避けるためである。この1手の実行結果自体は<br/>Mainの新しいCurrent Decision Resultとして正しく採用され、<br/>直後にRESEARCHで再探索されるため、検証を省いても安全性は損なわれない。"]
+    NOTE_NO_SIGNATURE -.-> COMMIT_FIRST_ONLY
+
+    NOTE_SINGLE_SEGMENT["設計注記: RNG Hypothesisが関与する評価は、今回は複数のRoot Action<br/>Evaluation Segmentにまたがる汎用的な確率的Beam Searchとして実装しない。<br/>理由は、Hごとに合法Actionや以降の分岐構造が異なりうる場合、Root Actionより<br/>深い階層でのグループ同一性が一般に定義できないためである。多段化する場合は、<br/>グループ同一性の定義とサンプル欠損時の集約規則(本図のAGGREGATE_RULE相当)を<br/>深さ非依存に一般化してから着手する。"]
+    NOTE_SINGLE_SEGMENT -.-> COMPARE_HYP
