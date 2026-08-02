@@ -22,6 +22,7 @@ from battle_emulator import BattleState  # noqa: E402
 from live_combat_session import LiveCombatSession  # noqa: E402
 from search.belief_coverage import (  # noqa: E402
     assess_public_multiset_coverage,
+    assess_public_multiset_coverage_for_combat_start,
     compute_public_multiset_with_coverage,
 )
 from search.branch_worker_pool import BranchWorkerPool, LeaseRegistry  # noqa: E402
@@ -87,6 +88,16 @@ def test_assess_public_multiset_coverage_confirmed_active_relic_is_complete():
     assert assessment.is_complete is True
     assert assessment.uncertain_sources == []
     assert "Relic:BIIIG_HUG" in assessment.reason
+
+
+def test_assess_public_multiset_coverage_for_combat_start_toolbox_is_complete():
+    spec = _simple_spec(relics=["TOOLBOX"])
+
+    assessment = assess_public_multiset_coverage_for_combat_start(spec)
+
+    assert assessment.is_complete is True
+    assert assessment.uncertain_sources == []
+    assert "Relic:TOOLBOX" in assessment.reason
 
 
 def test_compute_public_multiset_with_coverage_delegates_to_rng_hypothesis():

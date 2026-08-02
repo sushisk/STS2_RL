@@ -31,6 +31,7 @@ from live_combat_session import ActionExecutionError, LiveCombatSession  # noqa:
 from search.decision_context import (  # noqa: E402
     BOUNDARY_PENDING,
     BOUNDARY_STABLE,
+    CombatStartReplayRoot,
     DecisionSignature,
     SemanticAction,
     boundary_of_battle_state,
@@ -46,6 +47,7 @@ from search.main_loop import (  # noqa: E402
     ROUTE_PENDING_STATIC,
     ROUTE_SEARCH,
     SearchEvaluationFailure,
+    SearchSuccess,
     first_candidate_direct_selector,
     initialize_main_loop_state,
     pending_static_select,
@@ -486,6 +488,64 @@ def test_pending_boundary_cannot_route_to_search():
             search_strategy=_search_that_must_never_run,
             routing_policy=lambda boundary: ROUTE_SEARCH,
             max_iterations=5,
+        )
+        raise AssertionError("expected PendingSearchNotAllowedError")
+    except PendingSearchNotAllowedError:
+        pass
+
+
+def test_combat_start_pending_with_replay_root_can_route_to_search_without_pending_guard_error():
+    spec = _toolbox_pending_spec()
+    session = LiveCombatSession()
+    state = session.start_combat(spec)
+    assert boundary_of_battle_state(state) == BOUNDARY_PENDING
+    loop_state = initialize_main_loop_state(
+        session,
+        state,
+        combat_start_replay_root=CombatStartReplayRoot(spec),
+    )
+    calls = []
+
+    def _one_choice_search(context):
+        calls.append(context)
+        choice = next(a for a in state._cached_legal_actions if a["action_type"] == "choice_card")  # noqa: SLF001
+        return SearchSuccess([PlannedStep(semantic_action=_semantic_action_for(choice))])
+
+    try:
+        run_until_terminal_or_fault(
+            loop_state,
+            direct_selector=first_candidate_direct_selector,
+            search_strategy=_one_choice_search,
+            routing_policy=lambda boundary: ROUTE_SEARCH if boundary == BOUNDARY_PENDING and loop_state.held_stable_snapshot is None else ROUTE_DIRECT,
+            max_iterations=1,
+        )
+    except RuntimeError as exc:
+        assert "exceeded max_iterations" in str(exc)
+
+    assert calls, "Search must be invoked for genesis Pending when CombatStartReplayRoot is present"
+    assert isinstance(calls[0].root_snapshot, CombatStartReplayRoot)
+    assert loop_state.held_stable_snapshot is not None
+    assert boundary_of_battle_state(loop_state.current_result) == BOUNDARY_STABLE
+
+
+def test_non_genesis_pending_with_held_snapshot_still_cannot_route_to_search():
+    session = LiveCombatSession()
+    state = session.start_combat(_toolbox_pending_spec())
+    assert boundary_of_battle_state(state) == BOUNDARY_PENDING
+    loop_state = initialize_main_loop_state(
+        session,
+        state,
+        combat_start_replay_root=CombatStartReplayRoot(_toolbox_pending_spec()),
+    )
+    loop_state.held_stable_snapshot = object()
+
+    try:
+        run_until_terminal_or_fault(
+            loop_state,
+            direct_selector=first_candidate_direct_selector,
+            search_strategy=lambda context: SearchEvaluationFailure("must not run"),
+            routing_policy=lambda boundary: ROUTE_SEARCH,
+            max_iterations=1,
         )
         raise AssertionError("expected PendingSearchNotAllowedError")
     except PendingSearchNotAllowedError:

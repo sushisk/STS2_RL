@@ -29,6 +29,7 @@ from search.decision_context import (  # noqa: E402
     BOUNDARY_STABLE,
     CHOICE_SCOPE_ACTION_CONTINUATION,
     CHOICE_SCOPE_TOP_LEVEL,
+    CombatStartReplayRoot,
     DecisionContext,
     DecisionSignature,
     PendingSnapshotRestoreViolationError,
@@ -408,6 +409,66 @@ def test_replay_decision_context_reproduces_pending_prefix_entry():
     assert isinstance(outcome, ReplaySuccess), outcome
     assert boundary_of_battle_state(outcome.final_state) == BOUNDARY_PENDING, outcome.final_state.engine_state.get("pendingChoice")
     assert is_action_continuation_pending_choice(outcome.final_state.engine_state), outcome.final_state.engine_state.get("pendingChoice")
+
+
+def test_replay_decision_context_combat_start_root_empty_prefix_reaches_pending_without_restore():
+    spec = _toolbox_pending_spec()
+    record_session = LiveCombatSession()
+    state = record_session.start_combat(spec)
+    assert boundary_of_battle_state(state) == BOUNDARY_PENDING
+    first_choice = next(a for a in state._cached_legal_actions if a["action_type"] == "choice_card")  # noqa: SLF001
+    signature = DecisionSignature.from_battle_state(
+        state,
+        semantic_action=_semantic_action_for(first_choice),
+        resolved_action=first_choice,
+    )
+    context = DecisionContext.from_combat_start_pending(CombatStartReplayRoot(spec), state, signature)
+
+    replay_session = LiveCombatSession()
+    restore_calls = []
+    original_restore = replay_session.restore_snapshot
+
+    def _tracking_restore(*args, **kwargs):
+        restore_calls.append(1)
+        return original_restore(*args, **kwargs)
+
+    replay_session.restore_snapshot = _tracking_restore
+    try:
+        outcome = replay_decision_context(replay_session, context)
+    finally:
+        replay_session.restore_snapshot = original_restore
+
+    assert isinstance(outcome, ReplaySuccess), outcome
+    assert boundary_of_battle_state(outcome.final_state) == BOUNDARY_PENDING
+    assert restore_calls == []
+
+
+def test_replay_decision_context_combat_start_root_replays_choice_prefix_to_stable():
+    spec = _toolbox_pending_spec()
+    record_session = LiveCombatSession()
+    pending_state = record_session.start_combat(spec)
+    assert boundary_of_battle_state(pending_state) == BOUNDARY_PENDING
+    choice = next(a for a in pending_state._cached_legal_actions if a["action_type"] == "choice_card")  # noqa: SLF001
+    choice_semantic = _semantic_action_for(choice)
+    stable_state = record_session.step(pending_state, choice)
+    assert boundary_of_battle_state(stable_state) == BOUNDARY_STABLE
+    stable_signature = DecisionSignature.from_battle_state(
+        stable_state,
+        semantic_action=choice_semantic,
+        resolved_action=choice,
+    )
+    entry = ReplayPrefixEntry(semantic_action=choice_semantic, expected_signature=stable_signature)
+    context = DecisionContext.from_combat_start_pending(
+        CombatStartReplayRoot(spec),
+        pending_state,
+        DecisionSignature.from_battle_state(pending_state, semantic_action=choice_semantic, resolved_action=choice),
+    )
+    context = dataclasses.replace(context, replay_prefix=[entry], current_context_signature=stable_signature)
+
+    outcome = replay_decision_context(LiveCombatSession(), context)
+
+    assert isinstance(outcome, ReplaySuccess), outcome
+    assert boundary_of_battle_state(outcome.final_state) == BOUNDARY_STABLE
 
 
 def test_replay_decision_context_detects_tampered_action_as_mismatch():

@@ -41,6 +41,7 @@ from search.decision_context import (  # noqa: E402
     BOUNDARY_PENDING,
     BOUNDARY_STABLE,
     BOUNDARY_TERMINAL,
+    CombatStartReplayRoot,
     DecisionContext,
     DecisionSignature,
     SemanticAction,
@@ -71,6 +72,23 @@ def _liquid_memories_spec():
     spec["discard_pile"] = ["DEFEND_IRONCLAD", "STRIKE_IRONCLAD"]
     spec["potions"] = [{"slot": 0, "potion_id": "LIQUID_MEMORIES"}]
     return spec
+
+
+def _toolbox_pending_spec():
+    return {
+        "character_id": "IRONCLAD",
+        "player_hp": None,
+        "player_max_hp": None,
+        "hand": ["STRIKE_IRONCLAD"],
+        "draw_pile": [],
+        "discard_pile": [],
+        "exhaust_pile": [],
+        "player_powers": [],
+        "relics": ["TOOLBOX"],
+        "potions": [],
+        "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
@@ -448,6 +466,64 @@ def test_real_multiprocess_pool_pending_step_establishes_context_pipeline_and_le
     assert result.established_lease is not None
     assert derive_context_id(result.pending_decision_context) == result.established_lease.context_id
     assert registry.get(result.established_lease.context_id, None) == result.established_lease
+
+
+def test_real_multiprocess_pool_combat_start_pending_siblings_bootstrap_independently():
+    spec = _toolbox_pending_spec()
+    session = LiveCombatSession()
+    state = session.start_combat(spec)
+    assert boundary_of_battle_state(state) == BOUNDARY_PENDING
+    representative = next(a for a in state._cached_legal_actions if a["action_type"] == "choice_card")  # noqa: SLF001
+    signature = DecisionSignature.from_battle_state(
+        state,
+        semantic_action=_semantic_action_for(representative),
+        resolved_action=representative,
+    )
+    context = DecisionContext.from_combat_start_pending(CombatStartReplayRoot(spec), state, signature)
+    pipeline = build_candidate_pipeline_result(context, width=8)
+    assert isinstance(pipeline, CandidatePipelineSuccess), pipeline
+    card_candidates = [
+        candidate
+        for candidate in [pipeline.continuation_candidate, *pipeline.sub_branch_candidates]
+        if candidate.semantic_action.action_type == "choice_card"
+    ]
+    distinct_by_card_id = []
+    seen_card_ids = set()
+    for candidate in card_candidates:
+        if candidate.semantic_action.card_id in seen_card_ids:
+            continue
+        seen_card_ids.add(candidate.semantic_action.card_id)
+        distinct_by_card_id.append(candidate)
+    assert len(distinct_by_card_id) >= 2, [c.semantic_action for c in card_candidates]
+
+    context_id = derive_context_id(context)
+    work_items = [
+        WorkItem.from_candidate_ref(
+            context,
+            distinct_by_card_id[0],
+            work_kind="continuation",
+            context_id=context_id,
+            work_id="toolbox-a",
+        ),
+        WorkItem.from_candidate_ref(
+            context,
+            distinct_by_card_id[1],
+            work_kind="sub_branch",
+            context_id=context_id,
+            work_id="toolbox-b",
+        ),
+    ]
+
+    registry = LeaseRegistry()
+    with BranchWorkerPool(worker_count=2, request_timeout_s=120.0) as pool:
+        results = dispatch_work_items(work_items, registry, worker_pool=pool)
+
+    assert len(results) == 2
+    assert all(result.status == BRANCH_STATUS_SUCCESS for result in results), [result.diagnostics for result in results]
+    assert all(result.execution_mode == EXECUTION_MODE_BOOTSTRAP_STEP for result in results)
+    assert all(result.result_signature.boundary == BOUNDARY_STABLE for result in results)
+    assert len({result.result_signature.combat_session_id for result in results}) == 2
+    assert len({result.result_signature.resolved_card_id for result in results}) == 2
 
 
 def _run_all() -> int:

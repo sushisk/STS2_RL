@@ -29,7 +29,7 @@ from search.branch_worker_pool import (  # noqa: E402
     derive_context_id,
 )
 from search.candidate_pipeline import CandidatePipelineSuccess, build_candidate_pipeline_result  # noqa: E402
-from search.decision_context import DecisionContext, DecisionSignature, SemanticAction  # noqa: E402
+from search.decision_context import CombatStartReplayRoot, DecisionContext, DecisionSignature, SemanticAction  # noqa: E402
 from search.rng_hypothesis import (  # noqa: E402
     CONSUME_MODE,
     CONSUME_PASSTHROUGH,
@@ -38,9 +38,11 @@ from search.rng_hypothesis import (  # noqa: E402
     HYPOTHESIS_MODE_STANDARD,
     SearchHypothesisId,
     build_grid,
+    compute_public_multiset_for_combat_start,
     compute_public_multiset,
     consume_check,
     derive_substituted_snapshot,
+    derive_substituted_replay_root,
     generate_belief_hypotheses,
     with_search_hypothesis,
 )
@@ -124,6 +126,48 @@ def test_compute_public_multiset_from_real_captured_snapshot():
 
     expected = dict(Counter({"STRIKE_IRONCLAD": 1, "DEFEND_IRONCLAD": 1, "BASH": 1}))
     assert got == expected, got
+
+
+def test_compute_public_multiset_for_combat_start_subtracts_visible_scenario_piles():
+    spec = _simple_spec(
+        hand=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD"],
+        draw_pile=["BASH", "STRIKE_IRONCLAD", "DEFEND_IRONCLAD"],
+        discard_pile=["BASH"],
+    )
+    spec["exhaust_pile"] = ["DEFEND_IRONCLAD"]
+    spec["play_pile"] = ["STRIKE_IRONCLAD"]
+    combat_start = {
+        "STRIKE_IRONCLAD": 3,
+        "DEFEND_IRONCLAD": 3,
+        "BASH": 2,
+    }
+
+    got = compute_public_multiset_for_combat_start(spec, combat_start_deck_multiset=combat_start)
+
+    assert got == {"BASH": 1, "DEFEND_IRONCLAD": 1, "STRIKE_IRONCLAD": 1}, got
+
+
+def test_derive_substituted_replay_root_replaces_only_scenario_draw_pile():
+    spec = _simple_spec(
+        hand=["STRIKE_IRONCLAD"],
+        draw_pile=["BASH", "DEFEND_IRONCLAD", "STRIKE_IRONCLAD"],
+        discard_pile=["DEFEND_IRONCLAD"],
+    )
+    spec["relics"] = ["TOOLBOX"]
+    root = CombatStartReplayRoot(scenario_spec=spec)
+    hypothesis = SearchHypothesisId(
+        rng=_rng(23),
+        ordered_draw_pile_card_ids=("STRIKE_IRONCLAD", "BASH", "DEFEND_IRONCLAD"),
+        hypothesis_index=23,
+    )
+
+    derived = derive_substituted_replay_root(root, hypothesis)
+
+    assert derived.scenario_spec["draw_pile"] == ["STRIKE_IRONCLAD", "BASH", "DEFEND_IRONCLAD"]
+    assert derived.scenario_spec["hand"] == spec["hand"]
+    assert derived.scenario_spec["discard_pile"] == spec["discard_pile"]
+    assert derived.scenario_spec["relics"] == ["TOOLBOX"]
+    assert root.scenario_spec["draw_pile"] == ["BASH", "DEFEND_IRONCLAD", "STRIKE_IRONCLAD"]
 
 
 def test_compute_public_multiset_includes_card_generated_entry_with_card_id():

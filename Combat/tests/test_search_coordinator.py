@@ -41,7 +41,7 @@ from search.branch_worker_pool import (  # noqa: E402
     dispatch_work_items as phase5_dispatch_work_items,
 )
 from search.candidate_pipeline import CandidatePipelineSuccess, build_candidate_pipeline_result  # noqa: E402
-from search.decision_context import BOUNDARY_PENDING, DecisionContext, DecisionSignature, SemanticAction  # noqa: E402
+from search.decision_context import BOUNDARY_PENDING, CombatStartReplayRoot, DecisionContext, DecisionSignature, SemanticAction  # noqa: E402
 from search.fault_taxonomy import SRC_MAIN_INVARIANT, WORK_ITEM_FINAL_FAULT  # noqa: E402
 from search.main_loop import (  # noqa: E402
     ROUTE_SEARCH,
@@ -78,6 +78,12 @@ def _simple_spec(hand=None, draw_pile=None, enemy_hp=48):
         "seed": 1,
         "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": enemy_hp}],
     }
+
+
+def _toolbox_pending_spec():
+    spec = _simple_spec(hand=["STRIKE_IRONCLAD"], draw_pile=[], enemy_hp=48)
+    spec["relics"] = ["TOOLBOX"]
+    return spec
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
@@ -339,6 +345,27 @@ def test_search_strategy_raises_main_invariant_error_when_state_identity_changes
     assert error.outcome.diagnostics["main_invariant"]["expected_state_identity"] != error.outcome.diagnostics[
         "main_invariant"
     ]["live_state_identity"]
+
+
+def test_combat_start_main_invariant_accepts_absent_held_snapshot_and_rejects_capture():
+    spec = _toolbox_pending_spec()
+    session = LiveCombatSession()
+    state = session.start_combat(spec)
+    context = DecisionContext.from_combat_start_pending(
+        CombatStartReplayRoot(spec),
+        state,
+        _representative_signature(state),
+    )
+    loop_state = initialize_main_loop_state(session, state, combat_start_replay_root=CombatStartReplayRoot(spec))
+
+    ok = coordinator_module._check_main_invariant(context, lambda: loop_state)  # noqa: SLF001
+    assert ok.ok is True, ok
+    assert ok.mismatches == ()
+
+    loop_state.held_stable_snapshot = object()
+    bad = coordinator_module._check_main_invariant(context, lambda: loop_state)  # noqa: SLF001
+    assert bad.ok is False, bad
+    assert "held_snapshot" in bad.mismatches
 
 
 def test_hypothesis_path_builds_distinct_hypothesis_work_items_and_commit_first_only():
