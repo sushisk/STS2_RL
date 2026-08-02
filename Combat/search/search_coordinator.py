@@ -2,9 +2,9 @@
 
 This module is intentionally thin assembly over Phases 2-7. It builds a Phase-3
 ``SearchStrategy`` by composing the existing Candidate Pipeline, RNG Hypothesis helpers,
-Branch Worker Pool, and Commit aggregation. No retry/resubmit loop or deeper tree search
-is implemented here; branch faults are converted to final decision-log entries for this
-single evaluation round.
+Branch Worker Pool, and Commit aggregation. Faulted branch work is retried before final
+Commit aggregation according to Phase 7's retry taxonomy; deeper tree search is still
+outside this assembly layer.
 """
 
 from __future__ import annotations
@@ -15,8 +15,11 @@ from dataclasses import dataclass
 
 from combat_state_snapshot import CombatStateSnapshot, restore_input_eligibility, validate_snapshot_references
 from search.branch_worker_pool import (
+    BRANCH_STATUS_FAULT,
+    BRANCH_STATUS_SUCCESS,
     WORK_KIND_CONTINUATION,
     WORK_KIND_SUB_BRANCH,
+    BranchResult,
     BranchWorkerPool,
     LeaseRegistry,
     WorkItem,
@@ -31,7 +34,12 @@ from search.fault_taxonomy import (
     aggregate_hypothesis_results,
     aggregate_plain_results,
     build_commit_decision,
+    classify_fault,
+    decide_retry,
     to_decision_log_entry,
+    WORK_ITEM_FINAL_FAULT,
+    WORK_ITEM_FINAL_SUCCESS,
+    WorkItemAttempt,
 )
 from search.main_loop import SearchEvaluationFailure, SearchStrategy
 from search.rng_hypothesis import (
@@ -174,6 +182,81 @@ def _hypothesis_work_items(
     return work_items
 
 
+def _dispatch_work_items_until_final(
+    work_items: list[WorkItem],
+    lease_registry: LeaseRegistry,
+    *,
+    pool: BranchWorkerPool,
+    config: SearchCoordinatorConfig,
+) -> list[tuple[WorkItem, BranchResult, str]]:
+    """Dispatch and retry WorkItems until each has a final outcome.
+
+    The outer cap is one round above the legitimate maximum: initial execution plus
+    ``max_retries`` resubmissions. Hitting it means retry state accounting regressed.
+    ``FORCE_RESTART`` decisions are tracked as generation bumps, but BranchWorkerPool has
+    no process-level restart API yet; fault dispatch already invalidates affected leases,
+    so resubmission goes through normal Bootstrap/Holder routing with stale leases gone.
+    """
+
+    attempts = {item.work_id: WorkItemAttempt(work_id=item.work_id) for item in work_items}
+    by_work_id = {item.work_id: item for item in work_items}
+    final_results: dict[str, BranchResult] = {}
+    final_states: dict[str, str] = {}
+    pending = list(work_items)
+    max_rounds = config.max_retries + 2
+    round_count = 0
+
+    while pending:
+        round_count += 1
+        if round_count > max_rounds:
+            states = {work_id: dataclasses.asdict(attempt) for work_id, attempt in attempts.items()}
+            raise RuntimeError(
+                f"SearchCoordinator retry loop exceeded defensive round cap "
+                f"{max_rounds} for max_retries={config.max_retries}; states={states!r}"
+            )
+
+        branch_results = dispatch_work_items(pending, lease_registry, worker_pool=pool)
+        if len(branch_results) != len(pending):
+            raise RuntimeError(
+                f"dispatch_work_items returned {len(branch_results)} results for {len(pending)} WorkItems"
+            )
+
+        retry_next_round: list[WorkItem] = []
+        for work_item, branch_result in zip(pending, branch_results):
+            attempt = attempts[work_item.work_id]
+            if branch_result.status == BRANCH_STATUS_SUCCESS:
+                attempts[work_item.work_id] = dataclasses.replace(
+                    attempt,
+                    state=WORK_ITEM_FINAL_SUCCESS,
+                    worker_generation=branch_result.worker_generation or attempt.worker_generation,
+                )
+                final_results[work_item.work_id] = branch_result
+                final_states[work_item.work_id] = WORK_ITEM_FINAL_SUCCESS
+                continue
+
+            if branch_result.status != BRANCH_STATUS_FAULT:
+                raise RuntimeError(f"unknown BranchResult status {branch_result.status!r}")
+
+            fault_kind = classify_fault(branch_result.diagnostics)
+            retry = decide_retry(attempt, fault_kind, max_retries=config.max_retries)
+            attempts[work_item.work_id] = dataclasses.replace(
+                attempt,
+                attempt_count=retry.attempt_count,
+                state=retry.next_state,
+                worker_generation=retry.worker_generation,
+            )
+            if retry.should_retry:
+                retry_next_round.append(by_work_id[work_item.work_id])
+                continue
+
+            final_results[work_item.work_id] = branch_result
+            final_states[work_item.work_id] = WORK_ITEM_FINAL_FAULT
+
+        pending = retry_next_round
+
+    return [(item, final_results[item.work_id], final_states[item.work_id]) for item in work_items]
+
+
 def build_search_strategy(
     pool: BranchWorkerPool,
     *,
@@ -187,9 +270,10 @@ def build_search_strategy(
     to the returned strategy, so Phase-5 State-Holding Worker Leases can be reused.
 
     Scope limitations documented rather than hidden:
-      * Branch faults are classified/logged as ``FinalFault`` entries immediately. Phase
-        7's retry decision primitive is not driven here because this phase is final
-        assembly only, not retry orchestration.
+      * Branch faults are retried through the normal BranchWorkerPool dispatch path until
+        ``decide_retry()`` returns a final state. ``FORCE_RESTART`` invalidates leases via
+        the existing fault path, but this coordinator cannot kill/respawn OS processes
+        because BranchWorkerPool does not expose process restart plumbing.
       * ``verify_main_invariant`` is ``lambda: True``. A strategy call dispatches one
         synchronous worker batch and Main does not interleave live steps while waiting,
         so this phase has no real changing Main state to compare. If a future coordinator
@@ -228,10 +312,15 @@ def build_search_strategy(
         else:
             work_items = _plain_work_items(decision_context, candidates)
 
-        branch_results = dispatch_work_items(work_items, lease_registry, worker_pool=pool)
+        final_results = _dispatch_work_items_until_final(
+            work_items,
+            lease_registry,
+            pool=pool,
+            config=config,
+        )
         entries = [
-            to_decision_log_entry(work_item, branch_result)
-            for work_item, branch_result in zip(work_items, branch_results)
+            to_decision_log_entry(work_item, branch_result, work_item_state=work_item_state)
+            for work_item, branch_result, work_item_state in final_results
         ]
         aggregation = (
             aggregate_hypothesis_results(entries, min_coverage_fraction=config.min_coverage_fraction)

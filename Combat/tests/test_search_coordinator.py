@@ -29,6 +29,7 @@ from combat_state_snapshot import (  # noqa: E402
 from emulator_bridge import ensure_loaded  # noqa: E402
 from live_combat_session import LiveCombatSession  # noqa: E402
 from search.branch_worker_pool import (  # noqa: E402
+    BRANCH_STATUS_FAULT,
     BRANCH_STATUS_SUCCESS,
     EXECUTION_MODE_BOOTSTRAP_STEP,
     EXECUTION_MODE_HOLDER_STEP,
@@ -41,6 +42,7 @@ from search.branch_worker_pool import (  # noqa: E402
 )
 from search.candidate_pipeline import CandidatePipelineSuccess, build_candidate_pipeline_result  # noqa: E402
 from search.decision_context import BOUNDARY_PENDING, DecisionContext, DecisionSignature, SemanticAction  # noqa: E402
+from search.fault_taxonomy import WORK_ITEM_FINAL_FAULT  # noqa: E402
 from search.main_loop import (  # noqa: E402
     ROUTE_SEARCH,
     CombatTerminalOutcome,
@@ -356,6 +358,260 @@ def test_shared_lease_registry_allows_holder_reuse_across_strategy_calls():
     assert calls[0][1] == EXECUTION_MODE_BOOTSTRAP_STEP
     assert calls[1][1] == EXECUTION_MODE_HOLDER_STEP
     assert calls[1][2] is not None
+
+
+def test_retry_loop_resubmits_force_restart_fault_and_commits_retry_success():
+    context = _context(_simple_spec(hand=[], enemy_hp=999))
+    registry = LeaseRegistry()
+    calls_by_work_id = {}
+    original_dispatch = coordinator_module.dispatch_work_items
+
+    def _fault_then_success(work_items, lease_registry, *, worker_pool):
+        results = []
+        for work_item in work_items:
+            calls_by_work_id[work_item.work_id] = calls_by_work_id.get(work_item.work_id, 0) + 1
+            if calls_by_work_id[work_item.work_id] == 1:
+                results.append(
+                    BranchResult(
+                        status=BRANCH_STATUS_FAULT,
+                        work_item=work_item,
+                        execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                        worker_id=0,
+                        worker_generation=1,
+                        diagnostics={"fault_kind": "worker_exception", "exception_type": "ActionExecutionError"},
+                    )
+                )
+            else:
+                results.append(
+                    BranchResult(
+                        status=BRANCH_STATUS_SUCCESS,
+                        work_item=work_item,
+                        execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                        worker_id=0,
+                        worker_generation=1,
+                        result_signature=work_item.decision_context.current_context_signature,
+                        child_snapshot=object(),
+                    )
+                )
+        return results
+
+    coordinator_module.dispatch_work_items = _fault_then_success
+    try:
+        strategy = build_search_strategy(
+            object(),
+            config=SearchCoordinatorConfig(width=1, max_retries=1),
+            combat_start_deck_multiset={},
+            lease_registry=registry,
+        )
+        result = strategy(context)
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert isinstance(result, SearchSuccess), result
+    assert set(calls_by_work_id.values()) == {2}
+    assert result.planned_sequence[0].expected_signature is not None
+
+
+def test_retry_loop_resubmits_reuse_safe_validation_rejection():
+    context = _context(_simple_spec(hand=[], enemy_hp=999))
+    registry = LeaseRegistry()
+    calls_by_work_id = {}
+    original_dispatch = coordinator_module.dispatch_work_items
+
+    def _validation_rejection_then_success(work_items, lease_registry, *, worker_pool):
+        work_item = work_items[0]
+        calls_by_work_id[work_item.work_id] = calls_by_work_id.get(work_item.work_id, 0) + 1
+        if calls_by_work_id[work_item.work_id] == 1:
+            return [
+                BranchResult(
+                    status=BRANCH_STATUS_FAULT,
+                    work_item=work_item,
+                    execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                    worker_id=0,
+                    worker_generation=1,
+                    diagnostics={"fault_kind": "validation_rejection"},
+                )
+            ]
+        return [
+            BranchResult(
+                status=BRANCH_STATUS_SUCCESS,
+                work_item=work_item,
+                execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                worker_id=0,
+                worker_generation=1,
+                result_signature=work_item.decision_context.current_context_signature,
+                child_snapshot=object(),
+            )
+        ]
+
+    coordinator_module.dispatch_work_items = _validation_rejection_then_success
+    try:
+        strategy = build_search_strategy(
+            object(),
+            config=SearchCoordinatorConfig(width=1, max_retries=1),
+            combat_start_deck_multiset={},
+            lease_registry=registry,
+        )
+        result = strategy(context)
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert isinstance(result, SearchSuccess), result
+    assert set(calls_by_work_id.values()) == {2}
+
+
+def test_retry_loop_final_fault_after_max_retries_is_excluded_from_plain_aggregation():
+    context = _context(_simple_spec(hand=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD"], enemy_hp=999))
+    registry = LeaseRegistry()
+    calls_by_work_id = {}
+    captured_entries = {}
+    faulted_work_id = None
+    original_dispatch = coordinator_module.dispatch_work_items
+    original_aggregate = coordinator_module.aggregate_plain_results
+    original_hypothesis_aggregate = coordinator_module.aggregate_hypothesis_results
+
+    def _one_candidate_always_faults(work_items, lease_registry, *, worker_pool):
+        nonlocal faulted_work_id
+        if faulted_work_id is None:
+            faulted_work_id = work_items[0].work_id
+        results = []
+        for work_item in work_items:
+            calls_by_work_id[work_item.work_id] = calls_by_work_id.get(work_item.work_id, 0) + 1
+            if work_item.work_id == faulted_work_id:
+                results.append(
+                    BranchResult(
+                        status=BRANCH_STATUS_FAULT,
+                        work_item=work_item,
+                        execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                        worker_id=0,
+                        worker_generation=1,
+                        diagnostics={"fault_kind": "worker_exception", "exception_type": "ActionExecutionError"},
+                    )
+                )
+            else:
+                results.append(
+                    BranchResult(
+                        status=BRANCH_STATUS_SUCCESS,
+                        work_item=work_item,
+                        execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                        worker_id=1,
+                        worker_generation=1,
+                        result_signature=work_item.decision_context.current_context_signature,
+                        child_snapshot=object(),
+                    )
+                )
+        return results
+
+    def _capturing_aggregate(entries):
+        captured_entries["entries"] = list(entries)
+        return original_aggregate(entries)
+
+    def _capturing_hypothesis_aggregate(entries, *, min_coverage_fraction):
+        captured_entries["entries"] = list(entries)
+        return original_hypothesis_aggregate(entries, min_coverage_fraction=min_coverage_fraction)
+
+    coordinator_module.dispatch_work_items = _one_candidate_always_faults
+    coordinator_module.aggregate_plain_results = _capturing_aggregate
+    coordinator_module.aggregate_hypothesis_results = _capturing_hypothesis_aggregate
+    try:
+        strategy = build_search_strategy(
+            object(),
+            config=SearchCoordinatorConfig(width=2, max_retries=1),
+            combat_start_deck_multiset=_deck_multiset("STRIKE_IRONCLAD", "DEFEND_IRONCLAD"),
+            lease_registry=registry,
+        )
+        result = strategy(context)
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
+        coordinator_module.aggregate_plain_results = original_aggregate
+        coordinator_module.aggregate_hypothesis_results = original_hypothesis_aggregate
+
+    assert isinstance(result, SearchSuccess), result
+    assert calls_by_work_id[faulted_work_id] == 2
+    fault_entry = next(entry for entry in captured_entries["entries"] if entry.work_id == faulted_work_id)
+    assert fault_entry.work_item_state == WORK_ITEM_FINAL_FAULT
+    assert captured_entries["entries"]
+
+
+def test_retry_loop_defensive_cap_stays_above_decide_retry_bounded_rounds():
+    context = _context(_simple_spec(hand=[], enemy_hp=999))
+    registry = LeaseRegistry()
+    calls = []
+    original_dispatch = coordinator_module.dispatch_work_items
+
+    def _always_fault(work_items, lease_registry, *, worker_pool):
+        calls.append([work_item.work_id for work_item in work_items])
+        return [
+            BranchResult(
+                status=BRANCH_STATUS_FAULT,
+                work_item=work_item,
+                execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                worker_id=0,
+                worker_generation=1,
+                diagnostics={"fault_kind": "worker_exception", "exception_type": "ActionExecutionError"},
+            )
+            for work_item in work_items
+        ]
+
+    coordinator_module.dispatch_work_items = _always_fault
+    try:
+        max_retries = 3
+        strategy = build_search_strategy(
+            object(),
+            config=SearchCoordinatorConfig(width=1, max_retries=max_retries),
+            combat_start_deck_multiset={},
+            lease_registry=registry,
+        )
+        result = strategy(context)
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert isinstance(result, SearchEvaluationFailure), result
+    assert len(calls) == max_retries + 1
+
+
+def test_real_worker_faults_are_retried_and_successful_candidates_still_commit():
+    context = _context(_simple_spec(hand=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD"], enemy_hp=999))
+    registry = LeaseRegistry()
+    original_pipeline = coordinator_module.build_candidate_pipeline_result
+    original_dispatch = coordinator_module.dispatch_work_items
+    dispatch_rounds = []
+
+    def _pipeline_with_invalid_sub_branch(decision_context, *, width):
+        pipeline = original_pipeline(decision_context, width=width)
+        assert isinstance(pipeline, CandidatePipelineSuccess), pipeline
+        invalid = dataclasses.replace(
+            pipeline.continuation_candidate,
+            semantic_action=SemanticAction("card", "NOT_A_REAL_CARD", "SingleEnemy"),
+            target_enemy_index=0,
+            score=pipeline.continuation_candidate.score - 100.0,
+        )
+        return dataclasses.replace(pipeline, sub_branch_candidates=[invalid])
+
+    def _capturing_real_dispatch(work_items, lease_registry, *, worker_pool):
+        results = original_dispatch(work_items, lease_registry, worker_pool=worker_pool)
+        dispatch_rounds.append([(result.work_item.work_id, result.status, dict(result.diagnostics)) for result in results])
+        return results
+
+    coordinator_module.build_candidate_pipeline_result = _pipeline_with_invalid_sub_branch
+    coordinator_module.dispatch_work_items = _capturing_real_dispatch
+    try:
+        with BranchWorkerPool(worker_count=2, request_timeout_s=120.0) as pool:
+            strategy = build_search_strategy(
+                pool,
+                config=SearchCoordinatorConfig(width=2, max_retries=1),
+                combat_start_deck_multiset=_deck_multiset("STRIKE_IRONCLAD", "DEFEND_IRONCLAD"),
+                lease_registry=registry,
+            )
+            result = strategy(context)
+    finally:
+        coordinator_module.build_candidate_pipeline_result = original_pipeline
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert isinstance(result, SearchSuccess), (result, dispatch_rounds)
+    assert len(dispatch_rounds) == 2
+    assert any(status == BRANCH_STATUS_FAULT for _work_id, status, _diagnostics in dispatch_rounds[0])
+    assert any(status == BRANCH_STATUS_FAULT for _work_id, status, _diagnostics in dispatch_rounds[1])
 
 
 def _run_all() -> int:
