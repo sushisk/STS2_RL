@@ -42,18 +42,20 @@ from search.branch_worker_pool import (  # noqa: E402
 )
 from search.candidate_pipeline import CandidatePipelineSuccess, build_candidate_pipeline_result  # noqa: E402
 from search.decision_context import BOUNDARY_PENDING, DecisionContext, DecisionSignature, SemanticAction  # noqa: E402
-from search.fault_taxonomy import WORK_ITEM_FINAL_FAULT  # noqa: E402
+from search.fault_taxonomy import SRC_MAIN_INVARIANT, WORK_ITEM_FINAL_FAULT  # noqa: E402
 from search.main_loop import (  # noqa: E402
     ROUTE_SEARCH,
     CombatTerminalOutcome,
     SearchEvaluationFailure,
     SearchSuccess,
+    build_main_decision_context,
     first_candidate_direct_selector,
     initialize_main_loop_state,
     run_until_terminal_or_fault,
 )
 import search.search_coordinator as coordinator_module  # noqa: E402
 from search.search_coordinator import (  # noqa: E402
+    MainInvariantViolatedError,
     SearchCoordinatorConfig,
     _strip_known_benign_dangling_entries,
     build_search_strategy,
@@ -103,6 +105,15 @@ def _context(spec: dict) -> DecisionContext:
     return DecisionContext.from_main_stable_capture(_eligible_root_snapshot(session), state, _representative_signature(state))
 
 
+def _main_loop_state_with_held_snapshot(spec: dict):
+    session = LiveCombatSession()
+    state = session.start_combat(spec)
+    loop_state = initialize_main_loop_state(session, state)
+    loop_state.held_stable_snapshot = _eligible_root_snapshot(session)
+    loop_state.replay_prefix = []
+    return loop_state
+
+
 def _deck_multiset(*card_ids: str) -> dict[str, int]:
     counts: dict[str, int] = {}
     for card_id in card_ids:
@@ -123,6 +134,7 @@ def test_end_to_end_main_loop_invokes_real_search_and_reaches_terminal():
             config=SearchCoordinatorConfig(width=1, hypothesis_count=2),
             combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
             lease_registry=registry,
+            main_state_provider=lambda: loop_state,
         )
 
         def _tracked_strategy(context):
@@ -147,6 +159,22 @@ def test_sanitizer_strips_only_known_benign_dangling_card_drawn_entries():
     session.start_combat(_simple_spec(hand=["WHIRLWIND"], enemy_hp=48))
     snapshot = session.capture_snapshot()
     report = validate_snapshot_references(snapshot)
+    if not report.dangling_references:
+        synthetic_draw = CombatHistoryEntrySnapshot(
+            EntryType="CardDrawnEntry",
+            RoundNumber=snapshot.RoundNumber,
+            CurrentSide=snapshot.CurrentSide,
+            PlayerTurnNumbers={},
+            Fields={"cardInstanceId": "SYNTHETIC_DANGLING_DRAWN_CARD", "fromHandDraw": True},
+        )
+        snapshot = dataclasses.replace(
+            snapshot,
+            CombatHistory=dataclasses.replace(
+                snapshot.CombatHistory,
+                Entries=[*snapshot.CombatHistory.Entries, synthetic_draw],
+            ),
+        )
+        report = validate_snapshot_references(snapshot)
     matched_indices = {
         int(dangling.field_path.split("CombatHistory.Entries[", 1)[1].split("]", 1)[0])
         for dangling in report.dangling_references
@@ -184,6 +212,123 @@ def test_sanitizer_strips_only_known_benign_dangling_card_drawn_entries():
     assert snapshot_with_sentinel.CombatHistory.Entries[-1] is sentinel
     assert sanitized.CombatHistory.Entries[-1] is sentinel
     assert len(sanitized.CombatHistory.Entries) == len(snapshot_with_sentinel.CombatHistory.Entries) - len(matched_indices)
+
+
+def test_search_strategy_without_main_state_provider_keeps_backward_compatible_commit():
+    context = _context(_simple_spec(hand=[], enemy_hp=999))
+    registry = LeaseRegistry()
+    original_dispatch = coordinator_module.dispatch_work_items
+
+    def _single_success(work_items, lease_registry, *, worker_pool):
+        work_item = work_items[0]
+        return [
+            BranchResult(
+                status=BRANCH_STATUS_SUCCESS,
+                work_item=work_item,
+                execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                worker_id=0,
+                worker_generation=1,
+                result_signature=work_item.decision_context.current_context_signature,
+                child_snapshot=object(),
+            )
+        ]
+
+    coordinator_module.dispatch_work_items = _single_success
+    try:
+        strategy = build_search_strategy(
+            object(),
+            config=SearchCoordinatorConfig(width=1),
+            combat_start_deck_multiset={},
+            lease_registry=registry,
+        )
+        result = strategy(context)
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert isinstance(result, SearchSuccess), result
+
+
+def test_search_strategy_with_real_main_state_provider_passes_when_unchanged():
+    loop_state = _main_loop_state_with_held_snapshot(_simple_spec(hand=[], enemy_hp=999))
+    context = build_main_decision_context(loop_state)
+    registry = LeaseRegistry()
+    original_dispatch = coordinator_module.dispatch_work_items
+
+    def _single_success(work_items, lease_registry, *, worker_pool):
+        work_item = work_items[0]
+        return [
+            BranchResult(
+                status=BRANCH_STATUS_SUCCESS,
+                work_item=work_item,
+                execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                worker_id=0,
+                worker_generation=1,
+                result_signature=work_item.decision_context.current_context_signature,
+                child_snapshot=object(),
+            )
+        ]
+
+    coordinator_module.dispatch_work_items = _single_success
+    try:
+        strategy = build_search_strategy(
+            object(),
+            config=SearchCoordinatorConfig(width=1),
+            combat_start_deck_multiset={},
+            lease_registry=registry,
+            main_state_provider=lambda: loop_state,
+        )
+        result = strategy(context)
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert isinstance(result, SearchSuccess), result
+
+
+def test_search_strategy_raises_main_invariant_error_when_state_identity_changes():
+    original_loop_state = _main_loop_state_with_held_snapshot(_simple_spec(hand=[], enemy_hp=999))
+    changed_loop_state = _main_loop_state_with_held_snapshot(_simple_spec(hand=[], enemy_hp=999))
+    context = build_main_decision_context(original_loop_state)
+    registry = LeaseRegistry()
+    original_dispatch = coordinator_module.dispatch_work_items
+
+    def _single_success(work_items, lease_registry, *, worker_pool):
+        work_item = work_items[0]
+        return [
+            BranchResult(
+                status=BRANCH_STATUS_SUCCESS,
+                work_item=work_item,
+                execution_mode=EXECUTION_MODE_BOOTSTRAP_STEP,
+                worker_id=0,
+                worker_generation=1,
+                result_signature=work_item.decision_context.current_context_signature,
+                child_snapshot=object(),
+            )
+        ]
+
+    coordinator_module.dispatch_work_items = _single_success
+    try:
+        strategy = build_search_strategy(
+            object(),
+            config=SearchCoordinatorConfig(width=1),
+            combat_start_deck_multiset={},
+            lease_registry=registry,
+            main_state_provider=lambda: changed_loop_state,
+        )
+        try:
+            strategy(context)
+        except MainInvariantViolatedError as exc:
+            error = exc
+        else:
+            raise AssertionError("MainInvariantViolatedError was not raised")
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert error.outcome.fault_source == SRC_MAIN_INVARIANT
+    assert "state_identity" in str(error)
+    assert "state_identity" in error.check_result.mismatches
+    assert error.outcome.diagnostics["main_invariant"]["expected_state_identity"] != error.outcome.diagnostics[
+        "main_invariant"
+    ]["live_state_identity"]
 
 
 def test_hypothesis_path_builds_distinct_hypothesis_work_items_and_commit_first_only():

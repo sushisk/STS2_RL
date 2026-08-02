@@ -10,10 +10,12 @@ outside this assembly layer.
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import re
 from dataclasses import dataclass
+from typing import Callable, Optional
 
-from combat_state_snapshot import CombatStateSnapshot, restore_input_eligibility, validate_snapshot_references
+from combat_state_snapshot import CombatStateSnapshot, canonical_json, restore_input_eligibility, validate_snapshot_references
 from search.branch_worker_pool import (
     BRANCH_STATUS_FAULT,
     BRANCH_STATUS_SUCCESS,
@@ -42,6 +44,7 @@ from search.fault_taxonomy import (
     WorkItemAttempt,
 )
 from search.main_loop import SearchEvaluationFailure, SearchStrategy
+from search.main_loop import MainLoopState
 from search.rng_hypothesis import (
     build_grid,
     compute_public_multiset,
@@ -66,6 +69,95 @@ class SearchCoordinatorConfig:
     worker_count: int = 2
     max_retries: int = 1
     request_timeout_s: float = 120.0
+
+
+@dataclass(frozen=True)
+class MainInvariantCheckResult:
+    """Detailed result for Main state identity verification at Commit time."""
+
+    ok: bool
+    mismatches: tuple[str, ...] = ()
+    diagnostics: dict[str, object] = dataclasses.field(default_factory=dict)
+
+
+class MainInvariantViolatedError(RuntimeError):
+    """Raised when Search detects Main moved while a strategy call was in flight.
+
+    ``SearchStrategy`` cannot return ``MainCombatFaultOutcome`` without lying about its
+    fixed success/evaluation-failure contract. Future Main-loop integration should catch
+    this specific exception and route ``.outcome`` into Main's own fault path.
+    """
+
+    def __init__(self, outcome: MainCombatFaultOutcome, check_result: MainInvariantCheckResult) -> None:
+        self.outcome = outcome
+        self.check_result = check_result
+        mismatch_text = ", ".join(check_result.mismatches) or "unknown mismatch"
+        super().__init__(f"Main invariant violated during Search commit: {mismatch_text}; outcome={outcome!r}")
+
+
+def _snapshot_content_digest(snapshot: CombatStateSnapshot) -> str:
+    """Hash only stable snapshot content, excluding volatile capture metadata.
+
+    This intentionally mirrors Branch Worker Pool's root-snapshot side of
+    ``derive_context_id()`` without folding replay-prefix or hypothesis fields into the
+    answer, because the invariant checks Held Snapshot identity separately.
+    """
+
+    text = canonical_json(dataclasses.asdict(snapshot), exclude_volatile=True)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _live_state_identity(loop_state: MainLoopState) -> tuple[Optional[str], int]:
+    frame = loop_state.current_result.decision_frame
+    if frame is None:
+        return None, -1
+    return frame.combat_session_id, frame.step_index
+
+
+def _check_main_invariant(
+    original_context: DecisionContext,
+    main_state_provider: Callable[[], MainLoopState],
+) -> MainInvariantCheckResult:
+    live_state = main_state_provider()
+    expected_signature = original_context.current_context_signature
+    live_session_id, live_step_index = _live_state_identity(live_state)
+    expected_identity = (expected_signature.combat_session_id, expected_signature.step_index)
+    live_identity = (live_session_id, live_step_index)
+    mismatches: list[str] = []
+    diagnostics: dict[str, object] = {
+        "expected_state_identity": {
+            "combat_session_id": expected_identity[0],
+            "step_index": expected_identity[1],
+        },
+        "live_state_identity": {
+            "combat_session_id": live_identity[0],
+            "step_index": live_identity[1],
+        },
+    }
+
+    if live_identity != expected_identity:
+        mismatches.append("state_identity")
+
+    if live_state.held_stable_snapshot is None:
+        mismatches.append("held_snapshot")
+        diagnostics["expected_held_snapshot_sha256"] = _snapshot_content_digest(original_context.root_snapshot)
+        diagnostics["live_held_snapshot_sha256"] = None
+    else:
+        expected_snapshot_digest = _snapshot_content_digest(original_context.root_snapshot)
+        live_snapshot_digest = _snapshot_content_digest(live_state.held_stable_snapshot)
+        diagnostics["expected_held_snapshot_sha256"] = expected_snapshot_digest
+        diagnostics["live_held_snapshot_sha256"] = live_snapshot_digest
+        if live_snapshot_digest != expected_snapshot_digest:
+            mismatches.append("held_snapshot")
+
+    replay_prefix_matches = live_state.replay_prefix == original_context.replay_prefix
+    diagnostics["expected_replay_prefix_length"] = len(original_context.replay_prefix)
+    diagnostics["live_replay_prefix_length"] = len(live_state.replay_prefix)
+    diagnostics["replay_prefix_matches"] = replay_prefix_matches
+    if not replay_prefix_matches:
+        mismatches.append("replay_prefix")
+
+    return MainInvariantCheckResult(ok=not mismatches, mismatches=tuple(mismatches), diagnostics=diagnostics)
 
 
 def _candidate_batch(pipeline: CandidatePipelineSuccess) -> list[PipelineCandidateRef]:
@@ -263,28 +355,43 @@ def build_search_strategy(
     config: SearchCoordinatorConfig,
     combat_start_deck_multiset: dict[str, int],
     lease_registry: LeaseRegistry,
+    main_state_provider: Optional[Callable[[], MainLoopState]] = None,
 ) -> SearchStrategy:
     """Build a Phase-3 ``SearchStrategy`` over the real Phase 4-7 components.
 
     ``lease_registry`` is supplied by the caller and intentionally retained across calls
     to the returned strategy, so Phase-5 State-Holding Worker Leases can be reused.
+    ``main_state_provider`` is optional for backward compatibility. When supplied, it is
+    called at Commit time to verify that Main's live state identity, Held Stable Snapshot,
+    and Replay Prefix still match the ``DecisionContext`` originally passed into this
+    strategy call. When omitted, the coordinator preserves the prior always-pass
+    invariant behavior.
 
     Scope limitations documented rather than hidden:
       * Branch faults are retried through the normal BranchWorkerPool dispatch path until
         ``decide_retry()`` returns a final state. ``FORCE_RESTART`` invalidates leases via
         the existing fault path, but this coordinator cannot kill/respawn OS processes
         because BranchWorkerPool does not expose process restart plumbing.
-      * ``verify_main_invariant`` is ``lambda: True``. A strategy call dispatches one
-        synchronous worker batch and Main does not interleave live steps while waiting,
-        so this phase has no real changing Main state to compare. If a future coordinator
-        overlaps Main activity with search, that caller must provide a real invariant.
       * ``build_commit_decision`` can return Phase-7 ``MainCombatFaultOutcome`` only if
-        that invariant fails. With the always-true invariant, the path is unreachable; if
-        it appears anyway, this integration raises instead of coercing it into a normal
-        search evaluation failure.
+        that invariant fails. Because ``SearchStrategy`` can only return
+        ``SearchSuccess`` or ``SearchEvaluationFailure``, this integration raises
+        ``MainInvariantViolatedError`` carrying the fault outcome instead of coercing a
+        Main fault into a search evaluation failure. Future Main-loop integration should
+        catch that exception type and route ``.outcome`` to Main's own fault path.
     """
 
     def _strategy(decision_context: DecisionContext):
+        original_decision_context = decision_context
+        invariant_check: Optional[MainInvariantCheckResult] = None
+
+        def _verify_main_invariant() -> bool:
+            nonlocal invariant_check
+            if main_state_provider is None:
+                invariant_check = MainInvariantCheckResult(ok=True)
+                return True
+            invariant_check = _check_main_invariant(original_decision_context, main_state_provider)
+            return invariant_check.ok
+
         # Interim Emulator-side data-quality workaround: fresh scenario snapshots retain
         # stale initial-hand CardDrawnEntry references classified as
         # source_live_state_inconsistency after the authoritative hand setup overwrites
@@ -330,10 +437,16 @@ def build_search_strategy(
         decision = build_commit_decision(
             aggregation,
             hypothesis_involved=hypothesis_involved,
-            verify_main_invariant=lambda: True,
+            verify_main_invariant=_verify_main_invariant,
         )
         if isinstance(decision, MainCombatFaultOutcome):
-            raise RuntimeError(f"unreachable Main invariant fault from synchronous SearchCoordinator: {decision}")
+            check = invariant_check or MainInvariantCheckResult(ok=False, mismatches=("unknown",))
+            decision = dataclasses.replace(
+                decision,
+                detail=f"{decision.detail}; mismatches={', '.join(check.mismatches) or 'unknown'}",
+                diagnostics={**decision.diagnostics, "main_invariant": check.diagnostics},
+            )
+            raise MainInvariantViolatedError(decision, check)
         return decision
 
     return _strategy
