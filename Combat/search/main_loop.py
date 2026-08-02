@@ -31,10 +31,18 @@ Scope (per this phase's task instruction - deliberately NOT the full mermaid con
     module does NOT implement Search Coordinator/Candidate Pipeline/Branch Worker Pool/
     RNG Hypothesis (all later phases, per mermaid_rough_combat.mermaid's MAIN_PROCESS vs.
     SEARCH_COORDINATOR subgraph boundary) - `search_strategy` is a stub injection point
-    only. Pending boundaries structurally CANNOT route into Search in this repo's current
-    state (`PendingSearchNotAllowedError`) - per NOTE_PENDING_FUTURE, Search/Worker
-    fan-out under Main-observed Pending is explicitly out of scope until a future phase
-    proves candidate execution is future-RNG-safe.
+    only. A Pending boundary structurally CANNOT route into Search
+    (`PendingSearchNotAllowedError`) UNLESS it is a genuine Start-of-Combat Pending with a
+    Combat Start Replay Root available (`held_stable_snapshot is None` and
+    `combat_start_replay_root is not None` - see `build_combat_start_decision_context()`).
+    NOTE_PENDING_FUTURE's original restriction applied to Main-observed Pending
+    generally because no mechanism existed to Restore/reproduce ANY Pending root for
+    sibling Bootstrap - Start-of-Combat Pending now has one (the Combat Start Replay
+    Root: re-run `start_combat()` with the SAME Scenario/RNG/Deck/Relic, never Restore a
+    captured Pending Snapshot), so it is promoted out of PENDING_STATIC-only per this
+    task's own instruction. Every OTHER Main-observed Pending (mid-combat, a Held Stable
+    Snapshot already exists but nothing analogous exists for Restoring a mid-combat
+    Pending capture) remains PENDING_STATIC-only, unchanged.
 
 Fault handling: `LiveCombatSession.step()` never returns a Boundary=Fault `BattleState` -
 it RAISES (`ActionExecutionError`/`FaultedCombatSessionError`/`QuiescentBoundaryViolation`)
@@ -66,6 +74,7 @@ from search.decision_context import (
     BOUNDARY_PENDING,
     BOUNDARY_STABLE,
     BOUNDARY_TERMINAL,
+    CombatStartReplayRoot,
     DecisionContext,
     DecisionSignature,
     ReplayPrefixEntry,
@@ -91,10 +100,14 @@ ROUTE_VALUES = frozenset({ROUTE_DIRECT, ROUTE_SEARCH, ROUTE_PENDING_STATIC})
 
 class PendingSearchNotAllowedError(RuntimeError):
     """Structural guard for NOTE_PENDING_FUTURE: a Pending boundary (Main-observed, real
-    RNG directly beneath it) must never route into the not-yet-built Restore/Step/Worker
-    fan-out Search path - "この経路のEvaluatorにも...実RNGのまま分岐探索してEvaluatorへ
-    結果が見える事態を避ける". Raised, never silently downgraded, if a `routing_policy`
-    callback returns `ROUTE_SEARCH` while the current boundary is Pending."""
+    RNG directly beneath it) must never route into the Restore/Step/Worker fan-out Search
+    path - "この経路のEvaluatorにも...実RNGのまま分岐探索してEvaluatorへ結果が見える事態を
+    避ける" - UNLESS it is a genuine Start-of-Combat Pending with a Combat Start Replay
+    Root available (`held_stable_snapshot is None` and `combat_start_replay_root is not
+    None`), which reproduces via re-running `start_combat()` from the same Scenario/RNG/
+    Deck/Relic rather than any Restore at all. Raised, never silently downgraded, for
+    every other case of a `routing_policy` callback returning `ROUTE_SEARCH` while the
+    current boundary is Pending."""
 
 
 def default_routing_policy(boundary: str) -> str:
@@ -205,14 +218,35 @@ class MainLoopState:
     held_stable_snapshot: "Optional[CombatStateSnapshot]" = None
     replay_prefix: "list[ReplayPrefixEntry]" = field(default_factory=list)
     planned_sequence: "list[PlannedStep]" = field(default_factory=list)
+    # Set once, at genesis, from whatever `scenario_spec` this episode's `start_combat()`
+    # call used. Never cleared (harmless to retain after the real first Stable boundary,
+    # since every routing decision below only ever consults it while
+    # `held_stable_snapshot is None`) - the sole purpose is letting a Start-of-Combat
+    # Pending (TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP etc.) build a Combat Start Replay
+    # Root DecisionContext for Search, per NOTE_PENDING_FUTURE's relaxation below.
+    combat_start_replay_root: "Optional[CombatStartReplayRoot]" = None
 
 
-def initialize_main_loop_state(session: LiveCombatSession, initial_result: BattleState) -> MainLoopState:
+def initialize_main_loop_state(
+    session: LiveCombatSession,
+    initial_result: BattleState,
+    *,
+    combat_start_replay_root: "Optional[CombatStartReplayRoot]" = None,
+) -> MainLoopState:
     """Wraps a fresh `start_combat()`/`resume_from()` return value into a `MainLoopState`.
     Does NOT itself perform the genesis Held Stable Snapshot capture - that happens on
     `run_until_terminal_or_fault()`'s first iteration exactly like every subsequent
-    Stable visit to BOUNDARY (STABLE_CAPTURE)."""
-    return MainLoopState(session=session, current_result=initial_result)
+    Stable visit to BOUNDARY (STABLE_CAPTURE).
+
+    `combat_start_replay_root` is optional and backward-compatible: omit it (as every
+    caller that only cares about the Direct/PENDING_STATIC path for Start-of-Combat
+    Pending already does) and Search simply stays unavailable for a genesis Pending,
+    exactly as before this Combat Start Replay Root support was added. Pass it - built
+    from the SAME `scenario_spec` the caller's own `session.start_combat(scenario_spec)`
+    call just used - to make Search available for it."""
+    return MainLoopState(
+        session=session, current_result=initial_result, combat_start_replay_root=combat_start_replay_root
+    )
 
 
 def _capture_stable(loop_state: MainLoopState) -> None:
@@ -283,6 +317,38 @@ def build_main_decision_context(loop_state: MainLoopState) -> DecisionContext:
 
     context = DecisionContext.from_main_stable_capture(
         loop_state.held_stable_snapshot, loop_state.current_result, current_context_signature
+    )
+    if loop_state.replay_prefix:
+        context = dataclasses.replace(context, replay_prefix=list(loop_state.replay_prefix))
+    return context
+
+
+def build_combat_start_decision_context(loop_state: MainLoopState) -> DecisionContext:
+    """Start-of-Combat Pending's own counterpart to `build_main_decision_context()`.
+
+    Only ever called while `loop_state.held_stable_snapshot is None` (no real Stable
+    boundary has been reached yet - per NOTE_NO_HELD_SNAPSHOT_AT_GENESIS, a
+    Start-of-Combat Pending must never be treated as or stored into a Held Stable
+    Snapshot). Uses `loop_state.combat_start_replay_root` as the root instead - see
+    `DecisionContext.from_combat_start_pending()`/`CombatStartReplayRoot`'s own
+    docstrings. Structurally mirrors `build_main_decision_context()` otherwise (same
+    empty-vs-non-empty Replay Prefix handling), since Main's own bookkeeping
+    (`loop_state.replay_prefix`/`APPEND_RECORD`) does not distinguish the two cases."""
+    if loop_state.held_stable_snapshot is not None:
+        raise RuntimeError(
+            "build_combat_start_decision_context() called after a real Held Stable Snapshot "
+            "already exists - use build_main_decision_context() instead"
+        )
+    if loop_state.combat_start_replay_root is None:
+        raise RuntimeError("build_combat_start_decision_context() called without a Combat Start Replay Root")
+
+    if loop_state.replay_prefix:
+        current_context_signature = loop_state.replay_prefix[-1].expected_signature
+    else:
+        current_context_signature = _representative_signature_for_empty_prefix(loop_state.current_result)
+
+    context = DecisionContext.from_combat_start_pending(
+        loop_state.combat_start_replay_root, loop_state.current_result, current_context_signature
     )
     if loop_state.replay_prefix:
         context = dataclasses.replace(context, replay_prefix=list(loop_state.replay_prefix))
@@ -523,11 +589,20 @@ def run_until_terminal_or_fault(
             route = routing_policy(boundary)
             if route not in ROUTE_VALUES:
                 raise ValueError(f"routing_policy returned unknown route {route!r} (known: {sorted(ROUTE_VALUES)})")
-            if boundary == BOUNDARY_PENDING and route == ROUTE_SEARCH:
+            is_combat_start_pending_search = (
+                boundary == BOUNDARY_PENDING
+                and route == ROUTE_SEARCH
+                and loop_state.held_stable_snapshot is None
+                and loop_state.combat_start_replay_root is not None
+            )
+            if boundary == BOUNDARY_PENDING and route == ROUTE_SEARCH and not is_combat_start_pending_search:
                 raise PendingSearchNotAllowedError(
                     f"routing_policy returned {ROUTE_SEARCH!r} for a Pending boundary - "
                     "Main-observed Pending must never route into Search/Worker fan-out "
-                    "(NOTE_PENDING_FUTURE, mermaid_combat_main_loop_detail.mermaid)"
+                    "(NOTE_PENDING_FUTURE, mermaid_combat_main_loop_detail.mermaid), "
+                    "EXCEPT a genuine Start-of-Combat Pending with a Combat Start Replay "
+                    "Root available - that requires held_stable_snapshot is None and "
+                    "combat_start_replay_root is not None, neither of which held here"
                 )
 
             if route == ROUTE_DIRECT:
@@ -536,10 +611,14 @@ def run_until_terminal_or_fault(
                 if boundary != BOUNDARY_PENDING:
                     raise RuntimeError("ROUTE_PENDING_STATIC is only a valid routing_policy answer at a Pending boundary")
                 loop_state.planned_sequence = [pending_static_select(loop_state.current_result)]
-            else:  # ROUTE_SEARCH, boundary is necessarily Stable here
+            else:  # ROUTE_SEARCH, boundary is Stable or a genuine Start-of-Combat Pending
                 if search_strategy is None:
                     raise RuntimeError("routing_policy selected ROUTE_SEARCH but no search_strategy callable was provided")
-                context = build_main_decision_context(loop_state)
+                context = (
+                    build_combat_start_decision_context(loop_state)
+                    if is_combat_start_pending_search
+                    else build_main_decision_context(loop_state)
+                )
                 search_result = search_strategy(context)
                 if isinstance(search_result, SearchEvaluationFailure):
                     # SEARCH_FAIL_HANDLE -> ABORT_POLICY -> COMBAT_ABORTED. No implicit

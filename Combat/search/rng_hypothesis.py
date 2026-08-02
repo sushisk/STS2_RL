@@ -30,7 +30,7 @@ from combat_state_snapshot import (
     SerializableRngSnapshot,
     canonical_json,
 )
-from search.decision_context import DecisionContext
+from search.decision_context import CombatStartReplayRoot, DecisionContext
 
 HYPOTHESIS_SLOT_PREFIX = "rng-hyp:v1:"
 
@@ -189,6 +189,32 @@ def compute_public_multiset(
         counts[card_id] += 1
 
     _subtract_counts(counts, _card_counts(visible_cards))
+    return dict(sorted(counts.items()))
+
+
+def compute_public_multiset_for_combat_start(
+    scenario_spec: dict,
+    *,
+    combat_start_deck_multiset: dict[str, int],
+) -> dict[str, int]:
+    """Genesis counterpart to ``compute_public_multiset()`` for a Start-of-Combat
+    Pending, where there is no captured ``CombatStateSnapshot`` to read at all (see
+    ``CombatStartReplayRoot``).
+
+    At this exact point (immediately out of ``ResetFromScenario``/``start_combat()``,
+    before a single Step has ever executed) nothing has been drawn, discarded, exhausted,
+    or generated yet - the hidden DrawPile's public composition is simply the declared
+    starting deck minus whatever the Scenario itself already declares as visible
+    (Hand/DiscardPile/ExhaustPile/PlayPile - all already-known, not hidden). There is no
+    ``CombatHistory`` to consult for ``CardGeneratedEntry`` rows for the same reason.
+    """
+    counts = Counter({str(k): int(v) for k, v in combat_start_deck_multiset.items() if int(v) != 0})
+    visible_ids: list[str] = []
+    for pile_name in ("hand", "discard_pile", "exhaust_pile", "play_pile"):
+        for card in scenario_spec.get(pile_name) or []:
+            card_id = card if isinstance(card, str) else (card.get("card_id") or card.get("id"))
+            visible_ids.append(str(card_id))
+    _subtract_counts(counts, Counter(visible_ids))
     return dict(sorted(counts.items()))
 
 
@@ -389,6 +415,57 @@ def build_grid(
                     hypothesis=hypothesis,
                     search_hypothesis_id=hypothesis.to_slot_value(),
                     derived_snapshot=derive_substituted_snapshot(root_snapshot, hypothesis),
+                )
+            )
+    return cells
+
+
+def derive_substituted_replay_root(
+    combat_start_replay_root: CombatStartReplayRoot,
+    hypothesis: SearchHypothesisId,
+) -> CombatStartReplayRoot:
+    """Genesis counterpart to ``derive_substituted_snapshot()`` for a Start-of-Combat
+    Pending's Combat Start Replay Root.
+
+    Unlike the Snapshot case, ``CombatScenario`` has no per-stream ``Rng.RunRng``
+    substitution point to target - ``CombatScenario.Seed`` (``build_scenario_from_spec()``)
+    is a single top-level value that seeds the WHOLE RNG tree, not just Shuffle in
+    isolation. This substitutes only the one field a search candidate's evaluation
+    actually reads: ``scenario_spec["draw_pile"]``, replaced with the hypothesis's own
+    believed ordering of the SAME public multiset - Main's true declared draw_pile order
+    is never read by this function or passed to any candidate/evaluator."""
+    spec = dict(combat_start_replay_root.scenario_spec)
+    spec["draw_pile"] = list(hypothesis.ordered_draw_pile_card_ids)
+    return CombatStartReplayRoot(scenario_spec=spec)
+
+
+@dataclass(frozen=True)
+class CombatStartHypothesisGridCell:
+    """Genesis counterpart to ``HypothesisGridCell`` - carries a derived Combat Start
+    Replay Root instead of a derived Snapshot."""
+
+    root_action: Any
+    hypothesis: SearchHypothesisId
+    search_hypothesis_id: str
+    derived_replay_root: CombatStartReplayRoot
+
+
+def build_grid_for_combat_start(
+    root_actions: list[Any],
+    hypotheses: list[SearchHypothesisId],
+    combat_start_replay_root: CombatStartReplayRoot,
+) -> list[CombatStartHypothesisGridCell]:
+    """Genesis counterpart to ``build_grid()`` for a Start-of-Combat Pending's Combat
+    Start Replay Root."""
+    cells: list[CombatStartHypothesisGridCell] = []
+    for root_action in root_actions:
+        for hypothesis in hypotheses:
+            cells.append(
+                CombatStartHypothesisGridCell(
+                    root_action=root_action,
+                    hypothesis=hypothesis,
+                    search_hypothesis_id=hypothesis.to_slot_value(),
+                    derived_replay_root=derive_substituted_replay_root(combat_start_replay_root, hypothesis),
                 )
             )
     return cells

@@ -14,7 +14,7 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from combat_state_snapshot import CombatStateSnapshot, canonical_json
+from combat_state_snapshot import CombatStateSnapshot, SerializableRngSnapshot, canonical_json
 from search.branch_worker_pool import (
     BRANCH_STATUS_FAULT,
     BRANCH_STATUS_SUCCESS,
@@ -29,7 +29,7 @@ from search.branch_worker_pool import (
 )
 from search.candidate_pipeline import CandidatePipelineSuccess, NoViableCandidates, PipelineCandidateRef
 from search.candidate_pipeline import build_candidate_pipeline_result
-from search.decision_context import DecisionContext
+from search.decision_context import CombatStartReplayRoot, DecisionContext
 from search.fault_taxonomy import (
     MainCombatFaultOutcome,
     aggregate_hypothesis_results,
@@ -42,11 +42,16 @@ from search.fault_taxonomy import (
     WORK_ITEM_FINAL_SUCCESS,
     WorkItemAttempt,
 )
-from search.belief_coverage import CoverageAssessment, compute_public_multiset_with_coverage
+from search.belief_coverage import (
+    CoverageAssessment,
+    compute_public_multiset_with_coverage,
+    compute_public_multiset_with_coverage_for_combat_start,
+)
 from search.main_loop import SearchEvaluationFailure, SearchStrategy
 from search.main_loop import MainLoopState
 from search.rng_hypothesis import (
     build_grid,
+    build_grid_for_combat_start,
     consume_check,
     generate_belief_hypotheses,
     with_search_hypothesis,
@@ -162,7 +167,17 @@ def _check_main_invariant(
     if live_identity != expected_identity:
         mismatches.append("state_identity")
 
-    if live_state.held_stable_snapshot is None:
+    if isinstance(original_context.root_snapshot, CombatStartReplayRoot):
+        # Start-of-Combat Pending: the ONLY valid "still matches" state is that Main has
+        # NOT captured a real Held Stable Snapshot while this Search call was in flight -
+        # per NOTE_NO_HELD_SNAPSHOT_AT_GENESIS, a Start-of-Combat Pending must never be
+        # treated as (or compared against) a Held Stable Snapshot itself.
+        diagnostics["expected_held_snapshot_sha256"] = None
+        diagnostics["live_held_snapshot_sha256"] = None
+        diagnostics["combat_start_replay_root_expected"] = True
+        if live_state.held_stable_snapshot is not None:
+            mismatches.append("held_snapshot")
+    elif live_state.held_stable_snapshot is None:
         mismatches.append("held_snapshot")
         diagnostics["expected_held_snapshot_sha256"] = _snapshot_content_digest(original_context.root_snapshot)
         diagnostics["live_held_snapshot_sha256"] = None
@@ -236,23 +251,50 @@ def _hypothesis_work_items_with_coverage(
     config: SearchCoordinatorConfig,
     combat_start_deck_multiset: dict[str, int],
 ) -> tuple[list[WorkItem], CoverageAssessment]:
-    public_multiset, coverage = compute_public_multiset_with_coverage(
-        decision_context.root_snapshot,
-        combat_start_deck_multiset=combat_start_deck_multiset,
-    )
-    shuffle_rng = decision_context.root_snapshot.Rng.RunRng["Shuffle"]
-    hypotheses = generate_belief_hypotheses(
-        public_multiset,
-        count=config.hypothesis_count,
-        rng_seed_source=lambda _index: shuffle_rng,
-    )
-    cells = build_grid(candidates, hypotheses, decision_context.root_snapshot)
+    is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
+    if is_combat_start:
+        # Start-of-Combat Pending: no captured Snapshot exists to read PUBLIC_MULTISET
+        # or a Shuffle RNG stream from - derive both from the Combat Start Replay Root's
+        # own declared Scenario spec instead (see belief_coverage.py / rng_hypothesis.py
+        # genesis counterparts). Main's true declared draw_pile order is read ONLY to
+        # compute combat_start_deck_multiset's complement (never exposed to a
+        # candidate/evaluator - identical privacy posture to the Snapshot path).
+        scenario_spec = decision_context.root_snapshot.scenario_spec
+        public_multiset, coverage = compute_public_multiset_with_coverage_for_combat_start(
+            scenario_spec,
+            combat_start_deck_multiset=combat_start_deck_multiset,
+        )
+        # hypothesis.rng is never consumed downstream on this path (derive_substituted_
+        # replay_root() only reads ordered_draw_pile_card_ids) - this seed only needs to
+        # be a stable, well-formed SerializableRngSnapshot to hash per hypothesis index.
+        seed_rng = SerializableRngSnapshot(
+            Counter=int(scenario_spec.get("seed", 1)), State0=0, State1=0, State2=0, State3=0
+        )
+        hypotheses = generate_belief_hypotheses(
+            public_multiset,
+            count=config.hypothesis_count,
+            rng_seed_source=lambda _index: seed_rng,
+        )
+        cells = build_grid_for_combat_start(candidates, hypotheses, decision_context.root_snapshot)
+    else:
+        public_multiset, coverage = compute_public_multiset_with_coverage(
+            decision_context.root_snapshot,
+            combat_start_deck_multiset=combat_start_deck_multiset,
+        )
+        shuffle_rng = decision_context.root_snapshot.Rng.RunRng["Shuffle"]
+        hypotheses = generate_belief_hypotheses(
+            public_multiset,
+            count=config.hypothesis_count,
+            rng_seed_source=lambda _index: shuffle_rng,
+        )
+        cells = build_grid(candidates, hypotheses, decision_context.root_snapshot)
     root_index_by_id = {id(candidate): index for index, candidate in enumerate(candidates)}
 
     work_items: list[WorkItem] = []
     for cell in cells:
         root_index = root_index_by_id[id(cell.root_action)]
-        context = dataclasses.replace(decision_context, root_snapshot=cell.derived_snapshot)
+        derived_root = cell.derived_replay_root if is_combat_start else cell.derived_snapshot
+        context = dataclasses.replace(decision_context, root_snapshot=derived_root)
         context = with_search_hypothesis(context, cell.hypothesis)
         work_items.append(
             WorkItem.from_candidate_ref(

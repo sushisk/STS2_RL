@@ -31,7 +31,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from combat_state_snapshot import CombatStateSnapshot
-from search.rng_hypothesis import compute_public_multiset
+from search.rng_hypothesis import compute_public_multiset, compute_public_multiset_for_combat_start
 
 
 @dataclass(frozen=True)
@@ -136,3 +136,49 @@ def compute_public_multiset_with_coverage(
         combat_start_deck_multiset=combat_start_deck_multiset,
     )
     return public_multiset, assess_public_multiset_coverage(snapshot)
+
+
+def assess_public_multiset_coverage_for_combat_start(scenario_spec: dict) -> CoverageAssessment:
+    """Genesis counterpart to ``assess_public_multiset_coverage()`` for a Start-of-Combat
+    Pending's Combat Start Replay Root - reuses the SAME audited coverage tables, just
+    reading active Relic/Power ids directly from the declared Scenario spec
+    (``relics``/``player_powers``) instead of a captured Snapshot's dataclasses, since no
+    Snapshot exists yet at this point (see ``CombatStartReplayRoot``)."""
+    active_keys = [f"Relic:{relic_id}" for relic_id in (scenario_spec.get("relics") or [])]
+    active_keys.extend(f"Power:{power.get('id', power.get('power_id'))}" for power in (scenario_spec.get("player_powers") or []))
+
+    uncertain = sorted(key for key in active_keys if key in UNCERTAIN_GENERATION_SOURCES)
+    if uncertain:
+        reasons = "; ".join(f"{key}: {UNCERTAIN_GENERATION_SOURCES[key]}" for key in uncertain)
+        return CoverageAssessment(
+            is_complete=False,
+            uncertain_sources=uncertain,
+            reason=f"PUBLIC_MULTISET generated-card coverage is incomplete for active source(s): {reasons}",
+        )
+
+    covered = sorted(key for key in active_keys if key in CONFIRMED_COVERED_GENERATION_SOURCES)
+    if covered:
+        return CoverageAssessment(
+            is_complete=True,
+            uncertain_sources=[],
+            reason="known active card-generation source(s) are CardGeneratedEntry-covered: " + ", ".join(covered),
+        )
+
+    return CoverageAssessment(
+        is_complete=True,
+        uncertain_sources=[],
+        reason="no known card-generation-capable Relic/Power currently active",
+    )
+
+
+def compute_public_multiset_with_coverage_for_combat_start(
+    scenario_spec: dict,
+    *,
+    combat_start_deck_multiset: dict[str, int],
+) -> tuple[dict[str, int], CoverageAssessment]:
+    """Genesis counterpart to ``compute_public_multiset_with_coverage()``."""
+    public_multiset = compute_public_multiset_for_combat_start(
+        scenario_spec,
+        combat_start_deck_multiset=combat_start_deck_multiset,
+    )
+    return public_multiset, assess_public_multiset_coverage_for_combat_start(scenario_spec)

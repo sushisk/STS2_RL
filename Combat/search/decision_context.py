@@ -83,6 +83,26 @@ class PendingSnapshotRestoreViolationError(RuntimeError):
 
 
 @dataclass(frozen=True)
+class CombatStartReplayRoot:
+    """The Combat Start Replay Root - `DecisionContext.root_snapshot`'s alternate "root"
+    kind for Start-of-Combat Pending (TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP etc.), which
+    fires immediately out of `ResetFromScenario`/`start_combat()`, before any Stable
+    boundary has ever been reached - there is no prior Held Stable Snapshot to Restore.
+
+    Holds exactly what is needed to start the SAME combat again from scratch (Scenario,
+    RNG seed, Deck, Relic - everything `battle_emulator.build_scenario_from_spec()`
+    consumes) - never a captured Pending Snapshot. A sibling Worker reproduces the
+    Start-of-Combat Pending by calling `session.start_combat(scenario_spec)` again with
+    this SAME spec (never `restore_snapshot()`), then replaying `replay_prefix` exactly
+    like every other Bootstrap+Replay case. `scenario_spec` is a plain JSON-safe dict
+    (the same shape `LiveCombatSession.start_combat()` already accepts), so it needs no
+    special IPC handling - unlike a `CombatStateSnapshot`, it never wraps a live CLR
+    object."""
+
+    scenario_spec: dict
+
+
+@dataclass(frozen=True)
 class SemanticAction:
     """The 'Semantic Action' side of DC_SIGNATURE's Semantic Action <-> ActionId
     correspondence: (action_type, card_id, target_type). Deliberately NOT an action_id -
@@ -306,7 +326,11 @@ class DecisionContext:
       per that method's own docstring), so holding the dataclass avoids a redundant
       serialize/parse round trip for the (expected) common case of "capture, then later
       restore the same object" without losing anything (the dataclass IS the cheapest
-      form that is also directly usable).
+      form that is also directly usable). For a Start-of-Combat Pending Root Action
+      Evaluation Segment (no Stable boundary has ever been reached yet), this field
+      instead holds a `CombatStartReplayRoot` - see that type's own docstring for why a
+      Combat Start Replay Root, not a captured Pending Snapshot, is used. Every consumer
+      of this field must branch on `isinstance(root_snapshot, CombatStartReplayRoot)`.
     * `replay_prefix` - ordered `ReplayPrefixEntry` list from the Stable Root to here;
       resets to empty at every Stable capture (DC_STABLE/DC_PENDING; NOTE_REPLAY_VS_PLAN).
     * `plan_path` - ordered `ReplayPrefixEntry` list from the SEARCH START to here; never
@@ -323,12 +347,33 @@ class DecisionContext:
       actually decided (TO_RNG in the snapshot-replay diagram) - always `None` here.
     """
 
-    root_snapshot: "CombatStateSnapshot"
+    root_snapshot: "CombatStateSnapshot | CombatStartReplayRoot"
     replay_prefix: "list[ReplayPrefixEntry]"
     plan_path: "list[ReplayPrefixEntry]"
     current_decision_result: "BattleState"
     current_context_signature: DecisionSignature
     search_hypothesis_id: "Optional[str]" = None
+
+    @classmethod
+    def from_combat_start_pending(
+        cls,
+        combat_start_replay_root: "CombatStartReplayRoot",
+        current_decision_result: "BattleState",
+        current_context_signature: DecisionSignature,
+    ) -> "DecisionContext":
+        """Start-of-Combat Pending's own root-context constructor - structurally identical
+        to `from_main_stable_capture()` (both Replay Prefix and Plan Path start empty),
+        kept as a separate, honestly-named classmethod rather than reusing that one
+        because the root here is never a "Stable Capture" - it is a `CombatStartReplayRoot`,
+        and Main must never treat it as (or store it into) a Held Stable Snapshot."""
+        return cls(
+            root_snapshot=combat_start_replay_root,
+            replay_prefix=[],
+            plan_path=[],
+            current_decision_result=current_decision_result,
+            current_context_signature=current_context_signature,
+            search_hypothesis_id=None,
+        )
 
     @classmethod
     def from_main_stable_capture(
@@ -431,6 +476,11 @@ def _root_snapshot_capture_boundary(root_snapshot) -> "Optional[str]":
 
 
 def _raise_if_root_snapshot_not_restore_eligible(root_snapshot) -> None:
+    if isinstance(root_snapshot, CombatStartReplayRoot):
+        # Nothing to Restore-eligibility-check: a Combat Start Replay Root is never
+        # Captured/Restored at all - see that type's own docstring.
+        return
+
     from combat_state_snapshot import capture_boundary_is_restore_eligible
 
     capture_boundary = _root_snapshot_capture_boundary(root_snapshot)
@@ -467,7 +517,12 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
     from live_combat_session import LiveCombatSession  # noqa: F401 - documents the expected type, avoids a hard import cycle
 
     _raise_if_root_snapshot_not_restore_eligible(context.root_snapshot)
-    state = session.restore_snapshot(context.root_snapshot)
+    if isinstance(context.root_snapshot, CombatStartReplayRoot):
+        # Start-of-Combat Pending's own Bootstrap: re-run the SAME combat start, never
+        # Restore - there is no prior Stable boundary to Restore from at all.
+        state = session.start_combat(context.root_snapshot.scenario_spec)
+    else:
+        state = session.restore_snapshot(context.root_snapshot)
     last_observed: "Optional[DecisionSignature]" = None
 
     for index, entry in enumerate(context.replay_prefix):
