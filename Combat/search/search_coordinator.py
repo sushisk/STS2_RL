@@ -42,11 +42,11 @@ from search.fault_taxonomy import (
     WORK_ITEM_FINAL_SUCCESS,
     WorkItemAttempt,
 )
+from search.belief_coverage import CoverageAssessment, compute_public_multiset_with_coverage
 from search.main_loop import SearchEvaluationFailure, SearchStrategy
 from search.main_loop import MainLoopState
 from search.rng_hypothesis import (
     build_grid,
-    compute_public_multiset,
     consume_check,
     generate_belief_hypotheses,
     with_search_hypothesis,
@@ -190,7 +190,23 @@ def _hypothesis_work_items(
     config: SearchCoordinatorConfig,
     combat_start_deck_multiset: dict[str, int],
 ) -> list[WorkItem]:
-    public_multiset = compute_public_multiset(
+    work_items, _coverage = _hypothesis_work_items_with_coverage(
+        decision_context,
+        candidates,
+        config=config,
+        combat_start_deck_multiset=combat_start_deck_multiset,
+    )
+    return work_items
+
+
+def _hypothesis_work_items_with_coverage(
+    decision_context: DecisionContext,
+    candidates: list[PipelineCandidateRef],
+    *,
+    config: SearchCoordinatorConfig,
+    combat_start_deck_multiset: dict[str, int],
+) -> tuple[list[WorkItem], CoverageAssessment]:
+    public_multiset, coverage = compute_public_multiset_with_coverage(
         decision_context.root_snapshot,
         combat_start_deck_multiset=combat_start_deck_multiset,
     )
@@ -215,7 +231,15 @@ def _hypothesis_work_items(
                 work_kind=WORK_KIND_CONTINUATION if root_index == 0 else WORK_KIND_SUB_BRANCH,
             )
         )
-    return work_items
+    return work_items, coverage
+
+
+def _coverage_diagnostics(coverage: CoverageAssessment) -> dict[str, object]:
+    return {
+        "is_complete": coverage.is_complete,
+        "uncertain_sources": list(coverage.uncertain_sources),
+        "reason": coverage.reason,
+    }
 
 
 def _dispatch_work_items_until_final(
@@ -346,8 +370,9 @@ def build_search_strategy(
         assert isinstance(pipeline, CandidatePipelineSuccess)
         candidates = _candidate_batch(pipeline)
         hypothesis_involved = _requires_hypothesis(decision_context, candidates)
+        public_multiset_coverage: Optional[CoverageAssessment] = None
         if hypothesis_involved:
-            work_items = _hypothesis_work_items(
+            work_items, public_multiset_coverage = _hypothesis_work_items_with_coverage(
                 decision_context,
                 candidates,
                 config=config,
@@ -366,6 +391,15 @@ def build_search_strategy(
             to_decision_log_entry(work_item, branch_result, work_item_state=work_item_state)
             for work_item, branch_result, work_item_state in final_results
         ]
+        if public_multiset_coverage is not None:
+            coverage_payload = _coverage_diagnostics(public_multiset_coverage)
+            entries = [
+                dataclasses.replace(
+                    entry,
+                    diagnostics={**entry.diagnostics, "public_multiset_coverage": coverage_payload},
+                )
+                for entry in entries
+            ]
         aggregation = (
             aggregate_hypothesis_results(entries, min_coverage_fraction=config.min_coverage_fraction)
             if hypothesis_involved
