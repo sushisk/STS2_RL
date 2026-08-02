@@ -101,6 +101,25 @@ def _find_action(state: BattleState, action_type: str, card_id=None) -> dict:
     )
 
 
+def _with_synthetic_dangling_draw(snapshot):
+    from System import Array  # noqa: PLC0415
+    from System import Int32, Object, String  # noqa: PLC0415
+    from System.Collections.Generic import Dictionary  # noqa: PLC0415
+    from Sts2Emulator.Dto.Snapshot import CombatHistoryEntrySnapshot  # noqa: PLC0415
+
+    dangling_draw = CombatHistoryEntrySnapshot()
+    dangling_draw.EntryType = "CardDrawnEntry"
+    dangling_draw.RoundNumber = snapshot.RoundNumber
+    dangling_draw.CurrentSide = snapshot.CurrentSide
+    dangling_draw.PlayerTurnNumbers = Dictionary[String, Int32]()
+    fields = Dictionary[String, Object]()
+    fields["cardInstanceId"] = "SYNTHETIC_DANGLING_DRAWN_CARD"
+    fields["fromHandDraw"] = True
+    dangling_draw.Fields = fields
+    snapshot.CombatHistory.Entries = Array[CombatHistoryEntrySnapshot]([*snapshot.CombatHistory.Entries, dangling_draw])
+    return snapshot
+
+
 def _sig(action: SemanticAction | None = None, *, boundary=BOUNDARY_STABLE) -> DecisionSignature:
     action = action or SemanticAction("card", "STRIKE_IRONCLAD", "SingleEnemy")
     return DecisionSignature(
@@ -360,7 +379,10 @@ def test_decision_log_entry_wraps_success_and_fault_results():
 def test_real_worker_post_teardown_restore_failure_diagnostics_classify_as_restore_failure():
     session = LiveCombatSession()
     state = session.start_combat(_simple_spec())
-    ineligible_snapshot = session._game.CaptureSnapshot()  # noqa: SLF001 - intentionally not _make_eligible()
+    ineligible_snapshot = _with_synthetic_dangling_draw(_make_eligible(session._game.CaptureSnapshot()))  # noqa: SLF001
+    validation = LiveCombatSession().validate_restore_snapshot(ineligible_snapshot)
+    assert validation.eligible is False, validation
+    assert any("reference_integrity" in code for code in validation.rejection_codes), validation.rejection_codes
     strike = _find_action(state, "card", "STRIKE_IRONCLAD")
     semantic = _semantic_action_for(strike)
     signature = DecisionSignature.from_battle_state(state, semantic_action=semantic, resolved_action=strike, target_enemy_index=0)

@@ -57,7 +57,6 @@ import search.search_coordinator as coordinator_module  # noqa: E402
 from search.search_coordinator import (  # noqa: E402
     MainInvariantViolatedError,
     SearchCoordinatorConfig,
-    _strip_known_benign_dangling_entries,
     build_search_strategy,
 )
 from verify_restore_bootstrap_phase3b import _make_eligible  # noqa: E402
@@ -121,6 +120,23 @@ def _deck_multiset(*card_ids: str) -> dict[str, int]:
     return counts
 
 
+def _with_synthetic_dangling_draw(snapshot: CombatStateSnapshot) -> CombatStateSnapshot:
+    dangling_draw = CombatHistoryEntrySnapshot(
+        EntryType="CardDrawnEntry",
+        RoundNumber=snapshot.RoundNumber,
+        CurrentSide=snapshot.CurrentSide,
+        PlayerTurnNumbers={},
+        Fields={"cardInstanceId": "SYNTHETIC_DANGLING_DRAWN_CARD", "fromHandDraw": True},
+    )
+    return dataclasses.replace(
+        snapshot,
+        CombatHistory=dataclasses.replace(
+            snapshot.CombatHistory,
+            Entries=[*snapshot.CombatHistory.Entries, dangling_draw],
+        ),
+    )
+
+
 def test_end_to_end_main_loop_invokes_real_search_and_reaches_terminal():
     session = LiveCombatSession()
     state = session.start_combat(_simple_spec(hand=["WHIRLWIND"], enemy_hp=1))
@@ -154,64 +170,58 @@ def test_end_to_end_main_loop_invokes_real_search_and_reaches_terminal():
     assert outcome.final_state.is_terminal
 
 
-def test_sanitizer_strips_only_known_benign_dangling_card_drawn_entries():
+def test_fresh_root_snapshot_is_eligible_and_synthetic_dangling_history_faults_search():
     session = LiveCombatSession()
-    session.start_combat(_simple_spec(hand=["WHIRLWIND"], enemy_hp=48))
-    snapshot = session.capture_snapshot()
-    report = validate_snapshot_references(snapshot)
-    if not report.dangling_references:
-        synthetic_draw = CombatHistoryEntrySnapshot(
-            EntryType="CardDrawnEntry",
-            RoundNumber=snapshot.RoundNumber,
-            CurrentSide=snapshot.CurrentSide,
-            PlayerTurnNumbers={},
-            Fields={"cardInstanceId": "SYNTHETIC_DANGLING_DRAWN_CARD", "fromHandDraw": True},
-        )
-        snapshot = dataclasses.replace(
-            snapshot,
-            CombatHistory=dataclasses.replace(
-                snapshot.CombatHistory,
-                Entries=[*snapshot.CombatHistory.Entries, synthetic_draw],
-            ),
-        )
-        report = validate_snapshot_references(snapshot)
-    matched_indices = {
-        int(dangling.field_path.split("CombatHistory.Entries[", 1)[1].split("]", 1)[0])
-        for dangling in report.dangling_references
-        if dangling.entry_type == "CardDrawnEntry" and dangling.cause == "source_live_state_inconsistency"
-    }
+    state = session.start_combat(_simple_spec(hand=["WHIRLWIND"], enemy_hp=48))
+    fresh_snapshot = session.capture_snapshot()
+    fresh_report = validate_snapshot_references(fresh_snapshot)
+    fresh_eligible, fresh_reasons = restore_input_eligibility(fresh_snapshot)
 
-    assert report.dangling_references
-    assert len(matched_indices) > 0
-    assert len(matched_indices) <= len(snapshot.CombatHistory.Entries)
-    assert all(
-        dangling.entry_type == "CardDrawnEntry" and dangling.cause == "source_live_state_inconsistency"
-        for dangling in report.dangling_references
+    assert fresh_report.dangling_references == []
+    assert fresh_eligible, fresh_reasons
+
+    invalid_snapshot = _with_synthetic_dangling_draw(fresh_snapshot)
+    invalid_report = validate_snapshot_references(invalid_snapshot)
+    invalid_eligible, invalid_reasons = restore_input_eligibility(invalid_snapshot)
+
+    assert len(invalid_report.dangling_references) == 1
+    assert invalid_report.dangling_references[0].entry_type == "CardDrawnEntry"
+    assert invalid_report.dangling_references[0].cause == "source_live_state_inconsistency"
+    assert invalid_eligible is False
+    assert any("dangling_references=1" in reason for reason in invalid_reasons)
+
+    context = DecisionContext.from_main_stable_capture(
+        invalid_snapshot,
+        state,
+        _representative_signature(state),
     )
+    captured_branch_results = []
+    original_dispatch = coordinator_module.dispatch_work_items
 
-    sentinel = CombatHistoryEntrySnapshot(
-        EntryType="CardGeneratedEntry",
-        RoundNumber=snapshot.RoundNumber,
-        CurrentSide=snapshot.CurrentSide,
-        PlayerTurnNumbers={},
-        Fields={"CardId": "SENTINEL_CARD"},
-    )
-    snapshot_with_sentinel = dataclasses.replace(
-        snapshot,
-        CombatHistory=dataclasses.replace(
-            snapshot.CombatHistory,
-            Entries=[*snapshot.CombatHistory.Entries, sentinel],
-        ),
-    )
+    def _capturing_real_dispatch(work_items, lease_registry, *, worker_pool):
+        results = original_dispatch(work_items, lease_registry, worker_pool=worker_pool)
+        captured_branch_results.extend(results)
+        return results
 
-    sanitized = _strip_known_benign_dangling_entries(snapshot_with_sentinel)
-    eligible, reasons = restore_input_eligibility(sanitized)
+    coordinator_module.dispatch_work_items = _capturing_real_dispatch
+    try:
+        with BranchWorkerPool(worker_count=1, request_timeout_s=120.0) as pool:
+            strategy = build_search_strategy(
+                pool,
+                config=SearchCoordinatorConfig(width=1, max_retries=0),
+                combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
+                lease_registry=LeaseRegistry(),
+            )
+            result = strategy(context)
+    finally:
+        coordinator_module.dispatch_work_items = original_dispatch
 
-    assert eligible, reasons
-    assert sanitized is not snapshot_with_sentinel
-    assert snapshot_with_sentinel.CombatHistory.Entries[-1] is sentinel
-    assert sanitized.CombatHistory.Entries[-1] is sentinel
-    assert len(sanitized.CombatHistory.Entries) == len(snapshot_with_sentinel.CombatHistory.Entries) - len(matched_indices)
+    assert isinstance(result, SearchEvaluationFailure), result
+    assert any(branch.status == BRANCH_STATUS_FAULT for branch in captured_branch_results), captured_branch_results
+    assert any(
+        branch.diagnostics.get("fault_kind") in {"validation_rejection", "worker_exception"}
+        for branch in captured_branch_results
+    ), [branch.diagnostics for branch in captured_branch_results]
 
 
 def test_search_strategy_without_main_state_provider_keeps_backward_compatible_commit():

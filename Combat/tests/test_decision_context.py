@@ -81,12 +81,32 @@ def _semantic_action_for(action: dict) -> SemanticAction:
 
 
 def _eligible_root_snapshot(session: LiveCombatSession):
-    """Mirrors `test_restore_snapshot_phase3c1.py`'s own pattern: a Snapshot captured
-    immediately after `start_combat()` carries the natural turn-1 CardDrawnEntry that
-    `ResetFromScenario`'s own setup writes, which is a documented, confirmed
-    (`source_live_state_inconsistency`) dangling reference once the scenario's own
-    authoritative hand overwrites it - not restore-eligible until stripped."""
+    """Return the capture through the shared Phase 3B normalizer used by older tests.
+
+    Fresh Emulator captures are now naturally restore-eligible; the historical
+    CardDrawnEntry source_live_state_inconsistency workaround is covered by explicit
+    synthetic-invalid tests instead of relying on natural capture corruption.
+    """
     return _make_eligible(session._game.CaptureSnapshot())  # noqa: SLF001
+
+
+def _with_synthetic_dangling_draw(snapshot):
+    from System import Array  # noqa: PLC0415
+    from System import Int32, Object, String  # noqa: PLC0415
+    from System.Collections.Generic import Dictionary  # noqa: PLC0415
+    from Sts2Emulator.Dto.Snapshot import CombatHistoryEntrySnapshot  # noqa: PLC0415
+
+    dangling_draw = CombatHistoryEntrySnapshot()
+    dangling_draw.EntryType = "CardDrawnEntry"
+    dangling_draw.RoundNumber = snapshot.RoundNumber
+    dangling_draw.CurrentSide = snapshot.CurrentSide
+    dangling_draw.PlayerTurnNumbers = Dictionary[String, Int32]()
+    fields = Dictionary[String, Object]()
+    fields["cardInstanceId"] = "SYNTHETIC_DANGLING_DRAWN_CARD"
+    fields["fromHandDraw"] = True
+    dangling_draw.Fields = fields
+    snapshot.CombatHistory.Entries = Array[CombatHistoryEntrySnapshot]([*snapshot.CombatHistory.Entries, dangling_draw])
+    return snapshot
 
 
 # ---------------------------------------------------------------------------
@@ -385,11 +405,13 @@ def test_replay_decision_context_surfaces_real_restore_rejection_uncaught():
     must let it propagate, never swallow or convert it to a `ReplayMismatch`."""
     session = LiveCombatSession()
     state0 = session.start_combat(_simple_spec())
-    # Deliberately NOT calling _make_eligible(): the fresh turn-1 CardDrawnEntry left in
-    # CombatHistory makes this an ineligible restore input (confirmed dangling reference
-    # - see this file's `_eligible_root_snapshot()` docstring and
-    # test_restore_snapshot_phase3c1.py's own use of the same underlying mechanism).
-    ineligible_snapshot = session._game.CaptureSnapshot()  # noqa: SLF001
+    # The old natural fresh-capture CardDrawnEntry corruption is fixed in the Emulator.
+    # Inject the same broken reference shape explicitly so this test still verifies that
+    # Emulator-level restore rejection propagates uncaught.
+    ineligible_snapshot = _with_synthetic_dangling_draw(_make_eligible(session._game.CaptureSnapshot()))  # noqa: SLF001
+    validation = LiveCombatSession().validate_restore_snapshot(ineligible_snapshot)
+    assert validation.eligible is False, validation
+    assert any("reference_integrity" in code for code in validation.rejection_codes), validation.rejection_codes
 
     strike = _find_action(state0, "card", "STRIKE_IRONCLAD")
     strike_semantic = _semantic_action_for(strike)

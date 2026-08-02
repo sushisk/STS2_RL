@@ -563,6 +563,26 @@ def _assert_rejected(snapshot, expected_substring: str):
     assert session._session_faulted is False  # noqa: SLF001
 
 
+def _with_synthetic_dangling_draw(snapshot):
+    ensure_loaded()
+    from System import Array
+    from System import Int32, Object, String
+    from System.Collections.Generic import Dictionary
+    from Sts2Emulator.Dto.Snapshot import CombatHistoryEntrySnapshot
+
+    dangling_draw = CombatHistoryEntrySnapshot()
+    dangling_draw.EntryType = "CardDrawnEntry"
+    dangling_draw.RoundNumber = snapshot.RoundNumber
+    dangling_draw.CurrentSide = snapshot.CurrentSide
+    dangling_draw.PlayerTurnNumbers = Dictionary[String, Int32]()
+    fields = Dictionary[String, Object]()
+    fields["cardInstanceId"] = "SYNTHETIC_DANGLING_DRAWN_CARD"
+    fields["fromHandDraw"] = True
+    dangling_draw.Fields = fields
+    snapshot.CombatHistory.Entries = Array[CombatHistoryEntrySnapshot]([*snapshot.CombatHistory.Entries, dangling_draw])
+    return snapshot
+
+
 def _scenario_6546_21_snapshot():
     manifest_path = _ONLINE_EVAL_DIR / "choice_policy_online_eval_manifest.jsonl"
     rows = [json.loads(line) for line in manifest_path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -1108,11 +1128,11 @@ def test_rejection_categories_via_public_python_api():
     unknown_history.CombatHistory.Entries = Array[CombatHistoryEntrySnapshot]([unknown_entry])
     _assert_rejected(unknown_history, "unknown_combat_history_entry_type:SyntheticUnknownEntry")
 
-    pet_snapshot = _scenario_6546_21_snapshot()
-    pet_validation = LiveCombatSession().validate_restore_snapshot(pet_snapshot)
-    assert pet_validation.eligible is False, pet_validation
-    assert any("reference_integrity" in r for r in pet_validation.rejection_codes), pet_validation.rejection_codes
-    assert not any("pet_count" in r for r in pet_validation.rejection_codes), pet_validation.rejection_codes
+    dangling_history = _with_synthetic_dangling_draw(_make_eligible(_fresh_source_game().CaptureSnapshot()))
+    dangling_validation = LiveCombatSession().validate_restore_snapshot(dangling_history)
+    assert dangling_validation.eligible is False, dangling_validation
+    assert any("reference_integrity" in r for r in dangling_validation.rejection_codes), dangling_validation.rejection_codes
+    assert not any("pet_count" in r for r in dangling_validation.rejection_codes), dangling_validation.rejection_codes
 
     toolbox = LiveCombatSession()
     toolbox.start_combat({
