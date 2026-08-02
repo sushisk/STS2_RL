@@ -10,6 +10,11 @@
 %%       Sub WorkerもStepの結果Pendingへ到達すれば、その時点で新規Leaseを確立する
 %%       (「SubはLeaseを取得しない」という区別は誤り。区別すべきは
 %%       『WorkItem受領時点でLease済みかどうか』であり、Sub/Holderという固定的な種別ではない)。
+%%       本図中「Root Snapshot」はStable Root Snapshotのほか、Start-of-Combat Pendingの
+%%       Combat Start Replay Root(2026-08-03追加)も含む総称として使う - 後者のBOOTSTRAP_STEP/
+%%       SUB_RESTORE経路はRestoreではなくstart_combat(scenario_spec)の再実行になる点のみが異なり、
+%%       Lease成立・検証・解放の条件自体は完全に同一
+%%       (→ mermaid_combat_snapshot_replay_detail.mermaidのROOT_KIND/COMBAT_START_RUN)。
 flowchart TD
     subgraph LEASE_MODEL["State-Holding Worker Lease (Workerは一時的な実行資源。Decision Contextの正本ではない)"]
         LEASE_DEF["Lease構成要素(State Identity — Decision Signatureとは別物):<br/>・worker_id<br/>・worker_generation (Worker再起動を検出するための世代番号)<br/>・context_id (対象Decision Context)<br/>・Search Hypothesis ID (対象Decision Contextと同じ組)<br/>・state epoch (このWorkerが成功したStepのたびに単調増加するカウンタ。<br/>  想定外の欠落/重複Stepを検出する)<br/>・CombatSessionId／StepIndex (EmulatorのStepResult/DecisionFrameが<br/>  返す権威ある識別情報。Search Coordinator側の推測ではない)<br/>・Decision Result digest (現在保持しているDecision Result全体のハッシュ。<br/>  Decision Signatureより強い/具体的な同一性証明)<br/><br/>注意: これらはWorker/Leaseの『信頼できるliveプロセスか』の検証専用であり、<br/>Choiceの意味的同一性を表すDecision Signature(→snapshot_replay詳細図の<br/>DC_SIGNATURE)とは別軸。意味的に同じChoiceに見えても、実際には異なる/<br/>信頼できないunderlying stateから生じている可能性を排除できないため、<br/>両方を独立に検証する。"]

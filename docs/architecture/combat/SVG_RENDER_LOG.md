@@ -216,3 +216,45 @@ mermaid_combat_commit_detail             : OK (無変更)
 
 `MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
 (4図のハッシュは前回commitから不変)。
+
+## 第6回検証(2026-08-03、Start-of-Combat Pending探索対応)
+
+`mermaid_combat_snapshot_replay_detail` / `mermaid_combat_main_loop_detail` /
+`mermaid_combat_branch_scheduler_detail` の3図へ、以下を反映した。
+
+- `mermaid_combat_snapshot_replay_detail`: 新規`CombatStartReplayRoot`(Combat開始に使った
+  Scenario／RNG Seed／Deck／Relic — CaptureされたSnapshotではない)を`DC_COMBAT_START`ノードとして
+  追加し、`WHO`の分岐に`WHO_COMBAT_START`を新設(Start-of-Combat Pendingのみの例外経路)。
+  `SUB_REPLAY`サブグラフに`ROOT_KIND`分岐を追加し、Combat Start Replay Rootの場合は
+  `ValidateRestoreSnapshotJson`/`RestoreSnapshotJson`を一切呼ばず`start_combat(scenario_spec)`を
+  再実行する`COMBAT_START_RUN`経路を新設した(以降のReplay Prefix再生・Signature照合は共通)。
+- `mermaid_combat_main_loop_detail`: `PENDING_HOLD`/`MAIN_DC2`にStart-of-Combat Pendingの場合の
+  Combat Start Replay Root確定を追記し、`NEW_DECISION_PENDING`に`NEED_SEARCH_COMBAT_START`分岐
+  (held_stable_snapshot is Noneの場合のみSearch Coordinatorへの入口を許可)を新設した。
+  `NOTE_PENDING_FUTURE`を、Start-of-Combat Pendingがこの制限から外れたことを反映した内容へ更新し、
+  新規`NOTE_NO_HELD_SNAPSHOT_AT_GENESIS`(Start-of-Combat PendingをHeld Stable Snapshotとして
+  一切扱わないことの明記)を追加した。
+- `mermaid_combat_branch_scheduler_detail`: 冒頭コメントへ、「Root Snapshot」がStable Root
+  SnapshotとCombat Start Replay Rootの両方を指す総称であることの注記を追加(視覚的なノード/エッジは
+  無変更 — コメント行のみの追記のため、実際に再レンダリングしたSVGは前回commitと同一)。
+
+`mermaid_combat_candidate_pipeline_detail`・`mermaid_combat_rng_hypothesis_detail`・
+`mermaid_combat_fault_worker_detail`・`mermaid_combat_commit_detail`・`mermaid_rough_combat`は
+変更なし(候補分類・RNG Hypothesis生成・Fault分類・Commit集約のロジック自体はRoot種別に依存しない
+既存の抽象化のまま利用できるため)。使用ツール・実行コマンドは上記と同一
+(`@mermaid-js/mermaid-cli` v11.16.0)。全ての追記は既存の引用符付きノード/エッジラベル記法に従って
+行ったため、bracket balance検証・実レンダリングともに初回から3図で成功した。
+
+```
+mermaid_rough_combat                     : OK (無変更)
+mermaid_combat_main_loop_detail          : OK
+mermaid_combat_candidate_pipeline_detail : OK (無変更)
+mermaid_combat_branch_scheduler_detail   : OK (SVGはコメントのみの変更のため前回と同一)
+mermaid_combat_snapshot_replay_detail    : OK
+mermaid_combat_rng_hypothesis_detail     : OK (無変更)
+mermaid_combat_fault_worker_detail       : OK (無変更)
+mermaid_combat_commit_detail             : OK (無変更)
+```
+
+`MANIFEST.sha256`を全8図分再計算し、`sha256sum -c MANIFEST.sha256`で検証済み
+(5図のハッシュは前回commitから不変)。

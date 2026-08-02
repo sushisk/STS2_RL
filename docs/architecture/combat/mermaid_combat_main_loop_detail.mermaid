@@ -6,6 +6,11 @@
 %%       ことを明示する。あわせてMain自身のPending時Replay Prefix管理、Step成功ごとの
 %%       (Semantic Action, Observed Post-Step Signature)記録追加、およびMain-observed Pending
 %%       (Replay Prefix非空)からの新規decisionを静的評価(PENDING_STATIC)に制限することを定義する。
+%%       例外: Start-of-Combat Pending(TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP等、
+%%       held_stable_snapshot is Noneの場合)は2026-08-03よりこの制限から外れ、Combat Start
+%%       Replay Root経由でSearch Coordinatorへの通常の探索対象となる(→ NOTE_PENDING_FUTURE、
+%%       NEED_SEARCH_COMBAT_START)。Held Stable Snapshotとして扱われることは一切ない
+%%       (→ NOTE_NO_HELD_SNAPSHOT_AT_GENESIS)。
 flowchart TD
     ENTRY["Combat Entry<br/>(mermaid_combat.mermaidのENTRANCE群から接続)"] --> MAIN_INST
 
@@ -19,10 +24,10 @@ flowchart TD
         BOUNDARY -->|"Fault"| FAULT_OUT["Main Combat Fault<br/>詳細: mermaid_combat_fault_worker_detail.mermaid"]
 
         BOUNDARY -->|"Stable"| STABLE_CAPTURE["CaptureSnapshot<br/>(Emulator API境界)<br/>Held Stable Snapshotとして保持し<br/>Replay Prefix = 空にリセット<br/>(次のStepを行う前に必ず再現元を確保する)"]
-        BOUNDARY -->|"Pending"| PENDING_HOLD["Held Stable Snapshot・Replay Prefixは<br/>直前のStable到達時のまま変更せず保持継続<br/>(Pending自体はCaptureしない)"]
+        BOUNDARY -->|"Pending"| PENDING_HOLD["Held Stable Snapshot・Replay Prefixは<br/>直前のStable到達時のまま変更せず保持継続<br/>(Pending自体はCaptureしない)。<br/>Start-of-Combat Pending(まだ一度もStableに到達していない=<br/>held_stable_snapshot is Noneの場合)は、この時点でCombat Start Replay Root<br/>(このCombat開始に使ったScenario／RNG Seed／Deck／Relic)を確定するのみで、<br/>Held Stable Snapshotには一切書き込まない(→ 下記NOTE_NO_HELD_SNAPSHOT_AT_GENESIS)"]
 
         STABLE_CAPTURE --> MAIN_DC["Main Decision Context確定:<br/>Held Stable Snapshot＋Replay Prefix(空)＋Current Result"]
-        PENDING_HOLD --> MAIN_DC2["Main Decision Context確定:<br/>Held Stable Snapshot(直前分)＋Replay Prefix(Stableから現在まで、<br/>各エントリは(Semantic Action, Observed Post-Step Signature))＋<br/>Current Result(直前StepのPending Choice Payload)"]
+        PENDING_HOLD --> MAIN_DC2["Main Decision Context確定:<br/>Held Stable Snapshot(直前分)＋Replay Prefix(Stableから現在まで、<br/>各エントリは(Semantic Action, Observed Post-Step Signature))＋<br/>Current Result(直前StepのPending Choice Payload)<br/>(Start-of-Combat Pendingの場合はHeld Stable Snapshotの代わりに<br/>Combat Start Replay Rootを用いる<br/>→ mermaid_combat_snapshot_replay_detail.mermaidのDC_COMBAT_START)"]
 
         MAIN_DC --> SEQ_HAS_S{"採用中のPlanned Sequenceが残っているか"}
         MAIN_DC2 --> SEQ_HAS_P{"採用中のPlanned Sequenceが残っているか"}
@@ -31,17 +36,19 @@ flowchart TD
         SEQ_HAS_P -->|"Yes"| SEQ_STEP
 
         SEQ_HAS_S -->|"No"| NEW_DECISION{"新しいdecisionの決定方法<br/>(Stable起点。RNG Hypothesisを新規に検討可能)"}
-        SEQ_HAS_P -->|"No"| NEW_DECISION_PENDING{"新しいdecisionの決定方法<br/>(Pending起点。Replay Prefix非空につき制限あり)"}
+        SEQ_HAS_P -->|"No"| NEW_DECISION_PENDING{"新しいdecisionの決定方法<br/>(Pending起点。Replay Prefix非空につき制限あり。<br/>ただしStart-of-Combat Pending(held_stable_snapshot is None)は例外<br/>→ 下記NEED_SEARCH_COMBAT_START)"}
 
         NEW_DECISION -->|"Direct<br/>候補評価不要"| DIRECT["Current Decision Resultの候補から<br/>Semantic Actionを直接1つ選択<br/>(Planned Sequence長=1、Expected Post-Step Signatureは付与しない<br/>=自己決定であり事前検証対象ではない)"]
         NEW_DECISION -->|"候補評価が必要<br/>Heuristic1段 or Beam Search"| NEED_SEARCH["Search CoordinatorへMain Decision Contextを渡す<br/>(Held Stable Snapshot＋Replay Prefix(空)＋Current Result。<br/>この時点のCurrent Result由来のシグネチャがCurrent Context Signatureとして<br/>Search Coordinator側に記録される)"]
 
         NEW_DECISION_PENDING -->|"Direct<br/>候補評価不要"| DIRECT
-        NEW_DECISION_PENDING -->|"静的評価のみ<br/>(候補評価が必要な場合でも<br/>探索的Lookaheadは行わない — 下記NOTE_PENDING_FUTURE参照)"| PENDING_STATIC["mermaid_combat_candidate_pipeline_detail.mermaidと同じ<br/>choice_kind別の軽量Evaluatorを、Current Decision Resultの<br/>候補へ直接適用し、最上位1件を選択<br/>(Restore／Step／Worker分岐は一切行わない。Search Coordinator/<br/>Branch Worker Poolへは一切送らない。実RNGのまま分岐探索して<br/>Evaluatorへ結果が見える事態を避けるための初期実装時点の安全策。<br/>この経路のEvaluatorにも、Authoritative OrderedDrawPile(Mainの真の状態)を<br/>そのまま渡さない(Order-Masked Observation(Hidden-Order Features。<br/>並び順を含まない集計特徴量)のみ)<br/>→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE、<br/>mermaid_combat_candidate_pipeline_detail.mermaidのNOTE_DRAWPILE_HIDDEN。<br/>Planned Sequence長=1、Expected Post-Step Signatureは付与しない)"]
+        NEW_DECISION_PENDING -->|"静的評価のみ<br/>(mid-combatのMain-observed Pending。候補評価が必要な場合でも<br/>探索的Lookaheadは行わない — 下記NOTE_PENDING_FUTURE参照)"| PENDING_STATIC["mermaid_combat_candidate_pipeline_detail.mermaidと同じ<br/>choice_kind別の軽量Evaluatorを、Current Decision Resultの<br/>候補へ直接適用し、最上位1件を選択<br/>(Restore／Step／Worker分岐は一切行わない。Search Coordinator/<br/>Branch Worker Poolへは一切送らない。実RNGのまま分岐探索して<br/>Evaluatorへ結果が見える事態を避けるための初期実装時点の安全策。<br/>この経路のEvaluatorにも、Authoritative OrderedDrawPile(Mainの真の状態)を<br/>そのまま渡さない(Order-Masked Observation(Hidden-Order Features。<br/>並び順を含まない集計特徴量)のみ)<br/>→ mermaid_combat_rng_hypothesis_detail.mermaidのBOUNDARY_TABLE、<br/>mermaid_combat_candidate_pipeline_detail.mermaidのNOTE_DRAWPILE_HIDDEN。<br/>Planned Sequence長=1、Expected Post-Step Signatureは付与しない)"]
+        NEW_DECISION_PENDING -->|"候補評価が必要<br/>かつStart-of-Combat Pending<br/>(held_stable_snapshot is None、TOOLBOX/CHOICES_PARADOX/<br/>GAMBLING_CHIP等。2026-08-03追加 → 下記NOTE_PENDING_FUTURE)"| NEED_SEARCH_COMBAT_START["Search CoordinatorへCombat Start Replay Root起点の<br/>Decision Contextを渡す(Combat Start Replay Root＋Replay Prefix(空)＋<br/>Current Result。Held Stable Snapshotには一切書き込まない)"]
 
         DIRECT --> SET_SEQ["Planned Sequenceを確定<br/>(Semantic Action列＋各手のExpected Post-Step Signature。<br/>Direct／PENDING_STATICの場合はExpected Post-Step Signatureなし)"]
         PENDING_STATIC --> SET_SEQ
         NEED_SEARCH -.->|"Mainは変更しない<br/>Stableの場合のみCaptureSnapshotが必要になる可能性あり<br/>(既にSTABLE_CAPTUREで確保済みならRoot Snapshotとして再利用)"| TO_SEARCH["→ mermaid_combat_snapshot_replay_detail.mermaid<br/>Root Snapshot／Decision Context受け渡し"]
+        NEED_SEARCH_COMBAT_START -.->|"Mainは変更しない(start_combat()の再実行は、Main自身のGameInstanceとは<br/>別のBranch Worker側GameInstanceで行う。Main自身のGameInstanceは<br/>このPendingに達したまま、Search完了後にMainがcommitした行動を<br/>実行するまで一切変更されない)"| TO_SEARCH
         TO_SEARCH -.->|"探索完了<br/>戻り値は SearchSuccess(PlannedSequence)<br/>または SearchEvaluationFailure のいずれか"| SEARCH_RESULT{"探索結果"}
         SEARCH_RESULT -->|"SearchSuccess<br/>(mermaid_combat_commit_detail.mermaidの方針により<br/>RNG Hypothesisが関与した場合は先頭1手のみ、<br/>かつExpected Post-Step Signatureなし)"| FROM_COMMIT["← mermaid_combat_commit_detail.mermaid<br/>COMMIT_SEQUENCE"]
         SEARCH_RESULT -->|"SearchEvaluationFailure<br/>(全候補がFault等で評価不能<br/>→ mermaid_combat_fault_worker_detail.mermaidのALL_FAULT)"| SEARCH_FAIL_HANDLE["SearchEvaluationFailureとして記録する<br/>(Main自身は正常であり、Main Combat Faultへは変換しない。<br/>Branch評価から採用可能な候補を得られなかっただけであり、<br/>Main GameInstance・State Identityは無傷。<br/>暗黙のDirect fallbackは行わない — Mainの決定方針の切替は<br/>上位の運用判断であり、本図では自動フォールバックしない)"]
@@ -105,8 +112,12 @@ flowchart TD
     NOTE_FAULT_FIRST["設計注記: StepResultがFaultの場合、Transition Recordへの追記<br/>(APPEND_RECORD)より前に判定し、即座にMain Combat Faultへ遷移する。<br/>Faultは『計画と実行結果が一致しない』という通常のDISCARD/RESYNC対象とは<br/>性質が異なり(Emulator側の実行時異常であり、Replay Prefix/Plan Pathへ<br/>記録して再現対象とすべきものではない)、再探索によって解決するものでもない。"]
     NOTE_FAULT_FIRST -.-> STEP_FAULT_CHECK
 
-    NOTE_PENDING_FUTURE["設計注記: PENDING_STATICへの制限(探索的Lookahead不可・<br/>静的評価による1手選択のみ)は、最終的な機能方針ではなく、<br/>Main-observed Pendingの候補実行が未来の非公開RNGを消費し得るかを<br/>判定する機構が未実装であることに起因する、初期実装時点の安全策である。<br/>将来、候補実行が未来RNGを消費しないことをEmulator契約または<br/>明示的なmetadataで保証できるようになった場合は、その範囲に限り<br/>Worker展開(Search Coordinator経由の探索)を許可する余地を残す。<br/>現段階ではその判定機構自体が存在しないため、判定不能な場合を含め<br/>全て静的評価とする。この制限は『choice_scope=ActionContinuationも<br/>原則探索対象である』という上位方針<br/>(→ mermaid_combat_candidate_pipeline_detail.mermaidのNOTE_KIND_VS_SCOPE)を<br/>撤回するものではなく、あくまでMain-observed Pending(Mainの実RNG直下)<br/>という限定された経路にのみ適用される。"]
+    NOTE_PENDING_FUTURE["設計注記: PENDING_STATICへの制限(探索的Lookahead不可・<br/>静的評価による1手選択のみ)は、最終的な機能方針ではなく、根本原因は<br/>『Pendingの再現手段が無いWorkerへどう到達させるか』という実装ギャップで<br/>あった。Start-of-Combat Pending(TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP等)は<br/>2026-08-03、Combat Start Replay Root(このCombat開始に使ったScenario／<br/>RNG Seed／Deck／Relic — CaptureされたSnapshotではない)という再現手段が<br/>整ったため、この制限から外れ、通常のSearch Coordinator経由の探索対象と<br/>なった(→ NEED_SEARCH_COMBAT_START、mermaid_combat_snapshot_replay_detail.<br/>mermaidのWHO_COMBAT_START/DC_COMBAT_START)。<br/>mid-combatのMain-observed Pending(Held Stable Snapshotが既に存在する<br/>状態でのAction Continuation Pending等)は、Pending自体を再現する<br/>Snapshot相当の手段がまだ無いため、引き続きPENDING_STATIC限定のままである。<br/>これは『choice_scope=ActionContinuationも原則探索対象である』という<br/>上位方針(→ mermaid_combat_candidate_pipeline_detail.mermaidの<br/>NOTE_KIND_VS_SCOPE)を撤回するものではない — Search自身は、あるDecision<br/>Context内でPending(Action Continuationの連鎖含む)へ到達した場合、<br/>Holder Worker継続／sibling Bootstrap+Replayで探索を継続する<br/>(→ mermaid_combat_branch_scheduler_detail.mermaidのLEASE_ESTABLISH/<br/>CONTEXT_UPDATE)。ここで言う制限は、あくまでMain自身が最初にPendingへ<br/>到達した時点でSearchへ入口として渡してよいか、という入口の話に限られる。"]
     NOTE_PENDING_FUTURE -.-> PENDING_STATIC
+    NOTE_PENDING_FUTURE -.-> NEED_SEARCH_COMBAT_START
+
+    NOTE_NO_HELD_SNAPSHOT_AT_GENESIS["設計注記(2026-08-03追加): Start-of-Combat Pendingは、たとえSearchの<br/>入口として使われても、Held Stable Snapshotとして保存・比較されることは<br/>一切ない。held_stable_snapshotはMainが本物のStable境界へ到達するまで<br/>Noneのままであり、Search呼び出し中もMain不変条件の検証は<br/>「held_stable_snapshotがNoneのまま」であることを確認する形に限る<br/>(Combat Start Replay Rootの内容とのdigest比較は行わない)。"]
+    NOTE_NO_HELD_SNAPSHOT_AT_GENESIS -.-> PENDING_HOLD
 
     classDef api fill:#333,color:#fff,stroke:#000;
     class STEP api;

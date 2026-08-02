@@ -1,8 +1,12 @@
 %% 責任主体: Main Process (Root Snapshot取得/保持) + Search Coordinator (Decision Context管理) + Branch Worker (Restore・Replay)
 %% 参照上位図: mermaid_rough_combat.mermaid (SNAPSHOT/ROOT_CONTEXT, RESTORE_1..N)
-%% 目的: Canonical Decision Contextの定義(Replay PrefixとPlan Pathの分離込み)、Main起点(Stableのみ。
-%%       Main-observed Pendingはmermaid_combat_main_loop_detail.mermaidのPENDING_STATICで完結し、
-%%       本図には到達しない)の受け渡し、Sub Branchの逐次検証付きReplay Prefix再生、
+%% 目的: Canonical Decision Contextの定義(Replay PrefixとPlan Pathの分離込み)、Main起点
+%%       (Stable Root Snapshot、またはCombat Start Replay Root — 2026-08-03のRL側
+%%       「Start-of-Combat Pending探索」対応で追加。TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP等の
+%%       Start-of-Combat Pendingに限る例外で、詳細はWHO/DC_COMBAT_START参照。それ以外の
+%%       Main-observed Pending(mid-combatでHeld Stable Snapshotが既に存在する場合)は、引き続き
+%%       mermaid_combat_main_loop_detail.mermaidのPENDING_STATICで完結し、本図には到達しない)
+%%       の受け渡し、Sub Branchの逐次検証付きReplay Prefix再生、
 %%       Decision Signature(Action実行とDecision Boundary制御情報の確認専用。盤面Signatureではない。
 %%       2026-08-01のRL安全性確認方針修正により軽量化)とState Identity(Worker/Leaseの信頼性検証専用)の
 %%       分離、候補分類・枝刈り完了後にのみRNG Hypothesisを決定する順序を詳細化する。RL側は盤面
@@ -22,18 +26,22 @@ flowchart TD
         DC_DEF["構成要素:<br/>・Stable Root Snapshot (Concrete OrderedDrawPile(index 0が山札上/<br/>  次に引くカード。Authoritative OrderedDrawPileまたはHypothetical<br/>  OrderedDrawPileのいずれか — このDecision ContextがMain直系の探索起点なら<br/>  Authoritative、DrawPile Belief仮説から派生したものならHypothetical)を含む<br/>  全Player/Enemy状態＋完全なRNG(RunRng/PlayerRng/MonsterRng、Shuffle purposeを含む)。<br/>  Search Coordinator/Branch Workerは、この具体的なConcrete OrderedDrawPileへ<br/>  Restore/Replayの忠実性のために機械的にアクセスするが、Evaluatorへは転送せず、<br/>  かつHypothetical OrderedDrawPileを『真の状態』として扱ってはならない<br/>  (公開情報と整合する一仮説に過ぎない) → mermaid_combat_rng_hypothesis_detail.mermaidの<br/>  BOUNDARY_TABLE／NOTE_ORDERED_TRUTH参照)<br/>・Replay Prefix (Stable Rootから現在地点までの<br/>  Transition Record(Semantic Action, Observed Post-Step Signature)の<br/>  逐次記録。Sub Branch再構築専用。評価境界ごとに空へリセットされる)<br/>・Plan Path (探索開始点からこのDecision Contextまでの<br/>  Transition Recordの累積。新Decision Context生成時に<br/>  親のPlan Pathをそのまま引き継ぎ、以後は自身のStep成功のたびに<br/>  追記される。評価境界を跨いでもリセットされない)<br/>・現在のDecision Result／Choice Payload<br/>・Current Context Signature (現在地点への到達確認用。意味的同一性のみ)<br/>・Search Hypothesis ID<br/><br/>State-Holding Workerは正本に含めず、Leaseとして別管理する<br/>(→ mermaid_combat_branch_scheduler_detail.mermaidのLease参照)。"]
         DC_STABLE["Stable地点(新Decision Context生成時)の形:<br/>Root Snapshot = 現在地点のStable Snapshot(=親のChild Snapshot)<br/>Replay Prefix = 空<br/>Plan Path = 親Decision ContextのPlan Pathをそのまま継承<br/>Current Result = 現在のStable Decision Result"]
         DC_PENDING["Pending地点(同一Decision Context内でのStep継続)の形:<br/>Root Snapshot = 直前のStable Snapshot(既にCapture済み、変更なし)<br/>Replay Prefix = Stableから現在Pendingまでの<br/>  Transition Recordの逐次記録<br/>Plan Path = 継承済みのものへ、この地点までのTransition Recordを<br/>  逐次追記した状態<br/>Current Result = 直前StepのChoice Payload<br/>(Pending地点自体を新たにCaptureすることはない)"]
+        DC_COMBAT_START["Start-of-Combat Pending地点(Combat Start Replay Rootを起点とする<br/>Decision Context生成時)の形(2026-08-03追加):<br/>Root Snapshot = Combat Start Replay Root<br/>  (Scenario／RNG Seed／Deck／Relic — build_scenario_from_spec()の入力そのもの。<br/>  CaptureされたSnapshotではない。TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP等)<br/>Replay Prefix = 空<br/>Plan Path = 空(この探索呼び出しの起点)<br/>Current Result = Start-of-Combatで到達したPending Choice Payload<br/>Search Hypothesis ID = None(このRoot自体はMainの実RNGそのもの)<br/>(→ WHO_COMBAT_START。Held Stable Snapshotとして扱わない・Held Stable<br/>Snapshotに保存しない — Main側もこの区別を維持する<br/>→ mermaid_combat_main_loop_detail.mermaidのNOTE_NO_HELD_SNAPSHOT_AT_GENESIS)"]
         DC_SIGNATURE["Decision Signature(Action実行とDecision Boundary制御情報の確認専用。<br/>盤面Signatureではない — 軽量形式。Current Context Signature・<br/>Expected Post-Step Signature双方で共通の基礎とする):<br/><br/>Stable／Pending共通で確認する項目:<br/>・State Identity(実行前後。→ mermaid_combat_branch_scheduler_detail.mermaidの<br/>  LEASE_DEF: context_id・worker_generation・state epoch・<br/>  CombatSessionId/StepIndex・Decision Result digest)<br/>・選択したSemantic Actionと、それが解決されたActionIdとの対応<br/>  (解決時点での1回限りのマッピング確認。action_id自体を状態を跨いで<br/>  永続的な識別子として比較することはしない — 従来通り)<br/>・Emulatorが実際に解決したカード・対象・selection<br/>  (Decision Result/StepResultがEmulator自身の処理結果として報告する値との<br/>  照合。RL側が独自に予測・再計算した値と比較するのではない)<br/>・到達したBoundary種別(Stable/Pending/Terminal/Fault)<br/><br/>Pendingの場合のみ追加で確認する項目:<br/>・Choice scope(TopLevel／ActionContinuation)<br/>・Choice種別(choice_kind)<br/>・候補のSemantic Key集合<br/>  (canonical multiset — 重複を保持したまま比較する。<br/>   setに潰して重複情報を失ってはならない)<br/><br/>本図から撤廃した項目(旧版に存在したが2026-08-01のRL安全性確認方針修正で削除):<br/>min/max selection・target制約・continuation識別情報。これらは候補の<br/>詳細構造に踏み込む情報であり、盤面期待値の作成へつながりかねないため、<br/>軽量な確認項目セットからは除外する。<br/><br/>禁止事項(→ 下記NOTE_NO_BOARD_PREDICTION): HP・Block・Energy・Pile構成・<br/>Power・Relic・敵状態などの盤面期待値は作成しない。Power/Relic/Hook/<br/>カード固有処理を含む戦闘結果の予測・再計算はEmulatorの責任範囲であり、<br/>RL側では行わない。盤面期待値をReplay安全性の判定に使うこともしない。<br/><br/>用途の区別: Current Context Signature=候補実行前(Candidate適用前)から<br/>存在し、その候補を適用する親Decision Contextへ実際に到達したかの<br/>確認に使う(『今この地点に到達したChoiceが想定通りか』の確認)。<br/>Expected Post-Step Signature=初回のCandidate実行前には存在しない。<br/>Step後に得られたObserved Post-Step Signatureを記録したものであり、<br/>後続のReplayまたはCommit時にのみExpected値として使われる。<br/><br/>注意: Decision Signatureは『Action実行とDecision Boundary制御情報』のみを<br/>検証するものであり、『このWorkerのGameInstanceが本当に信頼できるlive<br/>processか』の検証には使わない。後者はState Identity<br/>(→ mermaid_combat_branch_scheduler_detail.mermaidのLEASE_DEF)そのものの<br/>検証として別途行う(Decision Signatureの一部としてState Identityを確認は<br/>するが、Lease/Workerの信頼性判定という目的自体はLEASE_VERIFYが担う)。<br/>意味的に同一に見えるChoiceが、実際には異なる(あるいは信頼できない)<br/>underlying stateから生じている可能性を排除できないため、両者は連携するが<br/>混同しない。"]
     end
 
-    START["Decision Contextの起点"] --> WHO{"Root Snapshot／Current Result／Plan Pathの出処<br/>(Main-observed Pendingはここに到達しない。<br/>→ mermaid_combat_main_loop_detail.mermaidのPENDING_STATICで完結する)"}
+    START["Decision Contextの起点"] --> WHO{"Root Snapshot／Current Result／Plan Pathの出処<br/>(mid-combatのMain-observed Pending(Held Stable Snapshotが既に存在)は<br/>ここに到達しない。→ mermaid_combat_main_loop_detail.mermaidのPENDING_STATICで<br/>完結する。Start-of-Combat Pendingのみ、下記WHO_COMBAT_START経由で到達する)"}
 
     WHO -->|"Main ProcessがStableで探索開始"| MAIN_CAP["Main GameInstanceからCaptureSnapshot<br/>(Emulator API境界)<br/>※Main Instanceは変更しない<br/>Current Result = 現在のStable Decision Result<br/>Replay Prefix = 空<br/>Plan Path = 空(この探索呼び出しの起点)<br/>Search Hypothesis ID = None(このRoot自体はMainの実RNGそのもの)"]
     WHO -->|"直前の評価境界で確定した<br/>Child Snapshot(RNG非依存のBeam Search続行時のみ。<br/>Hypothesis評価は単一のRoot Action Evaluation Segmentで<br/>完結するため本経路には来ない)"| PREV_CHILD["前の評価境界で採択したDecision ContextのChild Snapshot<br/>(mermaid_combat_commit_detail.mermaidから)<br/>これは必ずStable。Replay Prefix = 空で再開<br/>Plan Path = 親Decision ContextのPlan Pathをそのまま継承<br/>Search Hypothesis ID = None(RNG非依存経路のため)<br/>(→ mermaid_combat_commit_detail.mermaidのEXPAND)"]
+    WHO -->|"Start-of-Combat Pending(TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP等)で<br/>Main Processが探索開始(2026-08-03追加)。Held Stable Snapshotは<br/>まだ存在しない(=held_stable_snapshot is None)ことが条件"| WHO_COMBAT_START["Main起動時に使ったScenario／RNG Seed／Deck／Relicを<br/>Combat Start Replay Rootとして確定<br/>(Pending SnapshotのCapture/Restoreは一切行わない — NOTE_NO_REGEN)<br/>Current Result = Start-of-CombatのPending Choice Payload<br/>Replay Prefix = 空<br/>Plan Path = 空(この探索呼び出しの起点)<br/>Search Hypothesis ID = None"]
 
     MAIN_CAP --> ROOT_SNAP["Stable Root Snapshot確定<br/>(Replay Prefix = 空)"]
     PREV_CHILD --> ROOT_SNAP
+    WHO_COMBAT_START --> ROOT_REPLAY_ROOT["Combat Start Replay Root確定<br/>(Replay Prefix = 空)"]
 
     ROOT_SNAP --> TO_PIPELINE["→ mermaid_combat_candidate_pipeline_detail.mermaid<br/>CLASSIFY→PRE_EVAL→PRUNEへ<br/>(RNG Hypothesisの決定はまだ行わない。<br/>まずChoice Payloadの候補を絞り込む)"]
+    ROOT_REPLAY_ROOT --> TO_PIPELINE
 
     TO_PIPELINE -.->|"枝刈り後に生存した候補群<br/>(継続候補＋Sub Branch候補)"| FROM_PIPELINE_SPLIT["← mermaid_combat_candidate_pipeline_detail.mermaidのSPLIT"]
     FROM_PIPELINE_SPLIT --> TO_RNG["→ mermaid_combat_rng_hypothesis_detail.mermaid<br/>生存候補に対してのみRNG Hypothesisを決定する<br/>(Replay Prefixが空=新規決定可能、非空=既存Hをそのまま継承)"]
@@ -49,14 +57,17 @@ flowchart TD
     FROM_RNG -.->|"Sub Branch候補"| SUB_ENTRY["別Workerで下記のRestore+Replayを実行<br/>(WorkItem = Current Context Signature＋Candidate Semantic Action。<br/>WorkItem受領時点ではLease未確立)"]
 
     subgraph SUB_REPLAY["Sub Branch側の処理 (責任: Branch Worker、別GameInstance)"]
-        SUB_ENTRY --> VALIDATE["ValidateRestoreSnapshotJson<br/>(Emulator API境界)"]
-        BOOTSTRAP --> VALIDATE
+        SUB_ENTRY --> ROOT_KIND{"Rootの種別<br/>(WorkItemのDecision Context.root_snapshotが<br/>Stable Root SnapshotかCombat Start Replay Rootか)"}
+        BOOTSTRAP --> ROOT_KIND
+        ROOT_KIND -->|"Stable Root Snapshot"| VALIDATE["ValidateRestoreSnapshotJson<br/>(Emulator API境界)"]
+        ROOT_KIND -->|"Combat Start Replay Root<br/>(2026-08-03追加。TOOLBOX/CHOICES_PARADOX/GAMBLING_CHIP等)"| COMBAT_START_RUN["start_combat(scenario_spec)を再実行<br/>(Emulator API境界。ValidateRestoreSnapshotJson／RestoreSnapshotJsonは<br/>一切呼ばない — Pending Snapshotを直接Restoreしないのと同じ理由で、<br/>Combat Start Replay Root自体もCapture/Restoreの対象にしない)<br/>ResetResultを受領しCurrent Decision Resultとする"]
         VALIDATE --> VALID{"Restore可能か"}
         VALID -->|"No"| REJECT["rejection code + UnsupportedFieldPathsを返す<br/>→ mermaid_combat_fault_worker_detail.mermaid<br/>(種別: validation rejection。GameInstance未変更のためWorkerは再利用可能)"]
         VALID -->|"Yes"| RESTORE["RestoreSnapshotJson<br/>(Emulator API境界)<br/>RestoreResultを受領しCurrent Decision Resultとする<br/>RunRng・PlayerRng・MonsterRng(Shuffle purposeを含む完全なRNG)、<br/>および各PileのConcrete OrderedDrawPile(Authoritative/Hypotheticalの<br/>いずれか)等を含め厳密復元<br/>(→ 下記NOTE_RESHUFFLE_DETERMINISM)"]
 
         RESTORE --> PREFIX_EMPTY{"Replay Prefixは空か"}
-        PREFIX_EMPTY -->|"Yes"| AT_ROOT_S["RestoreResultがそのままDecision Contextの起点"]
+        COMBAT_START_RUN --> PREFIX_EMPTY
+        PREFIX_EMPTY -->|"Yes"| AT_ROOT_S["RestoreResult(またはResetResult)がそのままDecision Contextの起点"]
         PREFIX_EMPTY -->|"No"| REPLAY_STEP["Replay Prefix先頭の未実行Transition RecordのActionを、<br/>現在のDecision Result／Choice Payloadの候補へ再解決<br/>(RestoreResultまたは直前StepResultに含まれる候補のみを参照)"]
 
         REPLAY_STEP --> REPLAY_RESOLVABLE{"再解決できたか"}
