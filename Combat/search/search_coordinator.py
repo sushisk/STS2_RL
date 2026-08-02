@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable, Optional
 
 from combat_state_snapshot import CombatStateSnapshot, canonical_json
@@ -63,6 +63,36 @@ class SearchCoordinatorConfig:
     worker_count: int = 2
     max_retries: int = 1
     request_timeout_s: float = 120.0
+
+
+@dataclass
+class SearchCoordinatorMetrics:
+    """Optional per-call counters for observational shadow evaluation."""
+
+    pipeline_candidate_count: int = 0
+    pruned_candidate_count: int = 0
+    work_item_count: int = 0
+    hypothesis_involved: bool = False
+    hypothesis_count: int = 0
+    dispatch_round_count: int = 0
+    branch_step_count: int = 0
+    bootstrap_step_count: int = 0
+    holder_step_count: int = 0
+    replay_count: int = 0
+    fault_count: int = 0
+    retry_count: int = 0
+    worker_ids_used: set[int] = field(default_factory=set)
+    final_success_count: int = 0
+    final_fault_count: int = 0
+    aggregation_mode: Optional[str] = None
+    best_aggregate_score: Optional[float] = None
+    aggregation_diagnostics: dict[str, object] = field(default_factory=dict)
+
+    @property
+    def worker_utilization_fraction(self) -> float:
+        if self.work_item_count <= 0:
+            return 0.0
+        return len(self.worker_ids_used) / float(self.work_item_count)
 
 
 @dataclass(frozen=True)
@@ -248,6 +278,7 @@ def _dispatch_work_items_until_final(
     *,
     pool: BranchWorkerPool,
     config: SearchCoordinatorConfig,
+    metrics: Optional[SearchCoordinatorMetrics] = None,
 ) -> list[tuple[WorkItem, BranchResult, str]]:
     """Dispatch and retry WorkItems until each has a final outcome.
 
@@ -268,6 +299,8 @@ def _dispatch_work_items_until_final(
 
     while pending:
         round_count += 1
+        if metrics is not None:
+            metrics.dispatch_round_count += 1
         if round_count > max_rounds:
             states = {work_id: dataclasses.asdict(attempt) for work_id, attempt in attempts.items()}
             raise RuntimeError(
@@ -283,6 +316,15 @@ def _dispatch_work_items_until_final(
 
         retry_next_round: list[WorkItem] = []
         for work_item, branch_result in zip(pending, branch_results):
+            if metrics is not None:
+                metrics.branch_step_count += 1
+                if branch_result.execution_mode == "bootstrap_step":
+                    metrics.bootstrap_step_count += 1
+                    metrics.replay_count += 1
+                elif branch_result.execution_mode == "holder_step":
+                    metrics.holder_step_count += 1
+                if branch_result.worker_id is not None:
+                    metrics.worker_ids_used.add(branch_result.worker_id)
             attempt = attempts[work_item.work_id]
             if branch_result.status == BRANCH_STATUS_SUCCESS:
                 attempts[work_item.work_id] = dataclasses.replace(
@@ -298,6 +340,8 @@ def _dispatch_work_items_until_final(
                 raise RuntimeError(f"unknown BranchResult status {branch_result.status!r}")
 
             fault_kind = classify_fault(branch_result.diagnostics)
+            if metrics is not None:
+                metrics.fault_count += 1
             retry = decide_retry(attempt, fault_kind, max_retries=config.max_retries)
             attempts[work_item.work_id] = dataclasses.replace(
                 attempt,
@@ -306,6 +350,8 @@ def _dispatch_work_items_until_final(
                 worker_generation=retry.worker_generation,
             )
             if retry.should_retry:
+                if metrics is not None:
+                    metrics.retry_count += 1
                 retry_next_round.append(by_work_id[work_item.work_id])
                 continue
 
@@ -314,6 +360,9 @@ def _dispatch_work_items_until_final(
 
         pending = retry_next_round
 
+    if metrics is not None:
+        metrics.final_success_count += sum(1 for state in final_states.values() if state == WORK_ITEM_FINAL_SUCCESS)
+        metrics.final_fault_count += sum(1 for state in final_states.values() if state == WORK_ITEM_FINAL_FAULT)
     return [(item, final_results[item.work_id], final_states[item.work_id]) for item in work_items]
 
 
@@ -324,6 +373,7 @@ def build_search_strategy(
     combat_start_deck_multiset: dict[str, int],
     lease_registry: LeaseRegistry,
     main_state_provider: Optional[Callable[[], MainLoopState]] = None,
+    metrics: Optional[SearchCoordinatorMetrics] = None,
 ) -> SearchStrategy:
     """Build a Phase-3 ``SearchStrategy`` over the real Phase 4-7 components.
 
@@ -369,7 +419,12 @@ def build_search_strategy(
 
         assert isinstance(pipeline, CandidatePipelineSuccess)
         candidates = _candidate_batch(pipeline)
+        if metrics is not None:
+            metrics.pipeline_candidate_count = len(pipeline.ranked_candidates)
+            metrics.pruned_candidate_count = len(candidates)
         hypothesis_involved = _requires_hypothesis(decision_context, candidates)
+        if metrics is not None:
+            metrics.hypothesis_involved = hypothesis_involved
         public_multiset_coverage: Optional[CoverageAssessment] = None
         if hypothesis_involved:
             work_items, public_multiset_coverage = _hypothesis_work_items_with_coverage(
@@ -380,12 +435,16 @@ def build_search_strategy(
             )
         else:
             work_items = _plain_work_items(decision_context, candidates)
+        if metrics is not None:
+            metrics.work_item_count = len(work_items)
+            metrics.hypothesis_count = len({item.search_hypothesis_id for item in work_items if item.search_hypothesis_id is not None})
 
         final_results = _dispatch_work_items_until_final(
             work_items,
             lease_registry,
             pool=pool,
             config=config,
+            metrics=metrics,
         )
         entries = [
             to_decision_log_entry(work_item, branch_result, work_item_state=work_item_state)
@@ -405,6 +464,12 @@ def build_search_strategy(
             if hypothesis_involved
             else aggregate_plain_results(entries)
         )
+        if metrics is not None:
+            metrics.aggregation_mode = str(aggregation.diagnostics.get("mode"))
+            metrics.best_aggregate_score = (
+                None if aggregation.best_action is None else float(aggregation.best_action.aggregate_score)
+            )
+            metrics.aggregation_diagnostics = dict(aggregation.diagnostics)
         decision = build_commit_decision(
             aggregation,
             hypothesis_involved=hypothesis_involved,

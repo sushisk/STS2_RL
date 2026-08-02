@@ -23,7 +23,42 @@ from live_combat_session import LiveCombatSession
 from search.branch_worker_pool import BranchWorkerPool, LeaseRegistry
 from search.decision_context import SemanticAction
 from search.main_loop import SearchEvaluationFailure, SearchSuccess, build_main_decision_context, initialize_main_loop_state
-from search.search_coordinator import SearchCoordinatorConfig, build_search_strategy
+from search.search_coordinator import SearchCoordinatorConfig, SearchCoordinatorMetrics, build_search_strategy
+
+
+@dataclass(frozen=True)
+class ShadowOutcomeMetrics:
+    """Observed board metrics after executing the chosen action in a disposable session."""
+
+    outcome: str
+    is_terminal: bool
+    remaining_player_hp: int
+    potion_slots_consumed: int
+
+
+@dataclass(frozen=True)
+class ShadowExecutionMetrics:
+    """Common execution counters used by the batch shadow evaluator.
+
+    Old-path restore/step counts are approximated from HeuristicAgent's real evaluated
+    candidates because its internal BattleEmulator restores are not instrumented. New-path
+    counts come from SearchCoordinator/BranchResult execution modes.
+    """
+
+    step_count: int = 0
+    restore_count: int = 0
+    replay_count: int = 0
+    fault_count: int = 0
+    retry_count: int = 0
+    worker_count: int = 0
+    worker_ids_used: tuple[int, ...] = ()
+    worker_utilization_fraction: float = 0.0
+    hypothesis_count: int = 0
+    search_round_count: int = 0
+    plan_path_length: int = 0
+    bootstrap_step_count: int = 0
+    holder_step_count: int = 0
+    work_item_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -59,6 +94,8 @@ class OldPathResult:
     elapsed_ms: float
     legal_action_count: int
     restored_combat_session_id: "Optional[str]"
+    outcome: "Optional[ShadowOutcomeMetrics]" = None
+    metrics: ShadowExecutionMetrics = field(default_factory=ShadowExecutionMetrics)
 
 
 @dataclass(frozen=True)
@@ -69,6 +106,9 @@ class NewPathResult:
     planned_sequence_length: int
     elapsed_ms: float
     restored_combat_session_id: "Optional[str]"
+    score: "Optional[float]" = None
+    outcome: "Optional[ShadowOutcomeMetrics]" = None
+    metrics: ShadowExecutionMetrics = field(default_factory=ShadowExecutionMetrics)
     diagnostics: dict[str, Any] = field(default_factory=dict)
 
 
@@ -164,6 +204,22 @@ def _old_path_restore_compatible_state(battle_state):
     )
 
 
+def _potion_slots_consumed(before_state: dict, after_state: dict) -> int:
+    before = len([p for p in (before_state.get("potions") or []) if p])
+    after = len([p for p in (after_state.get("potions") or []) if p])
+    return max(0, before - after)
+
+
+def _outcome_metrics(before_state: dict, after_battle_state) -> ShadowOutcomeMetrics:
+    state = after_battle_state.engine_state
+    return ShadowOutcomeMetrics(
+        outcome=after_battle_state.outcome,
+        is_terminal=bool(after_battle_state.is_terminal),
+        remaining_player_hp=int(state.get("hp") or 0),
+        potion_slots_consumed=_potion_slots_consumed(before_state, state),
+    )
+
+
 def _old_path_worker(snapshot_json: str, repo_root: "str | None", out_queue) -> None:
     try:
         from battle_emulator import BattleEmulator
@@ -187,6 +243,14 @@ def _old_path_worker(snapshot_json: str, repo_root: "str | None", out_queue) -> 
         t0 = time.perf_counter()
         chosen, candidate_details = agent.choose_action_with_detail(battle_state)
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
+        evaluated_count = sum(1 for detail in candidate_details if detail.get("score") is not None)
+        fault_count = sum(1 for detail in candidate_details if detail.get("score") is None and detail.get("exception_type"))
+        outcome_state = emulator.apply_action(
+            battle_state,
+            chosen.action,
+            target_index=chosen.target_index,
+            continuation_resolver=agent._choose_action_continuation_live,  # noqa: SLF001
+        )
         target_enemy_index = next(
             (
                 _int_or_none(detail.get("enemy_index"))
@@ -208,6 +272,23 @@ def _old_path_worker(snapshot_json: str, repo_root: "str | None", out_queue) -> 
             elapsed_ms=elapsed_ms,
             legal_action_count=len(legal_actions),
             restored_combat_session_id=frame.combat_session_id if frame is not None else None,
+            outcome=_outcome_metrics(battle_state.engine_state, outcome_state),
+            metrics=ShadowExecutionMetrics(
+                step_count=evaluated_count + 1,
+                restore_count=1 + evaluated_count + 1,
+                replay_count=0,
+                fault_count=fault_count,
+                retry_count=0,
+                worker_count=0,
+                worker_ids_used=(),
+                worker_utilization_fraction=0.0,
+                hypothesis_count=0,
+                search_round_count=1,
+                plan_path_length=1,
+                bootstrap_step_count=0,
+                holder_step_count=0,
+                work_item_count=evaluated_count,
+            ),
         )
         out_queue.put(("ok", result))
     except BaseException as exc:  # noqa: BLE001
@@ -298,15 +379,17 @@ def run_new_path(
         raise ValueError(f"snapshot is not restore-eligible: {reasons}")
 
     effective_config = config or SearchCoordinatorConfig(width=4, hypothesis_count=2, max_retries=0)
+    coordinator_metrics = SearchCoordinatorMetrics()
     preserve_snapshot = _capture_current_process_snapshot(repo_root)
     try:
-        _session, _state, loop_state, context = _build_shadow_context(snapshot, repo_root=repo_root)
+        session, state, loop_state, context = _build_shadow_context(snapshot, repo_root=repo_root)
         strategy = build_search_strategy(
             pool,
             config=effective_config,
             combat_start_deck_multiset=combat_start_deck_multiset or {},
             lease_registry=LeaseRegistry(),
             main_state_provider=lambda: loop_state,
+            metrics=coordinator_metrics,
         )
 
         t0 = time.perf_counter()
@@ -314,8 +397,38 @@ def run_new_path(
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
         frame = loop_state.current_result.decision_frame
         restored_id = frame.combat_session_id if frame is not None else None
+        outcome = None
+        if isinstance(result, SearchSuccess) and result.planned_sequence:
+            first = result.planned_sequence[0]
+            resolved_action = first.semantic_action.resolve(state._cached_legal_actions or session.get_legal_actions())  # noqa: SLF001
+            outcome_state = session.step(
+                state,
+                resolved_action,
+                target_index=first.target_index,
+                target_enemy_index=first.target_enemy_index,
+            )
+            outcome = _outcome_metrics(state.engine_state, outcome_state)
     finally:
         _restore_current_process_snapshot(preserve_snapshot, repo_root=repo_root)
+
+    execution_metrics = ShadowExecutionMetrics(
+        step_count=coordinator_metrics.branch_step_count + (1 if outcome is not None else 0),
+        restore_count=1 + coordinator_metrics.bootstrap_step_count + 1,
+        replay_count=coordinator_metrics.replay_count,
+        fault_count=coordinator_metrics.fault_count,
+        retry_count=coordinator_metrics.retry_count,
+        worker_count=len(pool.worker_ids),
+        worker_ids_used=tuple(sorted(coordinator_metrics.worker_ids_used)),
+        worker_utilization_fraction=(
+            len(coordinator_metrics.worker_ids_used) / float(len(pool.worker_ids)) if pool.worker_ids else 0.0
+        ),
+        hypothesis_count=coordinator_metrics.hypothesis_count,
+        search_round_count=coordinator_metrics.dispatch_round_count,
+        plan_path_length=len(result.planned_sequence) if isinstance(result, SearchSuccess) else 0,
+        bootstrap_step_count=coordinator_metrics.bootstrap_step_count,
+        holder_step_count=coordinator_metrics.holder_step_count,
+        work_item_count=coordinator_metrics.work_item_count,
+    )
 
     if isinstance(result, SearchEvaluationFailure):
         return NewPathResult(
@@ -325,6 +438,9 @@ def run_new_path(
             planned_sequence_length=0,
             elapsed_ms=elapsed_ms,
             restored_combat_session_id=restored_id,
+            score=coordinator_metrics.best_aggregate_score,
+            outcome=None,
+            metrics=execution_metrics,
         )
     if not isinstance(result, SearchSuccess):
         raise TypeError(f"unexpected search result type: {type(result).__name__}")
@@ -336,6 +452,9 @@ def run_new_path(
             planned_sequence_length=0,
             elapsed_ms=elapsed_ms,
             restored_combat_session_id=restored_id,
+            score=coordinator_metrics.best_aggregate_score,
+            outcome=None,
+            metrics=execution_metrics,
         )
     first = result.planned_sequence[0]
     return NewPathResult(
@@ -349,6 +468,9 @@ def run_new_path(
         planned_sequence_length=len(result.planned_sequence),
         elapsed_ms=elapsed_ms,
         restored_combat_session_id=restored_id,
+        score=coordinator_metrics.best_aggregate_score,
+        outcome=outcome,
+        metrics=execution_metrics,
         diagnostics={"expected_signature_present": first.expected_signature is not None},
     )
 
