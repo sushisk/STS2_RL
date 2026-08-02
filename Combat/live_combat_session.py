@@ -648,6 +648,7 @@ class LiveCombatSession:
         target_enemy_index: "int | None" = None,
         continuation_resolver: "Callable | None" = None,
         continuation_deadline: "float | None" = None,
+        stop_at_pending: bool = False,
     ) -> BattleState:
         """Commits `action` (chosen against `battle_state`, this session's own last
         return value) via a direct `Step()` call - no restore, unless
@@ -655,6 +656,17 @@ class LiveCombatSession:
         ActionContinuation is resolved via repeated `Step()` calls on the same live
         `game`, exactly as `BattleEmulator.apply_action()` already does - the only
         difference from that method is the absence of an unconditional restore at entry.
+
+        `stop_at_pending`: when True, returns immediately with a genuinely
+        multi-candidate ActionContinuation PendingChoice still open (boundary=pending)
+        instead of auto-resolving it via `continuation_resolver` - callers that need to
+        treat each Pending decision as its own branch point (Search's Branch Worker
+        Pool, and Main replaying a Search-committed Plan Path that passed through one)
+        set this. The engine's OWN transparent single-real-candidate auto-confirm
+        (`CardSelectorPrefs.RequireManualConfirmation`, see
+        `C:\\STS2_Emulator\\docs\\reports\\pending_choice_exposure_20260803.md`) never
+        creates a PendingChoice at all, so it is unaffected either way - this flag only
+        ever changes behavior when there is a genuine multi-candidate choice open.
 
         `battle_state.decision_frame` must equal this session's current frame - this is
         the DecisionFrame validation this task's contract calls for: an action chosen
@@ -701,6 +713,8 @@ class LiveCombatSession:
         continuation_steps = 0
         resolver = continuation_resolver or self._emulator._default_choose_action_continuation_live  # noqa: SLF001
         while is_action_continuation_pending_choice(next_state.engine_state):
+            if stop_at_pending:
+                break
             continuation_steps += 1
             if continuation_steps > MAX_CONTINUATION_STEPS:
                 raise RuntimeError("ActionContinuation did not resolve within 50 continuation steps.")
