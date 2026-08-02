@@ -211,8 +211,7 @@ def initialize_main_loop_state(session: LiveCombatSession, initial_result: Battl
     """Wraps a fresh `start_combat()`/`resume_from()` return value into a `MainLoopState`.
     Does NOT itself perform the genesis Held Stable Snapshot capture - that happens on
     `run_until_terminal_or_fault()`'s first iteration exactly like every subsequent
-    Stable visit to BOUNDARY (STABLE_CAPTURE), plus one documented bootstrap exception for
-    a combat that starts directly on a Pending boundary (see that function's docstring)."""
+    Stable visit to BOUNDARY (STABLE_CAPTURE)."""
     return MainLoopState(session=session, current_result=initial_result)
 
 
@@ -512,21 +511,10 @@ def run_until_terminal_or_fault(
         if boundary == BOUNDARY_STABLE:
             _capture_stable(loop_state)
         elif boundary == BOUNDARY_PENDING:
-            if loop_state.held_stable_snapshot is None:
-                # Bootstrap exception, not in the diagram as drawn: the diagram's
-                # PENDING_HOLD assumes a PRIOR Stable already established the Held Stable
-                # Snapshot. A combat can reach Pending immediately out of start_combat()
-                # (e.g. the TOOLBOX relic's StartOfCombat choice, used by this phase's own
-                # tests) with no prior Stable at all in this episode. CaptureSnapshot is
-                # documented valid at any Quiescent Decision Boundary (Stable or Pending -
-                # Phase 2's own `_eligible_root_snapshot()` test helper captures at
-                # exactly this Toolbox Pending boundary), so a one-time genesis capture
-                # here is a safe, real Held Stable Snapshot substitute rather than leaving
-                # it `None` (which would make `build_main_decision_context()` unusable if
-                # Search were ever invoked before any Stable boundary occurs).
-                _capture_stable(loop_state)
-            # else: PENDING_HOLD - Held Stable Snapshot/Replay Prefix stay exactly as of
-            # the last Stable capture, untouched.
+            # PENDING_HOLD - Held Stable Snapshot/Replay Prefix stay exactly as of the
+            # last Stable capture, untouched. If this is a genesis Pending, no Stable
+            # root exists yet and Search is structurally disallowed below.
+            pass
         else:  # pragma: no cover - boundary_of_battle_state() never returns Fault (see decision_context.py)
             raise RuntimeError(f"unexpected boundary {boundary!r} outside EXEC_LOOP")
 

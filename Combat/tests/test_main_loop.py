@@ -133,34 +133,30 @@ def test_ordinary_stable_step_keeps_replay_prefix_reset_and_updates_snapshot():
 
 def test_pending_bookkeeping_extends_replay_prefix_then_resets_on_real_stable_resolution():
     """PENDING_HOLD/STEP_PENDING_HOLD (Replay Prefix EXTENDS, Held Stable Snapshot stays
-    untouched while still Pending) followed by the real Toolbox choice resolving to
-    Stable (STEP_STABLE_CAPTURE resets it again).
+    untouched while still Pending) followed by a real Stable boundary
+    (STEP_STABLE_CAPTURE resets it again).
 
-    White-box note: the Toolbox fixture's single choice_card pick genuinely resolves in
-    ONE real Step straight to Stable - this repo has no ready-made fixture that stays
-    Main-observed-Pending across two or more real Steps to exercise STEP_PENDING_HOLD
-    "naturally" end-to-end. The middle assertion block below therefore temporarily
-    monkeypatches `main_loop_module.boundary_of_battle_state` to report Pending for the
-    duration of ONE real `_run_exec_loop()` call, forcing the STEP_PENDING_HOLD branch to
-    run instead of STEP_STABLE_CAPTURE for that one call. The Step itself, the
-    `DecisionSignature`, and the `ReplayPrefixEntry`/append are all real and completely
-    unmodified - only which of the two (both otherwise real-tested) STEP_BOUNDARY arms
-    executes is redirected. Immediately afterward, the patch is removed and the REAL
-    boundary is re-derived from the (genuinely Stable) live state to confirm the choice
-    really did resolve, and the reset-on-Stable rule is exercised for real."""
+    White-box note: this repo has no ready-made fixture that stays Main-observed-Pending
+    across two or more real Steps to exercise STEP_PENDING_HOLD naturally end-to-end. The
+    middle assertion block below therefore temporarily monkeypatches
+    `main_loop_module.boundary_of_battle_state` to report Pending for the duration of ONE
+    real `_run_exec_loop()` call, forcing the STEP_PENDING_HOLD branch to run instead of
+    STEP_STABLE_CAPTURE for that one call. The Step itself, the `DecisionSignature`, and
+    the `ReplayPrefixEntry`/append are all real and completely unmodified - only which of
+    the two (both otherwise real-tested) STEP_BOUNDARY arms executes is redirected.
+    Immediately afterward, the patch is removed and the REAL boundary is re-derived from
+    the (genuinely Stable) live state to confirm the reset-on-Stable rule."""
     session = LiveCombatSession()
-    state = session.start_combat(_toolbox_pending_spec())
+    state = session.start_combat(_simple_spec(enemy_hp=999))
     loop_state = initialize_main_loop_state(session, state)
 
-    assert boundary_of_battle_state(loop_state.current_result) == BOUNDARY_PENDING
-    # Bootstrap: no prior Stable exists yet this episode (see run_until_terminal_or_fault's
-    # own documented genesis-Pending exception).
+    assert boundary_of_battle_state(loop_state.current_result) == BOUNDARY_STABLE
     _capture_stable(loop_state)
-    bootstrap_snapshot = loop_state.held_stable_snapshot
+    stable_snapshot = loop_state.held_stable_snapshot
     assert loop_state.replay_prefix == []
-    assert bootstrap_snapshot is not None
+    assert stable_snapshot is not None
 
-    loop_state.planned_sequence = [pending_static_select(loop_state.current_result)]
+    loop_state.planned_sequence = [_strike_targeting_selector(loop_state.current_result)]
 
     original_boundary_fn = main_loop_module.boundary_of_battle_state
     try:
@@ -171,14 +167,14 @@ def test_pending_bookkeeping_extends_replay_prefix_then_resets_on_real_stable_re
 
     assert exec_outcome == _EXEC_SEQUENCE_EXHAUSTED
     assert len(loop_state.replay_prefix) == 1  # extended, NOT reset - STEP_PENDING_HOLD
-    assert loop_state.held_stable_snapshot is bootstrap_snapshot  # untouched while "Pending"
+    assert loop_state.held_stable_snapshot is stable_snapshot  # untouched while "Pending"
 
     # Now check the REAL (unpatched) boundary and let the ordinary Stable-reset rule run.
     real_boundary = boundary_of_battle_state(loop_state.current_result)
-    assert real_boundary == BOUNDARY_STABLE, "the Toolbox choice should have genuinely resolved by now"
+    assert real_boundary == BOUNDARY_STABLE
     _capture_stable(loop_state)
     assert loop_state.replay_prefix == []
-    assert loop_state.held_stable_snapshot is not bootstrap_snapshot
+    assert loop_state.held_stable_snapshot is not stable_snapshot
 
 
 # ---------------------------------------------------------------------------
@@ -219,6 +215,51 @@ def test_pending_static_resolves_real_pending_boundary_without_restore_or_captur
     resolved = planned_step.semantic_action.resolve(state._cached_legal_actions)
     assert resolved is not None
     assert planned_step.expected_signature is None  # self-decided, not a prior prediction
+
+
+def test_genesis_pending_does_not_capture_until_real_stable_and_still_completes():
+    session = LiveCombatSession()
+    spec = _toolbox_pending_spec()
+    spec["enemies"] = [{"monster_id": "CALCIFIED_CULTIST", "hp": 1}]
+    state = session.start_combat(spec)
+    assert boundary_of_battle_state(state) == BOUNDARY_PENDING
+    loop_state = initialize_main_loop_state(session, state)
+
+    capture_boundaries = []
+    original_capture = session.capture_snapshot
+
+    def _tracking_capture(*args, **kwargs):
+        snapshot = original_capture(*args, **kwargs)
+        capture_boundaries.append(snapshot.Metadata.CaptureBoundary)
+        return snapshot
+
+    route_observations = []
+
+    def _routing_policy(boundary):
+        route_observations.append((boundary, loop_state.held_stable_snapshot))
+        if boundary == BOUNDARY_PENDING:
+            assert loop_state.held_stable_snapshot is None
+            assert capture_boundaries == []
+            return ROUTE_PENDING_STATIC
+        return ROUTE_DIRECT
+
+    session.capture_snapshot = _tracking_capture
+    try:
+        outcome = run_until_terminal_or_fault(
+            loop_state,
+            direct_selector=_strike_targeting_selector,
+            routing_policy=_routing_policy,
+            max_iterations=10,
+        )
+    finally:
+        session.capture_snapshot = original_capture
+
+    assert isinstance(outcome, CombatTerminalOutcome), outcome
+    assert route_observations[0] == (BOUNDARY_PENDING, None)
+    assert loop_state.held_stable_snapshot is not None
+    assert loop_state.held_stable_snapshot.Metadata.CaptureBoundary == "normal_player_decision"
+    assert capture_boundaries
+    assert all(boundary == "normal_player_decision" for boundary in capture_boundaries)
 
 
 # ---------------------------------------------------------------------------

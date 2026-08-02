@@ -21,6 +21,7 @@ docstring and `Combat/tests/test_decision_context.py`'s structural test.
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Optional
@@ -74,6 +75,11 @@ class SemanticActionUnresolvedError(RuntimeError):
     a genuine `live_combat_session.py` Emulator exception, since a candidate becoming
     unresolvable is an expected, well-defined replay-mismatch case per the mermaid
     contract, not an Emulator-side fault."""
+
+
+class PendingSnapshotRestoreViolationError(RuntimeError):
+    """Raised when a Decision Context tries to Restore from a Pending/non-Stable root
+    snapshot instead of restoring the prior Stable root and replaying to Pending."""
 
 
 @dataclass(frozen=True)
@@ -411,6 +417,33 @@ class ReplayMismatch:
 ReplayOutcome = "ReplaySuccess | ReplayMismatch"
 
 
+def _root_snapshot_capture_boundary(root_snapshot) -> "Optional[str]":
+    if isinstance(root_snapshot, str):
+        payload = json.loads(root_snapshot)
+        return payload.get("Metadata", {}).get("CaptureBoundary")
+    if isinstance(root_snapshot, dict):
+        return root_snapshot.get("Metadata", {}).get("CaptureBoundary")
+    metadata = getattr(root_snapshot, "Metadata", None)
+    if metadata is not None:
+        boundary = getattr(metadata, "CaptureBoundary", None)
+        return str(boundary) if boundary is not None else None
+    return None
+
+
+def _raise_if_root_snapshot_not_restore_eligible(root_snapshot) -> None:
+    from combat_state_snapshot import capture_boundary_is_restore_eligible
+
+    capture_boundary = _root_snapshot_capture_boundary(root_snapshot)
+    if capture_boundary is not None and not capture_boundary_is_restore_eligible(capture_boundary):
+        raise PendingSnapshotRestoreViolationError(
+            "DecisionContext root_snapshot has "
+            f"capture_boundary={capture_boundary!r}, which is not Restore-eligible. "
+            "This is a design violation of NOTE_NO_REGEN: Pending must be reached by "
+            "Restoring the prior Stable root snapshot and replaying the semantic action "
+            "prefix, never by Restoring a Pending snapshot directly."
+        )
+
+
 def replay_decision_context(session: "LiveCombatSession", context: "DecisionContext") -> "ReplaySuccess | ReplayMismatch":
     """SUB_REPLAY: Restore `context.root_snapshot`, then replay `context.replay_prefix`
     one Transition Record at a time with REPLAY_SIG_CHECK after each Step, then
@@ -433,6 +466,7 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
     """
     from live_combat_session import LiveCombatSession  # noqa: F401 - documents the expected type, avoids a hard import cycle
 
+    _raise_if_root_snapshot_not_restore_eligible(context.root_snapshot)
     state = session.restore_snapshot(context.root_snapshot)
     last_observed: "Optional[DecisionSignature]" = None
 

@@ -22,6 +22,7 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env", _COMBAT_DIR /
         sys.path.insert(0, str(_p))
 
 from battle_emulator import BattleState  # noqa: E402
+from combat_state_snapshot import canonical_json, restore_input_eligibility  # noqa: E402
 from live_combat_session import LiveCombatSession, SnapshotRestoreRejectedError  # noqa: E402
 from search.decision_context import (  # noqa: E402
     BOUNDARY_PENDING,
@@ -30,6 +31,7 @@ from search.decision_context import (  # noqa: E402
     CHOICE_SCOPE_TOP_LEVEL,
     DecisionContext,
     DecisionSignature,
+    PendingSnapshotRestoreViolationError,
     ReplayMismatch,
     ReplayPrefixEntry,
     ReplaySuccess,
@@ -151,6 +153,26 @@ def test_signature_from_pending_boundary_populates_pending_only_fields():
     candidate_keys_dict = dict(sig.candidate_semantic_keys)
     assert candidate_keys_dict[("choice_card", "EQUILIBRIUM", None)] == 1
     assert sum(candidate_keys_dict.values()) == len(state._cached_legal_actions)  # noqa: SLF001
+
+
+def test_restore_input_eligibility_rejects_pending_capture_but_accepts_stable_capture():
+    stable_session = LiveCombatSession()
+    stable_session.start_combat(_simple_spec())
+    stable_snapshot = stable_session.capture_snapshot()
+    stable_eligible, stable_reasons = restore_input_eligibility(stable_snapshot)
+
+    assert stable_snapshot.Metadata.CaptureBoundary == "normal_player_decision"
+    assert stable_eligible, stable_reasons
+
+    pending_session = LiveCombatSession()
+    pending_state = pending_session.start_combat(_toolbox_pending_spec())
+    assert boundary_of_battle_state(pending_state) == BOUNDARY_PENDING
+    pending_snapshot = pending_session.capture_snapshot()
+    pending_eligible, pending_reasons = restore_input_eligibility(pending_snapshot)
+
+    assert pending_snapshot.Metadata.CaptureBoundary == "published_choice"
+    assert pending_eligible is False
+    assert "capture_boundary='published_choice' is not Restore-eligible" in pending_reasons
 
 
 def test_boundary_construction_rejects_pending_fields_when_not_pending():
@@ -425,6 +447,33 @@ def test_replay_decision_context_surfaces_real_restore_rejection_uncaught():
         raise AssertionError("expected SnapshotRestoreRejectedError to propagate uncaught")
     except SnapshotRestoreRejectedError:
         pass
+
+
+def test_replay_decision_context_rejects_pending_root_as_design_violation():
+    session = LiveCombatSession()
+    state = session.start_combat(_toolbox_pending_spec())
+    assert boundary_of_battle_state(state) == BOUNDARY_PENDING
+    pending_snapshot = session.capture_snapshot()
+
+    chosen = _find_action(state, "choice_card", "EQUILIBRIUM")
+    signature = DecisionSignature.from_battle_state(
+        state,
+        semantic_action=_semantic_action_for(chosen),
+        resolved_action=chosen,
+    )
+
+    for root_snapshot in (
+        pending_snapshot,
+        canonical_json(dataclasses.asdict(pending_snapshot), exclude_volatile=False),
+    ):
+        context = DecisionContext.from_main_stable_capture(root_snapshot, state, signature)
+        try:
+            replay_decision_context(LiveCombatSession(), context)
+            raise AssertionError("expected PendingSnapshotRestoreViolationError")
+        except PendingSnapshotRestoreViolationError as exc:
+            assert "NOTE_NO_REGEN" in str(exc)
+            assert "published_choice" in str(exc)
+            assert "prior Stable root snapshot" in str(exc)
 
 
 def _run_all() -> int:

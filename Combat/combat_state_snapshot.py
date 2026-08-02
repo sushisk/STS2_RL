@@ -31,6 +31,7 @@ from typing import Any
 KNOWN_SCHEMA_VERSIONS = frozenset({"phase2a.1", "phase2b.1", "phase2b.2", "phase3c.3", "phase3c.4"})
 COMPLETENESS_VALUES = frozenset({"complete", "partial_known_gaps", "unsupported_state", "capture_failed"})
 CAPTURE_BOUNDARY_VALUES = frozenset({"normal_player_decision", "published_choice", "published_target", "terminal"})
+RESTORE_ELIGIBLE_CAPTURE_BOUNDARY_VALUES = frozenset({"normal_player_decision"})
 
 # Phase 2B contract (`combat_state_contract.v0.4.md` §Stable ID principles): opaque
 # per-Emulator-process id, format '<kind>-<sequence>' (e.g. 'card-000042'). Matches
@@ -43,6 +44,10 @@ class SnapshotValidationError(ValueError):
     """Raised when a captured Snapshot JSON fails required-field or schema-version
     validation. Never raised for merely-unknown extra fields (those are recorded, not
     rejected) - only for a missing required field or an unrecognized `SchemaVersion`."""
+
+
+def capture_boundary_is_restore_eligible(capture_boundary: str) -> bool:
+    return capture_boundary in RESTORE_ELIGIBLE_CAPTURE_BOUNDARY_VALUES
 
 
 def _require(d: dict, keys: list[str], type_name: str) -> None:
@@ -678,7 +683,13 @@ def validate_snapshot_references(snapshot: "CombatStateSnapshot") -> SnapshotRef
 
 
 def restore_input_eligibility(snapshot: "CombatStateSnapshot") -> "tuple[bool, list[str]]":
-    """Combined Phase-3-readiness gate. Does NOT mutate/override `Metadata.Completeness`
+    """Fast static approximation of Restore input eligibility.
+
+    This does not call the live Emulator validation API, and is therefore only a cheap
+    Python-side pre-check. Callers requiring the authoritative ground-truth verdict must
+    use `LiveCombatSession.validate_restore_snapshot()`/`validate_restore_snapshot_json()`.
+
+    Combined Phase-3-readiness gate. Does NOT mutate/override `Metadata.Completeness`
     (that field remains the Emulator's own verbatim verdict, per the never-upgrade
     principle) - this is a SEPARATE, additional check layered on top: even a Snapshot the
     Emulator marked `complete` is not eligible as Restore input if this Python-side
@@ -688,6 +699,8 @@ def restore_input_eligibility(snapshot: "CombatStateSnapshot") -> "tuple[bool, l
     reasons = []
     if not snapshot.completeness_is_complete():
         reasons.append(f"completeness={snapshot.Metadata.Completeness!r} (Emulator verdict, not 'complete')")
+    if not capture_boundary_is_restore_eligible(snapshot.Metadata.CaptureBoundary):
+        reasons.append(f"capture_boundary={snapshot.Metadata.CaptureBoundary!r} is not Restore-eligible")
     ref_report = validate_snapshot_references(snapshot)
     if ref_report.duplicate_instance_ids:
         reasons.append(f"duplicate_instance_ids={ref_report.duplicate_instance_ids}")
