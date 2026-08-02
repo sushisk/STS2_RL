@@ -469,7 +469,20 @@ def build_search_strategy(
             metrics.best_aggregate_score = (
                 None if aggregation.best_action is None else float(aggregation.best_action.aggregate_score)
             )
-            metrics.aggregation_diagnostics = dict(aggregation.diagnostics)
+            metrics.aggregation_diagnostics = {
+                **dict(aggregation.diagnostics),
+                "viable_actions": [
+                    {
+                        "root_action_key": action.root_action_key,
+                        "aggregate_score": action.aggregate_score,
+                        "valid_sample_count": action.valid_sample_count,
+                        "total_hypotheses": action.total_hypotheses,
+                        "missing_sample_count": action.missing_sample_count,
+                        "filled_score": action.filled_score,
+                    }
+                    for action in aggregation.viable_actions
+                ],
+            }
         decision = build_commit_decision(
             aggregation,
             hypothesis_involved=hypothesis_involved,
