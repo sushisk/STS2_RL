@@ -66,6 +66,13 @@ def _simple_spec(hand=None, enemy_hp=48):
     }
 
 
+def _liquid_memories_spec():
+    spec = _simple_spec(hand=["STRIKE_IRONCLAD"], enemy_hp=48)
+    spec["discard_pile"] = ["DEFEND_IRONCLAD", "STRIKE_IRONCLAD"]
+    spec["potions"] = [{"slot": 0, "potion_id": "LIQUID_MEMORIES"}]
+    return spec
+
+
 def _semantic_action_for(action: dict) -> SemanticAction:
     params = action.get("parameters") or {}
     return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
@@ -83,6 +90,15 @@ def _representative_signature(state: BattleState) -> DecisionSignature:
 def _context_and_pipeline(enemy_hp=999, width=2, hand=None):
     session = LiveCombatSession()
     state = session.start_combat(_simple_spec(enemy_hp=enemy_hp, hand=hand or ["STRIKE_IRONCLAD", "DEFEND_IRONCLAD"]))
+    context = DecisionContext.from_main_stable_capture(_eligible_root_snapshot(session), state, _representative_signature(state))
+    pipeline = build_candidate_pipeline_result(context, width=width)
+    assert isinstance(pipeline, CandidatePipelineSuccess), pipeline
+    return context, pipeline
+
+
+def _context_and_pipeline_for_spec(spec, width=8):
+    session = LiveCombatSession()
+    state = session.start_combat(spec)
     context = DecisionContext.from_main_stable_capture(_eligible_root_snapshot(session), state, _representative_signature(state))
     pipeline = build_candidate_pipeline_result(context, width=width)
     assert isinstance(pipeline, CandidatePipelineSuccess), pipeline
@@ -403,6 +419,35 @@ def test_real_multiprocess_pool_can_return_terminal_result_without_snapshot():
     assert result.terminal_result is not None
     assert result.terminal_result.outcome == "victory"
     assert result.child_snapshot is None
+
+
+def test_real_multiprocess_pool_pending_step_establishes_context_pipeline_and_lease():
+    context, pipeline = _context_and_pipeline_for_spec(_liquid_memories_spec(), width=8)
+    potion_candidate = next(
+        ref
+        for ref in [pipeline.continuation_candidate, *pipeline.sub_branch_candidates]
+        if ref.semantic_action.action_type == "potion"
+    )
+    item = WorkItem.from_candidate_ref(
+        context,
+        potion_candidate,
+        work_kind="continuation",
+        context_id=derive_context_id(context),
+        work_id="liquid-pending",
+    )
+
+    registry = LeaseRegistry()
+    with BranchWorkerPool(worker_count=1, request_timeout_s=120.0) as pool:
+        results = pool.dispatch_work_items([item], registry)
+
+    result = results[0]
+    assert result.status == BRANCH_STATUS_SUCCESS, result.diagnostics
+    assert result.result_signature.boundary == BOUNDARY_PENDING
+    assert result.pending_decision_context is not None
+    assert result.pending_pipeline_result is not None
+    assert result.established_lease is not None
+    assert derive_context_id(result.pending_decision_context) == result.established_lease.context_id
+    assert registry.get(result.established_lease.context_id, None) == result.established_lease
 
 
 def _run_all() -> int:

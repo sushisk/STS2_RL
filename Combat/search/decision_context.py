@@ -482,6 +482,7 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
             resolved_action,
             target_index=entry.target_index,
             target_enemy_index=entry.target_enemy_index,
+            stop_at_pending=True,
         )
 
         observed = DecisionSignature.from_battle_state(

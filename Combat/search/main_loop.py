@@ -404,6 +404,7 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
                 resolved_action,
                 target_index=planned_step.target_index,
                 target_enemy_index=planned_step.target_enemy_index,
+                stop_at_pending=True,
             )
         except (ActionExecutionError, FaultedCombatSessionError, QuiescentBoundaryViolation) as exc:
             # STEP_FAULT_CHECK=Yes -> STEP_FAULT_JUMP: NOTE_FAULT_FIRST - no Transition

@@ -25,6 +25,7 @@ from live_combat_session import LiveCombatSession  # noqa: E402
 from search.branch_worker_pool import (  # noqa: E402
     BRANCH_STATUS_SUCCESS,
     EXECUTION_MODE_BOOTSTRAP_STEP,
+    EXECUTION_MODE_HOLDER_STEP,
     BranchResult,
     BranchTerminalResult,
     BranchWorkerPool,
@@ -37,6 +38,7 @@ from search.candidate_pipeline import (  # noqa: E402
     PipelineCandidateRef,
 )
 from search.decision_context import (  # noqa: E402
+    BOUNDARY_PENDING,
     BOUNDARY_STABLE,
     BOUNDARY_TERMINAL,
     DecisionContext,
@@ -67,6 +69,13 @@ def _simple_spec(hand=None, draw_pile=None, enemy_hp=999):
         "seed": 1,
         "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": enemy_hp}],
     }
+
+
+def _liquid_memories_spec():
+    spec = _simple_spec(hand=[], enemy_hp=999)
+    spec["discard_pile"] = ["DEFEND_IRONCLAD", "STRIKE_IRONCLAD"]
+    spec["potions"] = [{"slot": 0, "potion_id": "LIQUID_MEMORIES"}]
+    return spec
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
@@ -326,6 +335,57 @@ def test_terminal_mid_chain_is_completed_and_considered_final():
     assert isinstance(result, SearchSuccess), result
     assert len(result.planned_sequence) == 1
     assert result.planned_sequence[0].expected_signature.boundary == BOUNDARY_TERMINAL
+
+
+def test_real_pending_mid_chain_continues_with_holder_and_sibling_replay():
+    context = _context(_liquid_memories_spec())
+    original_requires_hypothesis = multi_round_module._requires_hypothesis  # noqa: SLF001
+    original_dispatch = coordinator_module.dispatch_work_items
+    dispatch_calls = []
+
+    def _dispatch(work_items, lease_registry, *, worker_pool):
+        results = original_dispatch(work_items, lease_registry, worker_pool=worker_pool)
+        dispatch_calls.append(
+            [
+                (
+                    item.work_kind,
+                    result.execution_mode,
+                    result.worker_id,
+                    result.result_signature.boundary if result.result_signature is not None else None,
+                    item.candidate.semantic_action.action_type,
+                    item.candidate.semantic_action.card_id,
+                )
+                for item, result in zip(work_items, results)
+            ]
+        )
+        return results
+
+    multi_round_module._requires_hypothesis = lambda _context, _candidates: False  # noqa: SLF001
+    coordinator_module.dispatch_work_items = _dispatch
+    try:
+        with BranchWorkerPool(worker_count=2, request_timeout_s=120.0) as pool:
+            strategy = build_beam_search_strategy(
+                pool,
+                config=BeamSearchConfig(
+                    coordinator=SearchCoordinatorConfig(width=8, max_retries=0, request_timeout_s=120.0),
+                    beam_width=1,
+                    max_rounds=2,
+                ),
+                combat_start_deck_multiset={},
+                lease_registry=LeaseRegistry(),
+            )
+            result = strategy(context)
+    finally:
+        multi_round_module._requires_hypothesis = original_requires_hypothesis  # noqa: SLF001
+        coordinator_module.dispatch_work_items = original_dispatch
+
+    assert isinstance(result, SearchSuccess), result
+    assert len(dispatch_calls) == 2
+    assert len(result.planned_sequence) == 2
+    assert result.planned_sequence[0].expected_signature.boundary == BOUNDARY_PENDING
+    assert dispatch_calls[0][0][3] == BOUNDARY_PENDING
+    assert any(call[1] == EXECUTION_MODE_HOLDER_STEP for call in dispatch_calls[1]), dispatch_calls
+    assert any(call[0] == "sub_branch" and call[1] == EXECUTION_MODE_BOOTSTRAP_STEP for call in dispatch_calls[1]), dispatch_calls
 
 
 def test_zero_viable_candidates_on_first_round_returns_failure():

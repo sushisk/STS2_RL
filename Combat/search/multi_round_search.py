@@ -14,6 +14,7 @@ broken deterministically by shorter plan length and then stable root-action keys
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -26,7 +27,9 @@ from search.candidate_pipeline import (
     build_candidate_pipeline_result,
 )
 from search.decision_context import (
+    BOUNDARY_PENDING,
     BOUNDARY_STABLE,
+    BOUNDARY_TERMINAL,
     DecisionContext,
     DecisionSignature,
     ReplayPrefixEntry,
@@ -344,6 +347,24 @@ def build_beam_search_strategy(
                 signature = candidate.branch_result.result_signature
                 if signature is None:
                     raise ValueError("successful expansion did not carry result_signature")
+                if signature.boundary == BOUNDARY_TERMINAL:
+                    completed.append(_completed_from_expansion(candidate, reason="terminal_boundary"))
+                    continue
+                if signature.boundary == BOUNDARY_PENDING:
+                    if round_index + 1 >= config.max_rounds:
+                        completed.append(_completed_from_expansion(candidate, reason="max_rounds"))
+                        continue
+                    pending_context = candidate.branch_result.pending_decision_context
+                    if pending_context is None:
+                        raise ValueError("Pending expansion did not carry pending_decision_context")
+                    next_active.append(
+                        _BeamEntry(
+                            context=dataclasses.replace(pending_context, plan_path=list(candidate.plan_path)),
+                            cumulative_score=candidate.cumulative_score,
+                            sort_key=candidate.sort_key,
+                        )
+                    )
+                    continue
                 if signature.boundary != BOUNDARY_STABLE or candidate.branch_result.child_snapshot is None:
                     completed.append(_completed_from_expansion(candidate, reason="non_stable_boundary"))
                     continue

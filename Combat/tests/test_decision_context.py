@@ -21,7 +21,7 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env", _COMBAT_DIR /
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from battle_emulator import BattleState  # noqa: E402
+from battle_emulator import BattleState, is_action_continuation_pending_choice  # noqa: E402
 from combat_state_snapshot import canonical_json, restore_input_eligibility  # noqa: E402
 from live_combat_session import LiveCombatSession, SnapshotRestoreRejectedError  # noqa: E402
 from search.decision_context import (  # noqa: E402
@@ -66,6 +66,15 @@ def _toolbox_pending_spec():
         "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
         "hand": ["STRIKE_IRONCLAD"], "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
         "player_powers": [], "relics": ["TOOLBOX"], "potions": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+
+
+def _liquid_memories_spec(discard_pile):
+    return {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand": ["STRIKE_IRONCLAD"], "draw_pile": [], "discard_pile": discard_pile, "exhaust_pile": [],
+        "player_powers": [], "relics": [], "potions": [{"slot": 0, "potion_id": "LIQUID_MEMORIES"}], "seed": 1,
         "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
     }
 
@@ -376,6 +385,29 @@ def test_replay_decision_context_clean_replay_reaches_recorded_signature():
         outcome.final_state, semantic_action=defend_semantic, resolved_action=defend
     )
     assert final_sig.matches_for_replay(sig2)
+
+
+def test_replay_decision_context_reproduces_pending_prefix_entry():
+    record_session = LiveCombatSession()
+    state0 = record_session.start_combat(_liquid_memories_spec(["DEFEND_IRONCLAD", "STRIKE_IRONCLAD"]))
+    root_snapshot = _eligible_root_snapshot(record_session)
+
+    potion = _find_action(state0, "potion")
+    potion_semantic = _semantic_action_for(potion)
+    state1 = record_session.step(state0, potion, stop_at_pending=True)
+    assert boundary_of_battle_state(state1) == BOUNDARY_PENDING, state1.engine_state.get("pendingChoice")
+    assert is_action_continuation_pending_choice(state1.engine_state), state1.engine_state.get("pendingChoice")
+
+    sig1 = DecisionSignature.from_battle_state(state1, semantic_action=potion_semantic, resolved_action=potion)
+    entry1 = ReplayPrefixEntry(semantic_action=potion_semantic, expected_signature=sig1)
+    context = DecisionContext.from_main_stable_capture(root_snapshot, state0, sig1)
+    context = dataclasses.replace(context, replay_prefix=[entry1], current_context_signature=sig1)
+
+    outcome = replay_decision_context(LiveCombatSession(), context)
+
+    assert isinstance(outcome, ReplaySuccess), outcome
+    assert boundary_of_battle_state(outcome.final_state) == BOUNDARY_PENDING, outcome.final_state.engine_state.get("pendingChoice")
+    assert is_action_continuation_pending_choice(outcome.final_state.engine_state), outcome.final_state.engine_state.get("pendingChoice")
 
 
 def test_replay_decision_context_detects_tampered_action_as_mismatch():
