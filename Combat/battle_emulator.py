@@ -775,6 +775,38 @@ class BattleEmulator:
                 result = game.Step(legal_after[idx].ActionId)
 
         next_turn = battle_state.turn + 1 if action["action_type"] == "system" else battle_state.turn
+
+        # Emulator commit dd8c800 ("Separate combat completion result from current Boundary
+        # in StepResult") added StepResult.Transition (TransitionOutcome), non-null exactly on
+        # the Step that watched combat go from in-progress to concluded. This is now the
+        # authoritative Combat-end signal (contract: Transition.Kind == "combat_completed"),
+        # rather than relying only on Observation.IsTerminal. FinalObservation is the
+        # snapshot captured before _combatState was cleared/post-combat processing ran - the
+        # correct "final combat state" to wrap, since in full-run mode (not used by this
+        # legacy no-map ResetFromScenario path today, but kept mode-agnostic for forward
+        # compatibility) result.Observation would already describe the NEXT settled state
+        # (reward/map), not the finished combat.
+        transition = result.Transition
+        if transition is not None and str(transition.Kind) == "combat_completed":
+            # Legacy no-map mode's existing contract (ComputeIsRunOver: !HasMap => combat
+            # concluded == run over) means Observation.IsTerminal must already be True here -
+            # this is a debug consistency check, not new terminal-detection logic; a mismatch
+            # would mean this translation and the Emulator's own legacy-mode contract have
+            # diverged, which existing Search/Main Loop/Shadow/endurance code implicitly
+            # depends on via obs.IsTerminal elsewhere in this file.
+            assert bool(result.Observation.IsTerminal), (
+                "StepResult.Transition.Kind == 'combat_completed' but "
+                "StepResult.Observation.IsTerminal is False - legacy no-map mode's "
+                "run_terminal-on-combat-conclusion contract no longer holds."
+            )
+            return self._wrap(
+                transition.FinalObservation,
+                turn=next_turn,
+                enemy_max_hps=battle_state.enemy_max_hps,
+                shuffle_rng_seed=battle_state.shuffle_rng_seed,
+                legal_actions=legal_actions_to_list(result.LegalActions),
+            )
+
         return self._wrap(
             result.Observation,
             turn=next_turn,

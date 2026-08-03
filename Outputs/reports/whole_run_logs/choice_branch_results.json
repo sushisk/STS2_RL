@@ -1,0 +1,106 @@
+{
+  "map": {
+    "ok": true,
+    "checks": {
+      "same_choice_same_result": true,
+      "different_choices_diverge": true,
+      "holder_sibling_isolated": true
+    }
+  },
+  "combat_pending": {
+    "ok": false,
+    "checks": {
+      "boundary_matches": true,
+      "choice_scope_matches": true,
+      "choice_kind_matches": true,
+      "room_context_matches": true,
+      "legal_action_semantic_set_matches": true,
+      "transition_unconsumed": true,
+      "prefix_replay_reproduces_boundary_again": true,
+      "same_choice_same_result": true,
+      "different_choices_diverge": false,
+      "holder_sibling_isolated": true
+    }
+  },
+  "event": {
+    "ok_any_of_3_attempts": false,
+    "attempts": [
+      {
+        "attempt": 0,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still EventRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      },
+      {
+        "attempt": 1,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still EventRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      },
+      {
+        "attempt": 2,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still EventRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      }
+    ]
+  },
+  "reward": {
+    "ok_any_of_3_attempts": false,
+    "attempts": [
+      {
+        "attempt": 0,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still CombatRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      },
+      {
+        "attempt": 1,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still CombatRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      },
+      {
+        "attempt": 2,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still CombatRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      }
+    ]
+  },
+  "shop": {
+    "ok_any_of_3_attempts": true,
+    "attempts": [
+      {
+        "attempt": 0,
+        "ok": true,
+        "checks": {
+          "boundary_matches": true,
+          "choice_scope_matches": true,
+          "choice_kind_matches": true,
+          "room_context_matches": true,
+          "legal_action_semantic_set_matches": true,
+          "transition_unconsumed": true,
+          "prefix_replay_reproduces_boundary_again": true,
+          "same_choice_same_result": true,
+          "different_choices_diverge": true,
+          "holder_sibling_isolated": true
+        }
+      }
+    ]
+  },
+  "rest": {
+    "ok_any_of_3_attempts": false,
+    "attempts": [
+      {
+        "attempt": 0,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still RestSiteRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      },
+      {
+        "attempt": 1,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still RestSiteRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      },
+      {
+        "attempt": 2,
+        "ok": false,
+        "error": "InvalidOperationException: RunManager.ExitCurrentRooms returned but CurrentRoom is still RestSiteRoom.\r\n   at Sts2Emulator.Api.GameInstance.EagerExitCurrentRooms() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5182\r\n   at Sts2Emulator.Api.GameInstance.TryEagerExitResolvedRoom() in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 5169\r\n   at Sts2Emulator.Api.GameInstance.Step(Int32 actionId) in C:\\STS2_Emulator\\Sts2Emulator\\Api\\GameInstance.cs:line 3044\r\n   at InvokeStub_GameInstance.Step(Object, Span`1)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)"
+      }
+    ]
+  }
+}
