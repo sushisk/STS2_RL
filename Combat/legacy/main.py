@@ -13,12 +13,12 @@ from pathlib import Path
 
 from battle_emulator import BattleEmulator
 from battle_result import BattleResult
-from beam_search import DEFAULT_BEAM_WIDTH, DEFAULT_MAX_PLAYS, TurnBeamSearcher
-from heuristic_agent import ChosenAction, HeuristicAgent
+from legacy.beam_search import DEFAULT_BEAM_WIDTH, DEFAULT_MAX_PLAYS, TurnBeamSearcher
+from legacy.heuristic_agent import ChosenAction, HeuristicAgent
 from lookahead import DEFAULT_D, DEFAULT_K, DEFAULT_M, LookaheadSearcher
-from potion_value_table import PotionValueTable
+from legacy.potion_value_table import PotionValueTable
 from scenario_set import ScenarioSet
-from state_evaluator import DEFAULT_WEIGHTS, StateEvaluator
+from legacy.state_evaluator import DEFAULT_WEIGHTS, StateEvaluator
 
 
 def load_eval_scenarios(train_n: int = 5, validation_n: int = 3, test_n: int = 5) -> ScenarioSet:

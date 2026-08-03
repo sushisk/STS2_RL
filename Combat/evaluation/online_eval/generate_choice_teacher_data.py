@@ -43,12 +43,12 @@ sys.path.insert(0, str(_COMBAT_DIR / "data"))
 
 from battle_emulator import battle_state_key, is_action_continuation_pending_choice  # noqa: E402
 from combat_env import CombatEnv  # noqa: E402
-from heuristic_agent import HeuristicAgent  # noqa: E402
-from state_evaluator import DEFAULT_WEIGHTS, StateEvaluator  # noqa: E402
-from potion_value_table import PotionValueTable  # noqa: E402
+from legacy.heuristic_agent import HeuristicAgent  # noqa: E402
+from legacy.state_evaluator import DEFAULT_WEIGHTS, StateEvaluator  # noqa: E402
+from legacy.potion_value_table import PotionValueTable  # noqa: E402
 from preflight_validate import preflight_validate  # noqa: E402
 from choice_semantics import ChoiceSemanticsTable  # noqa: E402
-from policy_agent import CHOICE_FALLBACK_ACTION_TYPES  # noqa: E402
+from legacy.policy_agent import CHOICE_FALLBACK_ACTION_TYPES  # noqa: E402
 from generate_heuristic_trajectories import (  # noqa: E402
     HEURISTIC_VERSION, EMULATOR_DLL_PATH, EMULATOR_COMMIT, emulator_dll_sha256,
     emulator_version, scenario_hash, unrestorable_forced_moves, unsupported_pending_choice,

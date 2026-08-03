@@ -38,9 +38,9 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env"):
 
 from combat_env import CombatEnv  # noqa: E402
 from preflight_validate import preflight_validate  # noqa: E402
-from policy_agent import build_policy_agent  # noqa: E402
+from legacy.policy_agent import build_policy_agent  # noqa: E402
 from choice_semantics import ChoiceSemanticsTable  # noqa: E402
-from choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT, make_ab_continuation_resolver  # noqa: E402
+from legacy.choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT, make_ab_continuation_resolver  # noqa: E402
 from emulator_bridge import to_plain  # noqa: E402
 
 

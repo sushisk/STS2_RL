@@ -41,9 +41,9 @@ from battle_emulator import BattleEmulator, to_plain  # noqa: E402
 from live_combat_session import LiveCombatSession  # noqa: E402
 import choice_policy_online_eval as cpoe  # noqa: E402
 from choice_policy_online_eval import run_scenario_ab, load_jsonl  # noqa: E402
-from choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT  # noqa: E402
+from legacy.choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT  # noqa: E402
 from choice_semantics import ChoiceSemanticsTable  # noqa: E402
-from policy_agent import build_policy_agent  # noqa: E402
+from legacy.policy_agent import build_policy_agent  # noqa: E402
 
 
 def _state_summary(engine_state: dict) -> dict:

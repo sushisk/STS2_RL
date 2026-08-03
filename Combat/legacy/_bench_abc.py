@@ -5,12 +5,12 @@ import random
 import time
 
 from battle_emulator import BattleEmulator
-from state_evaluator import StateEvaluator, DEFAULT_WEIGHTS
-from potion_value_table import PotionValueTable
+from legacy.state_evaluator import StateEvaluator, DEFAULT_WEIGHTS
+from legacy.potion_value_table import PotionValueTable
 from scenario_set import ScenarioSet
-from beam_search import TurnBeamSearcher, DEFAULT_BEAM_WIDTH, DEFAULT_MAX_PLAYS
+from legacy.beam_search import TurnBeamSearcher, DEFAULT_BEAM_WIDTH, DEFAULT_MAX_PLAYS
 from lookahead import LookaheadSearcher, DEFAULT_K, DEFAULT_D, DEFAULT_M
-from heuristic_agent import HeuristicAgent
+from legacy.heuristic_agent import HeuristicAgent
 
 RNG_SEED = 4242
 

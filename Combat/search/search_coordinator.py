@@ -29,6 +29,7 @@ from search.branch_worker_pool import (
 )
 from search.candidate_pipeline import CandidatePipelineSuccess, NoViableCandidates, PipelineCandidateRef
 from search.candidate_pipeline import build_candidate_pipeline_result
+from search.candidate_pipeline import build_candidate_pipeline_result_for_explicit_candidates
 from search.decision_context import CombatStartReplayRoot, DecisionContext
 from search.fault_taxonomy import (
     MainCombatFaultOutcome,
@@ -406,6 +407,72 @@ def _dispatch_work_items_until_final(
         metrics.final_success_count += sum(1 for state in final_states.values() if state == WORK_ITEM_FINAL_SUCCESS)
         metrics.final_fault_count += sum(1 for state in final_states.values() if state == WORK_ITEM_FINAL_FAULT)
     return [(item, final_results[item.work_id], final_states[item.work_id]) for item in work_items]
+
+
+@dataclass(frozen=True)
+class ExplicitBranchDispatchResult:
+    """One candidate's Branch execution outcome - post-branch state and execution
+    statistics only. No aggregate/best-action score is attached anywhere in this
+    dataclass or its `branch_result` - see `dispatch_explicit_candidates`'s own
+    docstring for why."""
+
+    work_item: WorkItem
+    branch_result: BranchResult
+    work_item_state: str
+
+
+def dispatch_explicit_candidates(
+    decision_context: DecisionContext,
+    candidate_legal_action_indices: "list[int]",
+    *,
+    pool: BranchWorkerPool,
+    config: SearchCoordinatorConfig,
+    lease_registry: LeaseRegistry,
+    combat_start_deck_multiset: dict[str, int],
+    metrics: Optional[SearchCoordinatorMetrics] = None,
+) -> "list[ExplicitBranchDispatchResult]":
+    """Training-facing Branch execution entry point (RL担当指示：推論処理撤去と受動実行基盤
+    への整理, section 5). Candidates are EXPLICITLY specified by index into the current
+    Decision Result's own `legal_actions` - never implicitly expanded from all Legal
+    Actions, never scored, ranked, or pruned by any heuristic
+    (`build_candidate_pipeline_result_for_explicit_candidates` does none of that).
+
+    Returns one `ExplicitBranchDispatchResult` per candidate: the resulting
+    `BranchResult` (post-branch state + execution diagnostics) and its final retry
+    state. There is no aggregate score, no "best action" selection, and NOTHING here
+    commits any result back to Main - reuses the exact same Fault-retry/Lease/Worker
+    dispatch machinery as `build_search_strategy` (`_dispatch_work_items_until_final`),
+    just without the scoring/aggregation/auto-commit layers built on top of it.
+    Training (or a test standing in for it) decides what to do with the results.
+    """
+    pipeline = build_candidate_pipeline_result_for_explicit_candidates(
+        decision_context, candidate_legal_action_indices
+    )
+    assert isinstance(pipeline, CandidatePipelineSuccess)  # the explicit builder never returns NoViableCandidates
+    candidates = _candidate_batch(pipeline)
+    if metrics is not None:
+        metrics.pipeline_candidate_count = len(pipeline.ranked_candidates)
+        metrics.pruned_candidate_count = len(candidates)
+    hypothesis_involved = _requires_hypothesis(decision_context, candidates)
+    if metrics is not None:
+        metrics.hypothesis_involved = hypothesis_involved
+    if hypothesis_involved:
+        work_items = _hypothesis_work_items(
+            decision_context, candidates, config=config, combat_start_deck_multiset=combat_start_deck_multiset
+        )
+    else:
+        work_items = _plain_work_items(decision_context, candidates)
+    if metrics is not None:
+        metrics.work_item_count = len(work_items)
+        metrics.hypothesis_count = len(
+            {item.search_hypothesis_id for item in work_items if item.search_hypothesis_id is not None}
+        )
+
+    final_results = _dispatch_work_items_until_final(work_items, lease_registry, pool=pool, config=config, metrics=metrics)
+    return [
+        ExplicitBranchDispatchResult(work_item=work_item, branch_result=branch_result, work_item_state=state)
+        for work_item, branch_result, state in final_results
+    ]
 
 
 def build_search_strategy(

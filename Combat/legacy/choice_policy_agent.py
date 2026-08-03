@@ -67,7 +67,7 @@ from typing import Any, Callable
 
 from battle_emulator import BattleState
 from choice_semantics import ChoiceSemanticsTable
-from policy_agent import PolicyAgent, STANDARD_ACTION_TYPES
+from legacy.policy_agent import PolicyAgent, STANDARD_ACTION_TYPES
 
 TRAINING_ROOT = Path(r"C:\STS2_RL\Training")
 DEFAULT_CHOICE_POLICY_CHECKPOINT = TRAINING_ROOT / "checkpoints" / "choice_policy_8token_best" / "best.pt"

@@ -8,7 +8,7 @@ nuance should ever make a loss look better than a win.
 
 from __future__ import annotations
 
-from potion_value_table import PotionValueTable
+from legacy.potion_value_table import PotionValueTable
 
 DEFAULT_WEIGHTS = {
     "player_hp_ratio": 40.0,

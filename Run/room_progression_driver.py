@@ -67,6 +67,8 @@ def drive_rooms(
     character_id: str = "Ironclad",
     ascension: int = 0,
     already_started: bool = False,
+    action_picker=pick_default_action,
+    room_picker=pick_room,
 ) -> dict:
     """Drives `session` through at least `min_rooms` map rooms (or until `run_terminal`/
     `max_steps`), returning a full per-step log plus a room-type-kind coverage summary.
@@ -77,6 +79,13 @@ def drive_rooms(
     (as a JSON string plus its digest) every time the map boundary is reached, both to
     log a Snapshot identifier and to make routing around an unsupported room (Treasure)
     possible by reloading it and picking a different candidate.
+
+    `action_picker`/`room_picker` default to the existing LEGACY filler policies
+    (`pick_default_action`/`pick_room`) for full backward compatibility. Pass
+    `action_picker=whole_run_session.zero_index_action` and
+    `room_picker=lambda rooms, exclude_room_ids=None: next((r for r in rooms if r["room_id"] not in (exclude_room_ids or set())), None)`
+    for the strict `zero_index` mode (legal_actions[0]/rooms[0], no reordering) - see
+    `Run/execution_mode.py`.
     """
     log: list[dict] = []
     unsupported_rooms: list[dict] = []
@@ -105,7 +114,7 @@ def drive_rooms(
             if last_map_snapshot is None or not tried_room_ids_at_current_map:
                 last_map_snapshot = session.save_state()
                 tried_room_ids_at_current_map = set()
-            chosen = pick_room(rooms, tried_room_ids_at_current_map)
+            chosen = room_picker(rooms, tried_room_ids_at_current_map)
             if chosen is None:
                 log.append({"event": "map_exhausted_all_candidates_unsupported", "available_rooms": rooms})
                 break
@@ -166,7 +175,7 @@ def drive_rooms(
             log.append({"event": "no_prior_map_snapshot_to_route_around_unsupported_room_stopping"})
             break
 
-        action = pick_default_action(actions)
+        action = action_picker(actions)
         try:
             result = session.step(action["action_id"])
         except Exception as exc:  # noqa: BLE001 - see the matching comment on choose_room above.

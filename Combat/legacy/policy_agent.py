@@ -53,7 +53,7 @@ from pathlib import Path
 from typing import Any
 
 from battle_emulator import BattleEmulator, BattleState
-from heuristic_agent import HeuristicAgent
+from legacy.heuristic_agent import HeuristicAgent
 from state_evaluator import StateEvaluator
 
 TRAINING_ROOT = Path(r"C:\STS2_RL\Training")

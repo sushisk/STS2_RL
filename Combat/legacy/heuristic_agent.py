@@ -17,7 +17,7 @@ from typing import Optional
 
 from battle_emulator import BattleEmulator, BattleState, battle_state_key
 from battle_emulator import is_action_continuation_pending_choice
-from state_evaluator import StateEvaluator
+from legacy.state_evaluator import StateEvaluator
 
 
 @dataclass

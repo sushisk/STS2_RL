@@ -367,7 +367,17 @@ def build_candidate_pipeline_result(
     width: int = 8,
     score_threshold: "Optional[float]" = None,
 ) -> CandidatePipelineResult:
-    """End-to-end Candidate Pipeline entry point for a future SearchStrategy wrapper."""
+    """End-to-end Candidate Pipeline entry point for a future SearchStrategy wrapper.
+
+    Uses this module's own cheap built-in heuristic scoring (`_card_score`/
+    `_hand_choice_score`/etc.) to implicitly expand and rank EVERY current legal action,
+    then keep only the top `width`. Per the "RL担当指示：推論処理撤去と受動実行基盤への整理"
+    division of responsibility, this implicit-scoring path is kept only for existing
+    tests/callers that predate Training owning candidate selection - new callers that
+    know exactly which candidates to branch on should use
+    `build_candidate_pipeline_result_for_explicit_candidates()` instead, which performs
+    no scoring and no implicit "all legal actions" expansion.
+    """
     observation = build_order_masked_observation(decision_context.current_decision_result)
     candidates = extract_candidates(decision_context.current_decision_result)
     ranked = rank_candidates(observation, candidates)
@@ -387,5 +397,54 @@ def build_candidate_pipeline_result(
         sub_branch_candidates=sub_branches,
         ranked_candidates=ranked,
         pruned_candidates=pruned,
+        observation=observation,
+    )
+
+
+def build_candidate_pipeline_result_for_explicit_candidates(
+    decision_context: DecisionContext,
+    candidate_legal_action_indices: "list[int]",
+) -> CandidatePipelineResult:
+    """Training-facing Candidate Pipeline entry point: NO scoring, NO automatic expansion
+    of every legal action, NO score-based pruning - per the "RL担当指示：推論処理撤去と
+    受動実行基盤への整理" division of responsibility (Training decides which candidates to
+    branch on; RL only builds the Branch-ready shape for the exact indices it's given).
+
+    `candidate_legal_action_indices` must be a non-empty list of indices into the CURRENT
+    Decision Result's own `legal_actions` (the same order Emulator/RL already publishes,
+    never reordered here). The FIRST index becomes the continuation candidate (Holder);
+    the rest become sub-branch candidates (siblings) - caller-controlled via list order,
+    not by any RL-side ranking. Every returned `ScoredCandidate.score` is `0.0` and
+    `evaluator_name="explicit"` - these fields are kept only for shape-compatibility with
+    `CandidatePipelineResult`'s existing consumers (`search_coordinator.py`,
+    `branch_worker_pool.py`), never read as a real score by this function's own caller.
+
+    Raises `ValueError` if any requested index is not present among the current legal
+    actions - this function never silently substitutes or falls back to "all actions".
+    """
+    if not candidate_legal_action_indices:
+        raise ValueError(
+            "build_candidate_pipeline_result_for_explicit_candidates requires at least one "
+            "candidate index - it never implicitly expands all Legal Actions"
+        )
+    observation = build_order_masked_observation(decision_context.current_decision_result)
+    all_candidates = extract_candidates(decision_context.current_decision_result)
+    by_index = {c.legal_action_index: c for c in all_candidates}
+    selected: "list[ScoredCandidate]" = []
+    for idx in candidate_legal_action_indices:
+        if idx not in by_index:
+            raise ValueError(
+                f"candidate index {idx!r} not present among current legal actions "
+                f"(valid indices: {sorted(by_index)!r})"
+            )
+        selected.append(ScoredCandidate(candidate=by_index[idx], score=0.0, evaluator_name="explicit"))
+    continuation, sub_branches = split_candidates(
+        selected, current_context_signature=decision_context.current_context_signature
+    )
+    return CandidatePipelineSuccess(
+        continuation_candidate=continuation,
+        sub_branch_candidates=sub_branches,
+        ranked_candidates=selected,
+        pruned_candidates=selected,
         observation=observation,
     )

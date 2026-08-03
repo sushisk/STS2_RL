@@ -38,6 +38,10 @@ from typing import Any
 
 import run_emulator_bridge as bridge
 
+MODE_EXTERNAL_CONTROL = "external_control"
+MODE_ZERO_INDEX = "zero_index"
+EXECUTION_MODES = frozenset({MODE_EXTERNAL_CONTROL, MODE_ZERO_INDEX})
+
 RUN_TERMINAL = "run_terminal"
 PENDING_CHOICE = "pending_choice"
 EVENT_CHOICE = "event_choice"
@@ -164,15 +168,17 @@ ACTION_TYPE_PREFERENCE_ORDER: list[str] = [
 
 
 def pick_default_action(legal_actions: list[dict]) -> dict:
-    """A deterministic, policy-free action picker used by the room progression driver.
-
-    Not a gameplay policy: exists only so the connectivity test can drive a run to
-    completion without a trained agent. Prefers finishing a still-open combat/target
-    decision (`choice_target`, `card`, `potion`) over ending the turn (`system`) so
-    combats actually conclude instead of stalling on repeated do-nothing end-turns;
-    outside combat, prefers ending choices quickly (`choice_shop_leave`,
-    `choice_confirm`, `choice_skip`) so runs progress instead of stalling on
-    open-ended shopping decisions.
+    """LEGACY internal filler policy - reorders by `ACTION_TYPE_PREFERENCE_ORDER`, which
+    the `zero_index` mode (see `zero_index_action` below) explicitly must NOT do
+    ("合法手順序はEmulator／RLの公開順序をそのまま並べ替えない"). Kept only so
+    `room_progression_driver.py`/`choice_branch_runner.py`'s Branch-prefix-discovery
+    helpers (`discover_prefix=True` in `worker_pool.py`) have SOME way to autoplay a
+    combat far enough to reach a later boundary (e.g. a Card Reward) when no external
+    decision-maker is attached yet - it is not `zero_index` and must not be presented as
+    one. Per "RL担当指示：推論処理撤去と受動実行基盤への整理", this is a
+    "Training API実装まで停止" item: once Training's own `external_control` wiring can
+    supply real mid-combat actions, this filler policy should be replaced by that, not
+    kept as RL's own decision-maker.
     """
     available = [a for a in legal_actions if a["is_available"]]
     pool = available or legal_actions
@@ -183,3 +189,39 @@ def pick_default_action(legal_actions: list[dict]) -> dict:
             if action["action_type"] == action_type:
                 return action
     return pool[0]
+
+
+def zero_index_action(legal_actions: list[dict]) -> dict:
+    """The ONLY sanctioned `zero_index` implementation (RL担当指示：推論処理撤去と受動実行
+    基盤への整理): always `legal_actions[0]`, in the exact order Emulator/RL already
+    publishes it - no reordering by action_type, no score/logit/value/tier/heuristic, no
+    comparison between candidates. This is a connectivity-check fallback only, never a
+    strength-oriented Policy - do not benchmark, tune, or present it as one.
+    """
+    if not legal_actions:
+        raise ValueError("zero_index: no legal actions to pick from.")
+    return legal_actions[0]
+
+
+def make_external_action_selector(resolve_action_id) -> "Any":
+    """Builds an action picker for `external_control` mode: `resolve_action_id(legal_actions)
+    -> action_id` is Training's own decision function (a transport shim, never a
+    scoring/ranking function living in RL). The returned picker does nothing but call it
+    and resolve the chosen `action_id` against the CURRENT `legal_actions` - RL performs
+    no comparison between candidates itself, and raises if Training's answer doesn't
+    match a currently-legal action (never silently substitutes).
+    """
+
+    def _select(legal_actions: list[dict]) -> dict:
+        if not legal_actions:
+            raise ValueError("external_control: no legal actions to pick from.")
+        action_id = resolve_action_id(legal_actions)
+        matches = [a for a in legal_actions if a["action_id"] == action_id]
+        if len(matches) != 1:
+            raise ValueError(
+                f"external_control: resolve_action_id returned {action_id!r}, not a unique "
+                f"action_id among {[a['action_id'] for a in legal_actions]!r}"
+            )
+        return matches[0]
+
+    return _select

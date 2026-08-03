@@ -33,8 +33,8 @@ from combat_env import CombatEnv  # noqa: E402
 from preflight_validate import preflight_validate  # noqa: E402
 from battle_emulator import is_action_continuation_pending_choice  # noqa: E402
 from choice_semantics import ChoiceSemanticsTable  # noqa: E402
-from choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT  # noqa: E402
-from policy_agent import build_policy_agent  # noqa: E402
+from legacy.choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT  # noqa: E402
+from legacy.policy_agent import build_policy_agent  # noqa: E402
 
 
 def load_spec() -> dict:

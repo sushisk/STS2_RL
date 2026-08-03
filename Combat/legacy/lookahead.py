@@ -29,8 +29,8 @@ from dataclasses import dataclass
 from typing import Optional
 
 from battle_emulator import BattleEmulator, BattleState, dedup_by_state
-from beam_search import TurnBeamSearcher
-from state_evaluator import StateEvaluator
+from legacy.beam_search import TurnBeamSearcher
+from legacy.state_evaluator import StateEvaluator
 
 DEFAULT_K = 5
 DEFAULT_D = 2

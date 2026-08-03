@@ -19,7 +19,7 @@ consistent with this package's stateless, state-in/state-out design throughout.
 from __future__ import annotations
 
 from battle_emulator import BattleEmulator, BattleState, dedup_by_state
-from state_evaluator import StateEvaluator
+from legacy.state_evaluator import StateEvaluator
 
 DEFAULT_BEAM_WIDTH = 8
 DEFAULT_MAX_PLAYS = 8

@@ -23,10 +23,10 @@ from battle_emulator import BattleEmulator, battle_state_key  # noqa: E402
 from battle_emulator import coerce_terminal_observation, state_has_living_enemies  # noqa: E402
 from battle_emulator import is_action_continuation_pending_choice  # noqa: E402
 from combat_env import CombatEnv  # noqa: E402
-from heuristic_agent import HeuristicAgent, is_non_terminal_self_loop  # noqa: E402
+from legacy.heuristic_agent import HeuristicAgent, is_non_terminal_self_loop  # noqa: E402
 from preflight_validate import preflight_validate  # noqa: E402
 from run_trajectory_batch import load_fixed_50  # noqa: E402
-from state_evaluator import DEFAULT_WEIGHTS, StateEvaluator  # noqa: E402
+from legacy.state_evaluator import DEFAULT_WEIGHTS, StateEvaluator  # noqa: E402
 from slot_name_inference import ensure_inferred_slot_names  # noqa: E402
 from mad_science_restore import mad_science_state_from_event_choices, mad_science_state_from_props  # noqa: E402
 

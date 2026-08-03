@@ -36,7 +36,7 @@ for _p in (_COMBAT_DIR, _DATA_DIR, _ENV_DIR):
 from battle_emulator import battle_state_key  # noqa: E402
 from combat_env import CombatEnv  # noqa: E402
 from preflight_validate import preflight_validate  # noqa: E402
-from policy_agent import build_policy_agent, CHOICE_FALLBACK_ACTION_TYPES  # noqa: E402
+from legacy.policy_agent import build_policy_agent, CHOICE_FALLBACK_ACTION_TYPES  # noqa: E402
 from choice_semantics import ChoiceSemanticsTable  # noqa: E402
 from generate_heuristic_trajectories import (  # noqa: E402
     unrestorable_forced_moves,

@@ -543,6 +543,7 @@ def run_until_terminal_or_fault(
     direct_selector: DirectSelector,
     search_strategy: "Optional[SearchStrategy]" = None,
     routing_policy: Callable[[str], str] = default_routing_policy,
+    pending_selector: DirectSelector = pending_static_select,
     max_iterations: int = 10000,
 ) -> MainLoopOutcome:
     """The Main Process outer decision loop (everything in the mermaid source's MAIN
@@ -556,6 +557,13 @@ def run_until_terminal_or_fault(
     `routing_policy`: decides Direct vs. Search vs. PENDING_STATIC per boundary; defaults
     to always-Direct (`default_routing_policy`) so a caller who never wants Search/
     PENDING_STATIC invoked doesn't have to supply one.
+    `pending_selector`: called whenever `routing_policy` picks `ROUTE_PENDING_STATIC` -
+    defaults to `pending_static_select` (unchanged backward-compatible behavior: prefer
+    resolving over skipping, otherwise keep Emulator order). Injectable so a caller can
+    substitute `Combat/execution_mode.py`'s `zero_index_pending_selector` (no tier, index
+    0 only) or an `external_control` selector that resolves an externally-specified
+    action - see that module's own docstring for the RL/Training division of
+    responsibility this parameter exists to support.
 
     One deliberate simplification vs. strict diagram fidelity, documented here rather
     than hidden: when a Planned Sequence's last step happens to land on a Stable boundary
@@ -610,7 +618,7 @@ def run_until_terminal_or_fault(
             elif route == ROUTE_PENDING_STATIC:
                 if boundary != BOUNDARY_PENDING:
                     raise RuntimeError("ROUTE_PENDING_STATIC is only a valid routing_policy answer at a Pending boundary")
-                loop_state.planned_sequence = [pending_static_select(loop_state.current_result)]
+                loop_state.planned_sequence = [pending_selector(loop_state.current_result)]
             else:  # ROUTE_SEARCH, boundary is Stable or a genuine Start-of-Combat Pending
                 if search_strategy is None:
                     raise RuntimeError("routing_policy selected ROUTE_SEARCH but no search_strategy callable was provided")

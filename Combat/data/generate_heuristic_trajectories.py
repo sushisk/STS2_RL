@@ -40,9 +40,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "env"))
 from battle_emulator import BattleEmulator, battle_state_key  # noqa: E402
 from battle_emulator import is_action_continuation_pending_choice  # noqa: E402
 from combat_env import CombatEnv  # noqa: E402
-from heuristic_agent import HeuristicAgent  # noqa: E402
-from state_evaluator import DEFAULT_WEIGHTS, StateEvaluator  # noqa: E402
-from potion_value_table import PotionValueTable  # noqa: E402
+from legacy.heuristic_agent import HeuristicAgent  # noqa: E402
+from legacy.state_evaluator import DEFAULT_WEIGHTS, StateEvaluator  # noqa: E402
+from legacy.potion_value_table import PotionValueTable  # noqa: E402
 from preflight_validate import preflight_validate  # noqa: E402
 
 HEURISTIC_VERSION = "greedy_v1_default_weights"

@@ -20,9 +20,9 @@ from pathlib import Path
 from choice_policy_online_eval import (
     verify_emulator_baseline, load_jsonl, run_scenario_ab, _sha256_file,
 )
-from choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT
+from legacy.choice_policy_agent import ChoicePolicyAgent, build_choice_decision, DEFAULT_CHOICE_POLICY_CHECKPOINT
 from choice_semantics import ChoiceSemanticsTable
-from policy_agent import build_policy_agent
+from legacy.policy_agent import build_policy_agent
 
 _HERE = Path(__file__).resolve().parent
 MANIFEST_PATH = _HERE / "choice_policy_max_decisions_recheck_manifest.jsonl"

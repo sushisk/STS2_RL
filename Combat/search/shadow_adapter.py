@@ -1,9 +1,14 @@
 """Shadow comparison adapter for old HeuristicAgent vs new Search Coordinator.
 
-This module is observational tooling only. It restores the same
+This module is observational/offline-analysis tooling only. It restores the same
 ``CombatStateSnapshot`` into disposable sessions, normalizes each path's chosen root
 action, and reports agreement without committing any action back to a caller's Main
-session.
+session. It imports the legacy inference stack (``Combat/legacy/heuristic_agent.py``
+etc. - see that package's own docstring for the RL/Training division of responsibility
+this module predates) purely to compute the OLD path's action for comparison; it never
+uses that action to drive Main, and is not part of the production execution path
+(`Combat/search/main_loop.py`/`search_coordinator.py`/`branch_worker_pool.py` never
+import this module).
 """
 
 from __future__ import annotations
@@ -223,9 +228,9 @@ def _outcome_metrics(before_state: dict, after_battle_state) -> ShadowOutcomeMet
 def _old_path_worker(snapshot_json: str, repo_root: "str | None", out_queue) -> None:
     try:
         from battle_emulator import BattleEmulator
-        from heuristic_agent import HeuristicAgent
-        from potion_value_table import PotionValueTable
-        from state_evaluator import DEFAULT_WEIGHTS, StateEvaluator
+        from legacy.heuristic_agent import HeuristicAgent
+        from legacy.potion_value_table import PotionValueTable
+        from legacy.state_evaluator import DEFAULT_WEIGHTS, StateEvaluator
 
         snapshot = CombatStateSnapshot.from_json(snapshot_json)
         session = LiveCombatSession(repo_root=Path(repo_root) if repo_root is not None else None)
