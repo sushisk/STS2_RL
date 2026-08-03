@@ -318,6 +318,12 @@ class BranchResult:
     pending_decision_context: Optional[DecisionContext] = None
     pending_pipeline_result: Optional[CandidatePipelineResult] = None
     established_lease: Optional[Lease] = None
+    next_legal_actions: Optional[list] = None
+    """Populated only for a Stable-boundary success (`child_snapshot is not None`) -
+    the resolved state's own cached legal actions, so a caller can present/branch
+    further from this decision point without a separate restore-only dispatch. Not
+    populated for Pending (candidates already live in `pending_pipeline_result`) or
+    Terminal (no further decision) results."""
     diagnostics: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -424,6 +430,7 @@ def _build_success_result(
             worker_generation=worker_generation,
             result_signature=signature,
             child_snapshot=session.capture_snapshot(),
+            next_legal_actions=list(next_state._cached_legal_actions or []),  # noqa: SLF001
         )
     if boundary == BOUNDARY_TERMINAL:
         return BranchResult(
