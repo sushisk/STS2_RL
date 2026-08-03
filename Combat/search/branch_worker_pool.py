@@ -588,6 +588,16 @@ class _WorkerHandle:
     worker_generation: int
     process: Any
     in_queue: Any
+    pid: Optional[int] = None
+
+
+class WorkerDiedError(RuntimeError):
+    """A worker's OS process is no longer alive - used internally by
+    ``BranchWorkerPool.is_worker_alive``/respawn bookkeeping. Not raised across a
+    ``dispatch_work_items``/``execute`` call boundary - a dead/hung worker surfaces to
+    callers as a normal ``BRANCH_STATUS_FAULT`` result (``fault_kind="task_timeout"``),
+    matching the existing ``search.fault_taxonomy`` contract, never as an uncaught
+    exception."""
 
 
 class BranchWorkerPool:
@@ -612,14 +622,17 @@ class BranchWorkerPool:
         self._next_request_id = 0
         self._closed = False
         for worker_id in range(worker_count):
-            in_queue = self._ctx.Queue()
-            process = self._ctx.Process(
-                target=_worker_main,
-                args=(worker_id, 1, str(self.repo_root) if self.repo_root is not None else None, in_queue, self._result_queue),
-                daemon=True,
-            )
-            process.start()
-            self._workers[worker_id] = _WorkerHandle(worker_id, 1, process, in_queue)
+            self._spawn_worker(worker_id, generation=1)
+
+    def _spawn_worker(self, worker_id: int, *, generation: int) -> None:
+        in_queue = self._ctx.Queue()
+        process = self._ctx.Process(
+            target=_worker_main,
+            args=(worker_id, generation, str(self.repo_root) if self.repo_root is not None else None, in_queue, self._result_queue),
+            daemon=True,
+        )
+        process.start()
+        self._workers[worker_id] = _WorkerHandle(worker_id, generation, process, in_queue, pid=process.pid)
 
     @property
     def worker_generations(self) -> dict[int, int]:
@@ -628,6 +641,40 @@ class BranchWorkerPool:
     @property
     def worker_ids(self) -> list[int]:
         return list(self._workers)
+
+    @property
+    def worker_pids(self) -> dict[int, Optional[int]]:
+        return {worker_id: handle.pid for worker_id, handle in self._workers.items()}
+
+    def is_worker_alive(self, worker_id: int) -> bool:
+        handle = self._workers.get(worker_id)
+        return handle is not None and handle.process.is_alive()
+
+    def respawn_worker(self, worker_id: int, lease_registry: Optional[LeaseRegistry] = None) -> None:
+        """Kills (if still alive) and replaces the OS process at `worker_id` with a fresh
+        one carrying an incremented `worker_generation`. Never touches any other worker -
+        a single worker's hang/crash never tears down the rest of the Pool. Every Lease
+        the OLD generation held is invalidated (`lease_registry.invalidate_worker`) so a
+        stale Holder Step can never be routed to the dead process's replacement, which
+        holds no live state at all. Does not, and must never, touch Main's own session -
+        Main Worker and Branch Workers are always separate processes/objects (Combat's
+        Main loop uses its own ``LiveCombatSession``, never one of this Pool's workers).
+        """
+        if self._closed:
+            raise RuntimeError("BranchWorkerPool is closed")
+        old_handle = self._workers[worker_id]
+        old_generation = old_handle.worker_generation
+        if old_handle.process.is_alive():
+            old_handle.process.terminate()
+            old_handle.process.join(timeout=5)
+        # The old in_queue is now permanently abandoned (its reader process is dead) -
+        # close it and cancel its background feeder thread's join so interpreter exit
+        # never blocks trying to flush a queue nobody will ever read again.
+        old_handle.in_queue.close()
+        old_handle.in_queue.cancel_join_thread()
+        self._spawn_worker(worker_id, generation=old_generation + 1)
+        if lease_registry is not None:
+            lease_registry.invalidate_worker(worker_id)
 
     def close(self) -> None:
         if self._closed:
@@ -640,6 +687,10 @@ class BranchWorkerPool:
             if handle.process.is_alive():
                 handle.process.terminate()
                 handle.process.join(timeout=5)
+            handle.in_queue.close()
+            handle.in_queue.cancel_join_thread()
+        self._result_queue.close()
+        self._result_queue.cancel_join_thread()
 
     def __enter__(self) -> "BranchWorkerPool":
         return self
@@ -656,18 +707,34 @@ class BranchWorkerPool:
         handle.in_queue.put((request_id, request))
         return request_id
 
-    def execute(self, worker_id: int, request: WorkerExecutionRequest) -> BranchResult:
+    def execute(
+        self,
+        worker_id: int,
+        request: WorkerExecutionRequest,
+        *,
+        lease_registry: Optional[LeaseRegistry] = None,
+    ) -> BranchResult:
+        stale_generation = self._workers[worker_id].worker_generation
         request_id = self._submit(worker_id, request)
         while True:
             try:
                 received_id, result = self._result_queue.get(timeout=self.request_timeout_s)
-            except queue.Empty as exc:
-                raise TimeoutError(f"timed out waiting for worker request {request_id}") from exc
+            except queue.Empty:
+                self.respawn_worker(worker_id, lease_registry=lease_registry)
+                return _fault_result(
+                    request.work_item,
+                    request.execution_mode,
+                    worker_id,
+                    stale_generation,
+                    TimeoutError(f"timed out waiting for worker request {request_id}"),
+                    fault_kind="task_timeout",
+                )
             if received_id == request_id:
                 return result
-            raise RuntimeError(
-                "BranchWorkerPool.execute() received an out-of-order result; use dispatch_work_items() for concurrent batches"
-            )
+            # Stray/late result from an old (respawned-away) generation's in-flight
+            # request - discard rather than raise, matching the instruction's
+            # "旧Workerから遅れて結果が届いても...破棄してください" contract.
+            continue
 
     def dispatch_work_items(self, work_items: list[WorkItem], lease_registry: LeaseRegistry) -> list[BranchResult]:
         return dispatch_work_items(work_items, lease_registry, worker_pool=self)
@@ -749,6 +816,8 @@ def dispatch_work_items(
     assert worker_generations is not None
 
     pending_real: dict[int, WorkItem] = {}
+    pending_request_worker_ids: dict[int, int] = {}
+    pending_request_execution_mode: dict[int, str] = {}
     fake_results_by_work_id: dict[str, BranchResult] = {}
     for work_item in work_items:
         request, worker_id, next_bootstrap_index, _ = _route_work_item(
@@ -764,6 +833,8 @@ def dispatch_work_items(
             ipc_request = dataclasses.replace(request, work_item=ipc_work_item)
             request_id = worker_pool._submit(worker_id, ipc_request)  # noqa: SLF001
             pending_real[request_id] = work_item
+            pending_request_worker_ids[request_id] = worker_id
+            pending_request_execution_mode[request_id] = request.execution_mode
         else:
             result = execute_request(worker_id, request)
             fake_results_by_work_id[work_item.work_id] = result
@@ -771,13 +842,40 @@ def dispatch_work_items(
     if use_real_pool:
         assert worker_pool is not None
         results_by_work_id: dict[str, BranchResult] = {}
-        for _ in pending_real:
+        remaining_request_ids = set(pending_real)
+        request_id_to_worker_id = dict(pending_request_worker_ids)
+        while remaining_request_ids:
             try:
                 request_id, result = worker_pool._result_queue.get(timeout=worker_pool.request_timeout_s)  # noqa: SLF001
-            except queue.Empty as exc:
-                raise TimeoutError("timed out waiting for Branch Worker batch") from exc
+            except queue.Empty:
+                # Every request still outstanding at this point is hung - respawn each
+                # distinct worker exactly once and synthesize a fault result for each of
+                # its still-pending requests, rather than waiting indefinitely.
+                hung_worker_ids = {request_id_to_worker_id[rid] for rid in remaining_request_ids}
+                for hung_worker_id in hung_worker_ids:
+                    stale_generation = worker_pool.worker_generations.get(hung_worker_id)
+                    worker_pool.respawn_worker(hung_worker_id, lease_registry=lease_registry)
+                    for rid in list(remaining_request_ids):
+                        if request_id_to_worker_id[rid] != hung_worker_id:
+                            continue
+                        work_item = pending_real[rid]
+                        results_by_work_id[work_item.work_id] = _fault_result(
+                            work_item,
+                            pending_request_execution_mode[rid],
+                            hung_worker_id,
+                            stale_generation,
+                            TimeoutError(f"timed out waiting for worker request {rid}"),
+                            fault_kind="task_timeout",
+                        )
+                        remaining_request_ids.discard(rid)
+                continue
+            if request_id not in remaining_request_ids:
+                # Stray/late result: either a genuine duplicate, or a response from a
+                # worker generation we already gave up on and respawned away. Discard.
+                continue
             work_item = pending_real[request_id]
             results_by_work_id[work_item.work_id] = result
+            remaining_request_ids.discard(request_id)
     else:
         results_by_work_id = fake_results_by_work_id
 

@@ -1,0 +1,22 @@
+{
+  "event_count": 1000,
+  "worker_count": 3,
+  "elapsed_s": 551.654,
+  "counters": {
+    "normal_complete": 333,
+    "pending_lease_and_sibling_replay": 167,
+    "queued_cancel": 167,
+    "running_cancel_kill": 0,
+    "tiny_timeout_respawn": 167,
+    "raw_worker_kill_respawn": 166,
+    "faults_total": 167,
+    "cancelled_result_reuse_rejections": 167
+  },
+  "violations": [],
+  "violation_count": 0,
+  "final_lease_registry_size": 0,
+  "final_pool_worker_slot_count": 3,
+  "final_branch_record_count": 1001,
+  "main_session_untouched_note": "Main session is a separate LiveCombatSession never passed to the Pool/Manager; no assertion beyond structural non-interaction is meaningful here since Combat snapshots carry live capture timestamps, but no code path in this test or in BranchManager/BranchWorkerPool ever holds a reference to main_session.",
+  "notes": "running_cancel_kill=0 / tiny_timeout_respawn=167 reflects that a 0.001s poll() timeout is consistently too short for even one real IPC round-trip to land before the manager gives up and respawns - so every event_type==3 iteration was observed via the timeout-respawn path rather than catching a genuinely 'running' Branch mid-flight. The respawn+fault-result mechanics exercised are identical either way; test_branch_manager.py's own test_running_cancel_kills_and_respawns_only_that_worker additionally verifies the true 'running'-state cancel path directly."
+}
