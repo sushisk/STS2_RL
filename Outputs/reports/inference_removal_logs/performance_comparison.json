@@ -1,0 +1,17 @@
+{
+  "combat": {
+    "pipeline_build_old_scored_implicit_ms": 0.1094,
+    "pipeline_build_new_explicit_ms": 0.1021,
+    "old_candidate_count_from_all_legal_actions": 4,
+    "new_candidate_count_from_explicit_2": 2,
+    "legal_actions_fetch_ms": 6.8931,
+    "single_step_apply_ms": 73.892,
+    "explicit_2candidate_branch_dispatch_ms": 3474.6284,
+    "explicit_branch_worker_execution_count": 8
+  },
+  "whole_run": {
+    "get_observation_ms": 7.4182,
+    "get_legal_actions_ms": 0.0181,
+    "single_choose_room_step_ms": 48.4284
+  }
+}

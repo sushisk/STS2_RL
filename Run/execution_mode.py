@@ -63,3 +63,67 @@ def make_external_room_selector(resolve_room_id: Callable[[list], int]):
 
 ZERO_INDEX_ACTION_PICKER = zero_index_action
 ZERO_INDEX_ROOM_PICKER = zero_index_room_picker
+
+
+class StaleDecisionError(RuntimeError):
+    """Raised when `external_control` is asked to apply an action against a Decision ID
+    that no longer matches the session's current one - the Whole Run counterpart to
+    Combat's `DecisionFrameMismatchError` (`decision_frame` there is
+    `(combat_session_id, step_index)`; here it additionally carries `boundary` and
+    `run_seed` since a single session moves across Map/Combat/Event/etc., not just one
+    combat). Guards against a caller applying a decision computed against a since-changed
+    or already-committed state, and against double-committing the same decision twice.
+    """
+
+
+def decision_id(session) -> tuple:
+    """A `(seed, character_id, step_index, boundary, combat_session_id)` snapshot of the
+    session's CURRENT decision identity - two calls only ever compare equal if nothing
+    has advanced the session between them (a fresh `GetObservation()`/`GetRoomContext()`
+    read never changes it). External Control callers should capture this once per
+    decision (alongside `legal_actions`/`observation`), then pass it back to
+    `apply_external_action`/`apply_external_room_choice` - if the session moved on for
+    any reason in between, the mismatch raises `StaleDecisionError` instead of silently
+    applying a decision made against stale state.
+    """
+    obs = session.get_observation()
+    return (obs["seed"], obs["character_id"], obs["step_index"], obs["boundary"], obs.get("combat_session_id"))
+
+
+def apply_external_action(session, expected_decision_id: tuple, action_id: int) -> dict:
+    """Applies `action_id` only if `session`'s CURRENT decision_id still matches
+    `expected_decision_id` (captured earlier by the same caller) - rejects stale
+    decisions and double-commits (the second attempt against an already-advanced session
+    will always see a different decision_id) without ever touching Main state first.
+    """
+    current = decision_id(session)
+    if current != expected_decision_id:
+        raise StaleDecisionError(
+            f"external_control: expected_decision_id={expected_decision_id!r} but session's "
+            f"current decision_id={current!r} - session has moved on (or this action was "
+            f"already committed); resolve() must be called again against the CURRENT decision"
+        )
+    legal_actions = session.get_legal_actions()
+    matches = [a for a in legal_actions if a["action_id"] == action_id]
+    if len(matches) != 1:
+        raise ValueError(
+            f"external_control: action_id={action_id!r} not a unique id among "
+            f"{[a['action_id'] for a in legal_actions]!r}"
+        )
+    return session.step(action_id)
+
+
+def apply_external_room_choice(session, expected_decision_id: tuple, room_id: int) -> dict:
+    """`apply_external_action`'s Map counterpart (`ChooseRoom(roomId)`, no LegalActions)."""
+    current = decision_id(session)
+    if current != expected_decision_id:
+        raise StaleDecisionError(
+            f"external_control: expected_decision_id={expected_decision_id!r} but session's "
+            f"current decision_id={current!r} - session has moved on (or this room choice "
+            f"was already committed); resolve() must be called again against the CURRENT decision"
+        )
+    rooms = session.get_map_rooms()
+    matches = [r for r in rooms if r["room_id"] == room_id]
+    if len(matches) != 1:
+        raise ValueError(f"external_control: room_id={room_id!r} not a unique id among {[r['room_id'] for r in rooms]!r}")
+    return session.choose_room(room_id)

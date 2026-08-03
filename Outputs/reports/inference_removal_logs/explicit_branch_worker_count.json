@@ -1,0 +1,13 @@
+{
+  "case_a_hypothesis_required": {
+    "explicit_candidate_count": 2,
+    "hypothesis_count_config": 4,
+    "expected_worker_executions": 8,
+    "actual_worker_executions": 8,
+    "distinct_root_candidates": 2
+  },
+  "case_b_no_hypothesis_single_candidate": {
+    "explicit_candidate_count": 1,
+    "actual_worker_executions": 1
+  }
+}
