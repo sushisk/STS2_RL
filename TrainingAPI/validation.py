@@ -37,13 +37,17 @@ from TrainingAPI.dto import (
 class RequestRejected(Exception):
     """Raised for any request that must be answered with status="rejected".
 
-    Carries a human-readable `error` string only (contract §3 "error": Training must
-    never parse this string programmatically - `fault_kind` is reserved for faulted
-    execution failures, not for rejected/malformed requests).
+    Carries a human-readable `error` string, and OPTIONALLY a machine-checkable
+    `fault_kind` (contract §2.3 lists `fault_kind` under "失敗時に返す項目" generally,
+    not only for `faulted` - e.g. `rng_hypothesis_unsupported_at_boundary` is a
+    `rejected`-status response with a `fault_kind` set, per RL担当指示：Active Event
+    RNG Hypothesis実装 §5). `fault_kind` is None for ordinary malformed/invalid
+    requests where no machine classification is meaningful.
     """
 
-    def __init__(self, error: str) -> None:
+    def __init__(self, error: str, *, fault_kind: "str | None" = None) -> None:
         super().__init__(error)
+        self.fault_kind = fault_kind
         self.error = error
 
 

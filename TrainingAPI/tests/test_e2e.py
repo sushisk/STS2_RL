@@ -91,7 +91,17 @@ def test_e2e_combat_full_sequence():
 
 
 def _whole_run_config():
-    return {"instance_type": "whole_run", "seed": 18, "character_id": "IRONCLAD", "ascension": 0}
+    # seed=1 confirmed (via exploratory scan) to reach map_select then event_choice
+    # reasonably quickly - needed since emulate_action now requires an Active Event
+    # boundary (RL担当指示：Active Event RNG Hypothesis実装).
+    return {"instance_type": "whole_run", "seed": 1, "character_id": "IRONCLAD", "ascension": 0}
+
+
+def _pick_action_id(legal):
+    for action in legal:
+        if action.get("action_type") == "card":
+            return action["action_id"]
+    return legal[0]["action_id"]
 
 
 def test_e2e_whole_run_full_sequence():
@@ -100,14 +110,22 @@ def test_e2e_whole_run_full_sequence():
         decision = client.start_instance(_whole_run_config())
         assert decision["status"] == "completed", decision
 
-        # Advance root (ordinary commit_action, no branching yet) until map_select -
-        # emulate_action needs a Map Snapshot to branch from (see instance_whole_run.py).
-        for _ in range(50):
+        # Advance root (ordinary commit_action, no branching yet) until map_select, then
+        # onward to an event_choice boundary - emulate_action now requires an Active
+        # Event boundary (RL担当指示：Active Event RNG Hypothesis実装), not just a Map
+        # Snapshot.
+        for _ in range(150):
             if decision["masked_emulator_dto"].get("boundary") == "map_select":
                 break
             legal = decision["masked_emulator_dto"]["legal_actions"]
-            decision = client.commit_action(decision["decision_point_id"], legal[0]["action_id"])
+            decision = client.commit_action(decision["decision_point_id"], _pick_action_id(legal))
         assert decision["masked_emulator_dto"].get("boundary") == "map_select", "never reached map_select"
+        for _ in range(150):
+            if decision["masked_emulator_dto"].get("boundary") == "event_choice":
+                break
+            legal = decision["masked_emulator_dto"]["legal_actions"]
+            decision = client.commit_action(decision["decision_point_id"], _pick_action_id(legal))
+        assert decision["masked_emulator_dto"].get("boundary") == "event_choice", "never reached event_choice"
 
         # 2. root Decision
         gd = client.get_decision("root")
@@ -117,16 +135,21 @@ def test_e2e_whole_run_full_sequence():
         legal = decision["masked_emulator_dto"]["legal_actions"]
         assert len(legal) >= 1
 
-        # 3. multiple emulate_action from root (different rooms, if more than one available)
+        # 3. multiple emulate_action from root (same rng_id different Action if
+        # possible, plus a different rng_id)
+        second_action = legal[1]["action_id"] if len(legal) > 1 else legal[0]["action_id"]
         b1 = client.emulate_action(parent_branch_id="root", rng_id=1, decision_point_id=decision["decision_point_id"], action_id=legal[0]["action_id"])
         assert b1["status"] == "completed", b1
-        second_room = legal[1]["action_id"] if len(legal) > 1 else legal[0]["action_id"]
-        b2 = client.emulate_action(parent_branch_id="root", rng_id=2, decision_point_id=decision["decision_point_id"], action_id=second_room)
+        b2 = client.emulate_action(parent_branch_id="root", rng_id=2, decision_point_id=decision["decision_point_id"], action_id=second_action)
         assert b2["status"] == "completed", b2
 
         # 4. a deeper Branch off b1 (if b1 didn't immediately hit run_terminal/a new map)
         deep = None
-        if not b1.get("masked_emulator_dto", {}).get("run_terminal") and b1["masked_emulator_dto"].get("legal_actions"):
+        if (
+            b1["masked_emulator_dto"].get("boundary") == "event_choice"
+            and not b1.get("masked_emulator_dto", {}).get("run_terminal")
+            and b1["masked_emulator_dto"].get("legal_actions")
+        ):
             b1_legal = b1["masked_emulator_dto"]["legal_actions"]
             deep = client.emulate_action(parent_branch_id=b1["branch_id"], rng_id=1, decision_point_id=b1["decision_point_id"], action_id=b1_legal[0]["action_id"])
             assert deep["status"] == "completed", deep

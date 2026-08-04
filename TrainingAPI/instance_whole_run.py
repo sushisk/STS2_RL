@@ -7,17 +7,23 @@ Branches are dispatched through the existing, already-tested `Run/worker_pool.
 WholeRunWorkerPool` (Phase K/L) with `include_main_worker=False` (this Instance IS the
 Main Run Worker, in-process, so the Pool's own optional Main slot would be redundant).
 
-Two deliberate scope reductions versus `instance_combat.py`, documented here and in the
+Deliberate scope reductions versus `instance_combat.py`, documented here and in the
 final report rather than silently:
 
-1. **`rng_id` has no belief/Hypothesis system to map onto for Whole Run** (unlike
-   Combat's DrawPile-order Hypothesis mechanism) - Whole Run room/event/shop/rest
-   progression is fully deterministic given `(map_snapshot, room_id, action_prefix,
-   action_id)`. Every `rng_id` for a given parent Decision therefore yields the exact
-   SAME (single) result - this still satisfies the contract's "同じrng_idは同じ
-   Hypothesis" / "異なるrng_idは異なるHypothesis" requirement (there is exactly one
-   Hypothesis, always shared), it just means `rng_id` is bookkeeping-only here, never
-   affecting the simulated outcome.
+1. **`rng_id` is a real RNG Hypothesis ONLY at an Active Event boundary** (RL担当指示：
+   Active Event RNG Hypothesis実装). Whole Run's Map/Encounter/Boss/Ancient/Act-generation
+   content is generated upfront in one draw at Act-generation time (Emulator's `UpFront`
+   RNG stream) with no safely isolable "unconsumed future" boundary and no purpose-built
+   partial-override API - see `Outputs/reports/rl_whole_run_rng_hypothesis_STOP_20260804.md`.
+   The ONLY Emulator API that safely exposes a partial, purpose-built RNG override is
+   `GetEventRngState`/`SetEventRngState`, scoped to whatever Event is currently active.
+   Consequently `emulate_action` with a positive `rng_id` (the only kind v0.5 allows -
+   `rng_id=0` is reserved for root) is `rejected` with
+   `fault_kind="rng_hypothesis_unsupported_at_boundary"` at every OTHER boundary (Map,
+   pre-Combat, Reward, Shop, Rest, Treasure, post-Event, and anything Map/Encounter/Boss/
+   Ancient-generation-related) - see `TrainingAPI.dto.RNG_HYPOTHESIS_CAPABILITIES` for
+   the formal capability declaration. `whole_run_event_rng.py` implements the actual
+   Hypothesis derivation (deterministic, process/PID-independent) and lifecycle registry.
 2. **Branch dispatch is synchronous** (`WholeRunWorkerPool.dispatch_choice_work_items`
    blocks for the whole request, matching this contract's own example where
    `emulate_action`'s response already carries `status: "completed"`), so a Whole Run
@@ -43,7 +49,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 import run_emulator_bridge as bridge
-from whole_run_session import MAP_SELECT, RUN_TERMINAL, WholeRunSession
+from whole_run_session import EVENT_CHOICE, MAP_SELECT, RUN_TERMINAL, WholeRunSession
 from worker_pool import (
     ChoiceWorkItem,
     LeaseRegistry as WRLeaseRegistry,
@@ -54,6 +60,7 @@ from worker_pool import (
 
 from TrainingAPI.dto import (
     FAULT_EMULATOR_ERROR,
+    FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
     FAULT_TASK_TIMEOUT,
     ROOT_BRANCH_ID,
     ROOT_RNG_ID,
@@ -66,6 +73,7 @@ from TrainingAPI.history_builder import HistoryBuilder
 from TrainingAPI.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
 from TrainingAPI.masking import build_masked_emulator_dto, mask_legal_actions
 from TrainingAPI.validation import RequestRejected
+from TrainingAPI.whole_run_event_rng import EventRngHypothesisRegistry
 
 
 def _map_rooms_as_legal_actions(session: WholeRunSession) -> list:
@@ -93,6 +101,7 @@ class _View:
         "action_prefix",
         "choice_type",
         "chain_blocked",
+        "event_rng_state",
     )
 
     def __init__(self, **kwargs) -> None:
@@ -110,7 +119,18 @@ class _View:
 
 
 class _BranchBookkeeping:
-    __slots__ = ("parent_public_id", "branch_log", "history", "view", "status", "terminal", "rng_id")
+    __slots__ = (
+        "parent_public_id",
+        "branch_log",
+        "history",
+        "view",
+        "status",
+        "terminal",
+        "rng_id",
+        "event_rng_key",
+        "event_rng_override",
+        "event_rng_override_at_index",
+    )
 
     def __init__(self, parent_public_id: str, branch_log: list, history: HistoryBuilder, rng_id: int) -> None:
         self.parent_public_id = parent_public_id
@@ -120,6 +140,16 @@ class _BranchBookkeeping:
         self.view: Optional[_View] = None
         self.status = STATUS_COMPLETED
         self.terminal = False
+        # Set only for a Branch created (or inherited) under an Active Event RNG
+        # Hypothesis - `event_rng_key` is the Hypothesis Key `(parent_branch_id,
+        # decision_point_id, rng_id)` it was ESTABLISHED under (may belong to an
+        # ancestor, for a deep Branch that inherited rather than re-derived - see
+        # `WholeRunInstance.emulate_action`); `event_rng_override`/
+        # `event_rng_override_at_index` are the exact values to pass through unchanged
+        # on any further `emulate_action` extending this Branch.
+        self.event_rng_key: "tuple | None" = None
+        self.event_rng_override: "dict | None" = None
+        self.event_rng_override_at_index: "int | None" = None
 
 
 class WholeRunInstance:
@@ -149,6 +179,7 @@ class WholeRunInstance:
         self._branch_ids = BranchIdRegistry()
         self._decision_points = DecisionPointRegistry()
         self._rng_table = RngHypothesisTable()
+        self._event_rng_registry = EventRngHypothesisRegistry()
         self.max_branches = max_branches
 
         self._map_snapshot: Optional[str] = None
@@ -177,6 +208,7 @@ class WholeRunInstance:
         legal = _map_rooms_as_legal_actions(self._session) if boundary == MAP_SELECT else self._session.get_legal_actions()
         room_context = self._session.get_room_context()
         self._root_history.observe_room_context(room_context)
+        event_rng_state = self._session.get_event_rng_state() if boundary == EVENT_CHOICE else None
         return _View(
             legal_actions_raw=legal,
             boundary=boundary,
@@ -187,6 +219,7 @@ class WholeRunInstance:
             action_prefix=list(self._action_prefix),
             choice_type=("map" if boundary == MAP_SELECT else boundary),
             chain_blocked=False,
+            event_rng_state=event_rng_state,
         )
 
     def _view_for(self, public_branch_id: str) -> _View:
@@ -312,6 +345,15 @@ class WholeRunInstance:
                 f"parent_branch_id {parent_branch_id!r} has not reached a map_select boundary yet; "
                 "emulate_action is unavailable until the first Map Decision is reached"
             )
+        if parent_view.boundary != EVENT_CHOICE:
+            # RL担当指示：Active Event RNG Hypothesis実装 §1/§5 - a positive rng_id is
+            # only meaningful (and only accepted) at an Active Event boundary; every
+            # other boundary is rejected outright, never silently accepted as
+            # bookkeeping-only.
+            raise RequestRejected(
+                "Active Event RNG hypothesis is not available at this boundary.",
+                fault_kind=FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
+            )
         if parent_branch_id != ROOT_BRANCH_ID:
             parent_rng_id = self._bookkeeping[parent_branch_id].rng_id
             if rng_id != parent_rng_id:
@@ -324,7 +366,28 @@ class WholeRunInstance:
 
         index = parent_view.resolve_action_id(action_id)
         chosen = parent_view.legal_actions_raw[index]
-        hypothesis_index = self._rng_table.hypothesis_index_for(parent_branch_id, decision_point_id, rng_id)
+
+        # Hypothesis Key per contract §3: (parent_branch_id, decision_point_id, rng_id).
+        # root parents ESTABLISH (or, for a repeat call with the same Key, re-obtain via
+        # memoization) a fresh Hypothesis derived from the CURRENT Active Event's own
+        # RNG state. Non-root parents INHERIT their own already-established Hypothesis
+        # unchanged (§4: "新しいHypothesisを再生成しない...親Branchが到達したHidden
+        # Stateから継続する") - the boundary check above guarantees the parent Branch
+        # itself was only ever created under an Active Event Hypothesis, so
+        # `parent_book.event_rng_key` is always set here.
+        if parent_branch_id == ROOT_BRANCH_ID:
+            event_rng_key = (parent_branch_id, decision_point_id, rng_id)
+            assert parent_view.event_rng_state is not None
+            override_state = self._event_rng_registry.get_or_create(event_rng_key, parent_view.event_rng_state, rng_id)
+            override_at_index = len(parent_view.action_prefix)
+        else:
+            parent_book = self._bookkeeping[parent_branch_id]
+            assert parent_book.event_rng_key is not None, "non-root parent must have its own established Hypothesis Key"
+            event_rng_key = parent_book.event_rng_key
+            override_state = parent_book.event_rng_override
+            override_at_index = parent_book.event_rng_override_at_index
+        self._event_rng_registry.register_branch(event_rng_key, branch_id)
+
         context_id = wr_derive_context_id(
             map_snapshot=parent_view.map_snapshot,
             room_id=parent_view.room_id,
@@ -333,7 +396,7 @@ class WholeRunInstance:
             relic_injection=None,
         )
         work_item = ChoiceWorkItem(
-            work_id=f"{branch_id}-{hypothesis_index}",
+            work_id=f"{branch_id}-{rng_id}",
             context_id=context_id,
             choice_type=parent_view.choice_type,
             map_snapshot=parent_view.map_snapshot,
@@ -343,6 +406,8 @@ class WholeRunInstance:
             target_boundary=parent_view.boundary,
             work_kind=WORK_KIND_SUB_BRANCH,
             resolve_action_id=chosen["action_id"],
+            event_rng_override=override_state,
+            event_rng_override_at_index=override_at_index,
         )
 
         parent_history = self._root_history if parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[parent_branch_id].history
@@ -350,12 +415,16 @@ class WholeRunInstance:
         depth = len(parent_log)
         branch_log = parent_log + [{"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": rng_id}]
         book = _BranchBookkeeping(parent_branch_id, branch_log, parent_history.fork(), rng_id)
+        book.event_rng_key = event_rng_key
+        book.event_rng_override = override_state
+        book.event_rng_override_at_index = override_at_index
         self._bookkeeping[branch_id] = book
 
         try:
             results = self._pool.dispatch_choice_work_items([work_item], self._lease_registry)
         except TimeoutError as exc:
             book.status = STATUS_FAULTED
+            self._event_rng_registry.release_branch(event_rng_key, branch_id)
             return {
                 "status": STATUS_FAULTED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id,
                 "error": str(exc), "fault_kind": FAULT_TASK_TIMEOUT,
@@ -363,6 +432,7 @@ class WholeRunInstance:
         result = results[0]
         if result.status != "success":
             book.status = STATUS_FAULTED
+            self._event_rng_registry.release_branch(event_rng_key, branch_id)
             diagnostics = result.diagnostics or {}
             return {
                 "status": STATUS_FAULTED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id,
@@ -375,6 +445,15 @@ class WholeRunInstance:
         book.history.observe_room_context(new_room_context)
         if new_boundary == RUN_TERMINAL:
             book.terminal = True
+            # NOTE: deliberately does NOT release_branch(event_rng_key, branch_id) here.
+            # The same Hypothesis Key may still be referenced by SIBLING Branches from
+            # the same parent Decision (contract fairness: "同一親Decision＋同一rng_id
+            # の複数Actionは同一Hypothesisを共有する") - releasing on this one Branch's
+            # own outcome would drop the SHARED registry entry out from under them.
+            # Further use of THIS branch_id as a parent is already correctly rejected by
+            # the boundary check above regardless (a terminal Branch has no Decision to
+            # branch from at all) - actual release only happens via explicit Cancel/
+            # Release, root Commit, or instance Close (contract §6).
             self._decision_points.issue(branch_id)
             return {
                 "status": STATUS_COMPLETED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id,
@@ -407,7 +486,17 @@ class WholeRunInstance:
             action_prefix=new_action_prefix,
             choice_type=("map" if new_boundary == MAP_SELECT else new_boundary),
             chain_blocked=chain_blocked,
+            event_rng_state=None,
         )
+        # NOTE: deliberately does NOT release_branch()/clear book.event_rng_key here
+        # even when new_boundary != EVENT_CHOICE (event concluded, moved to Map/Reward/
+        # Shop/Rest/whatever) - see the RUN_TERMINAL branch's comment above for why
+        # (shared-Hypothesis fairness with sibling Branches). This Branch's OWN resulting
+        # boundary being non-event_choice already, by itself, correctly blocks any
+        # further emulate_action FROM it (the general boundary check at the top of this
+        # method applies uniformly to root and non-root parents alike) - the contract's
+        # "Event終了後のMap、Encounter等へ同じHypothesisの意味を引き継がないでください"
+        # is satisfied structurally, without needing an extra release here.
         book.view = new_view
         self._decision_points.issue(branch_id)
         return {
@@ -426,6 +515,7 @@ class WholeRunInstance:
             if book.status not in (STATUS_CANCELLED, STATUS_RELEASED):
                 book.status = STATUS_CANCELLED
                 book.view = None
+                self._release_event_rng_reference(bid, book)
         return {"status": STATUS_COMPLETED, "branch_statuses": {bid: STATUS_CANCELLED for bid in branch_ids}}
 
     def release_branches(self, branch_ids: list) -> dict:
@@ -437,6 +527,7 @@ class WholeRunInstance:
             if book.status != STATUS_RELEASED:
                 book.status = STATUS_RELEASED
                 book.view = None
+                self._release_event_rng_reference(bid, book)
         return {"status": STATUS_COMPLETED, "branch_statuses": {bid: STATUS_RELEASED for bid in branch_ids}}
 
     def get_branch_status(self, branch_ids: list) -> dict:
@@ -453,6 +544,8 @@ class WholeRunInstance:
         if self._closed:
             return
         self._closed = True
+        # Contract §6: instance Close -> every live Hypothesis reference is released.
+        self._event_rng_registry.release_all()
         self._pool.close()
 
     # -- helpers ----------------------------------------------------------------------
@@ -464,6 +557,13 @@ class WholeRunInstance:
         if branch_id == ROOT_BRANCH_ID:
             raise RequestRejected("root cannot be Cancelled/Released/status-queried as a Branch")
 
+    def _release_event_rng_reference(self, branch_id: str, book: "_BranchBookkeeping") -> None:
+        if book.event_rng_key is not None:
+            self._event_rng_registry.release_branch(book.event_rng_key, branch_id)
+            book.event_rng_key = None
+            book.event_rng_override = None
+            book.event_rng_override_at_index = None
+
     def _cancel_and_release_all_branches(self) -> None:
         # Keep each bookkeeping ENTRY (status flipped to released) rather than deleting
         # it - branch_id must stay permanently non-reusable and `get_decision`/
@@ -473,3 +573,10 @@ class WholeRunInstance:
                 book.status = STATUS_RELEASED
             book.view = None
             self._decision_points.clear(bid)
+        # Contract §6: root Commit -> every Hypothesis derived from the just-committed
+        # (now stale) root Decision is released, regardless of which Branch referenced
+        # it - a blanket release_all() rather than per-Branch bookkeeping is correct
+        # here because a root commit_action always invalidates the ENTIRE current
+        # Decision's derived tree at once (see `_cancel_and_release_all_branches`'s own
+        # caller, `commit_action`).
+        self._event_rng_registry.release_all()

@@ -115,6 +115,26 @@ class ChoiceWorkItem:
     target_boundary: str
     work_kind: str
     resolve_action_id: "int | None" = None
+    event_rng_override: "dict | None" = None
+    """Active Event RNG Hypothesis state (`TrainingAPI/whole_run_event_rng.py`), shaped
+    exactly like `WholeRunSession.get_event_rng_state()`'s return value (a full
+    replacement across all 4 streams, not a partial one). Applied via
+    `WholeRunSession.set_event_rng_state()` exactly ONCE per replay, immediately before
+    stepping the entry at `event_rng_override_at_index` (see below) - never reapplied at
+    any other point. `None` (the default) means no override - unchanged behavior."""
+    event_rng_override_at_index: "int | None" = None
+    """0-based index into the logical replay sequence `action_prefix +
+    [resolve_action_id]` at which `event_rng_override` must be applied, once, right
+    before that entry is stepped. `index == len(action_prefix)` means "apply right
+    before `resolve_action_id`" (the common case: the Branch that FIRST establishes a
+    Hypothesis). `index < len(action_prefix)` means "apply mid-prefix-replay, before
+    `action_prefix[index]`" - the case for a DEEPER Branch whose `action_prefix` has
+    grown past the point the Hypothesis was originally established at: the override
+    must stay pinned to that ORIGINAL point so replay continues NATURALLY (consuming/
+    advancing the RNG via normal gameplay) from there, rather than being reset back to
+    the same override state before every subsequent step (RL担当指示：Active Event RNG
+    Hypothesis実装 §4 "親Branchが到達したHidden Stateから継続する" - continue from what
+    the parent reached, don't regenerate)."""
     discover_prefix: bool = False
     """When True (only meaningful for the very first `establish` job of a branch
     attempt), the worker DRIVES FORWARD from ChooseRoom using the same policy-free
@@ -205,6 +225,10 @@ class ChoiceReachResult:
     room_context: dict
     observation: dict
     run_state: dict
+    event_rng_state: "dict | None" = None
+    """`WholeRunSession.get_event_rng_state()`'s return value, captured only when
+    `boundary == "event_choice"` (an Active Event is live) - the base state an Active
+    Event RNG Hypothesis is derived FROM. `None` at every other boundary."""
 
 
 @dataclass(frozen=True)
@@ -293,6 +317,7 @@ def _reach_result_from_session(session, choice_type: str) -> ChoiceReachResult:
     obs = session.get_observation()
     legal = _map_rooms_as_legal_actions(session) if choice_type == "map" else session.get_legal_actions()
     pending = (obs.get("state") or {}).get("pendingChoice") or {}
+    event_rng_state = session.get_event_rng_state() if obs["boundary"] == "event_choice" else None
     return ChoiceReachResult(
         boundary=obs["boundary"],
         choice_scope=obs["choice_scope"],
@@ -301,7 +326,16 @@ def _reach_result_from_session(session, choice_type: str) -> ChoiceReachResult:
         room_context=session.get_room_context(),
         observation=obs,
         run_state=session.get_run_state(),
+        event_rng_state=event_rng_state,
     )
+
+
+def _apply_event_rng_override(session, event_rng_override: dict) -> None:
+    """`event_rng_override` is shaped like `get_event_rng_state()`'s full return value
+    (includes "event_id"), but `set_event_rng_state()`'s `overrides` param expects only
+    the 4 stream sub-dicts as top-level keys - strip "event_id" before passing through.
+    """
+    session.set_event_rng_state({k: v for k, v in event_rng_override.items() if k != "event_id"})
 
 
 def _bootstrap_reach(session, work_item: ChoiceWorkItem) -> "list[int] | None":
@@ -328,7 +362,9 @@ def _bootstrap_reach(session, work_item: ChoiceWorkItem) -> "list[int] | None":
     session.choose_room(work_item.room_id)
 
     if not work_item.discover_prefix:
-        for action_id in work_item.action_prefix:
+        for index, action_id in enumerate(work_item.action_prefix):
+            if work_item.event_rng_override is not None and work_item.event_rng_override_at_index == index:
+                _apply_event_rng_override(session, work_item.event_rng_override)
             session.step(action_id)
         return None
 
@@ -469,6 +505,22 @@ class _WorkerRuntime:
                         "actual_boundary": reach.boundary,
                     },
                 )
+
+            if work_item.event_rng_override is not None and work_item.event_rng_override_at_index == len(work_item.action_prefix):
+                # Active Event RNG Hypothesis application (RL担当指示：Active Event RNG
+                # Hypothesis実装 §4 step 4) - the "apply right before resolve_action_id"
+                # case (index == len(action_prefix)); the "apply mid-prefix-replay" case
+                # is handled inside `_bootstrap_reach` instead, and must NOT be reapplied
+                # here (see `ChoiceWorkItem.event_rng_override_at_index`'s docstring).
+                # Applied AFTER reach/boundary confirmation, BEFORE the given Action is
+                # resolved/stepped below. A mismatched EventId or absent event raises
+                # inside set_event_rng_state()/SetEventRngState(), which the outer except
+                # below normalizes into a fault result rather than crashing the worker.
+                if reach.boundary != "event_choice":
+                    raise RuntimeError(
+                        f"event_rng_override given but boundary is {reach.boundary!r}, not 'event_choice'"
+                    )
+                _apply_event_rng_override(self.session, work_item.event_rng_override)
 
             if work_item.resolve_action_id is None:
                 lease = Lease(

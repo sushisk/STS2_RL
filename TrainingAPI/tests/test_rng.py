@@ -169,44 +169,27 @@ def _advance_to_map(inst):
     raise AssertionError("never reached map_select")
 
 
-def test_whole_run_every_rng_id_yields_the_same_deterministic_result():
-    """Documented design note (instance_whole_run.py module docstring point 1): Whole Run
-    has no belief/Hypothesis system, so every rng_id for a given parent Decision + action
-    yields the identical deterministic result - this still satisfies "same rng_id => same
-    Hypothesis" / "different rng_id => different Hypothesis" (there's exactly one).
+def test_whole_run_positive_rng_id_rejected_at_map_boundary():
+    """Superseded design note: Whole Run's `rng_id` is now a REAL Active Event RNG
+    Hypothesis (RL担当指示：Active Event RNG Hypothesis実装), not bookkeeping-only - a
+    positive `rng_id` is only accepted at an `event_choice` boundary and `rejected`
+    (fault_kind `rng_hypothesis_unsupported_at_boundary`) everywhere else, including
+    `map_select`. Full reproducibility/fairness/separation/lineage coverage for the
+    Active Event case lives in `test_event_rng_hypothesis_integration.py` (which needs a
+    real Event Decision, not just a Map one, to exercise).
     """
     inst = WholeRunInstance("wr1", _whole_run_config(), branch_worker_count=2)
     try:
         decision = _advance_to_map(inst)
         dp0 = decision["decision_point_id"]
         legal = decision["masked_emulator_dto"]["legal_actions"]
-        b1 = inst.emulate_action(parent_branch_id="root", branch_id="ba", rng_id=1, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)
-        b2 = inst.emulate_action(parent_branch_id="root", branch_id="bb", rng_id=7, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)
-        assert b1["status"] == b2["status"] == "completed"
-        assert b1["masked_emulator_dto"] == b2["masked_emulator_dto"]
-    finally:
-        inst.close()
-
-
-def test_whole_run_non_root_parent_requires_its_own_lineage_rng_id():
-    inst = WholeRunInstance("wr2", _whole_run_config(), branch_worker_count=2)
-    try:
-        decision = _advance_to_map(inst)
-        dp0 = decision["decision_point_id"]
-        legal = decision["masked_emulator_dto"]["legal_actions"]
-        b1 = inst.emulate_action(parent_branch_id="root", branch_id="ba", rng_id=3, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)
-        assert b1["status"] == "completed"
-        b1_legal = b1["masked_emulator_dto"]["legal_actions"]
-
         raised = False
         try:
-            inst.emulate_action(
-                parent_branch_id="ba", branch_id="bb", rng_id=4, decision_point_id=b1["decision_point_id"],
-                action_id=_safe_action_id(b1_legal), simulation_options=None,
-            )
-        except RequestRejected:
+            inst.emulate_action(parent_branch_id="root", branch_id="ba", rng_id=1, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)
+        except RequestRejected as exc:
             raised = True
-        assert raised
+            assert exc.fault_kind == "rng_hypothesis_unsupported_at_boundary"
+        assert raised, "map_select must reject a positive rng_id emulate_action"
     finally:
         inst.close()
 

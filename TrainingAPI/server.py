@@ -53,7 +53,7 @@ class RLApiServer:
         try:
             validate_request(payload)
         except RequestRejected as exc:
-            return self._rejected(payload, exc.error)
+            return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
 
         operation = payload["operation"]
         try:
@@ -85,7 +85,7 @@ class RLApiServer:
                 del self._ledgers[instance_id]
             return response
         except RequestRejected as exc:
-            return self._rejected(payload, exc.error)
+            return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
 
     def _dispatch(self, instance: Any, operation: str, payload: dict) -> dict:
         if operation == OP_GET_DECISION:
@@ -140,12 +140,12 @@ class RLApiServer:
         }
 
     @staticmethod
-    def _rejected(payload: dict, error: str) -> dict:
+    def _rejected(payload: dict, error: str, *, fault_kind: "str | None" = None) -> dict:
         return {
             "schema_version": SCHEMA_VERSION,
             "request_id": payload.get("request_id"),
             "operation": payload.get("operation"),
             "status": STATUS_REJECTED,
             "error": error,
-            "fault_kind": None,
+            "fault_kind": fault_kind,
         }

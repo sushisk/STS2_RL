@@ -256,12 +256,19 @@ def run_summary_to_dict(summary) -> dict:
 
 
 def _serializable_rng_to_dict(rng) -> dict:
+    # NOTE: the live CLR `SerializableRng` type (`MegaCrit.Sts2.Core.Random`'s xoshiro256**
+    # state DTO, filled by `MegaRandom.FillSerializableState`) uses lowercase field names
+    # `state0`..`state3` (NOT `s0`..`s3` - that naming belongs to the unrelated Combat-side
+    # `Sts2Emulator.Dto.Snapshot.SerializableRngSnapshot` DTO, which uses PascalCase
+    # `State0`..`State3` properties instead). This function's own OUTPUT dict keys
+    # (`s0`..`s3`) are unchanged/public API - only the CLR attribute names read here were
+    # wrong, confirmed against `MegaRandom.FillSerializableState` in the Emulator source.
     return {
         "counter": int(rng.counter),
-        "s0": int(rng.s0),
-        "s1": int(rng.s1),
-        "s2": int(rng.s2),
-        "s3": int(rng.s3),
+        "s0": int(rng.state0),
+        "s1": int(rng.state1),
+        "s2": int(rng.state2),
+        "s3": int(rng.state3),
     }
 
 
@@ -283,6 +290,7 @@ def apply_rng_overrides(rng, overrides: dict) -> None:
     mutate its fields in place (pythonnet exposes C# public fields as settable
     attributes), and pass the same object back to `SetEventRngState`.
     """
-    for key in ("counter", "s0", "s1", "s2", "s3"):
+    _clr_attr_by_key = {"counter": "counter", "s0": "state0", "s1": "state1", "s2": "state2", "s3": "state3"}
+    for key, clr_attr in _clr_attr_by_key.items():
         if key in overrides:
-            setattr(rng, key, int(overrides[key]))
+            setattr(rng, clr_attr, int(overrides[key]))

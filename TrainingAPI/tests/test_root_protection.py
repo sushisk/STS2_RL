@@ -161,7 +161,10 @@ def test_combat_root_cannot_be_cancelled_or_released():
 
 
 def _whole_run_config():
-    return {"instance_type": "whole_run", "seed": 18, "character_id": "IRONCLAD", "ascension": 0}
+    # seed=1 confirmed (via exploratory scan) to reach map_select then event_choice
+    # reasonably quickly - needed since emulate_action now requires an Active Event
+    # boundary (RL担当指示：Active Event RNG Hypothesis実装).
+    return {"instance_type": "whole_run", "seed": 1, "character_id": "IRONCLAD", "ascension": 0}
 
 
 def _advance_to_map(inst):
@@ -174,10 +177,29 @@ def _advance_to_map(inst):
     raise AssertionError("never reached map_select")
 
 
+def _pick_action_id(legal):
+    for action in legal:
+        if action.get("action_type") == "card":
+            return action["action_id"]
+    return legal[0]["action_id"]
+
+
+def _reach_event(inst):
+    # A positive rng_id emulate_action is only accepted at an event_choice boundary
+    # (RL担当指示：Active Event RNG Hypothesis実装) - map_select alone is not enough.
+    decision = _advance_to_map(inst)
+    for _ in range(150):
+        if decision["masked_emulator_dto"].get("boundary") == "event_choice":
+            return decision
+        legal = decision["masked_emulator_dto"]["legal_actions"]
+        decision = inst.commit_action(decision_point_id=decision["decision_point_id"], action_id=_pick_action_id(legal))
+    raise AssertionError("never reached event_choice")
+
+
 def test_whole_run_emulate_action_never_mutates_root():
     inst = WholeRunInstance("wr1", _whole_run_config(), branch_worker_count=2)
     try:
-        decision = _advance_to_map(inst)
+        decision = _reach_event(inst)
         dp0 = decision["decision_point_id"]
         legal = decision["masked_emulator_dto"]["legal_actions"]
         before = inst.get_decision("root")
@@ -192,7 +214,7 @@ def test_whole_run_emulate_action_never_mutates_root():
 def test_whole_run_only_commit_action_advances_root():
     inst = WholeRunInstance("wr2", _whole_run_config(), branch_worker_count=2)
     try:
-        decision = _advance_to_map(inst)
+        decision = _reach_event(inst)
         dp0 = decision["decision_point_id"]
         legal = decision["masked_emulator_dto"]["legal_actions"]
         inst.emulate_action(parent_branch_id="root", branch_id="b1", rng_id=1, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)
@@ -206,7 +228,7 @@ def test_whole_run_only_commit_action_advances_root():
 def test_whole_run_commit_releases_derived_branches():
     inst = WholeRunInstance("wr3", _whole_run_config(), branch_worker_count=2)
     try:
-        decision = _advance_to_map(inst)
+        decision = _reach_event(inst)
         dp0 = decision["decision_point_id"]
         legal = decision["masked_emulator_dto"]["legal_actions"]
         b1 = inst.emulate_action(parent_branch_id="root", branch_id="b1", rng_id=1, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)

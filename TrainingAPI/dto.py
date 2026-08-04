@@ -74,6 +74,36 @@ FAULT_WORKER_PROCESS_CRASH = "worker_process_crash"
 FAULT_REPLAY_MISMATCH = "replay_mismatch"
 FAULT_EMULATOR_ERROR = "emulator_error"
 FAULT_SNAPSHOT_RESTORE_FAILED = "snapshot_restore_failed"
+FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY = "rng_hypothesis_unsupported_at_boundary"
+"""`rejected`-status fault_kind (not `faulted`) - a positive rng_id was requested at a
+Whole Run boundary where RNG Hypothesis generation is not supported (RL担当指示：Active
+Event RNG Hypothesis実装 §5). See `RNG_HYPOTHESIS_CAPABILITIES` below for exactly which
+boundaries/domains are supported."""
+
+# -- RNG Hypothesis capability declaration (§8: no new public Operation, just a formally
+# defined constant/contract + tests) ----------------------------------------------------
+
+RNG_HYPOTHESIS_CAPABILITY_EVENT = "event"
+RNG_HYPOTHESIS_CAPABILITY_MAP = "map"
+RNG_HYPOTHESIS_CAPABILITY_ENCOUNTER = "encounter"
+RNG_HYPOTHESIS_CAPABILITY_BOSS_ANCIENT = "boss_ancient"
+
+RNG_HYPOTHESIS_CAPABILITIES: "dict[str, bool]" = {
+    RNG_HYPOTHESIS_CAPABILITY_EVENT: True,
+    RNG_HYPOTHESIS_CAPABILITY_MAP: False,
+    RNG_HYPOTHESIS_CAPABILITY_ENCOUNTER: False,
+    RNG_HYPOTHESIS_CAPABILITY_BOSS_ANCIENT: False,
+}
+"""Whole Run RNG Hypothesis support by domain. Only `event` (Active Event's own RNG plus
+its Reward/Shop/Transformation streams, via the Emulator's `GetEventRngState`/
+`SetEventRngState`) is implemented. Map/Encounter/Boss/Ancient/Act-generation Hypothesis
+generation is explicitly unsupported - see
+`Outputs/reports/rl_whole_run_rng_hypothesis_STOP_20260804.md` for why (the `UpFront`
+RNG stream generates an entire Act's rooms/encounters/events/relic-offers in one
+upfront draw at Act-generation time with no safely isolable "unconsumed future" boundary
+and no purpose-built partial-override Emulator API, unlike the Event case). Combat's own
+RNG Hypothesis mechanism (`search.rng_hypothesis`, DrawPile-order belief) is unrelated
+and unaffected by this dict."""
 
 # -- instance types --------------------------------------------------------------------
 
