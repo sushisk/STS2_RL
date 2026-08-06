@@ -10,7 +10,7 @@ three Pile keys to Multiset counts, deletes `playPile` outright, and applies an 
 to `Metrics`/`Extras`/`Info`-named keys wherever they occur - rather than an
 enumerate-every-safe-field allowlist for the whole tree. This is deliberately
 conservative (over-strip, never under-strip) and, critically, makes it possible to write
-one recursive "no forbidden key anywhere" audit (see `TrainingAPI/tests/test_mask_audit.py`)
+one recursive "no forbidden key anywhere" audit (see `API/tests/test_mask_audit.py`)
 that exercises the exact same name list this builder uses, so builder and auditor can
 never silently drift apart.
 
@@ -24,7 +24,7 @@ import copy
 from collections import Counter
 from typing import Any
 
-from TrainingAPI.dto import DTO_VERSION, MASK_VERSION
+from API.dto import DTO_VERSION, MASK_VERSION
 
 # Any dict key whose lowercased name CONTAINS one of these substrings is removed
 # entirely, anywhere in the tree. Deliberately broad/conservative (Part A: "不必要な

@@ -38,8 +38,8 @@ from search.branch_worker_pool import (
 from search.candidate_pipeline import PipelineCandidateRef
 from search.decision_context import DecisionContext, DecisionSignature, SemanticAction
 
-from TrainingAPI.combat_rng_mapping import build_single_hypothesis_work_item
-from TrainingAPI.dto import (
+from API.combat_rng_mapping import build_single_hypothesis_work_item
+from API.dto import (
     FAULT_EMULATOR_ERROR,
     ROOT_BRANCH_ID,
     ROOT_RNG_ID,
@@ -51,10 +51,10 @@ from TrainingAPI.dto import (
     STATUS_RELEASED,
     STATUS_RUNNING,
 )
-from TrainingAPI.history_builder import HistoryBuilder
-from TrainingAPI.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
-from TrainingAPI.masking import build_masked_emulator_dto, mask_legal_actions
-from TrainingAPI.validation import RequestRejected
+from API.history_builder import HistoryBuilder
+from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
+from API.masking import build_masked_emulator_dto, mask_legal_actions
+from API.validation import RequestRejected
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:

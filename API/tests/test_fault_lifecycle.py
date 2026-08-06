@@ -3,7 +3,7 @@
 Combat's own Worker timeout/kill/Respawn/Cancel primitives are already exhaustively
 tested at the `BranchWorkerPool`/`BranchManager` level (Phase N:
 `Combat/tests/test_worker_respawn.py`, `Combat/tests/test_branch_manager.py`) - this
-file proves the TrainingAPI WIRE LAYER correctly surfaces those same events (a hung
+file proves the API WIRE LAYER correctly surfaces those same events (a hung
 Branch Worker becomes a `faulted` Response, not a hang/crash; a released Branch is
 rejected on reuse; `close_instance` is safe to call twice; a Training-side disconnect -
 modeled here as tearing down the OS process without an explicit `close_instance` first -
@@ -23,11 +23,11 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from TrainingAPI.api_runtime import RLApiServerProcess  # noqa: E402
-from TrainingAPI.dto import SCHEMA_VERSION  # noqa: E402
-from TrainingAPI.instance_combat import CombatInstance  # noqa: E402
-from TrainingAPI.server import RLApiServer  # noqa: E402
-from TrainingAPI.validation import RequestRejected  # noqa: E402
+from API.api_runtime import RLApiServerProcess  # noqa: E402
+from API.dto import SCHEMA_VERSION  # noqa: E402
+from API.instance_combat import CombatInstance  # noqa: E402
+from API.server import RLApiServer  # noqa: E402
+from API.validation import RequestRejected  # noqa: E402
 
 
 def _combat_config():

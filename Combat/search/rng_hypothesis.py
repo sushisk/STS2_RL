@@ -488,7 +488,7 @@ def apply_hypothesis_to_context(
 ) -> DecisionContext:
     """Low-level primitive shared by Search Coordinator's full-grid expansion
     (`search_coordinator._hypothesis_work_items_with_coverage`) and Training API's
-    single-Hypothesis path (`TrainingAPI.combat_rng_mapping.build_single_hypothesis_work_item`):
+    single-Hypothesis path (`API.combat_rng_mapping.build_single_hypothesis_work_item`):
     substitute `decision_context.root_snapshot` with the Method-B derived root for
     `hypothesis` (Combat-Start Pending vs ordinary Snapshot, dispatched by
     `root_snapshot`'s type), then stamp the Phase-2 `search_hypothesis_id` slot via

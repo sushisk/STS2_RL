@@ -14,7 +14,7 @@ from __future__ import annotations
 import itertools
 from typing import Any
 
-from TrainingAPI.dto import (
+from API.dto import (
     INSTANCE_TYPE_COMBAT,
     INSTANCE_TYPE_WHOLE_RUN,
     OP_CANCEL_BRANCHES,
@@ -29,8 +29,8 @@ from TrainingAPI.dto import (
     STATUS_COMPLETED,
     STATUS_REJECTED,
 )
-from TrainingAPI.identifiers import RequestLedger
-from TrainingAPI.validation import RequestRejected, validate_request
+from API.identifiers import RequestLedger
+from API.validation import RequestRejected, validate_request
 
 
 class RLApiServer:
@@ -116,11 +116,11 @@ class RLApiServer:
         instance_type = instance_config.get("instance_type")
         instance_id = f"inst-{next(self._instance_serial):06d}"
         if instance_type == INSTANCE_TYPE_COMBAT:
-            from TrainingAPI.instance_combat import CombatInstance
+            from API.instance_combat import CombatInstance
 
             instance = CombatInstance(instance_id, instance_config, **self._kwargs.get(INSTANCE_TYPE_COMBAT, {}))
         elif instance_type == INSTANCE_TYPE_WHOLE_RUN:
-            from TrainingAPI.instance_whole_run import WholeRunInstance
+            from API.instance_whole_run import WholeRunInstance
 
             instance = WholeRunInstance(instance_id, instance_config, **self._kwargs.get(INSTANCE_TYPE_WHOLE_RUN, {}))
         else:

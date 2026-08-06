@@ -9,9 +9,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 
-import TrainingAPI.dto as dto
-from TrainingAPI.identifiers import BranchIdRegistry, DecisionPointRegistry, RequestLedger
-from TrainingAPI.validation import RequestRejected, validate_request
+import API.dto as dto
+from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RequestLedger
+from API.validation import RequestRejected, validate_request
 
 
 def _dto_value(*names, default):
@@ -49,7 +49,7 @@ def _operation(name):
 
 def _field(name):
     # Wire field names are plain literal strings per the contract (schema_version,
-    # request_id, branch_id, ...) - NOT resolved through TrainingAPI.dto constants
+    # request_id, branch_id, ...) - NOT resolved through API.dto constants
     # (those hold VALUES like dto.SCHEMA_VERSION == "0.5", not field NAMES; routing
     # this through `_dto_value` was a bug that silently produced payload dicts keyed
     # by "0.5" instead of "schema_version").

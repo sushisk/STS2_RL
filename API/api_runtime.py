@@ -6,7 +6,7 @@ that crosses the Queue is a plain JSON-safe dict - no CLR objects, no dataclasse
 
 Critical: `pythonnet`/CLR is initialized ONLY inside `_rl_runtime_process_main`, which
 runs in the SPAWNED CHILD process - `RLApiServerProcess` itself (constructed and held by
-the PARENT/Training-side process) imports `TrainingAPI.server`/`instance_combat`/
+the PARENT/Training-side process) imports `API.server`/`instance_combat`/
 `instance_whole_run` LAZILY, only inside the child's entry point, so simply
 constructing/holding an `RLApiServerProcess` in the Training process never touches CLR.
 """
@@ -18,7 +18,7 @@ import queue
 from pathlib import Path
 from typing import Any, Optional
 
-from TrainingAPI.dto import FAULT_TASK_TIMEOUT, SCHEMA_VERSION, STATUS_FAULTED
+from API.dto import FAULT_TASK_TIMEOUT, SCHEMA_VERSION, STATUS_FAULTED
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,7 +33,7 @@ def _rl_runtime_process_main(in_queue, out_queue, repo_root: str) -> None:
     if repo_root not in sys.path:
         sys.path.insert(0, repo_root)
 
-    from TrainingAPI.server import RLApiServer
+    from API.server import RLApiServer
 
     server = RLApiServer()
     try:

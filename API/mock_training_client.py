@@ -14,8 +14,8 @@ from __future__ import annotations
 import itertools
 from typing import Any, Optional
 
-from TrainingAPI.api_runtime import RLApiServerProcess
-from TrainingAPI.dto import ROOT_BRANCH_ID, ROOT_RNG_ID, SCHEMA_VERSION
+from API.api_runtime import RLApiServerProcess
+from API.dto import ROOT_BRANCH_ID, ROOT_RNG_ID, SCHEMA_VERSION
 
 
 class MockTrainingClient:

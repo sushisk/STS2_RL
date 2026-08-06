@@ -21,7 +21,7 @@ final report rather than silently:
    `rng_id=0` is reserved for root) is `rejected` with
    `fault_kind="rng_hypothesis_unsupported_at_boundary"` at every OTHER boundary (Map,
    pre-Combat, Reward, Shop, Rest, Treasure, post-Event, and anything Map/Encounter/Boss/
-   Ancient-generation-related) - see `TrainingAPI.dto.RNG_HYPOTHESIS_CAPABILITIES` for
+   Ancient-generation-related) - see `API.dto.RNG_HYPOTHESIS_CAPABILITIES` for
    the formal capability declaration. `whole_run_event_rng.py` implements the actual
    Hypothesis derivation (deterministic, process/PID-independent) and lifecycle registry.
 2. **Branch dispatch is synchronous** (`WholeRunWorkerPool.dispatch_choice_work_items`
@@ -35,7 +35,7 @@ final report rather than silently:
    whole-run Branch simulation to be interruptible mid-flight (e.g. a very long Room
    auto-play), that would need an async submit/poll layer mirroring
    `search/branch_manager.py`, built for `WholeRunWorkerPool` - out of scope for this
-   pass, flagged rather than silently done differently. See `TrainingAPI/dto.py`'s
+   pass, flagged rather than silently done differently. See `API/dto.py`'s
    "-- status --" section for the formal statement of which statuses each instance_type
    can reach - `STATUS_QUEUED`/`STATUS_RUNNING` are declared there for shared vocabulary
    but are never produced by this module.
@@ -64,7 +64,7 @@ from worker_pool import (
     derive_context_id as wr_derive_context_id,
 )
 
-from TrainingAPI.dto import (
+from API.dto import (
     FAULT_EMULATOR_ERROR,
     FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
     FAULT_TASK_TIMEOUT,
@@ -75,11 +75,11 @@ from TrainingAPI.dto import (
     STATUS_FAULTED,
     STATUS_RELEASED,
 )
-from TrainingAPI.history_builder import HistoryBuilder
-from TrainingAPI.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
-from TrainingAPI.masking import build_masked_emulator_dto, mask_legal_actions
-from TrainingAPI.validation import RequestRejected
-from TrainingAPI.whole_run_event_rng import EventRngHypothesisRegistry
+from API.history_builder import HistoryBuilder
+from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
+from API.masking import build_masked_emulator_dto, mask_legal_actions
+from API.validation import RequestRejected
+from API.whole_run_event_rng import EventRngHypothesisRegistry
 
 
 def _map_rooms_as_legal_actions(session: WholeRunSession) -> list:

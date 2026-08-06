@@ -20,10 +20,10 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from TrainingAPI.identifiers import RngHypothesisTable  # noqa: E402
-from TrainingAPI.instance_combat import CombatInstance  # noqa: E402
-from TrainingAPI.instance_whole_run import WholeRunInstance  # noqa: E402
-from TrainingAPI.validation import RequestRejected, validate_request  # noqa: E402
+from API.identifiers import RngHypothesisTable  # noqa: E402
+from API.instance_combat import CombatInstance  # noqa: E402
+from API.instance_whole_run import WholeRunInstance  # noqa: E402
+from API.validation import RequestRejected, validate_request  # noqa: E402
 
 
 def _combat_config():

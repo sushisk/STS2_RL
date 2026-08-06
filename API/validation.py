@@ -17,7 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from TrainingAPI.dto import (
+from API.dto import (
     COMMON_REQUEST_FIELDS,
     OP_CANCEL_BRANCHES,
     OP_CLOSE_INSTANCE,

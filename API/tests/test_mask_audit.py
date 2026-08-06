@@ -9,8 +9,8 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from TrainingAPI.dto import DTO_VERSION, MASK_VERSION  # noqa: E402
-from TrainingAPI.masking import (  # noqa: E402
+from API.dto import DTO_VERSION, MASK_VERSION  # noqa: E402
+from API.masking import (  # noqa: E402
     _FORBIDDEN_KEY_SUBSTRINGS,
     build_masked_emulator_dto,
     mask_legal_actions,

@@ -1,4 +1,4 @@
-"""Unit tests for `TrainingAPI/instance_whole_run.py`'s `_View` dataclass,
+"""Unit tests for `API/instance_whole_run.py`'s `_View` dataclass,
 `_build_child_view()`, and `_choice_type_from_boundary()` (RL担当指示 code-improvement
 pass items 4/5/6). Pure in-process tests, no real Emulator session or Worker Pool needed.
 
@@ -16,7 +16,7 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from TrainingAPI.instance_whole_run import _build_child_view, _choice_type_from_boundary, _View  # noqa: E402
+from API.instance_whole_run import _build_child_view, _choice_type_from_boundary, _View  # noqa: E402
 from whole_run_session import EVENT_CHOICE, MAP_SELECT, RUN_TERMINAL, SHOP_CHOICE  # noqa: E402
 from worker_pool import BranchResult, ChoiceStepResult, ChoiceWorkItem, EXECUTION_MODE_BOOTSTRAP_STEP, WORK_KIND_SUB_BRANCH  # noqa: E402
 

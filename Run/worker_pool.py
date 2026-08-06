@@ -119,7 +119,7 @@ class EventRngReplayPlan:
     application site is a single value rather than 3 independently-passed-around fields.
 
     A child Branch inherits its parent's `EventRngReplayPlan` UNCHANGED (never
-    re-derives/recomputes it) - see `TrainingAPI/instance_whole_run.py`'s
+    re-derives/recomputes it) - see `API/instance_whole_run.py`'s
     `WholeRunInstance.emulate_action`, non-root parent branch.
     """
 
@@ -127,11 +127,11 @@ class EventRngReplayPlan:
     """The Hypothesis Key `(parent_branch_id, decision_point_id, rng_id)` this plan's
     `override_state` was ESTABLISHED under (may belong to an ancestor Branch, for a deep
     Branch that inherited rather than re-derived). Also the key
-    `TrainingAPI.whole_run_event_rng.EventRngHypothesisRegistry` uses for its own,
+    `API.whole_run_event_rng.EventRngHypothesisRegistry` uses for its own,
     separate ref-counted lifecycle bookkeeping - this plan does not itself manage that
     lifecycle, only carries the key."""
     override_state: dict
-    """Active Event RNG Hypothesis state (`TrainingAPI/whole_run_event_rng.py`), shaped
+    """Active Event RNG Hypothesis state (`API/whole_run_event_rng.py`), shaped
     exactly like `WholeRunSession.get_event_rng_state()`'s return value (a full
     replacement across all 4 streams, not a partial one). Applied via
     `WholeRunSession.set_event_rng_state()` exactly ONCE per replay, immediately before

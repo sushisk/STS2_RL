@@ -21,8 +21,8 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
-from TrainingAPI.dto import ROOT_BRANCH_ID
-from TrainingAPI.validation import RequestRejected
+from API.dto import ROOT_BRANCH_ID
+from API.validation import RequestRejected
 
 
 def _payload_digest(payload: dict) -> str:

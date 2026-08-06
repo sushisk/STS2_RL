@@ -1,7 +1,7 @@
 """Pure-Python coverage for Whole Run event RNG hypothesis derivation.
 
 No CLR/emulator access is used here. The tests operate only on dicts and the registry
-class in `TrainingAPI.whole_run_event_rng`.
+class in `API.whole_run_event_rng`.
 """
 
 from __future__ import annotations
@@ -15,8 +15,8 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from TrainingAPI import whole_run_event_rng as wh  # noqa: E402
-from TrainingAPI.whole_run_event_rng import EventRngHypothesisRegistry, derive_event_rng_hypothesis  # noqa: E402
+from API import whole_run_event_rng as wh  # noqa: E402
+from API.whole_run_event_rng import EventRngHypothesisRegistry, derive_event_rng_hypothesis  # noqa: E402
 
 
 def _base_state():
