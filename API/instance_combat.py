@@ -20,7 +20,6 @@ intermediate actions Training never specified, which is out of scope for a singl
 
 from __future__ import annotations
 
-import dataclasses
 from typing import Any, Optional
 
 from combat_state_snapshot import CombatStateSnapshot
@@ -308,8 +307,11 @@ class CombatInstance:
                 boundary,
             )
         elif boundary == BOUNDARY_STABLE:
-            stub_state = dataclasses.replace(parent_view.decision_context.current_decision_result, _cached_legal_actions=list(result.next_legal_actions or []))
-            next_context = DecisionContext.from_main_stable_capture(result.child_snapshot, stub_state, result.result_signature)
+            next_context = DecisionContext.from_main_stable_capture(
+                result.child_snapshot,
+                result.next_decision_result,
+                result.result_signature,
+            )
             next_view = _DecisionView(list(result.next_legal_actions or []), next_context, boundary)
         else:
             book.terminal = True
