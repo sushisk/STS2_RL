@@ -132,16 +132,22 @@ class RLApiServer:
 
     @staticmethod
     def _wrap(payload: dict, response: dict) -> dict:
-        return {
+        wrapped = {
             "schema_version": SCHEMA_VERSION,
             "request_id": payload["request_id"],
             "operation": payload["operation"],
             **response,
         }
+        # Contract §2.3: an Instance対象Request's Response必ずRequestと同じinstance_idを含む。
+        # `start_instance`はresponse側(RL発行のinstance_id)がそのまま優先される - この分岐は
+        # 個々のInstanceメソッドがinstance_idを積み忘れても壊れない安全網。
+        if "instance_id" not in wrapped and payload.get("instance_id") is not None:
+            wrapped["instance_id"] = payload["instance_id"]
+        return wrapped
 
     @staticmethod
     def _rejected(payload: dict, error: str, *, fault_kind: "str | None" = None) -> dict:
-        return {
+        response = {
             "schema_version": SCHEMA_VERSION,
             "request_id": payload.get("request_id"),
             "operation": payload.get("operation"),
@@ -149,3 +155,6 @@ class RLApiServer:
             "error": error,
             "fault_kind": fault_kind,
         }
+        if payload.get("instance_id") is not None:
+            response["instance_id"] = payload["instance_id"]
+        return response

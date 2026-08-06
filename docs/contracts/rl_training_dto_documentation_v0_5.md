@@ -107,6 +107,13 @@ Emulator DTOは公開可能な情報を基本的にそのまま利用し、Hidde
 | `branch_log` | array |
 | `masked_emulator_dto` | object |
 
+**Instance対象RequestのResponseは、同じ`instance_id`を必須とする。**
+
+- `start_instance`以外のRequestは`instance_id`を必須とする（2.1節）ため、対応するResponseにも同じ`instance_id`を必ず含める。
+- `completed`／`partial`などの正常系だけでなく、`rejected`、`faulted`、timeout（応答なしとしてRLまたはTrainingが合成するResponse）でも同様に、Requestの`instance_id`をそのまま返す。
+- `start_instance`のResponseは例外で、`instance_id`はRLがこの応答で新規発行する。
+- Trainingは、受信したResponseの`instance_id`が送信したRequestの`instance_id`と一致することを確認し、不一致の場合は当該Responseを信頼しない。
+
 失敗時に返す項目：
 
 | 項目 | 型 |
@@ -160,6 +167,7 @@ TrainingとRLは、対応していないVersionの要求を`rejected`とする�
 - rootと全Branchで共有する。
 - Whole Runと独立Combatでは別IDを使用する。
 - `close_instance`後は再利用しない。
+- `start_instance`以外の全Operationで、RequestとResponseは同じ`instance_id`を持つ（2.3節）。`rejected`、`faulted`、timeoutのResponseも例外なく含める。
 
 ### `request_id`
 

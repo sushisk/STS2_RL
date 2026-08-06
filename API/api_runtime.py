@@ -53,6 +53,9 @@ def _rl_runtime_process_main(in_queue, out_queue, repo_root: str) -> None:
                     "error": f"{type(exc).__name__}: {exc}",
                     "fault_kind": "emulator_error",
                 }
+                # Contract §2.3: Instance対象RequestのResponseは同じinstance_idを必須とする。
+                if isinstance(payload, dict) and payload.get("instance_id") is not None:
+                    response["instance_id"] = payload["instance_id"]
             out_queue.put((internal_id, response))
     finally:
         server.close_all()
@@ -96,7 +99,7 @@ class RLApiServerProcess:
         try:
             received_id, response = self._out_queue.get(timeout=self.request_timeout_s)
         except queue.Empty:
-            return {
+            response = {
                 "schema_version": SCHEMA_VERSION,
                 "request_id": payload.get("request_id"),
                 "operation": payload.get("operation"),
@@ -104,6 +107,10 @@ class RLApiServerProcess:
                 "error": "RL Runtime process did not respond within request_timeout_s",
                 "fault_kind": FAULT_TASK_TIMEOUT,
             }
+            # Contract §2.3: Instance対象RequestのResponseは同じinstance_idを必須とする。
+            if payload.get("instance_id") is not None:
+                response["instance_id"] = payload["instance_id"]
+            return response
         if received_id != internal_id:
             raise RuntimeError("RLApiServerProcess.call() received an out-of-order response")
         return response
