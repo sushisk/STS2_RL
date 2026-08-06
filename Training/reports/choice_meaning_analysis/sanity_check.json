@@ -1,9 +1,0 @@
-{
-  "test_top1_meaning": 0.6029411764705882,
-  "test_top1_no_meaning": 0.6176470588235294,
-  "expected_from_approved_report": {
-    "meaning": 0.6029,
-    "no_meaning": 0.6176
-  },
-  "matches_approved_report_within_0.01": true
-}
