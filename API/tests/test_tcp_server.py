@@ -13,6 +13,8 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
 
         def handler(payload: dict) -> dict:
             self.requests.append(payload)
+            if payload.get("operation") == "raise":
+                raise RuntimeError("boom")
             return {"echo": payload}
 
         self.server = AsyncioTcpServer(handler, port=0)
@@ -47,6 +49,19 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         response = await self._round_trip(request)
         self.assertEqual(response, {"echo": request})
         self.assertEqual(self.requests, [request])
+
+    async def test_handler_error_uses_api_fault_response(self) -> None:
+        request = {
+            "schema_version": "0.5",
+            "request_id": "req-2",
+            "operation": "raise",
+            "instance_id": "inst-1",
+        }
+        response = await self._round_trip(request)
+        self.assertEqual(response["status"], "faulted")
+        self.assertEqual(response["fault_kind"], "emulator_error")
+        self.assertEqual(response["instance_id"], "inst-1")
+        self.assertIn("RuntimeError: boom", response["error"])
 
 
 if __name__ == "__main__":
