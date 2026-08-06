@@ -16,7 +16,7 @@ from __future__ import annotations
 import multiprocessing
 import queue
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from API.dto import FAULT_TASK_TIMEOUT, SCHEMA_VERSION, STATUS_FAULTED
 
@@ -33,6 +33,7 @@ def _rl_runtime_process_main(in_queue, out_queue, repo_root: str) -> None:
     if repo_root not in sys.path:
         sys.path.insert(0, repo_root)
 
+    from API.faults import fault_response
     from API.server import RLApiServer
 
     server = RLApiServer()
@@ -44,29 +45,22 @@ def _rl_runtime_process_main(in_queue, out_queue, repo_root: str) -> None:
             internal_id, payload = message
             try:
                 response = server.handle_request(payload)
-            except BaseException as exc:  # noqa: BLE001 - the RL Runtime process must never crash silently.
-                response = {
-                    "schema_version": SCHEMA_VERSION,
-                    "request_id": payload.get("request_id") if isinstance(payload, dict) else None,
-                    "operation": payload.get("operation") if isinstance(payload, dict) else None,
-                    "status": STATUS_FAULTED,
-                    "error": f"{type(exc).__name__}: {exc}",
-                    "fault_kind": "emulator_error",
-                }
-                # Contract §2.3: Instance対象RequestのResponseは同じinstance_idを必須とする。
-                if isinstance(payload, dict) and payload.get("instance_id") is not None:
-                    response["instance_id"] = payload["instance_id"]
+            except BaseException as exc:  # noqa: BLE001 - the runtime must report failures.
+                response = fault_response(payload, exc)
             out_queue.put((internal_id, response))
     finally:
         server.close_all()
 
 
 class RLApiServerProcess:
-    """Training-side handle: owns the spawned RL Runtime OS process and provides a
-    synchronous, timeout-bounded `call(request_dict) -> response_dict`.
-    """
+    """Own the spawned RL Runtime process and provide timeout-bounded calls."""
 
-    def __init__(self, *, repo_root: Optional[Path] = None, request_timeout_s: float = 60.0) -> None:
+    def __init__(
+        self,
+        *,
+        repo_root: Optional[Path] = None,
+        request_timeout_s: float = 60.0,
+    ) -> None:
         self.request_timeout_s = request_timeout_s
         self._ctx = multiprocessing.get_context("spawn")
         self._in_queue = self._ctx.Queue()
@@ -74,9 +68,6 @@ class RLApiServerProcess:
         self._process = self._ctx.Process(
             target=_rl_runtime_process_main,
             args=(self._in_queue, self._out_queue, str(repo_root or _REPO_ROOT)),
-            # NOT daemonic: this process itself spawns Combat/Whole Run Branch Worker
-            # child processes (BranchWorkerPool/WholeRunWorkerPool), and Python disallows
-            # a daemonic process from having children of its own.
             daemon=False,
         )
         self._process.start()
@@ -107,12 +98,13 @@ class RLApiServerProcess:
                 "error": "RL Runtime process did not respond within request_timeout_s",
                 "fault_kind": FAULT_TASK_TIMEOUT,
             }
-            # Contract §2.3: Instance対象RequestのResponseは同じinstance_idを必須とする。
             if payload.get("instance_id") is not None:
                 response["instance_id"] = payload["instance_id"]
             return response
         if received_id != internal_id:
-            raise RuntimeError("RLApiServerProcess.call() received an out-of-order response")
+            raise RuntimeError(
+                "RLApiServerProcess.call() received an out-of-order response"
+            )
         return response
 
     def close(self) -> None:
