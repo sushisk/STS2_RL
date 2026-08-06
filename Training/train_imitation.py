@@ -16,22 +16,25 @@ from torch.utils.data import DataLoader
 from sts2_training.dataset import (
     STS2DecisionDataset,
     collate_decisions,
+    iter_rows,
     load_export_info,
     load_json,
     validate_rows,
-    iter_rows,
 )
 from sts2_training.encoding import ExportEncoder
 from sts2_training.model import CandidatePolicyNet, masked_logits
-
 
 DEFAULT_EXPORT_ROOT = Path("exports/train500_export_20260722_v1")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train a minimal STS2 imitation policy from exported JSONL.")
+    parser = argparse.ArgumentParser(
+        description="Train a minimal STS2 imitation policy from exported JSONL."
+    )
     parser.add_argument("--export-root", type=Path, default=DEFAULT_EXPORT_ROOT)
-    parser.add_argument("--checkpoint-dir", type=Path, default=Path("checkpoints/min_policy"))
+    parser.add_argument(
+        "--checkpoint-dir", type=Path, default=Path("checkpoints/min_policy")
+    )
     parser.add_argument("--epochs", type=int, default=2)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--hidden-dim", type=int, default=128)
@@ -101,11 +104,18 @@ def run_epoch(
             total_loss += float(loss.item()) * batch["state"].shape[0]
             total += batch["state"].shape[0]
             correct += int((predictions == batch["teacher_index"]).sum().item())
-            illegal_selected += int((~batch["legal_mask"]).gather(1, predictions.unsqueeze(1)).sum().item())
+            illegal_selected += int(
+                (~batch["legal_mask"]).gather(1, predictions.unsqueeze(1)).sum().item()
+            )
             for k in top_k:
                 kk = min(k, masked.shape[1])
                 top_indices = masked.topk(kk, dim=1).indices
-                top_counts[k] += int((top_indices == batch["teacher_index"].unsqueeze(1)).any(dim=1).sum().item())
+                top_counts[k] += int(
+                    (top_indices == batch["teacher_index"].unsqueeze(1))
+                    .any(dim=1)
+                    .sum()
+                    .item()
+                )
     metrics = {
         "loss": total_loss / max(1, total),
         "accuracy": correct / max(1, total),
@@ -127,14 +137,18 @@ def _add_bucket(buckets: dict[str, dict[str, float]], key: Any, correct: bool) -
     buckets[label]["correct"] += 1.0 if correct else 0.0
 
 
-def _finalize_buckets(buckets: dict[str, dict[str, float]]) -> dict[str, dict[str, float]]:
+def _finalize_buckets(
+    buckets: dict[str, dict[str, float]],
+) -> dict[str, dict[str, float]]:
     return {
         key: {
             "accuracy": value["correct"] / max(1.0, value["total"]),
             "correct": value["correct"],
             "total": value["total"],
         }
-        for key, value in sorted(buckets.items(), key=lambda item: (-item[1]["total"], item[0]))
+        for key, value in sorted(
+            buckets.items(), key=lambda item: (-item[1]["total"], item[0])
+        )
     }
 
 
@@ -175,12 +189,19 @@ def evaluate_detailed(
             batch_size = batch["state"].shape[0]
             total_loss += float(loss.item()) * batch_size
             total += batch_size
-            illegal_selected += int((~batch["legal_mask"]).gather(1, predictions.unsqueeze(1)).sum().item())
+            illegal_selected += int(
+                (~batch["legal_mask"]).gather(1, predictions.unsqueeze(1)).sum().item()
+            )
 
             for k in top_k:
                 kk = min(k, masked.shape[1])
                 top_indices = masked.topk(kk, dim=1).indices
-                top_counts[k] += int((top_indices == batch["teacher_index"].unsqueeze(1)).any(dim=1).sum().item())
+                top_counts[k] += int(
+                    (top_indices == batch["teacher_index"].unsqueeze(1))
+                    .any(dim=1)
+                    .sum()
+                    .item()
+                )
 
             for item_idx in range(batch_size):
                 row = dataset.rows[offset + item_idx]
@@ -188,9 +209,13 @@ def evaluate_detailed(
                 teacher_idx = int(batch["teacher_index"][item_idx].item())
                 is_correct = pred_idx == teacher_idx
                 correct_count += 1 if is_correct else 0
-                _add_bucket(by_action_type, batch["teacher_action_type"][item_idx], is_correct)
+                _add_bucket(
+                    by_action_type, batch["teacher_action_type"][item_idx], is_correct
+                )
                 _add_bucket(by_outcome, batch["combat_outcome"][item_idx], is_correct)
-                _add_bucket(by_legal_count, batch["legal_action_count"][item_idx], is_correct)
+                _add_bucket(
+                    by_legal_count, batch["legal_action_count"][item_idx], is_correct
+                )
                 _add_bucket(by_encounter, batch["encounter_key"][item_idx], is_correct)
 
                 if not is_correct and len(misclassified) < max_misclassified:
@@ -207,15 +232,29 @@ def evaluate_detailed(
                             "legal_actions": legal_actions,
                             "teacher_index": teacher_idx,
                             "predicted_index": pred_idx,
-                            "teacher_action": legal_actions[teacher_idx] if 0 <= teacher_idx < len(legal_actions) else row.get("teacher_action"),
-                            "predicted_action": legal_actions[pred_idx] if 0 <= pred_idx < len(legal_actions) else None,
+                            "teacher_action": (
+                                legal_actions[teacher_idx]
+                                if 0 <= teacher_idx < len(legal_actions)
+                                else row.get("teacher_action")
+                            ),
+                            "predicted_action": (
+                                legal_actions[pred_idx]
+                                if 0 <= pred_idx < len(legal_actions)
+                                else None
+                            ),
                             "top_scores": [
                                 {
                                     "index": int(idx),
                                     "score": float(masked[item_idx, idx].item()),
-                                    "action": legal_actions[int(idx)] if int(idx) < len(legal_actions) else None,
+                                    "action": (
+                                        legal_actions[int(idx)]
+                                        if int(idx) < len(legal_actions)
+                                        else None
+                                    ),
                                 }
-                                for idx in masked[item_idx].topk(min(max(top_k), masked.shape[1])).indices.tolist()
+                                for idx in masked[item_idx]
+                                .topk(min(max(top_k), masked.shape[1]))
+                                .indices.tolist()
                             ],
                         }
                     )
@@ -262,7 +301,9 @@ def save_checkpoint(
             "metrics": metrics,
             "history": metrics.get("history", []),
             "best_epoch": metrics.get("best_epoch", epoch),
-            "best_loss": metrics.get("best_loss", metrics.get("validation", {}).get("loss")),
+            "best_loss": metrics.get(
+                "best_loss", metrics.get("validation", {}).get("loss")
+            ),
             "dictionaries": dictionaries,
         },
         path,
@@ -278,12 +319,41 @@ def main() -> int:
     encoder = ExportEncoder(dictionaries)
     info = load_export_info(export_root)
 
-    train_dataset = STS2DecisionDataset(export_root, "train", encoder, max_rows=args.max_train_decisions)
-    val_dataset = STS2DecisionDataset(export_root, "validation", encoder, max_rows=args.max_val_decisions)
-    test_dataset = STS2DecisionDataset(export_root, "test", encoder, max_rows=args.max_test_decisions) if args.evaluate_test else None
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_decisions)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_decisions)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_decisions) if test_dataset else None
+    train_dataset = STS2DecisionDataset(
+        export_root, "train", encoder, max_rows=args.max_train_decisions
+    )
+    val_dataset = STS2DecisionDataset(
+        export_root, "validation", encoder, max_rows=args.max_val_decisions
+    )
+    test_dataset = (
+        STS2DecisionDataset(
+            export_root, "test", encoder, max_rows=args.max_test_decisions
+        )
+        if args.evaluate_test
+        else None
+    )
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=collate_decisions,
+    )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=collate_decisions,
+    )
+    test_loader = (
+        DataLoader(
+            test_dataset,
+            batch_size=args.batch_size,
+            shuffle=False,
+            collate_fn=collate_decisions,
+        )
+        if test_dataset
+        else None
+    )
 
     model = build_model(encoder, args.hidden_dim)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
@@ -323,13 +393,29 @@ def main() -> int:
         model.load_state_dict(checkpoint["model_state"])
         optimizer.load_state_dict(checkpoint["optimizer_state"])
         start_epoch = int(checkpoint["epoch"]) + 1
-        best_loss = float(checkpoint.get("best_loss", checkpoint.get("metrics", {}).get("validation", {}).get("loss", best_loss)))
+        best_loss = float(
+            checkpoint.get(
+                "best_loss",
+                checkpoint.get("metrics", {})
+                .get("validation", {})
+                .get("loss", best_loss),
+            )
+        )
         best_epoch = int(checkpoint.get("best_epoch", checkpoint.get("epoch", -1)))
         history = list(checkpoint.get("history", []))
 
     train_stats = validate_rows(iter_rows(export_root, "train"))
     val_stats = validate_rows(iter_rows(export_root, "validation"))
-    print(json.dumps({"config": config, "train_validation": asdict(train_stats), "val_validation": asdict(val_stats)}, indent=2))
+    print(
+        json.dumps(
+            {
+                "config": config,
+                "train_validation": asdict(train_stats),
+                "val_validation": asdict(val_stats),
+            },
+            indent=2,
+        )
+    )
 
     for epoch in range(start_epoch, start_epoch + args.epochs):
         train_metrics = run_epoch(model, train_loader, optimizer, args.top_k)
@@ -342,21 +428,48 @@ def main() -> int:
             best_loss = val_metrics["loss"]
             best_epoch = epoch
             epochs_without_improvement = 0
-            save_checkpoint(args.checkpoint_dir / "best.pt", model, optimizer, epoch, config, row, dictionaries)
+            save_checkpoint(
+                args.checkpoint_dir / "best.pt",
+                model,
+                optimizer,
+                epoch,
+                config,
+                row,
+                dictionaries,
+            )
         else:
             epochs_without_improvement += 1
-        save_checkpoint(args.checkpoint_dir / f"epoch_{epoch:03d}.pt", model, optimizer, epoch, config, row, dictionaries)
+        save_checkpoint(
+            args.checkpoint_dir / f"epoch_{epoch:03d}.pt",
+            model,
+            optimizer,
+            epoch,
+            config,
+            row,
+            dictionaries,
+        )
         save_checkpoint(
             args.checkpoint_dir / "latest.pt",
             model,
             optimizer,
             epoch,
             config,
-            row | {"history": history, "best_epoch": best_epoch, "best_loss": best_loss},
+            row
+            | {"history": history, "best_epoch": best_epoch, "best_loss": best_loss},
             dictionaries,
         )
         if epochs_without_improvement >= args.patience:
-            print(json.dumps({"early_stopping": True, "epoch": epoch, "best_epoch": best_epoch, "best_validation_loss": best_loss}, indent=2))
+            print(
+                json.dumps(
+                    {
+                        "early_stopping": True,
+                        "epoch": epoch,
+                        "best_epoch": best_epoch,
+                        "best_validation_loss": best_loss,
+                    },
+                    indent=2,
+                )
+            )
             break
 
     best_path = args.checkpoint_dir / "best.pt"
@@ -365,7 +478,17 @@ def main() -> int:
         model.load_state_dict(checkpoint["model_state"])
 
     detailed = {
-        "train": evaluate_detailed(model, train_dataset, DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_decisions), args.top_k),
+        "train": evaluate_detailed(
+            model,
+            train_dataset,
+            DataLoader(
+                train_dataset,
+                batch_size=args.batch_size,
+                shuffle=False,
+                collate_fn=collate_decisions,
+            ),
+            args.top_k,
+        ),
         "validation": evaluate_detailed(
             model,
             val_dataset,
@@ -378,8 +501,17 @@ def main() -> int:
     if test_dataset is not None and test_loader is not None:
         test_misclassified = None
         if args.misclassified_output is not None:
-            test_misclassified = args.misclassified_output.with_name(args.misclassified_output.stem + "_test.jsonl")
-        detailed["test"] = evaluate_detailed(model, test_dataset, test_loader, args.top_k, test_misclassified, args.max_misclassified)
+            test_misclassified = args.misclassified_output.with_name(
+                args.misclassified_output.stem + "_test.jsonl"
+            )
+        detailed["test"] = evaluate_detailed(
+            model,
+            test_dataset,
+            test_loader,
+            args.top_k,
+            test_misclassified,
+            args.max_misclassified,
+        )
 
     summary = {
         "config": config,
@@ -394,7 +526,9 @@ def main() -> int:
     print(json.dumps({"final_summary": summary}, ensure_ascii=False, indent=2))
     if args.metrics_output is not None:
         args.metrics_output.parent.mkdir(parents=True, exist_ok=True)
-        args.metrics_output.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+        args.metrics_output.write_text(
+            json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     return 0
 
 

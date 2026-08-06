@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import torch
 from torch.utils.data import Dataset
 
 from .encoding import ExportEncoder
-
 
 SPLITS = ("train", "validation", "test")
 
@@ -64,11 +64,14 @@ def load_export_info(export_root: Path) -> ExportInfo:
         complete_decision_count=int(metadata.get("complete_decision_count", 0)),
         emulator_commit=first_row.get("emulator_commit"),
         emulator_dll_sha256=first_row.get("emulator_dll_sha256"),
-        heuristic_version=metadata.get("heuristic_version") or first_row.get("heuristic_version"),
+        heuristic_version=metadata.get("heuristic_version")
+        or first_row.get("heuristic_version"),
     )
 
 
-def iter_rows(export_root: Path, split: str, dataset_kind: str = "complete") -> Iterable[dict[str, Any]]:
+def iter_rows(
+    export_root: Path, split: str, dataset_kind: str = "complete"
+) -> Iterable[dict[str, Any]]:
     path = export_root / f"{dataset_kind}_{split}.jsonl"
     with path.open(encoding="utf-8") as f:
         for line in f:
@@ -138,9 +141,19 @@ def validate_rows(rows: Iterable[dict[str, Any]]) -> ValidationStats:
             unavailable += 1
         teacher_key = action_semantic_key(row.get("teacher_action") or {})
         legal_key = action_semantic_key(legal_actions[teacher_idx])
-        if legal_key != teacher_key and action_semantic_key_without_target(legal_actions[teacher_idx]) != action_semantic_key_without_target(row.get("teacher_action") or {}):
+        if legal_key != teacher_key and action_semantic_key_without_target(
+            legal_actions[teacher_idx]
+        ) != action_semantic_key_without_target(row.get("teacher_action") or {}):
             semantic_mismatch += 1
-    return ValidationStats(row_count, len(trajectories), missing, out_of_range, unavailable, semantic_mismatch, max_legal)
+    return ValidationStats(
+        row_count,
+        len(trajectories),
+        missing,
+        out_of_range,
+        unavailable,
+        semantic_mismatch,
+        max_legal,
+    )
 
 
 class STS2DecisionDataset(Dataset):
@@ -153,7 +166,9 @@ class STS2DecisionDataset(Dataset):
         max_rows: int | None = None,
     ) -> None:
         if dataset_kind != "complete":
-            raise ValueError("Initial training only supports usable_complete export files.")
+            raise ValueError(
+                "Initial training only supports usable_complete export files."
+            )
         if split not in SPLITS:
             raise ValueError(f"Unknown split: {split}")
         self.export_root = export_root
@@ -182,7 +197,9 @@ class STS2DecisionDataset(Dataset):
     def __getitem__(self, index: int) -> dict[str, Any]:
         row = self.rows[index]
         legal_actions = row["legal_actions"]
-        action_features = [self.encoder.encode_action(action) for action in legal_actions]
+        action_features = [
+            self.encoder.encode_action(action) for action in legal_actions
+        ]
         teacher_index = find_teacher_index(row)
         teacher_action = legal_actions[teacher_index]
         return {
@@ -208,7 +225,9 @@ def collate_decisions(items: list[dict[str, Any]]) -> dict[str, Any]:
     card = torch.zeros(batch_size, max_actions, dtype=torch.long)
     potion = torch.zeros(batch_size, max_actions, dtype=torch.long)
     numeric_dim = items[0]["actions"][0]["numeric"].shape[0]
-    action_numeric = torch.zeros(batch_size, max_actions, numeric_dim, dtype=torch.float32)
+    action_numeric = torch.zeros(
+        batch_size, max_actions, numeric_dim, dtype=torch.float32
+    )
     legal_mask = torch.zeros(batch_size, max_actions, dtype=torch.bool)
     candidate_mask = torch.zeros(batch_size, max_actions, dtype=torch.bool)
     teacher_index = torch.stack([item["teacher_index"] for item in items])
@@ -247,7 +266,9 @@ def encounter_key(observation: dict[str, Any]) -> str:
     ids = [
         str(enemy.get("id"))
         for enemy in enemies
-        if isinstance(enemy, dict) and enemy.get("isAlive") is not False and enemy.get("id") is not None
+        if isinstance(enemy, dict)
+        and enemy.get("isAlive") is not False
+        and enemy.get("id") is not None
     ]
     if not ids:
         ids = [

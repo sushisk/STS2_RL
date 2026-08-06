@@ -24,19 +24,32 @@ from sts2_training.choice_data import (
     sha256_file,
 )
 from sts2_training.encoding import ExportEncoder
-from sts2_training.model import ChoicePolicyNet, load_shared_encoder_weights, masked_logits
-
+from sts2_training.model import (
+    ChoicePolicyNet,
+    load_shared_encoder_weights,
+    masked_logits,
+)
 
 DEFAULT_POLICY_CHECKPOINT = Path("checkpoints/policy_teacher2000_seed_20260724/best.pt")
-DEFAULT_CHOICE_SEMANTICS_BASELINE = Path(r"C:\STS2_RL\Combat\policy_baseline\choice_semantics_baseline_722b019_v1_20260725.json")
+DEFAULT_CHOICE_SEMANTICS_BASELINE = Path(
+    r"C:\STS2_RL\Combat\policy_baseline\choice_semantics_baseline_722b019_v1_20260725.json"
+)
 SPLITS = ("train", "validation", "test")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train an initial Choice Policy (offline-eval only) on RL's Choice teacher data.")
+    parser = argparse.ArgumentParser(
+        description="Train an initial Choice Policy (offline-eval only) on RL's Choice teacher data."
+    )
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
-    parser.add_argument("--policy-checkpoint", type=Path, default=DEFAULT_POLICY_CHECKPOINT)
-    parser.add_argument("--choice-semantics-baseline-file", type=Path, default=DEFAULT_CHOICE_SEMANTICS_BASELINE)
+    parser.add_argument(
+        "--policy-checkpoint", type=Path, default=DEFAULT_POLICY_CHECKPOINT
+    )
+    parser.add_argument(
+        "--choice-semantics-baseline-file",
+        type=Path,
+        default=DEFAULT_CHOICE_SEMANTICS_BASELINE,
+    )
     parser.add_argument("--split-seed", type=int, default=20260725)
     parser.add_argument("--seed", type=int, default=20260725)
     parser.add_argument("--epochs", type=int, default=60)
@@ -47,8 +60,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--choice-meaning-embedding-dim", type=int, default=8)
     parser.add_argument("--random-baseline-trials", type=int, default=200)
     parser.add_argument("--max-misclassified", type=int, default=20)
-    parser.add_argument("--checkpoint-dir", type=Path, default=Path("checkpoints/choice_policy_seed_20260725"))
-    parser.add_argument("--report-dir", type=Path, default=Path("reports/choice_policy_baseline"))
+    parser.add_argument(
+        "--checkpoint-dir",
+        type=Path,
+        default=Path("checkpoints/choice_policy_seed_20260725"),
+    )
+    parser.add_argument(
+        "--report-dir", type=Path, default=Path("reports/choice_policy_baseline")
+    )
     return parser.parse_args()
 
 
@@ -62,21 +81,33 @@ def set_seed(seed: int) -> None:
 # ---------------------------------------------------------------------------
 
 
-def rank_metrics_from_scores(scores: torch.Tensor, candidate_mask: torch.Tensor, teacher_index: torch.Tensor) -> dict[str, torch.Tensor]:
+def rank_metrics_from_scores(
+    scores: torch.Tensor, candidate_mask: torch.Tensor, teacher_index: torch.Tensor
+) -> dict[str, torch.Tensor]:
     masked = scores.masked_fill(~candidate_mask, -1.0e9)
     order = torch.argsort(masked, dim=1, descending=True)
     batch_size = scores.shape[0]
     ranks = torch.zeros(batch_size, dtype=torch.long)
     for b in range(batch_size):
-        ranks[b] = int((order[b] == teacher_index[b]).nonzero(as_tuple=True)[0].item()) + 1
+        ranks[b] = (
+            int((order[b] == teacher_index[b]).nonzero(as_tuple=True)[0].item()) + 1
+        )
     probs = torch.softmax(masked, dim=1)
     predicted_index = masked.argmax(dim=1)
     confidence = probs.gather(1, predicted_index.unsqueeze(1)).squeeze(1)
     illegal = ~candidate_mask.gather(1, predicted_index.unsqueeze(1)).squeeze(1)
-    return {"ranks": ranks, "predicted_index": predicted_index, "confidence": confidence, "illegal": illegal, "order": order}
+    return {
+        "ranks": ranks,
+        "predicted_index": predicted_index,
+        "confidence": confidence,
+        "illegal": illegal,
+        "order": order,
+    }
 
 
-def aggregate_rank_metrics(ranks: torch.Tensor, illegal: torch.Tensor) -> dict[str, float]:
+def aggregate_rank_metrics(
+    ranks: torch.Tensor, illegal: torch.Tensor
+) -> dict[str, float]:
     ranks_f = ranks.float()
     return {
         "top_1_accuracy": float((ranks == 1).float().mean().item()),
@@ -89,7 +120,9 @@ def aggregate_rank_metrics(ranks: torch.Tensor, illegal: torch.Tensor) -> dict[s
 
 
 def bucket_accuracy(keys: list[Any], hits: list[bool]) -> dict[str, dict[str, Any]]:
-    buckets: dict[str, dict[str, float]] = defaultdict(lambda: {"correct": 0.0, "total": 0.0})
+    buckets: dict[str, dict[str, float]] = defaultdict(
+        lambda: {"correct": 0.0, "total": 0.0}
+    )
     for key, hit in zip(keys, hits):
         label = "unknown" if key is None else str(key)
         buckets[label]["total"] += 1.0
@@ -129,7 +162,11 @@ def build_model(
     )
 
 
-def run_epoch(model: ChoicePolicyNet, loader: DataLoader, optimizer: torch.optim.Optimizer | None = None) -> dict[str, float]:
+def run_epoch(
+    model: ChoicePolicyNet,
+    loader: DataLoader,
+    optimizer: torch.optim.Optimizer | None = None,
+) -> dict[str, float]:
     training = optimizer is not None
     model.train(training)
     criterion = nn.CrossEntropyLoss()
@@ -139,7 +176,12 @@ def run_epoch(model: ChoicePolicyNet, loader: DataLoader, optimizer: torch.optim
     total = 0
     with torch.set_grad_enabled(training):
         for batch in loader:
-            logits = model(batch["state"], batch["card_ids"], batch["choice_meaning_id"], batch["remaining_select_count"])
+            logits = model(
+                batch["state"],
+                batch["card_ids"],
+                batch["choice_meaning_id"],
+                batch["remaining_select_count"],
+            )
             masked = masked_logits(logits, batch["candidate_mask"])
             loss = criterion(masked, batch["teacher_index"])
             if training:
@@ -149,7 +191,9 @@ def run_epoch(model: ChoicePolicyNet, loader: DataLoader, optimizer: torch.optim
             batch_size = batch["state"].shape[0]
             total += batch_size
             total_loss += float(loss.item()) * batch_size
-            metrics = rank_metrics_from_scores(logits, batch["candidate_mask"], batch["teacher_index"])
+            metrics = rank_metrics_from_scores(
+                logits, batch["candidate_mask"], batch["teacher_index"]
+            )
             all_ranks.append(metrics["ranks"])
             all_illegal.append(metrics["illegal"])
     ranks = torch.cat(all_ranks)
@@ -174,7 +218,15 @@ def train_variant(
     args: argparse.Namespace,
 ) -> dict[str, Any]:
     set_seed(seed)
-    model = build_model(state_dim, card_vocab, choice_meaning_vocab, card_embedding_dim, args.choice_meaning_embedding_dim, hidden_dim=64, use_choice_meaning=use_choice_meaning)
+    model = build_model(
+        state_dim,
+        card_vocab,
+        choice_meaning_vocab,
+        card_embedding_dim,
+        args.choice_meaning_embedding_dim,
+        hidden_dim=64,
+        use_choice_meaning=use_choice_meaning,
+    )
     copied_keys = load_shared_encoder_weights(model, policy_model_state)
     model.set_shared_encoder_trainable(not freeze_encoder)
     trainable_params = [p for p in model.parameters() if p.requires_grad]
@@ -188,7 +240,9 @@ def train_variant(
     for epoch in range(args.epochs):
         train_metrics = run_epoch(model, train_loader, optimizer)
         val_metrics = run_epoch(model, val_loader)
-        history.append({"epoch": epoch, "train": train_metrics, "validation": val_metrics})
+        history.append(
+            {"epoch": epoch, "train": train_metrics, "validation": val_metrics}
+        )
         improved = val_metrics["loss"] < best_loss - args.min_delta
         if improved:
             best_loss = val_metrics["loss"]
@@ -218,7 +272,9 @@ def train_variant(
 # ---------------------------------------------------------------------------
 
 
-def random_baseline(loader: DataLoader, trials: int, base_seed: int) -> dict[str, float]:
+def random_baseline(
+    loader: DataLoader, trials: int, base_seed: int
+) -> dict[str, float]:
     trial_metrics: list[dict[str, float]] = []
     for trial in range(trials):
         rng = torch.Generator().manual_seed(base_seed + trial)
@@ -226,18 +282,35 @@ def random_baseline(loader: DataLoader, trials: int, base_seed: int) -> dict[str
         all_illegal: list[torch.Tensor] = []
         for batch in loader:
             scores = torch.rand(batch["candidate_mask"].shape, generator=rng)
-            metrics = rank_metrics_from_scores(scores, batch["candidate_mask"], batch["teacher_index"])
+            metrics = rank_metrics_from_scores(
+                scores, batch["candidate_mask"], batch["teacher_index"]
+            )
             all_ranks.append(metrics["ranks"])
             all_illegal.append(metrics["illegal"])
-        trial_metrics.append(aggregate_rank_metrics(torch.cat(all_ranks), torch.cat(all_illegal)))
-    keys = ["top_1_accuracy", "top_3_accuracy", "top_5_accuracy", "mrr", "illegal_prediction_rate"]
-    return {k: sum(m[k] for m in trial_metrics) / trials for k in keys} | {"trials": trials, "decisions": trial_metrics[0]["decisions"]}
+        trial_metrics.append(
+            aggregate_rank_metrics(torch.cat(all_ranks), torch.cat(all_illegal))
+        )
+    keys = [
+        "top_1_accuracy",
+        "top_3_accuracy",
+        "top_5_accuracy",
+        "mrr",
+        "illegal_prediction_rate",
+    ]
+    return {k: sum(m[k] for m in trial_metrics) / trials for k in keys} | {
+        "trials": trials,
+        "decisions": trial_metrics[0]["decisions"],
+    }
 
 
-def frequency_baseline(train_rows: list[dict[str, Any]], encoder: ExportEncoder, loader: DataLoader) -> dict[str, float]:
+def frequency_baseline(
+    train_rows: list[dict[str, Any]], encoder: ExportEncoder, loader: DataLoader
+) -> dict[str, float]:
     freq: Counter = Counter()
     for row in train_rows:
-        card_id = row["teacher_action"]["parameters"].get("cardId") or row["teacher_action"].get("label")
+        card_id = row["teacher_action"]["parameters"].get("cardId") or row[
+            "teacher_action"
+        ].get("label")
         freq[encoder.vocabs["card"].encode(card_id)] += 1
 
     all_ranks: list[torch.Tensor] = []
@@ -250,7 +323,9 @@ def frequency_baseline(train_rows: list[dict[str, Any]], encoder: ExportEncoder,
         # deterministic tie-break favoring earlier-listed candidates
         tie_break = torch.arange(card_ids.shape[1], dtype=torch.float32).flip(0) * 1e-6
         scores = scores + tie_break.unsqueeze(0)
-        metrics = rank_metrics_from_scores(scores, batch["candidate_mask"], batch["teacher_index"])
+        metrics = rank_metrics_from_scores(
+            scores, batch["candidate_mask"], batch["teacher_index"]
+        )
         all_ranks.append(metrics["ranks"])
         all_illegal.append(metrics["illegal"])
     return aggregate_rank_metrics(torch.cat(all_ranks), torch.cat(all_illegal))
@@ -261,7 +336,12 @@ def frequency_baseline(train_rows: list[dict[str, Any]], encoder: ExportEncoder,
 # ---------------------------------------------------------------------------
 
 
-def detailed_evaluation(model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, loader: DataLoader, max_misclassified: int) -> dict[str, Any]:
+def detailed_evaluation(
+    model: ChoicePolicyNet,
+    dataset: ChoiceDecisionDataset,
+    loader: DataLoader,
+    max_misclassified: int,
+) -> dict[str, Any]:
     model.eval()
     all_ranks: list[torch.Tensor] = []
     all_illegal: list[torch.Tensor] = []
@@ -274,15 +354,24 @@ def detailed_evaluation(model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, 
     offset = 0
     with torch.no_grad():
         for batch in loader:
-            logits = model(batch["state"], batch["card_ids"], batch["choice_meaning_id"], batch["remaining_select_count"])
-            metrics = rank_metrics_from_scores(logits, batch["candidate_mask"], batch["teacher_index"])
+            logits = model(
+                batch["state"],
+                batch["card_ids"],
+                batch["choice_meaning_id"],
+                batch["remaining_select_count"],
+            )
+            metrics = rank_metrics_from_scores(
+                logits, batch["candidate_mask"], batch["teacher_index"]
+            )
             all_ranks.append(metrics["ranks"])
             all_illegal.append(metrics["illegal"])
             candidate_counts.extend(batch["candidate_count"])
             operation_modes.extend(batch["operation_mode"])
             normalized_ops.extend(batch["normalized_operation"])
             exception_entities.extend(batch["exception_entity"])
-            remaining_counts.extend(int(x.item()) for x in batch["remaining_select_count"])
+            remaining_counts.extend(
+                int(x.item()) for x in batch["remaining_select_count"]
+            )
 
             batch_size = batch["state"].shape[0]
             for i in range(batch_size):
@@ -293,7 +382,13 @@ def detailed_evaluation(model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, 
                 candidates = choice_card_candidates(row)
                 order = metrics["order"][i].tolist()
                 ranking = [
-                    {"index": idx, "label": candidates[idx]["label"] if idx < len(candidates) else None, "score": float(logits[i, idx].item())}
+                    {
+                        "index": idx,
+                        "label": (
+                            candidates[idx]["label"] if idx < len(candidates) else None
+                        ),
+                        "score": float(logits[i, idx].item()),
+                    }
                     for idx in order
                     if idx < len(candidates)
                 ]
@@ -306,15 +401,24 @@ def detailed_evaluation(model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, 
                             "hp": row["battle_state"].get("hp"),
                             "maxHp": row["battle_state"].get("maxHp"),
                             "turnNumber": row["battle_state"].get("turnNumber"),
-                            "enemy_ids": [e.get("id") for e in row["battle_state"].get("enemies") or []],
+                            "enemy_ids": [
+                                e.get("id")
+                                for e in row["battle_state"].get("enemies") or []
+                            ],
                         },
                         "choice_meaning": {
                             "operationMode": row["resolved"].get("operationMode"),
-                            "normalizedChoiceOperation": row["resolved"].get("normalizedChoiceOperation"),
-                            "exceptionEntityKey": row["resolved"].get("exceptionEntityKey"),
+                            "normalizedChoiceOperation": row["resolved"].get(
+                                "normalizedChoiceOperation"
+                            ),
+                            "exceptionEntityKey": row["resolved"].get(
+                                "exceptionEntityKey"
+                            ),
                         },
                         "legal_candidate_cards": [c.get("label") for c in candidates],
-                        "teacher_choice": candidates[int(batch["teacher_index"][i].item())].get("label"),
+                        "teacher_choice": candidates[
+                            int(batch["teacher_index"][i].item())
+                        ].get("label"),
                         "model_ranking": ranking,
                         "confidence": float(metrics["confidence"][i].item()),
                         "rank_of_teacher": rank,
@@ -329,11 +433,17 @@ def detailed_evaluation(model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, 
         "aggregate": aggregate_rank_metrics(ranks, illegal),
         "by_candidate_count": bucket_accuracy(candidate_counts, top1_hits),
         "by_normalized_operation": bucket_accuracy(
-            [op if mode == "normalized" else None for op, mode in zip(normalized_ops, operation_modes)],
+            [
+                op if mode == "normalized" else None
+                for op, mode in zip(normalized_ops, operation_modes)
+            ],
             top1_hits,
         ),
         "by_passthrough_exception_entity": bucket_accuracy(
-            [ent if mode == "passthrough" else None for ent, mode in zip(exception_entities, operation_modes)],
+            [
+                ent if mode == "passthrough" else None
+                for ent, mode in zip(exception_entities, operation_modes)
+            ],
             top1_hits,
         ),
         "by_remaining_select_count": bucket_accuracy(remaining_counts, top1_hits),
@@ -346,31 +456,64 @@ def detailed_evaluation(model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, 
 # ---------------------------------------------------------------------------
 
 
-def synthetic_check(model: ChoicePolicyNet, synthetic_rows: list[dict[str, Any]], encoder: ExportEncoder, choice_meaning_vocab: Any) -> list[dict[str, Any]]:
+def synthetic_check(
+    model: ChoicePolicyNet,
+    synthetic_rows: list[dict[str, Any]],
+    encoder: ExportEncoder,
+    choice_meaning_vocab: Any,
+) -> list[dict[str, Any]]:
     model.eval()
     results = []
     for row in synthetic_rows:
         candidates = choice_card_candidates(row)
         if not candidates:
-            results.append({"decision_id": decision_row_id(row), "skipped": "no_choice_card_candidates"})
+            results.append(
+                {
+                    "decision_id": decision_row_id(row),
+                    "skipped": "no_choice_card_candidates",
+                }
+            )
             continue
         card_ids = torch.tensor(
-            [[encoder.vocabs["card"].encode(c["parameters"].get("cardId") or c.get("label")) for c in candidates]], dtype=torch.long
+            [
+                [
+                    encoder.vocabs["card"].encode(
+                        c["parameters"].get("cardId") or c.get("label")
+                    )
+                    for c in candidates
+                ]
+            ],
+            dtype=torch.long,
         )
         state = encoder.encode_state(row["battle_state"]).unsqueeze(0)
-        meaning_id = torch.tensor([choice_meaning_vocab.encode(choice_meaning_token(row))], dtype=torch.long)
-        remaining = torch.tensor([float(row.get("remaining_select_count") or 0.0)], dtype=torch.float32)
+        meaning_id = torch.tensor(
+            [choice_meaning_vocab.encode(choice_meaning_token(row))], dtype=torch.long
+        )
+        remaining = torch.tensor(
+            [float(row.get("remaining_select_count") or 0.0)], dtype=torch.float32
+        )
         with torch.no_grad():
             logits = model(state, card_ids, meaning_id, remaining)
         predicted_index = int(logits.argmax(dim=1).item())
         teacher_action_id = row["teacher_action"]["action_id"]
-        teacher_index = next((i for i, c in enumerate(candidates) if c["action_id"] == teacher_action_id), None)
+        teacher_index = next(
+            (
+                i
+                for i, c in enumerate(candidates)
+                if c["action_id"] == teacher_action_id
+            ),
+            None,
+        )
         results.append(
             {
                 "decision_id": decision_row_id(row),
                 "candidate_count": len(candidates),
                 "predicted_label": candidates[predicted_index]["label"],
-                "teacher_label": candidates[teacher_index]["label"] if teacher_index is not None else None,
+                "teacher_label": (
+                    candidates[teacher_index]["label"]
+                    if teacher_index is not None
+                    else None
+                ),
                 "matched_teacher": predicted_index == teacher_index,
                 "ran_without_exception": True,
             }
@@ -395,13 +538,18 @@ def main() -> int:
     args = parse_args()
     started_at = time.perf_counter()
 
-    policy_checkpoint = torch.load(args.policy_checkpoint, map_location="cpu", weights_only=False)
+    policy_checkpoint = torch.load(
+        args.policy_checkpoint, map_location="cpu", weights_only=False
+    )
     dictionaries = policy_checkpoint["dictionaries"]
-    policy_config = policy_checkpoint["config"]
     encoder = ExportEncoder(dictionaries)
-    card_embedding_dim = int(policy_checkpoint["model_state"]["card_embedding.weight"].shape[1])
+    card_embedding_dim = int(
+        policy_checkpoint["model_state"]["card_embedding.weight"].shape[1]
+    )
     hidden_dim = int(policy_checkpoint["model_state"]["state_net.0.weight"].shape[0])
-    assert hidden_dim == 64, f"ChoicePolicyNet hidden_dim is hardcoded to 64 to match the Policy checkpoint; got {hidden_dim}"
+    assert (
+        hidden_dim == 64
+    ), f"ChoicePolicyNet hidden_dim is hardcoded to 64 to match the Policy checkpoint; got {hidden_dim}"
 
     audit = audit_and_split(args.source_dir, args.split_seed)
     choice_meaning_vocab = ExportEncoder._load_vocab(audit["choice_meaning_dict"])
@@ -413,62 +561,148 @@ def main() -> int:
     train_dataset = ChoiceDecisionDataset(train_rows, encoder, choice_meaning_vocab)
     val_dataset = ChoiceDecisionDataset(val_rows, encoder, choice_meaning_vocab)
     test_dataset = ChoiceDecisionDataset(test_rows, encoder, choice_meaning_vocab)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_choice)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_choice)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_choice)
-
-    common_kwargs = dict(
-        train_loader=train_loader,
-        val_loader=val_loader,
-        policy_model_state=policy_checkpoint["model_state"],
-        state_dim=encoder.state_dim,
-        card_vocab=encoder.vocab_size("card"),
-        choice_meaning_vocab=choice_meaning_vocab.size,
-        card_embedding_dim=card_embedding_dim,
-        args=args,
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=collate_choice,
     )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=collate_choice,
+    )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=collate_choice,
+    )
+
+    common_kwargs = {
+        "train_loader": train_loader,
+        "val_loader": val_loader,
+        "policy_model_state": policy_checkpoint["model_state"],
+        "state_dim": encoder.state_dim,
+        "card_vocab": encoder.vocab_size("card"),
+        "choice_meaning_vocab": choice_meaning_vocab.size,
+        "card_embedding_dim": card_embedding_dim,
+        "args": args,
+    }
     print(json.dumps({"stage": "training_primary_freeze_meaning"}))
-    primary = train_variant("freeze_meaning", use_choice_meaning=True, freeze_encoder=True, seed=args.seed, **common_kwargs)
+    primary = train_variant(
+        "freeze_meaning",
+        use_choice_meaning=True,
+        freeze_encoder=True,
+        seed=args.seed,
+        **common_kwargs,
+    )
     print(json.dumps({"stage": "training_baseline_freeze_no_meaning"}))
-    no_meaning = train_variant("freeze_no_meaning", use_choice_meaning=False, freeze_encoder=True, seed=args.seed, **common_kwargs)
+    no_meaning = train_variant(
+        "freeze_no_meaning",
+        use_choice_meaning=False,
+        freeze_encoder=True,
+        seed=args.seed,
+        **common_kwargs,
+    )
     print(json.dumps({"stage": "training_finetune_meaning"}))
-    finetune = train_variant("finetune_meaning", use_choice_meaning=True, freeze_encoder=False, seed=args.seed, **common_kwargs)
+    finetune = train_variant(
+        "finetune_meaning",
+        use_choice_meaning=True,
+        freeze_encoder=False,
+        seed=args.seed,
+        **common_kwargs,
+    )
 
     print(json.dumps({"stage": "baselines"}))
-    random_test = random_baseline(test_loader, args.random_baseline_trials, base_seed=args.seed)
-    random_val = random_baseline(val_loader, args.random_baseline_trials, base_seed=args.seed + 1)
+    random_test = random_baseline(
+        test_loader, args.random_baseline_trials, base_seed=args.seed
+    )
+    random_val = random_baseline(
+        val_loader, args.random_baseline_trials, base_seed=args.seed + 1
+    )
     frequency_test = frequency_baseline(train_rows, encoder, test_loader)
     frequency_val = frequency_baseline(train_rows, encoder, val_loader)
 
     print(json.dumps({"stage": "detailed_evaluation"}))
-    primary_val_detail = detailed_evaluation(primary["model"], val_dataset, val_loader, args.max_misclassified)
-    primary_test_detail = detailed_evaluation(primary["model"], test_dataset, test_loader, args.max_misclassified)
-    no_meaning_test_detail = detailed_evaluation(no_meaning["model"], test_dataset, test_loader, 0)
-    finetune_test_detail = detailed_evaluation(finetune["model"], test_dataset, test_loader, 0)
+    primary_val_detail = detailed_evaluation(
+        primary["model"], val_dataset, val_loader, args.max_misclassified
+    )
+    primary_test_detail = detailed_evaluation(
+        primary["model"], test_dataset, test_loader, args.max_misclassified
+    )
+    no_meaning_test_detail = detailed_evaluation(
+        no_meaning["model"], test_dataset, test_loader, 0
+    )
+    finetune_test_detail = detailed_evaluation(
+        finetune["model"], test_dataset, test_loader, 0
+    )
 
     print(json.dumps({"stage": "synthetic_check"}))
-    synthetic_results = synthetic_check(primary["model"], audit["synthetic_rows"], encoder, choice_meaning_vocab)
+    synthetic_results = synthetic_check(
+        primary["model"], audit["synthetic_rows"], encoder, choice_meaning_vocab
+    )
 
     args.report_dir.mkdir(parents=True, exist_ok=True)
-    write_jsonl(args.report_dir / "misclassified_validation.jsonl", primary_val_detail["misclassified"])
-    write_jsonl(args.report_dir / "misclassified_test.jsonl", primary_test_detail["misclassified"])
+    write_jsonl(
+        args.report_dir / "misclassified_validation.jsonl",
+        primary_val_detail["misclassified"],
+    )
+    write_jsonl(
+        args.report_dir / "misclassified_test.jsonl",
+        primary_test_detail["misclassified"],
+    )
     dump_json(args.report_dir / "synthetic_check.json", synthetic_results)
     write_jsonl(
         args.report_dir / "excluded_rows.jsonl",
-        [{"decision_id": decision_row_id(r), "trajectory_id": r["trajectory_id"], "reason": "operation_mode_unknown"} for r in audit["excluded_rows"]]
-        + [{"decision_id": decision_row_id(r), "trajectory_id": r["trajectory_id"], "reason": "teacher_action_type_not_choice_card"} for r in audit["out_of_scope_rows"]]
-        + [{"decision_id": decision_row_id(r), "trajectory_id": r["trajectory_id"], "reason": "synthetic_nested_scenario_holdout"} for r in audit["synthetic_rows"]],
+        [
+            {
+                "decision_id": decision_row_id(r),
+                "trajectory_id": r["trajectory_id"],
+                "reason": "operation_mode_unknown",
+            }
+            for r in audit["excluded_rows"]
+        ]
+        + [
+            {
+                "decision_id": decision_row_id(r),
+                "trajectory_id": r["trajectory_id"],
+                "reason": "teacher_action_type_not_choice_card",
+            }
+            for r in audit["out_of_scope_rows"]
+        ]
+        + [
+            {
+                "decision_id": decision_row_id(r),
+                "trajectory_id": r["trajectory_id"],
+                "reason": "synthetic_nested_scenario_holdout",
+            }
+            for r in audit["synthetic_rows"]
+        ],
     )
 
-    choice_semantics_baseline = json.loads(args.choice_semantics_baseline_file.read_text(encoding="utf-8"))
-    source_summary = json.loads((args.source_dir / "summary.json").read_text(encoding="utf-8"))
+    choice_semantics_baseline = json.loads(
+        args.choice_semantics_baseline_file.read_text(encoding="utf-8")
+    )
+    source_summary = json.loads(
+        (args.source_dir / "summary.json").read_text(encoding="utf-8")
+    )
     provenance = {
         "emulator_commit": source_summary.get("emulator_commit"),
         "emulator_dll_sha256": source_summary.get("emulator_dll_sha256"),
-        "choice_semantics_baseline_version": choice_semantics_baseline.get("baseline_id"),
-        "choice_semantics_lookup_sha256": choice_semantics_baseline.get("choice_semantics_lookup", {}).get("sha256"),
-        "choice_semantics_origin_alias_sha256": choice_semantics_baseline.get("origin_type_alias_lookup", {}).get("sha256"),
-        "source_choice_dataset_sha256": sha256_file(args.source_dir / "choice_teacher_data.jsonl"),
+        "choice_semantics_baseline_version": choice_semantics_baseline.get(
+            "baseline_id"
+        ),
+        "choice_semantics_lookup_sha256": choice_semantics_baseline.get(
+            "choice_semantics_lookup", {}
+        ).get("sha256"),
+        "choice_semantics_origin_alias_sha256": choice_semantics_baseline.get(
+            "origin_type_alias_lookup", {}
+        ).get("sha256"),
+        "source_choice_dataset_sha256": sha256_file(
+            args.source_dir / "choice_teacher_data.jsonl"
+        ),
         "training_commit": "not_a_git_repository (C:\\STS2_RL\\Training has no .git)",
         "policy_checkpoint_used_for_shared_encoder": str(args.policy_checkpoint),
     }
@@ -529,12 +763,22 @@ def main() -> int:
             },
         },
         "non_parametric_baselines": {
-            "random_candidate_selection": {"validation": random_val, "test": random_test},
-            "fixed_card_frequency_order": {"validation": frequency_val, "test": frequency_test},
+            "random_candidate_selection": {
+                "validation": random_val,
+                "test": random_test,
+            },
+            "fixed_card_frequency_order": {
+                "validation": frequency_val,
+                "test": frequency_test,
+            },
         },
         "primary_breakdowns": {
-            "validation": {k: v for k, v in primary_val_detail.items() if k != "misclassified"},
-            "test": {k: v for k, v in primary_test_detail.items() if k != "misclassified"},
+            "validation": {
+                k: v for k, v in primary_val_detail.items() if k != "misclassified"
+            },
+            "test": {
+                k: v for k, v in primary_test_detail.items() if k != "misclassified"
+            },
         },
         "synthetic_check": synthetic_results,
         "dataset_audit": {

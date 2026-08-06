@@ -22,14 +22,17 @@ from sts2_training.value_targets import (
     write_value_targets,
 )
 
-
 DEFAULT_EXPORT_ROOT = Path("exports/teacher2000_20260723_dataset_export_v1")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train the STS2 Value model (win probability / final HP / remaining decisions).")
+    parser = argparse.ArgumentParser(
+        description="Train the STS2 Value model (win probability / final HP / remaining decisions)."
+    )
     parser.add_argument("--export-root", type=Path, default=DEFAULT_EXPORT_ROOT)
-    parser.add_argument("--checkpoint-dir", type=Path, default=Path("checkpoints/value_baseline"))
+    parser.add_argument(
+        "--checkpoint-dir", type=Path, default=Path("checkpoints/value_baseline")
+    )
     parser.add_argument("--epochs", type=int, default=8)
     parser.add_argument("--batch-size", type=int, default=256)
     parser.add_argument("--hidden-dim", type=int, default=128)
@@ -42,7 +45,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-delta", type=float, default=1e-4)
     parser.add_argument("--evaluate-test", action="store_true")
     parser.add_argument("--metrics-output", type=Path, default=None)
-    parser.add_argument("--skip-target-build", action="store_true", help="Skip regenerating derived/value_targets_*.jsonl.")
+    parser.add_argument(
+        "--skip-target-build",
+        action="store_true",
+        help="Skip regenerating derived/value_targets_*.jsonl.",
+    )
     return parser.parse_args()
 
 
@@ -68,14 +75,15 @@ def run_epoch(
     total_loss = 0.0
     win_correct = 0
     hp_abs_error = 0.0
-    hp_abs_error_raw_hp = 0.0
     remaining_abs_error = 0.0
     with torch.set_grad_enabled(training):
         for batch in loader:
             output = model(batch["state"])
             win_loss = bce(output["win_logit"], batch["win_target"])
             hp_loss = smooth_l1(output["final_hp"], batch["final_hp_target"])
-            remaining_loss = smooth_l1(output["remaining_decisions"], batch["remaining_decisions_target"])
+            remaining_loss = smooth_l1(
+                output["remaining_decisions"], batch["remaining_decisions_target"]
+            )
             loss = win_loss + hp_loss + remaining_loss
             if training:
                 optimizer.zero_grad(set_to_none=True)
@@ -86,9 +94,20 @@ def run_epoch(
             total_loss += float(loss.item()) * batch_size
             win_pred = (torch.sigmoid(output["win_logit"]) >= 0.5).float()
             win_correct += int((win_pred == batch["win_target"]).sum().item())
-            hp_abs_error += float((output["final_hp"] - batch["final_hp_target"]).abs().sum().item())
+            hp_abs_error += float(
+                (output["final_hp"] - batch["final_hp_target"]).abs().sum().item()
+            )
             remaining_abs_error += float(
-                ((output["remaining_decisions"] - batch["remaining_decisions_target"]) * REMAINING_DECISIONS_SCALE).abs().sum().item()
+                (
+                    (
+                        output["remaining_decisions"]
+                        - batch["remaining_decisions_target"]
+                    )
+                    * REMAINING_DECISIONS_SCALE
+                )
+                .abs()
+                .sum()
+                .item()
             )
     return {
         "loss": total_loss / max(1, total),
@@ -119,7 +138,9 @@ def evaluate_detailed(model: ValueNet, loader: DataLoader) -> dict[str, Any]:
             output = model(batch["state"])
             win_loss = bce(output["win_logit"], batch["win_target"])
             hp_loss = smooth_l1(output["final_hp"], batch["final_hp_target"])
-            remaining_loss = smooth_l1(output["remaining_decisions"], batch["remaining_decisions_target"])
+            remaining_loss = smooth_l1(
+                output["remaining_decisions"], batch["remaining_decisions_target"]
+            )
             loss = win_loss + hp_loss + remaining_loss
             batch_size = batch["state"].shape[0]
             total += batch_size
@@ -127,17 +148,32 @@ def evaluate_detailed(model: ValueNet, loader: DataLoader) -> dict[str, Any]:
             win_pred = (torch.sigmoid(output["win_logit"]) >= 0.5).float()
             correct = win_pred == batch["win_target"]
             win_correct += int(correct.sum().item())
-            hp_abs_error += float((output["final_hp"] - batch["final_hp_target"]).abs().sum().item())
+            hp_abs_error += float(
+                (output["final_hp"] - batch["final_hp_target"]).abs().sum().item()
+            )
             remaining_abs_error += float(
-                ((output["remaining_decisions"] - batch["remaining_decisions_target"]) * REMAINING_DECISIONS_SCALE).abs().sum().item()
+                (
+                    (
+                        output["remaining_decisions"]
+                        - batch["remaining_decisions_target"]
+                    )
+                    * REMAINING_DECISIONS_SCALE
+                )
+                .abs()
+                .sum()
+                .item()
             )
             for i in range(batch_size):
                 outcome = batch["combat_outcome"][i] or "unknown"
                 by_outcome[outcome]["total"] += 1.0
-                by_outcome[outcome]["correct"] += 1.0 if bool(correct[i].item()) else 0.0
+                by_outcome[outcome]["correct"] += (
+                    1.0 if bool(correct[i].item()) else 0.0
+                )
                 encounter = batch["encounter_key"][i]
                 by_encounter[encounter]["total"] += 1.0
-                by_encounter[encounter]["correct"] += 1.0 if bool(correct[i].item()) else 0.0
+                by_encounter[encounter]["correct"] += (
+                    1.0 if bool(correct[i].item()) else 0.0
+                )
     return {
         "loss": total_loss / max(1, total),
         "win_accuracy": win_correct / max(1, total),
@@ -150,7 +186,9 @@ def evaluate_detailed(model: ValueNet, loader: DataLoader) -> dict[str, Any]:
         },
         "win_accuracy_by_encounter_top20": {
             key: {"accuracy": v["correct"] / max(1.0, v["total"]), "total": v["total"]}
-            for key, v in sorted(by_encounter.items(), key=lambda kv: -kv[1]["total"])[:20]
+            for key, v in sorted(by_encounter.items(), key=lambda kv: -kv[1]["total"])[
+                :20
+            ]
         },
     }
 
@@ -174,7 +212,9 @@ def save_checkpoint(
             "metrics": metrics,
             "history": metrics.get("history", []),
             "best_epoch": metrics.get("best_epoch", epoch),
-            "best_loss": metrics.get("best_loss", metrics.get("validation", {}).get("loss")),
+            "best_loss": metrics.get(
+                "best_loss", metrics.get("validation", {}).get("loss")
+            ),
             "dictionaries": dictionaries,
         },
         path,
@@ -193,12 +233,36 @@ def main() -> int:
     if not args.skip_target_build:
         write_value_targets(export_root, dataset_kind="complete")
 
-    train_dataset = STS2ValueDataset(export_root, "train", encoder, max_rows=args.max_train_decisions)
-    val_dataset = STS2ValueDataset(export_root, "validation", encoder, max_rows=args.max_val_decisions)
-    test_dataset = STS2ValueDataset(export_root, "test", encoder, max_rows=args.max_test_decisions) if args.evaluate_test else None
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_value)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_value)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_value) if test_dataset else None
+    train_dataset = STS2ValueDataset(
+        export_root, "train", encoder, max_rows=args.max_train_decisions
+    )
+    val_dataset = STS2ValueDataset(
+        export_root, "validation", encoder, max_rows=args.max_val_decisions
+    )
+    test_dataset = (
+        STS2ValueDataset(export_root, "test", encoder, max_rows=args.max_test_decisions)
+        if args.evaluate_test
+        else None
+    )
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=collate_value,
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_value
+    )
+    test_loader = (
+        DataLoader(
+            test_dataset,
+            batch_size=args.batch_size,
+            shuffle=False,
+            collate_fn=collate_value,
+        )
+        if test_dataset
+        else None
+    )
 
     model = build_model(encoder, args.hidden_dim)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
@@ -242,7 +306,15 @@ def main() -> int:
             best_loss = val_metrics["loss"]
             best_epoch = epoch
             epochs_without_improvement = 0
-            save_checkpoint(args.checkpoint_dir / "best.pt", model, optimizer, epoch, config, row, dictionaries)
+            save_checkpoint(
+                args.checkpoint_dir / "best.pt",
+                model,
+                optimizer,
+                epoch,
+                config,
+                row,
+                dictionaries,
+            )
         else:
             epochs_without_improvement += 1
         save_checkpoint(
@@ -251,11 +323,22 @@ def main() -> int:
             optimizer,
             epoch,
             config,
-            row | {"history": history, "best_epoch": best_epoch, "best_loss": best_loss},
+            row
+            | {"history": history, "best_epoch": best_epoch, "best_loss": best_loss},
             dictionaries,
         )
         if epochs_without_improvement >= args.patience:
-            print(json.dumps({"early_stopping": True, "epoch": epoch, "best_epoch": best_epoch, "best_validation_loss": best_loss}, indent=2))
+            print(
+                json.dumps(
+                    {
+                        "early_stopping": True,
+                        "epoch": epoch,
+                        "best_epoch": best_epoch,
+                        "best_validation_loss": best_loss,
+                    },
+                    indent=2,
+                )
+            )
             break
 
     best_path = args.checkpoint_dir / "best.pt"
@@ -264,7 +347,15 @@ def main() -> int:
         model.load_state_dict(checkpoint["model_state"])
 
     detailed = {
-        "train": evaluate_detailed(model, DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_value)),
+        "train": evaluate_detailed(
+            model,
+            DataLoader(
+                train_dataset,
+                batch_size=args.batch_size,
+                shuffle=False,
+                collate_fn=collate_value,
+            ),
+        ),
         "validation": evaluate_detailed(model, val_loader),
     }
     if test_dataset is not None and test_loader is not None:
@@ -283,7 +374,9 @@ def main() -> int:
     print(json.dumps({"final_summary": summary}, ensure_ascii=False, indent=2))
     if args.metrics_output is not None:
         args.metrics_output.parent.mkdir(parents=True, exist_ok=True)
-        args.metrics_output.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+        args.metrics_output.write_text(
+            json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     return 0
 
 

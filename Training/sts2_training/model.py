@@ -115,14 +115,20 @@ class ChoicePolicyNet(nn.Module):
         super().__init__()
         self.use_choice_meaning = use_choice_meaning
         self.card_embedding = nn.Embedding(card_vocab, card_embedding_dim)
-        self.choice_meaning_embedding = nn.Embedding(choice_meaning_vocab, choice_meaning_embedding_dim)
+        self.choice_meaning_embedding = nn.Embedding(
+            choice_meaning_vocab, choice_meaning_embedding_dim
+        )
         self.state_net = nn.Sequential(
             nn.Linear(state_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
         )
-        action_dim = card_embedding_dim + (choice_meaning_embedding_dim if use_choice_meaning else 0) + 1
+        action_dim = (
+            card_embedding_dim
+            + (choice_meaning_embedding_dim if use_choice_meaning else 0)
+            + 1
+        )
         self.action_net = nn.Sequential(
             nn.Linear(action_dim, hidden_dim),
             nn.ReLU(),
@@ -152,16 +158,24 @@ class ChoicePolicyNet(nn.Module):
         num_candidates = card.shape[1]
         parts = [self.card_embedding(card)]
         if self.use_choice_meaning:
-            meaning_repr = self.choice_meaning_embedding(choice_meaning).unsqueeze(1).expand(-1, num_candidates, -1)
+            meaning_repr = (
+                self.choice_meaning_embedding(choice_meaning)
+                .unsqueeze(1)
+                .expand(-1, num_candidates, -1)
+            )
             parts.append(meaning_repr)
-        remaining_repr = remaining_select_count.view(-1, 1, 1).expand(-1, num_candidates, 1)
+        remaining_repr = remaining_select_count.view(-1, 1, 1).expand(
+            -1, num_candidates, 1
+        )
         parts.append(remaining_repr)
         action_repr = self.action_net(torch.cat(parts, dim=-1))
         expanded_state = state_repr.unsqueeze(1).expand(-1, num_candidates, -1)
         return self.scorer(torch.cat([expanded_state, action_repr], dim=-1)).squeeze(-1)
 
 
-def load_shared_encoder_weights(choice_model: ChoicePolicyNet, policy_model_state: dict[str, torch.Tensor]) -> list[str]:
+def load_shared_encoder_weights(
+    choice_model: ChoicePolicyNet, policy_model_state: dict[str, torch.Tensor]
+) -> list[str]:
     """Copy state_net + card_embedding weights from a trained CandidatePolicyNet checkpoint.
 
     Returns the list of parameter keys actually copied (for provenance/logging).
@@ -169,11 +183,10 @@ def load_shared_encoder_weights(choice_model: ChoicePolicyNet, policy_model_stat
     own_state = choice_model.state_dict()
     copied: list[str] = []
     for key, tensor in policy_model_state.items():
-        if not (key.startswith("state_net.") or key.startswith("card_embedding.")):
+        if not key.startswith(("state_net.", "card_embedding.")):
             continue
         if key in own_state and own_state[key].shape == tensor.shape:
             own_state[key] = tensor.clone()
             copied.append(key)
     choice_model.load_state_dict(own_state)
     return copied
-

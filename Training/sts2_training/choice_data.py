@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +45,9 @@ CHOICE_MEANING_MERGE_MAP = {
 # instruction that choice_confirm/choice_skip are not trained on this pass. The one synthetic
 # nested-choice scenario is held out entirely from the split, for a dedicated inference check.
 
-DEFAULT_SOURCE_DIR = Path(r"C:\STS2_RL\Combat\evaluation\reports\choice_teacher_data_full_20260725")
+DEFAULT_SOURCE_DIR = Path(
+    r"C:\STS2_RL\Combat\evaluation\reports\choice_teacher_data_full_20260725"
+)
 SYNTHETIC_PREFIX = "synthetic:"
 DICTIONARY_VERSION = "v1"
 
@@ -71,11 +73,17 @@ def choice_meaning_token(row: dict[str, Any]) -> str | None:
     null; passthrough rows are the reverse. Never both, per the source schema.
     """
     resolved = row.get("resolved") or {}
-    return resolved.get("normalizedChoiceOperation") or resolved.get("exceptionEntityKey")
+    return resolved.get("normalizedChoiceOperation") or resolved.get(
+        "exceptionEntityKey"
+    )
 
 
 def choice_card_candidates(row: dict[str, Any]) -> list[dict[str, Any]]:
-    return [a for a in (row.get("legal_actions") or []) if a.get("action_type") == "choice_card"]
+    return [
+        a
+        for a in (row.get("legal_actions") or [])
+        if a.get("action_type") == "choice_card"
+    ]
 
 
 def split_trajectories(trajectory_ids: list[str], seed: int) -> dict[str, str]:
@@ -108,25 +116,45 @@ def build_dictionary(name: str, values: list[str]) -> dict:
     }
 
 
-def build_merged_vocab(source_choice_meaning_dict: dict[str, Any], merge_map: dict[str, str]) -> tuple[dict, Vocab]:
+def build_merged_vocab(
+    source_choice_meaning_dict: dict[str, Any], merge_map: dict[str, str]
+) -> tuple[dict, Vocab]:
     """Build the merged-category dictionary + a Vocab keyed by the *raw* 13 tokens.
 
     Encoding a raw token (e.g. "retrieve_to_hand") through the returned Vocab yields the merged
     category's id directly, so callers never need a separate remapping step. __UNKNOWN__ (id 0)
     is preserved as the reserved fallback id and is never a merge target.
     """
-    raw_tokens = [e["token"] for e in source_choice_meaning_dict["entries"] if e["token"] != "__UNKNOWN__"]
+    raw_tokens = [
+        e["token"]
+        for e in source_choice_meaning_dict["entries"]
+        if e["token"] != "__UNKNOWN__"
+    ]
     merged_token_names = sorted({merge_map.get(t, t) for t in raw_tokens})
     merged_dict = build_dictionary("choice_meaning_merged", merged_token_names)
     merged_id_by_token = {e["token"]: e["id"] for e in merged_dict["entries"]}
-    raw_token_to_id = {raw: merged_id_by_token[merge_map.get(raw, raw)] for raw in raw_tokens}
-    return merged_dict, Vocab(token_to_id=raw_token_to_id, size=len(merged_dict["entries"]))
+    raw_token_to_id = {
+        raw: merged_id_by_token[merge_map.get(raw, raw)] for raw in raw_tokens
+    }
+    return merged_dict, Vocab(
+        token_to_id=raw_token_to_id, size=len(merged_dict["entries"])
+    )
 
 
-def build_merge_map_artifact(source_choice_meaning_dict: dict[str, Any]) -> dict[str, Any]:
-    merged_dict, _ = build_merged_vocab(source_choice_meaning_dict, CHOICE_MEANING_MERGE_MAP)
-    merged_tokens = [e["token"] for e in merged_dict["entries"] if e["token"] != "__UNKNOWN__"]
-    raw_tokens = [e["token"] for e in source_choice_meaning_dict["entries"] if e["token"] != "__UNKNOWN__"]
+def build_merge_map_artifact(
+    source_choice_meaning_dict: dict[str, Any],
+) -> dict[str, Any]:
+    merged_dict, _ = build_merged_vocab(
+        source_choice_meaning_dict, CHOICE_MEANING_MERGE_MAP
+    )
+    merged_tokens = [
+        e["token"] for e in merged_dict["entries"] if e["token"] != "__UNKNOWN__"
+    ]
+    raw_tokens = [
+        e["token"]
+        for e in source_choice_meaning_dict["entries"]
+        if e["token"] != "__UNKNOWN__"
+    ]
     unmerged = sorted(t for t in raw_tokens if t not in CHOICE_MEANING_MERGE_MAP)
     return {
         "merge_map_version": CHOICE_MEANING_MERGE_MAP_VERSION,
@@ -155,10 +183,18 @@ def audit_and_split(source_dir: Path, split_seed: int) -> dict[str, Any]:
     eligible = load_jsonl(source_dir / "choice_teacher_data_eligible.jsonl")
     excluded = load_jsonl(source_dir / "choice_teacher_data_excluded.jsonl")
 
-    synthetic_rows = [r for r in eligible if r["trajectory_id"].startswith(SYNTHETIC_PREFIX)]
-    non_synthetic = [r for r in eligible if not r["trajectory_id"].startswith(SYNTHETIC_PREFIX)]
-    in_scope = [r for r in non_synthetic if r["teacher_action"]["action_type"] == "choice_card"]
-    out_of_scope = [r for r in non_synthetic if r["teacher_action"]["action_type"] != "choice_card"]
+    synthetic_rows = [
+        r for r in eligible if r["trajectory_id"].startswith(SYNTHETIC_PREFIX)
+    ]
+    non_synthetic = [
+        r for r in eligible if not r["trajectory_id"].startswith(SYNTHETIC_PREFIX)
+    ]
+    in_scope = [
+        r for r in non_synthetic if r["teacher_action"]["action_type"] == "choice_card"
+    ]
+    out_of_scope = [
+        r for r in non_synthetic if r["teacher_action"]["action_type"] != "choice_card"
+    ]
 
     trajectory_ids = sorted({r["trajectory_id"] for r in in_scope})
     split_map = split_trajectories(trajectory_ids, split_seed)
@@ -190,7 +226,9 @@ def audit_and_split(source_dir: Path, split_seed: int) -> dict[str, Any]:
                 "decision_id": decision_row_id(r),
                 "trajectory_id": r["trajectory_id"],
                 "status": "excluded_out_of_scope",
-                "reasons": [f"teacher_action_type={r['teacher_action']['action_type']}_not_in_scope"],
+                "reasons": [
+                    f"teacher_action_type={r['teacher_action']['action_type']}_not_in_scope"
+                ],
                 "split": None,
             }
         )
@@ -205,11 +243,19 @@ def audit_and_split(source_dir: Path, split_seed: int) -> dict[str, Any]:
             }
         )
 
-    choice_meaning_values = sorted({choice_meaning_token(r) for r in in_scope if choice_meaning_token(r) is not None})
+    choice_meaning_values = sorted(
+        {
+            choice_meaning_token(r)
+            for r in in_scope
+            if choice_meaning_token(r) is not None
+        }
+    )
     choice_meaning_dict = build_dictionary("choice_meaning", choice_meaning_values)
 
     split_counts_traj: dict[str, int] = Counter(split_map.values())
-    split_counts_decisions: dict[str, int] = Counter(split_map[r["trajectory_id"]] for r in in_scope)
+    split_counts_decisions: dict[str, int] = Counter(
+        split_map[r["trajectory_id"]] for r in in_scope
+    )
 
     return {
         "eligible_count": len(eligible),
@@ -231,7 +277,9 @@ def audit_and_split(source_dir: Path, split_seed: int) -> dict[str, Any]:
     }
 
 
-def rows_for_split(in_scope_rows: list[dict[str, Any]], split_map: dict[str, str], split: str) -> list[dict[str, Any]]:
+def rows_for_split(
+    in_scope_rows: list[dict[str, Any]], split_map: dict[str, str], split: str
+) -> list[dict[str, Any]]:
     return [r for r in in_scope_rows if split_map[r["trajectory_id"]] == split]
 
 
@@ -239,7 +287,12 @@ class ChoiceDecisionDataset(Dataset):
     """One item per in-scope Choice decision. Candidates are choice_card legal actions only -
     choice_confirm/choice_skip are filtered out of scope upstream in audit_and_split."""
 
-    def __init__(self, rows: list[dict[str, Any]], encoder: ExportEncoder, choice_meaning_vocab: Any) -> None:
+    def __init__(
+        self,
+        rows: list[dict[str, Any]],
+        encoder: ExportEncoder,
+        choice_meaning_vocab: Any,
+    ) -> None:
         # __UNKNOWN__ (id 0) is not a training target - exclude defensively, though in practice
         # every in-scope row resolves to a real token (verified: 0 occurrences in this dataset).
         self.excluded_unknown_meaning_count = 0
@@ -260,10 +313,15 @@ class ChoiceDecisionDataset(Dataset):
         row = self.rows[index]
         candidates = choice_card_candidates(row)
         card_ids = [
-            self.encoder.vocabs["card"].encode(c["parameters"].get("cardId") or c.get("label")) for c in candidates
+            self.encoder.vocabs["card"].encode(
+                c["parameters"].get("cardId") or c.get("label")
+            )
+            for c in candidates
         ]
         teacher_action_id = row["teacher_action"]["action_id"]
-        teacher_index = next(i for i, c in enumerate(candidates) if c["action_id"] == teacher_action_id)
+        teacher_index = next(
+            i for i, c in enumerate(candidates) if c["action_id"] == teacher_action_id
+        )
         meaning_id = self.choice_meaning_vocab.encode(choice_meaning_token(row))
         remaining = float(row.get("remaining_select_count") or 0.0)
         resolved = row.get("resolved") or {}
@@ -297,7 +355,9 @@ def collate_choice(items: list[dict[str, Any]]) -> dict[str, Any]:
         "state": torch.stack([item["state"] for item in items]),
         "card_ids": card_ids,
         "choice_meaning_id": torch.stack([item["choice_meaning_id"] for item in items]),
-        "remaining_select_count": torch.stack([item["remaining_select_count"] for item in items]),
+        "remaining_select_count": torch.stack(
+            [item["remaining_select_count"] for item in items]
+        ),
         "candidate_mask": candidate_mask,
         "teacher_index": torch.stack([item["teacher_index"] for item in items]),
         "candidate_count": [item["candidate_count"] for item in items],

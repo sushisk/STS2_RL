@@ -5,7 +5,6 @@ from typing import Any
 
 import torch
 
-from .choice_data import choice_card_candidates
 from .encoding import ExportEncoder, Vocab
 from .model import ChoicePolicyNet, masked_logits
 
@@ -14,7 +13,9 @@ def _load_checkpoint(checkpoint_path: Path) -> dict[str, Any]:
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
     for required in ("dictionaries", "choice_meaning_dict", "merge_map"):
         if required not in checkpoint:
-            raise ValueError(f"{checkpoint_path} is missing '{required}'; re-save with train_choice_policy_8token.py")
+            raise ValueError(
+                f"{checkpoint_path} is missing '{required}'; re-save with train_choice_policy_8token.py"
+            )
     return checkpoint
 
 
@@ -68,7 +69,9 @@ class ChoiceDecision:
         if not candidates:
             return self._fallback_result("no_choice_card_candidates", candidates=[])
         if operation_mode == "unknown" or operation_mode is None:
-            return self._fallback_result("operation_mode_unknown", candidates=candidates)
+            return self._fallback_result(
+                "operation_mode_unknown", candidates=candidates
+            )
 
         raw_token = normalized_choice_operation or exception_entity_key
         merged_token = self.merge_map.get(raw_token, raw_token) if raw_token else None
@@ -82,11 +85,20 @@ class ChoiceDecision:
 
         state = self.encoder.encode_state(battle_state).unsqueeze(0)
         card_ids = torch.tensor(
-            [[self.encoder.vocabs["card"].encode(c["parameters"].get("cardId") or c.get("label")) for c in candidates]],
+            [
+                [
+                    self.encoder.vocabs["card"].encode(
+                        c["parameters"].get("cardId") or c.get("label")
+                    )
+                    for c in candidates
+                ]
+            ],
             dtype=torch.long,
         )
         meaning_tensor = torch.tensor([meaning_id], dtype=torch.long)
-        remaining_tensor = torch.tensor([float(remaining_select_count or 0.0)], dtype=torch.float32)
+        remaining_tensor = torch.tensor(
+            [float(remaining_select_count or 0.0)], dtype=torch.float32
+        )
         candidate_mask = torch.ones(1, len(candidates), dtype=torch.bool)
 
         with torch.no_grad():
@@ -101,7 +113,14 @@ class ChoiceDecision:
         top2_confidence = float(probs[top2_idx].item()) if top2_idx is not None else 0.0
 
         return {
-            "ranking": [{"index": i, "action_id": candidates[i].get("action_id"), "label": candidates[i].get("label")} for i in ranking],
+            "ranking": [
+                {
+                    "index": i,
+                    "action_id": candidates[i].get("action_id"),
+                    "label": candidates[i].get("label"),
+                }
+                for i in ranking
+            ],
             "top1_action_id": candidates[top1_idx].get("action_id"),
             "top1_confidence": top1_confidence,
             "top2_confidence": top2_confidence,
@@ -110,9 +129,14 @@ class ChoiceDecision:
             "provenance": self.provenance,
         }
 
-    def _fallback_result(self, reason: str, candidates: list[dict[str, Any]]) -> dict[str, Any]:
+    def _fallback_result(
+        self, reason: str, candidates: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         return {
-            "ranking": [{"index": i, "action_id": c.get("action_id"), "label": c.get("label")} for i, c in enumerate(candidates)],
+            "ranking": [
+                {"index": i, "action_id": c.get("action_id"), "label": c.get("label")}
+                for i, c in enumerate(candidates)
+            ],
             "top1_action_id": candidates[0].get("action_id") if candidates else None,
             "top1_confidence": None,
             "top2_confidence": None,

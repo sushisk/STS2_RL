@@ -5,7 +5,6 @@ from typing import Any
 
 import torch
 
-
 DICT_NAMES = {
     "action_type": "action_type_dict",
     "card": "card_dict",
@@ -43,7 +42,9 @@ class ExportEncoder:
 
     @staticmethod
     def _load_vocab(payload: dict[str, Any]) -> Vocab:
-        mapping = {str(entry["token"]): int(entry["id"]) for entry in payload["entries"]}
+        mapping = {
+            str(entry["token"]): int(entry["id"]) for entry in payload["entries"]
+        }
         size = max(mapping.values(), default=0) + 1
         return Vocab(mapping, size)
 
@@ -52,15 +53,23 @@ class ExportEncoder:
 
     def encode_state(self, observation: dict[str, Any]) -> torch.Tensor:
         parts: list[torch.Tensor] = []
-        parts.append(torch.tensor(self._state_scalars(observation), dtype=torch.float32))
+        parts.append(
+            torch.tensor(self._state_scalars(observation), dtype=torch.float32)
+        )
         parts.append(self._one_hot("character", observation.get("characterId")))
 
         for pile in CARD_PILES:
             parts.append(self._bag("card", self._ids_from_items(observation.get(pile))))
 
-        parts.append(self._bag("relic", self._ids_from_items(observation.get("relics"))))
-        parts.append(self._bag("power", self._ids_from_items(observation.get("playerPowers"))))
-        parts.append(self._bag("potion", self._ids_from_items(observation.get("potions"))))
+        parts.append(
+            self._bag("relic", self._ids_from_items(observation.get("relics")))
+        )
+        parts.append(
+            self._bag("power", self._ids_from_items(observation.get("playerPowers")))
+        )
+        parts.append(
+            self._bag("potion", self._ids_from_items(observation.get("potions")))
+        )
 
         enemy_features: list[float] = []
         for enemy in (observation.get("enemies") or [])[:MAX_ENEMIES]:
@@ -84,9 +93,22 @@ class ExportEncoder:
     def encode_action(self, action: dict[str, Any]) -> dict[str, torch.Tensor]:
         raw = action.get("raw_parameters") or {}
         return {
-            "action_type": torch.tensor(self.vocabs["action_type"].encode(action.get("action_type")), dtype=torch.long),
-            "card": torch.tensor(self.vocabs["card"].encode(action.get("card_id") or action.get("label")), dtype=torch.long),
-            "potion": torch.tensor(self.vocabs["potion"].encode(action.get("potion_id") or action.get("label")), dtype=torch.long),
+            "action_type": torch.tensor(
+                self.vocabs["action_type"].encode(action.get("action_type")),
+                dtype=torch.long,
+            ),
+            "card": torch.tensor(
+                self.vocabs["card"].encode(
+                    action.get("card_id") or action.get("label")
+                ),
+                dtype=torch.long,
+            ),
+            "potion": torch.tensor(
+                self.vocabs["potion"].encode(
+                    action.get("potion_id") or action.get("label")
+                ),
+                dtype=torch.long,
+            ),
             "numeric": torch.tensor(
                 [
                     1.0 if action.get("is_available") is True else 0.0,
@@ -102,7 +124,10 @@ class ExportEncoder:
         }
 
     def legal_mask(self, legal_actions: list[dict[str, Any]]) -> torch.Tensor:
-        return torch.tensor([action.get("is_available") is True for action in legal_actions], dtype=torch.bool)
+        return torch.tensor(
+            [action.get("is_available") is True for action in legal_actions],
+            dtype=torch.bool,
+        )
 
     def _state_dim(self) -> int:
         return (
@@ -152,7 +177,9 @@ class ExportEncoder:
         return values
 
     def _one_hot(self, vocab_name: str, token: Any) -> torch.Tensor:
-        return torch.tensor(self._one_hot_values(vocab_name, token), dtype=torch.float32)
+        return torch.tensor(
+            self._one_hot_values(vocab_name, token), dtype=torch.float32
+        )
 
     def _one_hot_values(self, vocab_name: str, token: Any) -> list[float]:
         values = [0.0] * self.vocab_size(vocab_name)
@@ -202,7 +229,11 @@ class ExportEncoder:
         if not isinstance(intent, dict):
             return 0.0
         value = intent.get("attackDamage")
-        return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else 0.0
+        return (
+            float(value)
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
+            else 0.0
+        )
 
     @staticmethod
     def _intent_attack_repeats(enemy: dict[str, Any]) -> float:
@@ -210,5 +241,8 @@ class ExportEncoder:
         if not isinstance(intent, dict):
             return 0.0
         value = intent.get("attackRepeats")
-        return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else 0.0
-
+        return (
+            float(value)
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
+            else 0.0
+        )

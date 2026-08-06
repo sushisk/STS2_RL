@@ -7,7 +7,9 @@ from pathlib import Path
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Validate exported training datasets without Emulator.")
+    parser = argparse.ArgumentParser(
+        description="Validate exported training datasets without Emulator."
+    )
     parser.add_argument("--export-root", type=Path, required=True)
     return parser.parse_args()
 
@@ -60,13 +62,17 @@ def validate_decision_rows(rows: list[dict], dataset_kind: str) -> dict:
         decision_ids.add(decision_id)
         prior_split = trajectory_to_split.setdefault(row["trajectory_id"], row["split"])
         if prior_split != row["split"]:
-            raise AssertionError(f"trajectory {row['trajectory_id']} appears in multiple splits for {dataset_kind}")
+            raise AssertionError(
+                f"trajectory {row['trajectory_id']} appears in multiple splits for {dataset_kind}"
+            )
         legal_actions = row.get("legal_actions") or []
         if not legal_actions:
             empty_legal_actions.append(decision_id)
         teacher_action = row.get("teacher_action") or {}
-        selected_index = ((row.get("teacher_target") or {}).get("selected_action_index"))
-        if selected_index is not None and not (0 <= selected_index < len(legal_actions)):
+        selected_index = (row.get("teacher_target") or {}).get("selected_action_index")
+        if selected_index is not None and not (
+            0 <= selected_index < len(legal_actions)
+        ):
             selected_index_out_of_range.append(decision_id)
         if legal_actions:
             matched = any(

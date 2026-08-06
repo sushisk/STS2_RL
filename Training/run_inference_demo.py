@@ -15,7 +15,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--export-root", type=Path, required=True)
     parser.add_argument("--policy-checkpoint", type=Path, required=True)
     parser.add_argument("--value-checkpoint", type=Path, required=True)
-    parser.add_argument("--split", choices=["train", "validation", "test"], default="test")
+    parser.add_argument(
+        "--split", choices=["train", "validation", "test"], default="test"
+    )
     parser.add_argument("--count", type=int, default=20)
     return parser.parse_args()
 
@@ -60,11 +62,19 @@ def main() -> int:
                             "teacher_action_label": row["teacher_action"].get("label"),
                             "policy_selected_label": selected.get("label"),
                             "policy_confidence": round(policy_result["confidence"], 4),
-                            "recommend_heuristic_fallback": policy_result["recommend_heuristic_fallback"],
+                            "recommend_heuristic_fallback": policy_result[
+                                "recommend_heuristic_fallback"
+                            ],
                             "value": {
-                                "win_probability": round(value_result["win_probability"], 4),
-                                "expected_final_hp": round(value_result["expected_final_hp"], 2),
-                                "expected_remaining_decisions": round(value_result["expected_remaining_decisions"], 2),
+                                "win_probability": round(
+                                    value_result["win_probability"], 4
+                                ),
+                                "expected_final_hp": round(
+                                    value_result["expected_final_hp"], 2
+                                ),
+                                "expected_remaining_decisions": round(
+                                    value_result["expected_remaining_decisions"], 2
+                                ),
                             },
                         },
                         ensure_ascii=False,

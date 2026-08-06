@@ -58,9 +58,13 @@ MERGE_MAP = {
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Offline analysis of why meaning/no-meaning Choice Policy variants scored similarly.")
+    parser = argparse.ArgumentParser(
+        description="Offline analysis of why meaning/no-meaning Choice Policy variants scored similarly."
+    )
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
-    parser.add_argument("--policy-checkpoint", type=Path, default=DEFAULT_POLICY_CHECKPOINT)
+    parser.add_argument(
+        "--policy-checkpoint", type=Path, default=DEFAULT_POLICY_CHECKPOINT
+    )
     parser.add_argument("--meaning-checkpoint", type=Path, default=MEANING_CHECKPOINT)
     parser.add_argument("--split-seed", type=int, default=20260725)
     parser.add_argument("--seed", type=int, default=20260725)
@@ -69,14 +73,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--patience", type=int, default=8)
     parser.add_argument("--min-delta", type=float, default=1e-4)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--report-dir", type=Path, default=Path("reports/choice_meaning_analysis"))
+    parser.add_argument(
+        "--report-dir", type=Path, default=Path("reports/choice_meaning_analysis")
+    )
     return parser.parse_args()
 
 
 class _Args:
     """Minimal stand-in for train_choice_policy's argparse Namespace, for reusing train_variant()."""
 
-    def __init__(self, ns: argparse.Namespace, choice_meaning_embedding_dim: int) -> None:
+    def __init__(
+        self, ns: argparse.Namespace, choice_meaning_embedding_dim: int
+    ) -> None:
         self.epochs = ns.epochs
         self.patience = ns.patience
         self.min_delta = ns.min_delta
@@ -84,14 +92,23 @@ class _Args:
         self.choice_meaning_embedding_dim = choice_meaning_embedding_dim
 
 
-def predict_all(model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, loader: DataLoader) -> dict[str, dict[str, Any]]:
+def predict_all(
+    model: ChoicePolicyNet, dataset: ChoiceDecisionDataset, loader: DataLoader
+) -> dict[str, dict[str, Any]]:
     model.eval()
     predictions: dict[str, dict[str, Any]] = {}
     offset = 0
     with torch.no_grad():
         for batch in loader:
-            logits = model(batch["state"], batch["card_ids"], batch["choice_meaning_id"], batch["remaining_select_count"])
-            metrics = rank_metrics_from_scores(logits, batch["candidate_mask"], batch["teacher_index"])
+            logits = model(
+                batch["state"],
+                batch["card_ids"],
+                batch["choice_meaning_id"],
+                batch["remaining_select_count"],
+            )
+            metrics = rank_metrics_from_scores(
+                logits, batch["candidate_mask"], batch["teacher_index"]
+            )
             batch_size = batch["state"].shape[0]
             for i in range(batch_size):
                 row = dataset.rows[offset + i]
@@ -126,27 +143,53 @@ def main() -> int:
     args = parse_args()
     args.report_dir.mkdir(parents=True, exist_ok=True)
 
-    policy_checkpoint = torch.load(args.policy_checkpoint, map_location="cpu", weights_only=False)
+    policy_checkpoint = torch.load(
+        args.policy_checkpoint, map_location="cpu", weights_only=False
+    )
     dictionaries = policy_checkpoint["dictionaries"]
     encoder = ExportEncoder(dictionaries)
-    card_embedding_dim = int(policy_checkpoint["model_state"]["card_embedding.weight"].shape[1])
+    card_embedding_dim = int(
+        policy_checkpoint["model_state"]["card_embedding.weight"].shape[1]
+    )
 
-    meaning_checkpoint = torch.load(args.meaning_checkpoint, map_location="cpu", weights_only=False)
+    meaning_checkpoint = torch.load(
+        args.meaning_checkpoint, map_location="cpu", weights_only=False
+    )
     choice_meaning_dict = meaning_checkpoint["choice_meaning_dict"]
     choice_meaning_vocab = ExportEncoder._load_vocab(choice_meaning_dict)
     meaning_config = meaning_checkpoint["config"]
-    assert meaning_config["split_seed"] == args.split_seed, "must reuse the exact split that produced the approved checkpoint"
+    assert (
+        meaning_config["split_seed"] == args.split_seed
+    ), "must reuse the exact split that produced the approved checkpoint"
 
     audit = audit_and_split(args.source_dir, args.split_seed)
     all_rows = audit["in_scope_rows"]
     split_map = audit["split_map"]
 
-    datasets = {s: ChoiceDecisionDataset(rows_for_split(all_rows, split_map, s), encoder, choice_meaning_vocab) for s in SPLITS}
+    datasets = {
+        s: ChoiceDecisionDataset(
+            rows_for_split(all_rows, split_map, s), encoder, choice_meaning_vocab
+        )
+        for s in SPLITS
+    }
     # shuffle=False everywhere so predict_all's offset-based row lookup matches dataset.rows order;
     # a separately-shuffled train loader is used only for the retraining call below (matches how
     # train_choice_policy.py trains), never for prediction extraction.
-    loaders = {s: DataLoader(datasets[s], batch_size=args.batch_size, shuffle=False, collate_fn=collate_choice) for s in SPLITS}
-    train_loader_shuffled = DataLoader(datasets["train"], batch_size=args.batch_size, shuffle=True, collate_fn=collate_choice)
+    loaders = {
+        s: DataLoader(
+            datasets[s],
+            batch_size=args.batch_size,
+            shuffle=False,
+            collate_fn=collate_choice,
+        )
+        for s in SPLITS
+    }
+    train_loader_shuffled = DataLoader(
+        datasets["train"],
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=collate_choice,
+    )
 
     # ---- Model 1: meaning (13-token), reuse the already-approved checkpoint, no retraining ----
     meaning_model = build_model(
@@ -162,44 +205,58 @@ def main() -> int:
 
     # ---- Model 2: no-meaning, same seed/split/frozen-encoder as the approved comparison (retrained; weights weren't persisted before) ----
     sargs = _Args(args, meaning_config["choice_meaning_embedding_dim"])
-    common_kwargs = dict(
-        train_loader=train_loader_shuffled,
-        val_loader=loaders["validation"],
-        policy_model_state=policy_checkpoint["model_state"],
-        state_dim=encoder.state_dim,
-        card_vocab=encoder.vocab_size("card"),
-        card_embedding_dim=card_embedding_dim,
-        args=sargs,
-    )
+    common_kwargs = {
+        "train_loader": train_loader_shuffled,
+        "val_loader": loaders["validation"],
+        "policy_model_state": policy_checkpoint["model_state"],
+        "state_dim": encoder.state_dim,
+        "card_vocab": encoder.vocab_size("card"),
+        "card_embedding_dim": card_embedding_dim,
+        "args": sargs,
+    }
     print(json.dumps({"stage": "retraining_no_meaning_for_prediction_extraction"}))
     no_meaning_result = train_variant(
-        "freeze_no_meaning", use_choice_meaning=False, freeze_encoder=True, seed=args.seed,
-        choice_meaning_vocab=choice_meaning_vocab.size, **common_kwargs,
+        "freeze_no_meaning",
+        use_choice_meaning=False,
+        freeze_encoder=True,
+        seed=args.seed,
+        choice_meaning_vocab=choice_meaning_vocab.size,
+        **common_kwargs,
     )
     no_meaning_model = no_meaning_result["model"]
 
     predictions = {"meaning": {}, "no_meaning": {}}
     for split in SPLITS:
-        predictions["meaning"][split] = predict_all(meaning_model, datasets[split], loaders[split])
-        predictions["no_meaning"][split] = predict_all(no_meaning_model, datasets[split], loaders[split])
+        predictions["meaning"][split] = predict_all(
+            meaning_model, datasets[split], loaders[split]
+        )
+        predictions["no_meaning"][split] = predict_all(
+            no_meaning_model, datasets[split], loaders[split]
+        )
 
-    test_meaning_top1 = sum(1 for v in predictions["meaning"]["test"].values() if v["rank"] == 1) / len(predictions["meaning"]["test"])
-    test_no_meaning_top1 = sum(1 for v in predictions["no_meaning"]["test"].values() if v["rank"] == 1) / len(predictions["no_meaning"]["test"])
+    test_meaning_top1 = sum(
+        1 for v in predictions["meaning"]["test"].values() if v["rank"] == 1
+    ) / len(predictions["meaning"]["test"])
+    test_no_meaning_top1 = sum(
+        1 for v in predictions["no_meaning"]["test"].values() if v["rank"] == 1
+    ) / len(predictions["no_meaning"]["test"])
     sanity_check = {
         "test_top1_meaning": test_meaning_top1,
         "test_top1_no_meaning": test_no_meaning_top1,
         "expected_from_approved_report": {"meaning": 0.6029, "no_meaning": 0.6176},
-        "matches_approved_report_within_0.01": abs(test_meaning_top1 - 0.6029) < 0.01 and abs(test_no_meaning_top1 - 0.6176) < 0.01,
+        "matches_approved_report_within_0.01": abs(test_meaning_top1 - 0.6029) < 0.01
+        and abs(test_no_meaning_top1 - 0.6176) < 0.01,
     }
     print(json.dumps({"sanity_check": sanity_check}))
 
     # ================================================================
     # Build one flat per-decision record set (all splits) for analysis
     # ================================================================
-    row_by_id = {decision_row_id(r): r for r in all_rows}
     records: list[dict[str, Any]] = []
     for split in SPLITS:
-        for decision_id, row in {decision_row_id(r): r for r in rows_for_split(all_rows, split_map, split)}.items():
+        for decision_id, row in {
+            decision_row_id(r): r for r in rows_for_split(all_rows, split_map, split)
+        }.items():
             resolved = row.get("resolved") or {}
             m = predictions["meaning"][split][decision_id]
             nm = predictions["no_meaning"][split][decision_id]
@@ -273,37 +330,78 @@ def main() -> int:
     token_names = [e["token"] for e in choice_meaning_dict["entries"]]
     section3: dict[str, Any] = {}
     for token in token_names:
-        token_records_all = [r for r in records if (r["meaning_token"] or "__UNKNOWN__") == token]
+        token_records_all = [
+            r for r in records if (r["meaning_token"] or "__UNKNOWN__") == token
+        ]
         token_records_test = [r for r in token_records_all if r["split"] == "test"]
         split_counts = Counter(r["split"] for r in token_records_all)
         n_all = len(token_records_all)
         scenario_count = len({r["trajectory_id"] for r in token_records_all})
-        avg_candidates = (sum(r["candidate_count"] for r in token_records_all) / n_all) if n_all else None
-        top1_test = (sum(1 for r in token_records_test if r["meaning_rank"] == 1) / len(token_records_test)) if token_records_test else None
-        mrr_test = (sum(1.0 / r["meaning_rank"] for r in token_records_test) / len(token_records_test)) if token_records_test else None
+        avg_candidates = (
+            (sum(r["candidate_count"] for r in token_records_all) / n_all)
+            if n_all
+            else None
+        )
+        top1_test = (
+            (
+                sum(1 for r in token_records_test if r["meaning_rank"] == 1)
+                / len(token_records_test)
+            )
+            if token_records_test
+            else None
+        )
+        mrr_test = (
+            (
+                sum(1.0 / r["meaning_rank"] for r in token_records_test)
+                / len(token_records_test)
+            )
+            if token_records_test
+            else None
+        )
         top1_test_no_meaning = (
-            (sum(1 for r in token_records_test if r["no_meaning_rank"] == 1) / len(token_records_test)) if token_records_test else None
+            (
+                sum(1 for r in token_records_test if r["no_meaning_rank"] == 1)
+                / len(token_records_test)
+            )
+            if token_records_test
+            else None
         )
         teacher_dist = Counter(r["teacher_label"] for r in token_records_all)
         candidate_sets = Counter(r["candidate_label_set"] for r in token_records_all)
         duplicate_rate = (
-            (sum(c for c in candidate_sets.values() if c > 1) / n_all) if n_all else None
+            (sum(c for c in candidate_sets.values() if c > 1) / n_all)
+            if n_all
+            else None
         )  # fraction of rows whose exact candidate set recurs elsewhere within this token
         section3[token] = {
             "split_counts": dict(split_counts),
             "total": n_all,
             "scenario_count": scenario_count,
-            "avg_candidate_count": round(avg_candidates, 2) if avg_candidates is not None else None,
-            "top1_test_meaning_model": round(top1_test, 4) if top1_test is not None else None,
-            "top1_test_no_meaning_model": round(top1_test_no_meaning, 4) if top1_test_no_meaning is not None else None,
-            "meaning_minus_no_meaning_top1_delta": (
-                round(top1_test - top1_test_no_meaning, 4) if top1_test is not None and top1_test_no_meaning is not None else None
+            "avg_candidate_count": (
+                round(avg_candidates, 2) if avg_candidates is not None else None
             ),
-            "mrr_test_meaning_model": round(mrr_test, 4) if mrr_test is not None else None,
+            "top1_test_meaning_model": (
+                round(top1_test, 4) if top1_test is not None else None
+            ),
+            "top1_test_no_meaning_model": (
+                round(top1_test_no_meaning, 4)
+                if top1_test_no_meaning is not None
+                else None
+            ),
+            "meaning_minus_no_meaning_top1_delta": (
+                round(top1_test - top1_test_no_meaning, 4)
+                if top1_test is not None and top1_test_no_meaning is not None
+                else None
+            ),
+            "mrr_test_meaning_model": (
+                round(mrr_test, 4) if mrr_test is not None else None
+            ),
             "test_n_reference_only_low_n": len(token_records_test) < 10,
             "teacher_card_distribution_top5": teacher_dist.most_common(5),
             "distinct_candidate_sets": len(candidate_sets),
-            "candidate_set_duplicate_rate": round(duplicate_rate, 4) if duplicate_rate is not None else None,
+            "candidate_set_duplicate_rate": (
+                round(duplicate_rate, 4) if duplicate_rate is not None else None
+            ),
         }
 
     # ================================================================
@@ -318,7 +416,11 @@ def main() -> int:
         token: {
             "distinct_sets": len(counter),
             "total": sum(counter.values()),
-            "top_set_share": round(max(counter.values()) / sum(counter.values()), 4) if counter else None,
+            "top_set_share": (
+                round(max(counter.values()) / sum(counter.values()), 4)
+                if counter
+                else None
+            ),
         }
         for token, counter in sets_per_op.items()
     }
@@ -328,7 +430,10 @@ def main() -> int:
     for r in records:
         teacher_per_op[op_key(r)][r["teacher_label"]] += 1
     always_same_card = {
-        token: {"top_card": counter.most_common(1)[0][0], "share": round(counter.most_common(1)[0][1] / sum(counter.values()), 4)}
+        token: {
+            "top_card": counter.most_common(1)[0][0],
+            "share": round(counter.most_common(1)[0][1] / sum(counter.values()), 4),
+        }
         for token, counter in teacher_per_op.items()
         if counter and (counter.most_common(1)[0][1] / sum(counter.values())) >= 0.8
     }
@@ -339,7 +444,9 @@ def main() -> int:
         op_given_set[r["candidate_label_set"]][op_key(r)] += 1
     n_sets = len(op_given_set)
     n_pure_sets = sum(1 for counter in op_given_set.values() if len(counter) == 1)
-    weighted_purity = sum(max(counter.values()) for counter in op_given_set.values()) / len(records)
+    weighted_purity = sum(
+        max(counter.values()) for counter in op_given_set.values()
+    ) / len(records)
 
     # 4e. split leakage: any scenario_hash repeated, or any trajectory split across multiple splits?
     hash_to_splits: dict[str, set[str]] = defaultdict(set)
@@ -391,19 +498,50 @@ def main() -> int:
     # Section 5/6: merged-token dictionary + one small ablation training
     # (same seed/split/frozen encoder as the other two variants; see MERGE_MAP above for rationale)
     # ================================================================
-    merged_token_names = sorted({MERGE_MAP.get(t, t) for t in token_names if t != "__UNKNOWN__"})
+    merged_token_names = sorted(
+        {MERGE_MAP.get(t, t) for t in token_names if t != "__UNKNOWN__"}
+    )
     merged_dict = build_dictionary("choice_meaning_merged", merged_token_names)
     merged_id_by_token = {e["token"]: e["id"] for e in merged_dict["entries"]}
-    raw_token_to_id = {raw: merged_id_by_token[MERGE_MAP.get(raw, raw)] for raw in token_names if raw != "__UNKNOWN__"}
-    merged_vocab_raw_keyed = Vocab(token_to_id=raw_token_to_id, size=len(merged_dict["entries"]))
+    raw_token_to_id = {
+        raw: merged_id_by_token[MERGE_MAP.get(raw, raw)]
+        for raw in token_names
+        if raw != "__UNKNOWN__"
+    }
+    merged_vocab_raw_keyed = Vocab(
+        token_to_id=raw_token_to_id, size=len(merged_dict["entries"])
+    )
 
     merged_datasets = {
-        s: ChoiceDecisionDataset(rows_for_split(all_rows, split_map, s), encoder, merged_vocab_raw_keyed) for s in SPLITS
+        s: ChoiceDecisionDataset(
+            rows_for_split(all_rows, split_map, s), encoder, merged_vocab_raw_keyed
+        )
+        for s in SPLITS
     }
-    merged_loaders = {s: DataLoader(merged_datasets[s], batch_size=args.batch_size, shuffle=False, collate_fn=collate_choice) for s in SPLITS}
-    merged_train_loader_shuffled = DataLoader(merged_datasets["train"], batch_size=args.batch_size, shuffle=True, collate_fn=collate_choice)
+    merged_loaders = {
+        s: DataLoader(
+            merged_datasets[s],
+            batch_size=args.batch_size,
+            shuffle=False,
+            collate_fn=collate_choice,
+        )
+        for s in SPLITS
+    }
+    merged_train_loader_shuffled = DataLoader(
+        merged_datasets["train"],
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=collate_choice,
+    )
 
-    print(json.dumps({"stage": "training_merged_meaning_ablation", "merged_tokens": merged_token_names}))
+    print(
+        json.dumps(
+            {
+                "stage": "training_merged_meaning_ablation",
+                "merged_tokens": merged_token_names,
+            }
+        )
+    )
     merged_result = train_variant(
         "freeze_merged_meaning",
         use_choice_meaning=True,
@@ -424,28 +562,54 @@ def main() -> int:
     merged_test_illegal: list[torch.Tensor] = []
     with torch.no_grad():
         for batch in merged_loaders["test"]:
-            logits = merged_model(batch["state"], batch["card_ids"], batch["choice_meaning_id"], batch["remaining_select_count"])
-            m = rank_metrics_from_scores(logits, batch["candidate_mask"], batch["teacher_index"])
+            logits = merged_model(
+                batch["state"],
+                batch["card_ids"],
+                batch["choice_meaning_id"],
+                batch["remaining_select_count"],
+            )
+            m = rank_metrics_from_scores(
+                logits, batch["candidate_mask"], batch["teacher_index"]
+            )
             merged_test_ranks.append(m["ranks"])
             merged_test_illegal.append(m["illegal"])
-    merged_test_metrics = aggregate_rank_metrics(torch.cat(merged_test_ranks), torch.cat(merged_test_illegal))
+    merged_test_metrics = aggregate_rank_metrics(
+        torch.cat(merged_test_ranks), torch.cat(merged_test_illegal)
+    )
 
     section5_6 = {
         "merge_map": MERGE_MAP,
         "merged_token_count": len(merged_token_names),
         "merged_tokens": merged_token_names,
         "three_way_test_comparison": {
-            "meaning_13_token": {"top_1_accuracy": test_meaning_top1, "best_epoch": None},
-            "no_meaning": {"top_1_accuracy": test_no_meaning_top1, "best_epoch": no_meaning_result["best_epoch"]},
-            "meaning_merged_9_token": {**merged_test_metrics, "best_epoch": merged_result["best_epoch"]},
+            "meaning_13_token": {
+                "top_1_accuracy": test_meaning_top1,
+                "best_epoch": None,
+            },
+            "no_meaning": {
+                "top_1_accuracy": test_no_meaning_top1,
+                "best_epoch": no_meaning_result["best_epoch"],
+            },
+            "meaning_merged_9_token": {
+                **merged_test_metrics,
+                "best_epoch": merged_result["best_epoch"],
+            },
         },
     }
     dump_json(args.report_dir / "section5_6_merge_and_ablation.json", section5_6)
-    print(json.dumps({"stage": "section5_6_written", "three_way_test_top1": {
-        "meaning_13token": round(test_meaning_top1, 4),
-        "no_meaning": round(test_no_meaning_top1, 4),
-        "meaning_merged": round(merged_test_metrics["top_1_accuracy"], 4),
-    }}, indent=2))
+    print(
+        json.dumps(
+            {
+                "stage": "section5_6_written",
+                "three_way_test_top1": {
+                    "meaning_13token": round(test_meaning_top1, 4),
+                    "no_meaning": round(test_no_meaning_top1, 4),
+                    "meaning_merged": round(merged_test_metrics["top_1_accuracy"], 4),
+                },
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

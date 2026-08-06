@@ -58,18 +58,24 @@ class PolicyDecision:
         self.model.eval()
         self.provenance = _provenance(self.config, checkpoint_path)
 
-    def __call__(self, observation: dict[str, Any], legal_actions: list[dict[str, Any]]) -> dict[str, Any]:
+    def __call__(
+        self, observation: dict[str, Any], legal_actions: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         if not legal_actions:
             raise ValueError("legal_actions must be non-empty")
 
         # The model was never trained on choice_card decisions (RL does not yet supply choice
         # purpose/source-zone/origin context, and Training must not guess it). Detected
         # structurally from action_type, which the Data Contract already guarantees is present.
-        recommend_heuristic_fallback = any(a.get("action_type") == "choice_card" for a in legal_actions)
+        recommend_heuristic_fallback = any(
+            a.get("action_type") == "choice_card" for a in legal_actions
+        )
 
         action_features = [self.encoder.encode_action(a) for a in legal_actions]
         state = self.encoder.encode_state(observation).unsqueeze(0)
-        action_type = torch.stack([f["action_type"] for f in action_features]).unsqueeze(0)
+        action_type = torch.stack(
+            [f["action_type"] for f in action_features]
+        ).unsqueeze(0)
         card = torch.stack([f["card"] for f in action_features]).unsqueeze(0)
         potion = torch.stack([f["potion"] for f in action_features]).unsqueeze(0)
         numeric = torch.stack([f["numeric"] for f in action_features]).unsqueeze(0)
@@ -99,10 +105,14 @@ class ValueDetermination:
         checkpoint = _load_checkpoint(checkpoint_path)
         self.config = checkpoint["config"]
         self.encoder = ExportEncoder(checkpoint["dictionaries"])
-        self.model = ValueNet(state_dim=self.encoder.state_dim, hidden_dim=self.config["hidden_dim"])
+        self.model = ValueNet(
+            state_dim=self.encoder.state_dim, hidden_dim=self.config["hidden_dim"]
+        )
         self.model.load_state_dict(checkpoint["model_state"])
         self.model.eval()
-        self.remaining_decisions_scale = float(self.config.get("remaining_decisions_scale", REMAINING_DECISIONS_SCALE))
+        self.remaining_decisions_scale = float(
+            self.config.get("remaining_decisions_scale", REMAINING_DECISIONS_SCALE)
+        )
         self.provenance = _provenance(self.config, checkpoint_path)
 
     def __call__(self, observation: dict[str, Any]) -> dict[str, Any]:
@@ -116,6 +126,9 @@ class ValueDetermination:
             "win_probability": win_probability,
             "expected_final_hp_fraction": final_hp_fraction,
             "expected_final_hp": final_hp_fraction * float(max_hp),
-            "expected_remaining_decisions": float(output["remaining_decisions"][0].item()) * self.remaining_decisions_scale,
+            "expected_remaining_decisions": float(
+                output["remaining_decisions"][0].item()
+            )
+            * self.remaining_decisions_scale,
             "provenance": self.provenance,
         }

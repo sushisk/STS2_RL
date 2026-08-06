@@ -6,9 +6,9 @@ import json
 import random
 import subprocess
 from collections import Counter, defaultdict
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
-
+from typing import Any
 
 DATA_CONTRACT_VERSION = "v1"
 EXPORT_SCRIPT_VERSION = "v3"
@@ -25,7 +25,9 @@ USABLE_DATA_USAGE_KINDS = {"usable_complete": "complete", "usable_partial": "par
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Export learning-ready datasets from a saved trajectory batch run.")
+    parser = argparse.ArgumentParser(
+        description="Export learning-ready datasets from a saved trajectory batch run."
+    )
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--split-seed", type=int, default=SPLIT_SEED)
@@ -133,7 +135,11 @@ def normalize_action(action: dict, selected_enemy_index: int | None = None) -> d
         "card_id": parameters.get("cardId"),
         "potion_id": parameters.get("potionId"),
         "target_type": parameters.get("targetType"),
-        "target_enemy_index": selected_enemy_index if selected_enemy_index is not None else parameters.get("enemyIndex"),
+        "target_enemy_index": (
+            selected_enemy_index
+            if selected_enemy_index is not None
+            else parameters.get("enemyIndex")
+        ),
         "raw_parameters": parameters,
         "action_id_scope": "state_local_ephemeral",
         "semantic_id_note": "label is display/debug text only; do not use as a stable semantic id",
@@ -188,7 +194,9 @@ def export_decision_row(
 ) -> dict:
     state = decision["state"]
     legal_actions = [normalize_action(a) for a in (decision.get("legal_actions") or [])]
-    teacher_action = normalize_action(decision["selected_action"], decision.get("selected_enemy_index"))
+    teacher_action = normalize_action(
+        decision["selected_action"], decision.get("selected_enemy_index")
+    )
     return {
         "export_version": EXPORT_VERSION,
         "dataset_kind": dataset_kind,
@@ -202,7 +210,9 @@ def export_decision_row(
         "observation": state,
         "legal_actions": legal_actions,
         "teacher_action": teacher_action,
-        "teacher_action_type": (decision.get("selected_action") or {}).get("action_type"),
+        "teacher_action_type": (decision.get("selected_action") or {}).get(
+            "action_type"
+        ),
         "teacher_target": {
             "selected_enemy_index": decision.get("selected_enemy_index"),
             "selected_action_index": decision.get("selected_action_index"),
@@ -233,11 +243,17 @@ def resolve_source_manifest_path(run_dir: Path, source_format: str) -> Path:
 
 
 def usage_map_legacy(run_dir: Path) -> dict[str, str | None]:
-    return {row["trajectory_id"]: (row.get("quality") or {}).get("data_usage") for row in iter_jsonl(run_dir / "scenario_results.jsonl")}
+    return {
+        row["trajectory_id"]: (row.get("quality") or {}).get("data_usage")
+        for row in iter_jsonl(run_dir / "scenario_results.jsonl")
+    }
 
 
 def usage_map_flat(run_dir: Path) -> dict[str, str | None]:
-    return {row["trajectory_id"]: row.get("data_usage") for row in iter_jsonl(run_dir / "trajectory_quality.jsonl")}
+    return {
+        row["trajectory_id"]: row.get("data_usage")
+        for row in iter_jsonl(run_dir / "trajectory_quality.jsonl")
+    }
 
 
 def iter_legacy_decisions(run_dir: Path) -> Iterator[tuple[dict, dict]]:
@@ -258,7 +274,9 @@ def iter_legacy_decisions(run_dir: Path) -> Iterator[tuple[dict, dict]]:
             yield decision, context
 
 
-def iter_flat_decisions(run_dir: Path, usage_by_id: dict[str, str | None]) -> Iterator[tuple[dict, dict]]:
+def iter_flat_decisions(
+    run_dir: Path, usage_by_id: dict[str, str | None]
+) -> Iterator[tuple[dict, dict]]:
     """Yield (decision, context) pairs by streaming trajectories.jsonl one line at a time.
 
     Outcome/termination/data-usage fields are already denormalized onto every decision row in
@@ -307,7 +325,19 @@ def validation_rules() -> dict:
 
 
 def new_id_buckets() -> dict[str, set[str]]:
-    return {name: set() for name in ("action_type", "card", "potion", "power", "relic", "enemy", "encounter", "character")}
+    return {
+        name: set()
+        for name in (
+            "action_type",
+            "card",
+            "potion",
+            "power",
+            "relic",
+            "enemy",
+            "encounter",
+            "character",
+        )
+    }
 
 
 def update_id_buckets(buckets: dict[str, set[str]], row: dict) -> None:
@@ -315,7 +345,14 @@ def update_id_buckets(buckets: dict[str, set[str]], row: dict) -> None:
     source = obs.get("source") or {}
     if obs.get("characterId"):
         buckets["character"].add(obs["characterId"])
-    for pile_name in ("hand", "drawPile", "discardPile", "exhaustPile", "playPile", "deck"):
+    for pile_name in (
+        "hand",
+        "drawPile",
+        "discardPile",
+        "exhaustPile",
+        "playPile",
+        "deck",
+    ):
         for card in obs.get(pile_name) or []:
             if card.get("id"):
                 buckets["card"].add(card["id"])
@@ -356,7 +393,10 @@ def update_id_buckets(buckets: dict[str, set[str]], row: dict) -> None:
 
 
 def build_all_dictionaries_from_buckets(buckets: dict[str, set[str]]) -> dict:
-    return {f"{name}_dict": build_dictionary(name, sorted(values)) for name, values in buckets.items()}
+    return {
+        f"{name}_dict": build_dictionary(name, sorted(values))
+        for name, values in buckets.items()
+    }
 
 
 class RowAccumulator:
@@ -383,7 +423,9 @@ class RowAccumulator:
         if row["teacher_action"].get("label"):
             self.card_label_counts[row["teacher_action"]["label"]] += 1
         self.outcome_counts[row["combat_outcome"] or "unknown"] += 1
-        encounter = ((row["observation"].get("source") or {}).get("encounter")) or "unknown"
+        encounter = (
+            (row["observation"].get("source") or {}).get("encounter")
+        ) or "unknown"
         self.encounter_counts[encounter] += 1
         if action_type == "choice_card":
             self.choice_count += 1
@@ -391,7 +433,14 @@ class RowAccumulator:
             self.potion_action_count += 1
         if row["teacher_action"].get("label") == "End Turn":
             self.end_turn_count += 1
-        for field in ("teacher_score", "combat_outcome", "termination_reason", "emulator_commit", "emulator_dll_sha256", "heuristic_version"):
+        for field in (
+            "teacher_score",
+            "combat_outcome",
+            "termination_reason",
+            "emulator_commit",
+            "emulator_dll_sha256",
+            "heuristic_version",
+        ):
             if row.get(field) in (None, ""):
                 self.missing_field_counts[field] += 1
 
@@ -407,31 +456,57 @@ class RowAccumulator:
             "decision_count_distribution": {
                 "min": min(decision_counts) if decision_counts else 0,
                 "max": max(decision_counts) if decision_counts else 0,
-                "avg": round(sum(decision_counts) / len(decision_counts), 2) if decision_counts else 0.0,
+                "avg": (
+                    round(sum(decision_counts) / len(decision_counts), 2)
+                    if decision_counts
+                    else 0.0
+                ),
             },
             "missing_field_counts": dict(self.missing_field_counts),
             "choice_count": self.choice_count,
             "potion_action_count": self.potion_action_count,
             "end_turn_count": self.end_turn_count,
-            "end_turn_rate_pct": round(100.0 * self.end_turn_count / self.total_rows, 2) if self.total_rows else 0.0,
+            "end_turn_rate_pct": (
+                round(100.0 * self.end_turn_count / self.total_rows, 2)
+                if self.total_rows
+                else 0.0
+            ),
         }
 
 
-def write_manifests_from_split_map(split_map: dict[str, str], export_root: Path, dataset_kind: str) -> dict[str, list[str]]:
+def write_manifests_from_split_map(
+    split_map: dict[str, str], export_root: Path, dataset_kind: str
+) -> dict[str, list[str]]:
     split_to_ids: dict[str, list[str]] = defaultdict(list)
     for trajectory_id, split in split_map.items():
         split_to_ids[split].append(trajectory_id)
     manifest_dir = export_root / "manifests"
     for split in SPLITS:
         ids = sorted(set(split_to_ids.get(split, [])))
-        payload = [{"trajectory_id": tid, "scenario_id": tid, "dataset_kind": dataset_kind, "split": split} for tid in ids]
+        payload = [
+            {
+                "trajectory_id": tid,
+                "scenario_id": tid,
+                "dataset_kind": dataset_kind,
+                "split": split,
+            }
+            for tid in ids
+        ]
         write_jsonl(manifest_dir / f"{dataset_kind}_{split}_manifest.jsonl", payload)
     return {split: sorted(set(split_to_ids.get(split, []))) for split in SPLITS}
 
 
 def residual_issue_report_legacy(run_dir: Path) -> dict:
     rows = load_jsonl(run_dir / "scenario_results.jsonl")
-    target_ids = {"6304-18", "787-23", "2365-21", "4419-24", "5362-18", "7678-9", "6588-3"}
+    target_ids = {
+        "6304-18",
+        "787-23",
+        "2365-21",
+        "4419-24",
+        "5362-18",
+        "7678-9",
+        "6588-3",
+    }
     report = []
     for row in rows:
         if row["trajectory_id"] not in target_ids:
@@ -442,7 +517,9 @@ def residual_issue_report_legacy(run_dir: Path) -> dict:
         warnings = result.get("warnings") or []
         classification = "Heuristic品質上の制約"
         rationale = "manual_review_required"
-        if quality.get("data_usage") == "exclude_heuristic_exception" and any("no living enemies" in w for w in warnings):
+        if quality.get("data_usage") == "exclude_heuristic_exception" and any(
+            "no living enemies" in w for w in warnings
+        ):
             classification = "RL側修正"
             rationale = "candidate evaluation reaches terminal kill state but treats no-living-enemies restore as exception"
         elif any("step_exception:TimeoutException" in w for w in warnings):
@@ -450,7 +527,9 @@ def residual_issue_report_legacy(run_dir: Path) -> dict:
             rationale = "candidate evaluation Step timeout remained after adapter fixes"
         elif "init_exception:ArgumentException" in reasons:
             classification = "データ不足による隔離"
-            rationale = ((result.get("diffs") or {}).get("error_message")) or "init argument exception"
+            rationale = (
+                (result.get("diffs") or {}).get("error_message")
+            ) or "init argument exception"
         elif quality.get("classification") == "C_state_or_implementation_loop":
             classification = "RL側修正"
             rationale = "loop around potion-driven branch should be broken earlier or resolved by better continuation handling"
@@ -475,8 +554,12 @@ def known_issues_flat(run_dir: Path) -> dict:
     return {
         "run_dir": str(run_dir),
         "source": "verbatim copy of RL-provided error_summary.json / quarantine_report.jsonl; not re-derived by Training side",
-        "error_summary": load_json(error_summary_path) if error_summary_path.exists() else None,
-        "quarantined_trajectory_count": len(load_jsonl(quarantine_path)) if quarantine_path.exists() else None,
+        "error_summary": (
+            load_json(error_summary_path) if error_summary_path.exists() else None
+        ),
+        "quarantined_trajectory_count": (
+            len(load_jsonl(quarantine_path)) if quarantine_path.exists() else None
+        ),
     }
 
 
@@ -489,9 +572,17 @@ def main() -> int:
     source_format = resolve_source_format(run_dir, args.source_format)
     source_manifest_path = resolve_source_manifest_path(run_dir, source_format)
 
-    usage_by_id = usage_map_flat(run_dir) if source_format == "flat" else usage_map_legacy(run_dir)
-    complete_ids = [tid for tid, usage in usage_by_id.items() if usage == "usable_complete"]
-    partial_ids = [tid for tid, usage in usage_by_id.items() if usage == "usable_partial"]
+    usage_by_id = (
+        usage_map_flat(run_dir)
+        if source_format == "flat"
+        else usage_map_legacy(run_dir)
+    )
+    complete_ids = [
+        tid for tid, usage in usage_by_id.items() if usage == "usable_complete"
+    ]
+    partial_ids = [
+        tid for tid, usage in usage_by_id.items() if usage == "usable_partial"
+    ]
     split_map_by_kind = {
         "complete": split_trajectories(complete_ids, args.split_seed),
         "partial": split_trajectories(partial_ids, args.split_seed + 1),
@@ -503,17 +594,27 @@ def main() -> int:
 
     handles: dict[str, Any] = {}
     for kind in DATASET_KINDS:
-        handles[f"{kind}_all"] = (export_root / f"{kind}_all.jsonl").open("w", encoding="utf-8")
+        handles[f"{kind}_all"] = (export_root / f"{kind}_all.jsonl").open(
+            "w", encoding="utf-8"
+        )
         for split in SPLITS:
-            handles[f"{kind}_{split}"] = (export_root / f"{kind}_{split}.jsonl").open("w", encoding="utf-8")
+            handles[f"{kind}_{split}"] = (export_root / f"{kind}_{split}.jsonl").open(
+                "w", encoding="utf-8"
+            )
 
     overall_acc = {kind: RowAccumulator() for kind in DATASET_KINDS}
-    split_acc = {(kind, split): RowAccumulator() for kind in DATASET_KINDS for split in SPLITS}
+    split_acc = {
+        (kind, split): RowAccumulator() for kind in DATASET_KINDS for split in SPLITS
+    }
     id_buckets = new_id_buckets()
     decision_counts = {"complete": 0, "partial": 0}
     heuristic_version = None
 
-    decision_iter = iter_flat_decisions(run_dir, usage_by_id) if source_format == "flat" else iter_legacy_decisions(run_dir)
+    decision_iter = (
+        iter_flat_decisions(run_dir, usage_by_id)
+        if source_format == "flat"
+        else iter_legacy_decisions(run_dir)
+    )
     for decision, context in decision_iter:
         trajectory_id = decision["trajectory_id"]
         data_usage = context["data_usage"]
@@ -543,8 +644,12 @@ def main() -> int:
     for handle in handles.values():
         handle.close()
 
-    complete_manifests = write_manifests_from_split_map(split_map_by_kind["complete"], export_root, "complete")
-    partial_manifests = write_manifests_from_split_map(split_map_by_kind["partial"], export_root, "partial")
+    complete_manifests = write_manifests_from_split_map(
+        split_map_by_kind["complete"], export_root, "complete"
+    )
+    partial_manifests = write_manifests_from_split_map(
+        split_map_by_kind["partial"], export_root, "partial"
+    )
 
     dictionaries = build_all_dictionaries_from_buckets(id_buckets)
     dump_json(export_root / "id_dictionaries.v1.json", dictionaries)
@@ -557,7 +662,11 @@ def main() -> int:
             "dictionary_version": DICTIONARY_VERSION,
             "source_format": source_format,
             "source_run_dir": str(run_dir),
-            "source_manifest_sha256": sha256_file(source_manifest_path) if source_manifest_path.exists() else None,
+            "source_manifest_sha256": (
+                sha256_file(source_manifest_path)
+                if source_manifest_path.exists()
+                else None
+            ),
             "rl_git_commit": current_rl_git_commit(),
             "split_seed": {
                 "complete": args.split_seed,
@@ -567,8 +676,12 @@ def main() -> int:
             "partial_trajectory_count": len(partial_ids),
             "complete_decision_count": decision_counts["complete"],
             "partial_decision_count": decision_counts["partial"],
-            "complete_split_counts": {split: len(ids) for split, ids in complete_manifests.items()},
-            "partial_split_counts": {split: len(ids) for split, ids in partial_manifests.items()},
+            "complete_split_counts": {
+                split: len(ids) for split, ids in complete_manifests.items()
+            },
+            "partial_split_counts": {
+                split: len(ids) for split, ids in partial_manifests.items()
+            },
             "heuristic_version": heuristic_version,
             "validation_rules": validation_rules(),
         },
@@ -576,10 +689,16 @@ def main() -> int:
     quality_report = {
         "complete": overall_acc["complete"].finalize(),
         "partial": overall_acc["partial"].finalize(),
-        "complete_by_split": {split: split_acc[("complete", split)].finalize() for split in SPLITS},
-        "partial_by_split": {split: split_acc[("partial", split)].finalize() for split in SPLITS},
+        "complete_by_split": {
+            split: split_acc[("complete", split)].finalize() for split in SPLITS
+        },
+        "partial_by_split": {
+            split: split_acc[("partial", split)].finalize() for split in SPLITS
+        },
         "known_issues": (
-            residual_issue_report_legacy(run_dir) if source_format == "legacy" else known_issues_flat(run_dir)
+            residual_issue_report_legacy(run_dir)
+            if source_format == "legacy"
+            else known_issues_flat(run_dir)
         ),
     }
     dump_json(export_root / "quality_report.json", quality_report)

@@ -6,13 +6,14 @@ from pathlib import Path
 
 from sts2_training.choice_data import DEFAULT_SOURCE_DIR, audit_and_split, sha256_file
 
-
 DEFAULT_OUT_DIR = Path("exports/choice_policy_v1")
 DEFAULT_SPLIT_SEED = 20260725
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Audit the RL Choice teacher dataset and build the train/validation/test split.")
+    parser = argparse.ArgumentParser(
+        description="Audit the RL Choice teacher dataset and build the train/validation/test split."
+    )
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--split-seed", type=int, default=DEFAULT_SPLIT_SEED)
@@ -42,15 +43,23 @@ def main() -> int:
     write_jsonl(out_dir / "manifest.jsonl", result["manifest_rows"])
     write_jsonl(
         out_dir / "split_manifest.jsonl",
-        [{"trajectory_id": tid, "split": split} for tid, split in sorted(result["split_map"].items())],
+        [
+            {"trajectory_id": tid, "split": split}
+            for tid, split in sorted(result["split_map"].items())
+        ],
     )
-    dump_json(out_dir / "dictionaries.json", {"choice_meaning_dict": result["choice_meaning_dict"]})
+    dump_json(
+        out_dir / "dictionaries.json",
+        {"choice_meaning_dict": result["choice_meaning_dict"]},
+    )
 
     source_data_path = args.source_dir / "choice_teacher_data.jsonl"
     dataset_metadata = {
         "source_dir": str(args.source_dir),
         "source_choice_teacher_data_sha256": sha256_file(source_data_path),
-        "source_eligibility_summary": json.loads((args.source_dir / "eligibility_summary.json").read_text(encoding="utf-8")),
+        "source_eligibility_summary": json.loads(
+            (args.source_dir / "eligibility_summary.json").read_text(encoding="utf-8")
+        ),
         "split_seed": args.split_seed,
         "counts": {
             "rl_eligible": result["eligible_count"],

@@ -19,7 +19,6 @@ from sts2_training.choice_data import (
     choice_card_candidates,
     choice_meaning_token,
     collate_choice,
-    decision_row_id,
     rows_for_split,
     sha256_file,
 )
@@ -27,15 +26,15 @@ from sts2_training.encoding import ExportEncoder
 from train_choice_policy import (
     DEFAULT_CHOICE_SEMANTICS_BASELINE,
     DEFAULT_POLICY_CHECKPOINT,
-    aggregate_rank_metrics,
     bucket_accuracy,
-    build_model,
     frequency_baseline,
-    rank_metrics_from_scores,
     random_baseline,
+    rank_metrics_from_scores,
     run_epoch,
-    synthetic_check as _synthetic_check_fn,
     train_variant,
+)
+from train_choice_policy import (
+    synthetic_check as _synthetic_check_fn,
 )
 
 SPLITS = ("train", "validation", "test")
@@ -43,11 +42,21 @@ SEEDS = [20260725, 20260726, 20260727]
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="3-seed evaluation of the adopted 8-token (merged) Choice Policy configuration.")
+    parser = argparse.ArgumentParser(
+        description="3-seed evaluation of the adopted 8-token (merged) Choice Policy configuration."
+    )
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
-    parser.add_argument("--policy-checkpoint", type=Path, default=DEFAULT_POLICY_CHECKPOINT)
-    parser.add_argument("--choice-semantics-baseline-file", type=Path, default=DEFAULT_CHOICE_SEMANTICS_BASELINE)
-    parser.add_argument("--exports-dir", type=Path, default=Path("exports/choice_policy_v1"))
+    parser.add_argument(
+        "--policy-checkpoint", type=Path, default=DEFAULT_POLICY_CHECKPOINT
+    )
+    parser.add_argument(
+        "--choice-semantics-baseline-file",
+        type=Path,
+        default=DEFAULT_CHOICE_SEMANTICS_BASELINE,
+    )
+    parser.add_argument(
+        "--exports-dir", type=Path, default=Path("exports/choice_policy_v1")
+    )
     parser.add_argument("--split-seed", type=int, default=20260725)
     parser.add_argument("--seeds", type=int, nargs="+", default=SEEDS)
     parser.add_argument("--epochs", type=int, default=60)
@@ -58,7 +67,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--choice-meaning-embedding-dim", type=int, default=8)
     parser.add_argument("--random-baseline-trials", type=int, default=200)
     parser.add_argument("--checkpoint-dir-root", type=Path, default=Path("checkpoints"))
-    parser.add_argument("--report-dir", type=Path, default=Path("reports/choice_policy_8token_3seed"))
+    parser.add_argument(
+        "--report-dir", type=Path, default=Path("reports/choice_policy_8token_3seed")
+    )
     return parser.parse_args()
 
 
@@ -78,28 +89,53 @@ def dump_json(path: Path, payload: Any) -> None:
 
 
 def mean_std(values: list[float]) -> dict[str, float]:
-    return {"mean": statistics.mean(values), "std": statistics.pstdev(values) if len(values) > 1 else 0.0, "values": values}
+    return {
+        "mean": statistics.mean(values),
+        "std": statistics.pstdev(values) if len(values) > 1 else 0.0,
+        "values": values,
+    }
 
 
 def main() -> int:
     args = parse_args()
     args.report_dir.mkdir(parents=True, exist_ok=True)
 
-    policy_checkpoint = torch.load(args.policy_checkpoint, map_location="cpu", weights_only=False)
+    policy_checkpoint = torch.load(
+        args.policy_checkpoint, map_location="cpu", weights_only=False
+    )
     dictionaries = policy_checkpoint["dictionaries"]
     encoder = ExportEncoder(dictionaries)
-    card_embedding_dim = int(policy_checkpoint["model_state"]["card_embedding.weight"].shape[1])
+    card_embedding_dim = int(
+        policy_checkpoint["model_state"]["card_embedding.weight"].shape[1]
+    )
     hidden_dim = int(policy_checkpoint["model_state"]["state_net.0.weight"].shape[0])
 
     audit = audit_and_split(args.source_dir, args.split_seed)
     all_rows = audit["in_scope_rows"]
     split_map = audit["split_map"]
     source_13_token_dict = audit["choice_meaning_dict"]
-    merged_dict, merged_vocab = build_merged_vocab(source_13_token_dict, CHOICE_MEANING_MERGE_MAP)
+    merged_dict, merged_vocab = build_merged_vocab(
+        source_13_token_dict, CHOICE_MEANING_MERGE_MAP
+    )
 
-    datasets = {s: ChoiceDecisionDataset(rows_for_split(all_rows, split_map, s), encoder, merged_vocab) for s in SPLITS}
-    assert all(d.excluded_unknown_meaning_count == 0 for d in datasets.values()), "unexpected __UNKNOWN__ meaning rows in scope"
-    loaders_eval = {s: DataLoader(datasets[s], batch_size=args.batch_size, shuffle=False, collate_fn=collate_choice) for s in SPLITS}
+    datasets = {
+        s: ChoiceDecisionDataset(
+            rows_for_split(all_rows, split_map, s), encoder, merged_vocab
+        )
+        for s in SPLITS
+    }
+    assert all(
+        d.excluded_unknown_meaning_count == 0 for d in datasets.values()
+    ), "unexpected __UNKNOWN__ meaning rows in scope"
+    loaders_eval = {
+        s: DataLoader(
+            datasets[s],
+            batch_size=args.batch_size,
+            shuffle=False,
+            collate_fn=collate_choice,
+        )
+        for s in SPLITS
+    }
 
     train_rows_for_freq = rows_for_split(all_rows, split_map, "train")
 
@@ -107,7 +143,12 @@ def main() -> int:
     per_seed_results: dict[int, dict[str, Any]] = {}
     for seed in args.seeds:
         print(json.dumps({"stage": f"training_seed_{seed}"}))
-        train_loader_shuffled = DataLoader(datasets["train"], batch_size=args.batch_size, shuffle=True, collate_fn=collate_choice)
+        train_loader_shuffled = DataLoader(
+            datasets["train"],
+            batch_size=args.batch_size,
+            shuffle=True,
+            collate_fn=collate_choice,
+        )
         result = train_variant(
             f"freeze_merged8_seed_{seed}",
             use_choice_meaning=True,
@@ -137,22 +178,33 @@ def main() -> int:
         offset = 0
         with torch.no_grad():
             for batch in loaders_eval["test"]:
-                logits = model(batch["state"], batch["card_ids"], batch["choice_meaning_id"], batch["remaining_select_count"])
-                metrics = rank_metrics_from_scores(logits, batch["candidate_mask"], batch["teacher_index"])
+                logits = model(
+                    batch["state"],
+                    batch["card_ids"],
+                    batch["choice_meaning_id"],
+                    batch["remaining_select_count"],
+                )
+                metrics = rank_metrics_from_scores(
+                    logits, batch["candidate_mask"], batch["teacher_index"]
+                )
                 batch_size = batch["state"].shape[0]
                 for i in range(batch_size):
                     row = datasets["test"].rows[offset + i]
                     test_ranks.append(int(metrics["ranks"][i].item()))
                     test_candidate_counts.append(len(choice_card_candidates(row)))
                     raw_token = choice_meaning_token(row)
-                    merged_token_name = CHOICE_MEANING_MERGE_MAP.get(raw_token, raw_token)
+                    merged_token_name = CHOICE_MEANING_MERGE_MAP.get(
+                        raw_token, raw_token
+                    )
                     test_tokens.append(merged_token_name)
                 offset += batch_size
         top1_hits = [r == 1 for r in test_ranks]
         by_category = bucket_accuracy(test_tokens, top1_hits)
         by_candidate_count = bucket_accuracy(test_candidate_counts, top1_hits)
 
-        synthetic_results = _synthetic_check_fn(model, audit["synthetic_rows"], encoder, merged_vocab)
+        synthetic_results = _synthetic_check_fn(
+            model, audit["synthetic_rows"], encoder, merged_vocab
+        )
 
         per_seed_results[seed] = {
             "best_epoch": result["best_epoch"],
@@ -165,19 +217,27 @@ def main() -> int:
             "synthetic_check": synthetic_results,
             "shared_encoder_keys_copied": result["shared_encoder_keys_copied"],
         }
-        per_seed_results[seed]["_model_state"] = model.state_dict()  # kept only in memory, not dumped to JSON
+        per_seed_results[seed][
+            "_model_state"
+        ] = model.state_dict()  # kept only in memory, not dumped to JSON
 
     # ---- baselines (seed-independent) ----
     print(json.dumps({"stage": "baselines"}))
-    random_test = random_baseline(loaders_eval["test"], args.random_baseline_trials, base_seed=args.split_seed)
-    frequency_test = frequency_baseline(train_rows_for_freq, encoder, loaders_eval["test"])
+    random_test = random_baseline(
+        loaders_eval["test"], args.random_baseline_trials, base_seed=args.split_seed
+    )
+    frequency_test = frequency_baseline(
+        train_rows_for_freq, encoder, loaders_eval["test"]
+    )
 
     # ---- aggregate across seeds ----
     test_top1 = [per_seed_results[s]["test"]["top_1_accuracy"] for s in args.seeds]
     test_top3 = [per_seed_results[s]["test"]["top_3_accuracy"] for s in args.seeds]
     test_top5 = [per_seed_results[s]["test"]["top_5_accuracy"] for s in args.seeds]
     test_mrr = [per_seed_results[s]["test"]["mrr"] for s in args.seeds]
-    test_illegal = [per_seed_results[s]["test"]["illegal_prediction_rate"] for s in args.seeds]
+    test_illegal = [
+        per_seed_results[s]["test"]["illegal_prediction_rate"] for s in args.seeds
+    ]
     aggregate = {
         "test_top_1_accuracy": mean_std(test_top1),
         "test_top_3_accuracy": mean_std(test_top3),
@@ -188,10 +248,16 @@ def main() -> int:
 
     # ---- stability checks (section 4 of the instruction) ----
     all_synthetic_ok = all(
-        all(r.get("ran_without_exception", True) and "skipped" not in r for r in per_seed_results[s]["synthetic_check"]) for s in args.seeds
+        all(
+            r.get("ran_without_exception", True) and "skipped" not in r
+            for r in per_seed_results[s]["synthetic_check"]
+        )
+        for s in args.seeds
     )
     # category collapse check: any category with 0% top-1 accuracy in ALL 3 seeds simultaneously (n>=10 only, to ignore noise)
-    category_names = sorted({cat for s in args.seeds for cat in per_seed_results[s]["by_category_test"]})
+    category_names = sorted(
+        {cat for s in args.seeds for cat in per_seed_results[s]["by_category_test"]}
+    )
     collapsed_categories = []
     for cat in category_names:
         per_seed_acc = []
@@ -205,8 +271,10 @@ def main() -> int:
     stability = {
         "top1_range_across_seeds": max(test_top1) - min(test_top1),
         "illegal_rate_all_zero": all(v == 0.0 for v in test_illegal),
-        "beats_random_baseline_on_average": aggregate["test_top_1_accuracy"]["mean"] > random_test["top_1_accuracy"],
-        "beats_frequency_baseline_on_average": aggregate["test_top_1_accuracy"]["mean"] > frequency_test["top_1_accuracy"],
+        "beats_random_baseline_on_average": aggregate["test_top_1_accuracy"]["mean"]
+        > random_test["top_1_accuracy"],
+        "beats_frequency_baseline_on_average": aggregate["test_top_1_accuracy"]["mean"]
+        > frequency_test["top_1_accuracy"],
         "synthetic_ok_all_seeds": all_synthetic_ok,
         "collapsed_categories_ge10n_all_seeds_zero": collapsed_categories,
     }
@@ -220,18 +288,30 @@ def main() -> int:
     print(json.dumps({"stage": "selected_best_seed", "best_seed": best_seed}))
 
     # ---- save winning checkpoint with full provenance ----
-    choice_semantics_baseline = json.loads(args.choice_semantics_baseline_file.read_text(encoding="utf-8"))
-    source_summary = json.loads((args.source_dir / "summary.json").read_text(encoding="utf-8"))
+    choice_semantics_baseline = json.loads(
+        args.choice_semantics_baseline_file.read_text(encoding="utf-8")
+    )
+    source_summary = json.loads(
+        (args.source_dir / "summary.json").read_text(encoding="utf-8")
+    )
     merge_map_path = args.exports_dir / "merge_map.v1.json"
     split_manifest_path = args.exports_dir / "split_manifest.jsonl"
 
     provenance = {
         "emulator_commit": source_summary.get("emulator_commit"),
         "emulator_dll_sha256": source_summary.get("emulator_dll_sha256"),
-        "choice_semantics_baseline_version": choice_semantics_baseline.get("baseline_id"),
-        "choice_semantics_lookup_sha256": choice_semantics_baseline.get("choice_semantics_lookup", {}).get("sha256"),
-        "choice_semantics_origin_alias_sha256": choice_semantics_baseline.get("origin_type_alias_lookup", {}).get("sha256"),
-        "source_choice_dataset_sha256": sha256_file(args.source_dir / "choice_teacher_data.jsonl"),
+        "choice_semantics_baseline_version": choice_semantics_baseline.get(
+            "baseline_id"
+        ),
+        "choice_semantics_lookup_sha256": choice_semantics_baseline.get(
+            "choice_semantics_lookup", {}
+        ).get("sha256"),
+        "choice_semantics_origin_alias_sha256": choice_semantics_baseline.get(
+            "origin_type_alias_lookup", {}
+        ).get("sha256"),
+        "source_choice_dataset_sha256": sha256_file(
+            args.source_dir / "choice_teacher_data.jsonl"
+        ),
         "merge_map_version": CHOICE_MEANING_MERGE_MAP_VERSION,
         "merge_map_sha256": sha256_file(merge_map_path),
         "split_manifest_sha256": sha256_file(split_manifest_path),
@@ -279,7 +359,8 @@ def main() -> int:
 
     # ---- write reports (strip in-memory model states before dumping) ----
     per_seed_dump = {
-        str(s): {k: v for k, v in per_seed_results[s].items() if k != "_model_state"} for s in args.seeds
+        str(s): {k: v for k, v in per_seed_results[s].items() if k != "_model_state"}
+        for s in args.seeds
     }
     summary = {
         "seeds": args.seeds,
@@ -288,13 +369,27 @@ def main() -> int:
         "per_seed": per_seed_dump,
         "aggregate": aggregate,
         "stability": stability,
-        "baselines": {"random_candidate_selection_test": random_test, "fixed_card_frequency_order_test": frequency_test},
+        "baselines": {
+            "random_candidate_selection_test": random_test,
+            "fixed_card_frequency_order_test": frequency_test,
+        },
         "best_seed_selected": best_seed,
         "best_checkpoint_path": str((checkpoint_dir / "best.pt").resolve()),
         "provenance": provenance,
     }
     dump_json(args.report_dir / "metrics.json", summary)
-    print(json.dumps({"stage": "done", "aggregate": aggregate, "stability": stability, "best_seed": best_seed}, indent=2, default=str))
+    print(
+        json.dumps(
+            {
+                "stage": "done",
+                "aggregate": aggregate,
+                "stability": stability,
+                "best_seed": best_seed,
+            },
+            indent=2,
+            default=str,
+        )
+    )
     return 0
 
 

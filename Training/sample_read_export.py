@@ -6,9 +6,13 @@ from pathlib import Path
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Read a few exported training rows without Emulator.")
+    parser = argparse.ArgumentParser(
+        description="Read a few exported training rows without Emulator."
+    )
     parser.add_argument("--export-root", type=Path, required=True)
-    parser.add_argument("--split", choices=["train", "validation", "test"], default="train")
+    parser.add_argument(
+        "--split", choices=["train", "validation", "test"], default="train"
+    )
     parser.add_argument("--count", type=int, default=3)
     return parser.parse_args()
 
