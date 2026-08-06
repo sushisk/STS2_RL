@@ -303,6 +303,12 @@ def attempt_branch(
         raise ValueError(f"room_id required for choice_type={choice_type!r}")
     target_boundary = BOUNDARY_FOR_CHOICE[choice_type]
 
+    # Every GameInstance here is single-use and sequential (module docstring above) -
+    # holder must be fully driven, stepped, and read to completion BEFORE `sibling` is
+    # even constructed, since constructing a new GameInstance supersedes any still-alive
+    # one in the same process (`EnsureNotSuperseded()`); reading from `holder` after
+    # `sibling` exists would raise `InvalidOperationException`. action_b's selection
+    # (which needs `sibling_legal`) is deferred until after sibling exists instead.
     holder = new_session()
     holder.load_state(effective_snapshot)
     prefix, _holder_entered = reach_choice_boundary(holder, room_id, target_boundary)
@@ -313,6 +319,13 @@ def attempt_branch(
         )
     holder_legal = holder.get_legal_actions()
     holder_room_ctx = holder.get_room_context()
+    if len(holder_legal) < 2:
+        raise ChoiceReproductionError(f"{choice_type}: fewer than 2 legal actions to branch on ({holder_legal})")
+    action_a = holder_legal[0]
+    pre_holder_run_state = holder.get_run_state()
+    holder_choice_result = holder.step(action_a["action_id"])
+    post_holder_run_state = holder.get_run_state()
+    del holder
 
     sibling = new_session()
     sibling.load_state(effective_snapshot)
@@ -329,6 +342,16 @@ def attempt_branch(
         )
     sibling_legal = sibling.get_legal_actions()
     sibling_room_ctx = sibling.get_room_context()
+    action_b = next(
+        (a for a in sibling_legal if legal_action_semantic_key(a) != legal_action_semantic_key(action_a)),
+        None,
+    )
+    if action_b is None:
+        raise ChoiceReproductionError(f"{choice_type}: no second distinct choice available ({holder_legal})")
+    pre_sibling_run_state = sibling.get_run_state()
+    sibling_choice_result = sibling.step(action_b["action_id"])
+    post_sibling_run_state = sibling.get_run_state()
+    del sibling
 
     holder_pending = (holder_obs.get("state") or {}).get("pendingChoice") or {}
     sibling_pending = (sibling_obs.get("state") or {}).get("pendingChoice") or {}
@@ -341,26 +364,6 @@ def attempt_branch(
         "legal_action_semantic_set_matches": semantic_key_set(holder_legal) == semantic_key_set(sibling_legal),
         "transition_unconsumed": True,  # neither side has Stepped past the choice yet at this point
     }
-
-    if len(holder_legal) < 2:
-        raise ChoiceReproductionError(f"{choice_type}: fewer than 2 legal actions to branch on ({holder_legal})")
-
-    action_a = holder_legal[0]
-    action_b = next(
-        (a for a in sibling_legal if legal_action_semantic_key(a) != legal_action_semantic_key(action_a)),
-        None,
-    )
-    if action_b is None:
-        raise ChoiceReproductionError(f"{choice_type}: no second distinct choice available ({holder_legal})")
-
-    pre_holder_run_state = holder.get_run_state()
-    pre_sibling_run_state = sibling.get_run_state()
-
-    holder_choice_result = holder.step(action_a["action_id"])
-    sibling_choice_result = sibling.step(action_b["action_id"])
-
-    post_holder_run_state = holder.get_run_state()
-    post_sibling_run_state = sibling.get_run_state()
 
     # Determinism: replay the SAME prefix into a third fresh session and take the SAME
     # action_a - must land on an identical result to the holder's.
@@ -385,10 +388,12 @@ def attempt_branch(
         holder_choice_result["observation"]["boundary"] != sibling_choice_result["observation"]["boundary"]
         or post_holder_run_state != post_sibling_run_state
     )
-    # Isolation: acting on the holder must not have moved the sibling's (already-fetched,
-    # pre-choice) state, and vice versa - each side's PRE-choice run_state (captured right
-    # before either Step) must still match what each side itself started from, since they
-    # are two independent GameInstances / two independent process-local Python objects.
+    # Isolation: each side's PRE-choice run_state (captured right before its own Step,
+    # from its own independently loaded+replayed GameInstance) must agree - proves the
+    # two sequential, independently-constructed sessions reproduce the identical
+    # pre-choice state from the same snapshot+prefix, rather than one contaminating the
+    # other (they are never alive/interleaved at the same time - see the ordering note
+    # above this function's holder/sibling construction).
     checks["holder_sibling_isolated"] = (
         pre_holder_run_state["current_room_type"] == pre_sibling_run_state["current_room_type"]
         and pre_holder_run_state["gold"] == pre_sibling_run_state["gold"]

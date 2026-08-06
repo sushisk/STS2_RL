@@ -32,8 +32,30 @@ from worker_fault_injection import (  # noqa: E402
     kill_worker_process,
     respawn_and_verify,
 )
+
+
+def _establish_item(work_id: str, choice_type: str, target_boundary: str, map_snapshot: str, room_id: "int | None") -> ChoiceWorkItem:
+    context_id = derive_context_id(
+        map_snapshot=map_snapshot, room_id=room_id, action_prefix=[], choice_type=choice_type, relic_injection=None
+    )
+    return ChoiceWorkItem(
+        work_id=work_id,
+        context_id=context_id,
+        choice_type=choice_type,
+        map_snapshot=map_snapshot,
+        room_id=room_id,
+        action_prefix=[],
+        relic_injection=None,
+        target_boundary=target_boundary,
+        work_kind=WORK_KIND_SUB_BRANCH,
+        discover_prefix=True,
+    )
 from worker_pool import (  # noqa: E402
+    BRANCH_STATUS_FAULT,
+    BRANCH_STATUS_SUCCESS,
     ChoiceWorkItem,
+    EventRngReplayPlan,
+    EXECUTION_MODE_BOOTSTRAP_STEP,
     EXECUTION_MODE_HOLDER_STEP,
     ExploreRequest,
     Lease,
@@ -41,6 +63,7 @@ from worker_pool import (  # noqa: E402
     WholeRunWorkerPool,
     WorkerExecutionRequest,
     WORK_KIND_CONTINUATION,
+    WORK_KIND_SUB_BRANCH,
     derive_context_id,
 )
 
@@ -165,6 +188,89 @@ def test_stale_generation_lease_rejected_after_respawn():
         registry.set(stale_lease)
         respawn_and_verify(pool, registry, holder_slot)
         assert registry.get("not-a-real-context") is None, "respawn must invalidate leases for the respawned slot"
+
+
+def test_choice_work_item_event_rng_plan_pickles_round_trip():
+    import pickle
+
+    plan = EventRngReplayPlan(
+        hypothesis_key=("root", "dp-1", 3),
+        override_state={"event_id": "ev1", "event_rng": {"counter": 1, "s0": 2, "s1": 3, "s2": 4, "s3": 5}},
+        apply_before_action_index=2,
+    )
+    item = ChoiceWorkItem(
+        work_id="wid",
+        context_id="ctx",
+        choice_type="event",
+        map_snapshot="snap",
+        room_id=7,
+        action_prefix=[1, 2],
+        relic_injection=None,
+        target_boundary="event_choice",
+        work_kind=WORK_KIND_SUB_BRANCH,
+        resolve_action_id=9,
+        event_rng_plan=plan,
+    )
+
+    restored = pickle.loads(pickle.dumps(item))
+    assert restored == item
+    assert restored.event_rng_plan == plan
+
+
+def test_stray_late_result_is_discarded_not_misrouted():
+    with WholeRunWorkerPool(branch_worker_count=2) as pool:
+        found = _discover_all(pool, seed=18)
+        registry = LeaseRegistry()
+        shop_info = found["MerchantRoom"]
+        event_info = found["EventRoom"]
+        item1 = _establish_item("stray-test-1", "shop", "shop_choice", shop_info["map_snapshot"], shop_info["room_id"])
+        item2 = _establish_item("stray-test-2", "event", "event_choice", event_info["map_snapshot"], event_info["room_id"])
+
+        # Inject a stray/late result carrying a request_id that was never issued by this
+        # dispatch call (simulating a delayed response from a prior timed-out request) -
+        # it must be silently discarded, not misrouted to either real pending work item.
+        pool._result_queue.put((999999999, "choice", None))  # noqa: SLF001
+
+        results = pool.dispatch_choice_work_items([item1, item2], registry)
+        by_id = {r.work_item.work_id: r for r in results}
+        assert by_id["stray-test-1"].status == BRANCH_STATUS_SUCCESS
+        assert by_id["stray-test-2"].status == BRANCH_STATUS_SUCCESS
+
+
+def test_dead_worker_auto_respawns_during_dispatch():
+    with WholeRunWorkerPool(branch_worker_count=2) as pool:
+        found = _discover_all(pool, seed=18)
+        registry = LeaseRegistry()
+        info = found["EventRoom"]
+
+        old_generation = pool.worker_generations[0]
+        kill_worker_process(pool, 0)
+
+        # Bootstrap routing for the very first dispatch picks slot 0 deterministically
+        # (round-robin starts at index 0, no leases held yet) - dispatching now must not
+        # raise, must auto-respawn slot 0, and must return a normalized fault result.
+        item = _establish_item("dead-worker-test", "event", "event_choice", info["map_snapshot"], info["room_id"])
+        (result,) = pool.dispatch_choice_work_items([item], registry)
+        assert result.status == BRANCH_STATUS_FAULT
+        assert result.diagnostics.get("fault_kind") in ("worker_process_crash", "task_timeout")
+        assert pool.worker_generations[0] == old_generation + 1
+
+
+def test_pool_recovers_and_succeeds_after_auto_respawn():
+    with WholeRunWorkerPool(branch_worker_count=2) as pool:
+        found = _discover_all(pool, seed=18)
+        registry = LeaseRegistry()
+        info = found["EventRoom"]
+
+        kill_worker_process(pool, 0)
+        item = _establish_item("dead-worker-test-2", "event", "event_choice", info["map_snapshot"], info["room_id"])
+        (result,) = pool.dispatch_choice_work_items([item], registry)
+        assert result.status == BRANCH_STATUS_FAULT
+
+        # A follow-up request must succeed normally against the respawned worker.
+        item2 = _establish_item("dead-worker-test-2-followup", "event", "event_choice", info["map_snapshot"], info["room_id"])
+        (result2,) = pool.dispatch_choice_work_items([item2], registry)
+        assert result2.status == BRANCH_STATUS_SUCCESS, result2.diagnostics
 
 
 def _run_all() -> int:

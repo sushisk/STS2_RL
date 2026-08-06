@@ -22,19 +22,12 @@ state to Training (contract §3: "seed、RNG内部状態、DrawPile順序は公�
 
 from __future__ import annotations
 
-import dataclasses
-
 from combat_state_snapshot import SerializableRngSnapshot
 from search.belief_coverage import compute_public_multiset_with_coverage, compute_public_multiset_with_coverage_for_combat_start
 from search.branch_worker_pool import WorkItem
 from search.candidate_pipeline import PipelineCandidateRef
 from search.decision_context import CombatStartReplayRoot, DecisionContext
-from search.rng_hypothesis import (
-    derive_substituted_replay_root,
-    derive_substituted_snapshot,
-    generate_belief_hypotheses,
-    with_search_hypothesis,
-)
+from search.rng_hypothesis import apply_hypothesis_to_context, generate_belief_hypotheses
 
 
 def build_single_hypothesis_work_item(
@@ -61,7 +54,6 @@ def build_single_hypothesis_work_item(
         )
         hypotheses = generate_belief_hypotheses(public_multiset, count=count, rng_seed_source=lambda _i: seed_rng)
         hypothesis = hypotheses[hypothesis_index]
-        derived_root = derive_substituted_replay_root(decision_context.root_snapshot, hypothesis)
     else:
         public_multiset, _coverage = compute_public_multiset_with_coverage(
             decision_context.root_snapshot, combat_start_deck_multiset=combat_start_deck_multiset
@@ -69,8 +61,6 @@ def build_single_hypothesis_work_item(
         shuffle_rng = decision_context.root_snapshot.Rng.RunRng["Shuffle"]
         hypotheses = generate_belief_hypotheses(public_multiset, count=count, rng_seed_source=lambda _i: shuffle_rng)
         hypothesis = hypotheses[hypothesis_index]
-        derived_root = derive_substituted_snapshot(decision_context.root_snapshot, hypothesis)
 
-    context = dataclasses.replace(decision_context, root_snapshot=derived_root)
-    context = with_search_hypothesis(context, hypothesis)
+    context = apply_hypothesis_to_context(decision_context, hypothesis)
     return WorkItem.from_candidate_ref(context, candidate, work_kind=work_kind)

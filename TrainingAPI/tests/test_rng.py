@@ -155,8 +155,38 @@ def test_no_rng_internal_state_leaks_into_combat_response():
         inst.close()
 
 
-def _whole_run_config():
-    return {"instance_type": "whole_run", "seed": 18, "character_id": "IRONCLAD", "ascension": 0}
+def _whole_run_config(seed=18):
+    return {"instance_type": "whole_run", "seed": seed, "character_id": "IRONCLAD", "ascension": 0}
+
+
+def _pick_progression_action_id(legal):
+    # Mirrors test_e2e.py's `_pick_action_id` - avoids getting stuck picking "system"/end
+    # turn repeatedly in Combat, which would never progress a fight to its conclusion.
+    for action in legal:
+        if action.get("action_type") == "card":
+            return action["action_id"]
+    return legal[0]["action_id"]
+
+
+def _advance_to_event_choice(inst):
+    # Mirrors test_e2e.py's two-phase advance: an early event_choice (e.g. Neow's Room)
+    # can be reached BEFORE the first map_select boundary ever appears - emulate_action
+    # requires root to have captured a Map Snapshot first (see instance_whole_run.py's
+    # `parent_view.map_snapshot is None` check), so map_select must be reached first.
+    decision = inst.start_instance_response()
+    for _ in range(150):
+        if decision["masked_emulator_dto"].get("boundary") == "map_select":
+            break
+        legal = decision["masked_emulator_dto"]["legal_actions"]
+        decision = inst.commit_action(decision_point_id=decision["decision_point_id"], action_id=_pick_progression_action_id(legal))
+    else:
+        raise AssertionError("never reached map_select")
+    for _ in range(150):
+        if decision["masked_emulator_dto"].get("boundary") == "event_choice":
+            return decision
+        legal = decision["masked_emulator_dto"]["legal_actions"]
+        decision = inst.commit_action(decision_point_id=decision["decision_point_id"], action_id=_pick_progression_action_id(legal))
+    raise AssertionError("never reached event_choice")
 
 
 def _advance_to_map(inst):
@@ -190,6 +220,66 @@ def test_whole_run_positive_rng_id_rejected_at_map_boundary():
             raised = True
             assert exc.fault_kind == "rng_hypothesis_unsupported_at_boundary"
         assert raised, "map_select must reject a positive rng_id emulate_action"
+    finally:
+        inst.close()
+
+
+def test_whole_run_grandchild_inherits_parent_event_rng_plan_unchanged():
+    inst = WholeRunInstance("wr2", _whole_run_config(seed=1), branch_worker_count=2)
+    try:
+        decision = _advance_to_event_choice(inst)
+        dp0 = decision["decision_point_id"]
+        legal = decision["masked_emulator_dto"]["legal_actions"]
+        assert legal, "event_choice must offer at least one legal action"
+
+        b1 = inst.emulate_action(parent_branch_id="root", branch_id="ba", rng_id=1, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)
+        assert b1["status"] == "completed", b1
+        parent_book = inst._bookkeeping["ba"]  # noqa: SLF001
+        assert parent_book.event_rng_plan is not None
+
+        if b1["masked_emulator_dto"].get("boundary") != "event_choice" or not b1["masked_emulator_dto"].get("legal_actions"):
+            return  # event concluded on this seed's first Action - nothing deeper to branch from
+        b1_legal = b1["masked_emulator_dto"]["legal_actions"]
+        deep = inst.emulate_action(
+            parent_branch_id="ba", branch_id="bc", rng_id=1, decision_point_id=b1["decision_point_id"],
+            action_id=b1_legal[0]["action_id"], simulation_options=None,
+        )
+        assert deep["status"] == "completed", deep
+        child_book = inst._bookkeeping["bc"]  # noqa: SLF001
+        # A non-root parent INHERITS its own established plan unchanged - never
+        # re-derives/recomputes it (RL担当指示：Active Event RNG Hypothesis実装 §4).
+        assert child_book.event_rng_plan is parent_book.event_rng_plan
+    finally:
+        inst.close()
+
+
+def test_whole_run_event_rng_hypothesis_survives_parent_release_while_child_live():
+    inst = WholeRunInstance("wr3", _whole_run_config(seed=1), branch_worker_count=2)
+    try:
+        decision = _advance_to_event_choice(inst)
+        dp0 = decision["decision_point_id"]
+        legal = decision["masked_emulator_dto"]["legal_actions"]
+
+        b1 = inst.emulate_action(parent_branch_id="root", branch_id="pa", rng_id=1, decision_point_id=dp0, action_id=legal[0]["action_id"], simulation_options=None)
+        assert b1["status"] == "completed", b1
+        if b1["masked_emulator_dto"].get("boundary") != "event_choice" or not b1["masked_emulator_dto"].get("legal_actions"):
+            return
+        b1_legal = b1["masked_emulator_dto"]["legal_actions"]
+        deep = inst.emulate_action(
+            parent_branch_id="pa", branch_id="ch", rng_id=1, decision_point_id=b1["decision_point_id"],
+            action_id=b1_legal[0]["action_id"], simulation_options=None,
+        )
+        assert deep["status"] == "completed", deep
+        key = inst._bookkeeping["ch"].event_rng_plan.hypothesis_key  # noqa: SLF001
+        assert inst._event_rng_registry.is_live(key)  # noqa: SLF001
+
+        # Releasing the PARENT alone must not drop the shared registry entry while the
+        # child Branch still references the same Hypothesis Key.
+        inst.release_branches(["pa"])
+        assert inst._event_rng_registry.is_live(key)  # noqa: SLF001
+
+        inst.release_branches(["ch"])
+        assert not inst._event_rng_registry.is_live(key)  # noqa: SLF001
     finally:
         inst.close()
 

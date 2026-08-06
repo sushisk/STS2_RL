@@ -480,3 +480,27 @@ def with_search_hypothesis(
         decision_context,
         search_hypothesis_id=None if hypothesis is None else hypothesis.to_slot_value(),
     )
+
+
+def apply_hypothesis_to_context(
+    decision_context: DecisionContext,
+    hypothesis: SearchHypothesisId,
+) -> DecisionContext:
+    """Low-level primitive shared by Search Coordinator's full-grid expansion
+    (`search_coordinator._hypothesis_work_items_with_coverage`) and Training API's
+    single-Hypothesis path (`TrainingAPI.combat_rng_mapping.build_single_hypothesis_work_item`):
+    substitute `decision_context.root_snapshot` with the Method-B derived root for
+    `hypothesis` (Combat-Start Pending vs ordinary Snapshot, dispatched by
+    `root_snapshot`'s type), then stamp the Phase-2 `search_hypothesis_id` slot via
+    `with_search_hypothesis`. Both callers keep their own, differing higher-level policy
+    (multi-Hypothesis grid expansion vs one requested Hypothesis) - only this two-step
+    derive+replace dance is shared.
+    """
+    is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
+    derived_root = (
+        derive_substituted_replay_root(decision_context.root_snapshot, hypothesis)
+        if is_combat_start
+        else derive_substituted_snapshot(decision_context.root_snapshot, hypothesis)
+    )
+    context = dataclasses.replace(decision_context, root_snapshot=derived_root)
+    return with_search_hypothesis(context, hypothesis)

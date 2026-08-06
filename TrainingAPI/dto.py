@@ -41,6 +41,21 @@ OPERATIONS = frozenset(
 )
 
 # -- status ----------------------------------------------------------------------------
+#
+# Lifecycle reachability differs by instance_type, even though the vocabulary below is
+# shared across both:
+#   - Combat (`instance_combat.py`, async via `search/branch_manager.py`) can reach every
+#     status here, including STATUS_QUEUED/STATUS_RUNNING while a Branch is still being
+#     worked by the Branch Worker Pool (`get_decision`/`emulate_action` poll for it).
+#   - Whole Run (`instance_whole_run.py`) dispatches synchronously
+#     (`WholeRunWorkerPool.dispatch_choice_work_items` blocks until the whole batch is
+#     done - see that module's own docstring, "Deliberate scope reductions" item 2), so a
+#     Whole Run Branch is never observably STATUS_QUEUED/STATUS_RUNNING from the outside -
+#     only STATUS_COMPLETED/STATUS_FAULTED/STATUS_CANCELLED/STATUS_RELEASED are ever
+#     produced there.
+# Do not change this shared vocabulary (e.g. split it into implementation-specific Enums)
+# until Whole Run's own async BranchManager parity question is revisited - see the
+# completion note in the report this refactor pass came from.
 
 STATUS_COMPLETED = "completed"
 STATUS_PARTIAL = "partial"

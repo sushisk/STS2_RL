@@ -36,6 +36,18 @@ Queue out per pool, persistent per-worker runtime object, `Lease`/`LeaseRegistry
 Continuation-vs-Bootstrap routing, fault-driven lease invalidation) without importing
 or modifying a single line of `Combat/search/branch_worker_pool.py`.
 
+As of the request-id-safety/auto-respawn pass, `execute()`'s and
+`dispatch_choice_work_items()`'s stray-result-discard, timeout handling, and
+respawn-then-synthesize-fault behavior deliberately mirror
+`Combat/search/branch_worker_pool.py`'s `execute()`/`dispatch_work_items()` line-for-line
+in SHAPE, but remain independently implemented here, not imported or shared, for the same
+reasons given above. This ~40-line duplication between the two modules is accepted
+process-management duplication, not an oversight - do not "fix" it by extracting a shared
+base module without revisiting this note first (see the domain-type-coupling risk
+explained above; a shared drain/respawn helper would need to be generic over each pool's
+own `WorkItem`/`Lease`/`BranchResult` shapes, which is exactly the coupling this module was
+created to avoid).
+
 IPC purity: every dataclass that crosses a `multiprocessing.Queue` here is built from
 plain JSON-safe primitives only (str/int/float/bool/None/dict/list) - `WholeRunSession`
 methods already return plain dicts (see `run_emulator_bridge.py`), so no CLR-object
@@ -100,6 +112,47 @@ def derive_context_id(
 
 
 @dataclass(frozen=True)
+class EventRngReplayPlan:
+    """Active Event RNG Hypothesis replay plan - the 3 values a Branch (or a whole chain
+    of descendant Branches) needs to apply a previously-established Hypothesis at exactly
+    the right point during replay, consolidated into one immutable object so the
+    application site is a single value rather than 3 independently-passed-around fields.
+
+    A child Branch inherits its parent's `EventRngReplayPlan` UNCHANGED (never
+    re-derives/recomputes it) - see `TrainingAPI/instance_whole_run.py`'s
+    `WholeRunInstance.emulate_action`, non-root parent branch.
+    """
+
+    hypothesis_key: tuple
+    """The Hypothesis Key `(parent_branch_id, decision_point_id, rng_id)` this plan's
+    `override_state` was ESTABLISHED under (may belong to an ancestor Branch, for a deep
+    Branch that inherited rather than re-derived). Also the key
+    `TrainingAPI.whole_run_event_rng.EventRngHypothesisRegistry` uses for its own,
+    separate ref-counted lifecycle bookkeeping - this plan does not itself manage that
+    lifecycle, only carries the key."""
+    override_state: dict
+    """Active Event RNG Hypothesis state (`TrainingAPI/whole_run_event_rng.py`), shaped
+    exactly like `WholeRunSession.get_event_rng_state()`'s return value (a full
+    replacement across all 4 streams, not a partial one). Applied via
+    `WholeRunSession.set_event_rng_state()` exactly ONCE per replay, immediately before
+    stepping the entry at `apply_before_action_index` (see below) - never reapplied at
+    any other point."""
+    apply_before_action_index: int
+    """0-based index into the logical replay sequence `action_prefix +
+    [resolve_action_id]` at which `override_state` must be applied, once, right before
+    that entry is stepped. `index == len(action_prefix)` means "apply right before
+    `resolve_action_id`" (the common case: the Branch that FIRST establishes a
+    Hypothesis). `index < len(action_prefix)` means "apply mid-prefix-replay, before
+    `action_prefix[index]`" - the case for a DEEPER Branch whose `action_prefix` has
+    grown past the point the Hypothesis was originally established at: the override
+    must stay pinned to that ORIGINAL point so replay continues NATURALLY (consuming/
+    advancing the RNG via normal gameplay) from there, rather than being reset back to
+    the same override state before every subsequent step (RL担当指示：Active Event RNG
+    Hypothesis実装 §4 "親Branchが到達したHidden Stateから継続する" - continue from what
+    the parent reached, don't regenerate)."""
+
+
+@dataclass(frozen=True)
 class ChoiceWorkItem:
     """One Choice-branch job: reach a Choice (bootstrap or continuation) and optionally
     resolve it with `resolve_action_id`. Every field is JSON/pickle-safe.
@@ -115,26 +168,9 @@ class ChoiceWorkItem:
     target_boundary: str
     work_kind: str
     resolve_action_id: "int | None" = None
-    event_rng_override: "dict | None" = None
-    """Active Event RNG Hypothesis state (`TrainingAPI/whole_run_event_rng.py`), shaped
-    exactly like `WholeRunSession.get_event_rng_state()`'s return value (a full
-    replacement across all 4 streams, not a partial one). Applied via
-    `WholeRunSession.set_event_rng_state()` exactly ONCE per replay, immediately before
-    stepping the entry at `event_rng_override_at_index` (see below) - never reapplied at
-    any other point. `None` (the default) means no override - unchanged behavior."""
-    event_rng_override_at_index: "int | None" = None
-    """0-based index into the logical replay sequence `action_prefix +
-    [resolve_action_id]` at which `event_rng_override` must be applied, once, right
-    before that entry is stepped. `index == len(action_prefix)` means "apply right
-    before `resolve_action_id`" (the common case: the Branch that FIRST establishes a
-    Hypothesis). `index < len(action_prefix)` means "apply mid-prefix-replay, before
-    `action_prefix[index]`" - the case for a DEEPER Branch whose `action_prefix` has
-    grown past the point the Hypothesis was originally established at: the override
-    must stay pinned to that ORIGINAL point so replay continues NATURALLY (consuming/
-    advancing the RNG via normal gameplay) from there, rather than being reset back to
-    the same override state before every subsequent step (RL担当指示：Active Event RNG
-    Hypothesis実装 §4 "親Branchが到達したHidden Stateから継続する" - continue from what
-    the parent reached, don't regenerate)."""
+    event_rng_plan: "EventRngReplayPlan | None" = None
+    """`None` means no Active Event RNG Hypothesis override applies to this replay
+    (unchanged behavior). See `EventRngReplayPlan` for field-level detail."""
     discover_prefix: bool = False
     """When True (only meaningful for the very first `establish` job of a branch
     attempt), the worker DRIVES FORWARD from ChooseRoom using the same policy-free
@@ -362,9 +398,10 @@ def _bootstrap_reach(session, work_item: ChoiceWorkItem) -> "list[int] | None":
     session.choose_room(work_item.room_id)
 
     if not work_item.discover_prefix:
+        plan = work_item.event_rng_plan
         for index, action_id in enumerate(work_item.action_prefix):
-            if work_item.event_rng_override is not None and work_item.event_rng_override_at_index == index:
-                _apply_event_rng_override(session, work_item.event_rng_override)
+            if plan is not None and plan.apply_before_action_index == index:
+                _apply_event_rng_override(session, plan.override_state)
             session.step(action_id)
         return None
 
@@ -506,21 +543,22 @@ class _WorkerRuntime:
                     },
                 )
 
-            if work_item.event_rng_override is not None and work_item.event_rng_override_at_index == len(work_item.action_prefix):
+            plan = work_item.event_rng_plan
+            if plan is not None and plan.apply_before_action_index == len(work_item.action_prefix):
                 # Active Event RNG Hypothesis application (RL担当指示：Active Event RNG
                 # Hypothesis実装 §4 step 4) - the "apply right before resolve_action_id"
                 # case (index == len(action_prefix)); the "apply mid-prefix-replay" case
                 # is handled inside `_bootstrap_reach` instead, and must NOT be reapplied
-                # here (see `ChoiceWorkItem.event_rng_override_at_index`'s docstring).
+                # here (see `EventRngReplayPlan.apply_before_action_index`'s docstring).
                 # Applied AFTER reach/boundary confirmation, BEFORE the given Action is
                 # resolved/stepped below. A mismatched EventId or absent event raises
                 # inside set_event_rng_state()/SetEventRngState(), which the outer except
                 # below normalizes into a fault result rather than crashing the worker.
                 if reach.boundary != "event_choice":
                     raise RuntimeError(
-                        f"event_rng_override given but boundary is {reach.boundary!r}, not 'event_choice'"
+                        f"event_rng_plan given but boundary is {reach.boundary!r}, not 'event_choice'"
                     )
-                _apply_event_rng_override(self.session, work_item.event_rng_override)
+                _apply_event_rng_override(self.session, plan.override_state)
 
             if work_item.resolve_action_id is None:
                 lease = Lease(
@@ -638,9 +676,12 @@ def _worker_main(worker_slot: Any, worker_generation: int, repo_root: "str | Non
 
 
 class WorkerDiedError(RuntimeError):
-    """A worker's OS process is no longer alive - raised instead of hanging on a Queue
-    read forever, so a genuine process death is detected promptly rather than only after
-    `request_timeout_s` elapses.
+    """A worker's OS process is no longer alive - used internally by
+    `WholeRunWorkerPool.is_worker_alive`/respawn bookkeeping. Not raised across an
+    `execute`/`dispatch_choice_work_items` call boundary - a dead/hung worker surfaces to
+    callers as a normal `BRANCH_STATUS_FAULT` result (`fault_kind="task_timeout"` or
+    `"worker_process_crash"`), matching Combat's `search/branch_worker_pool.py` contract,
+    never as an uncaught exception.
     """
 
 
@@ -651,6 +692,30 @@ class _WorkerHandle:
     process: Any
     in_queue: Any
     pid: "int | None" = None
+
+
+def _fault_result(
+    work_item: ChoiceWorkItem,
+    execution_mode: str,
+    slot: Any,
+    worker_generation: "int | None",
+    exc: BaseException,
+    *,
+    fault_kind: str,
+) -> BranchResult:
+    return BranchResult(
+        status=BRANCH_STATUS_FAULT,
+        work_item=work_item,
+        execution_mode=execution_mode,
+        worker_slot=slot,
+        worker_generation=worker_generation,
+        pid=None,
+        diagnostics={
+            "fault_kind": fault_kind,
+            "exception_type": type(exc).__name__,
+            "message": str(exc),
+        },
+    )
 
 
 class WholeRunWorkerPool:
@@ -763,6 +828,12 @@ class WholeRunWorkerPool:
         if old_handle is not None and old_handle.process.is_alive():
             old_handle.process.terminate()
             old_handle.process.join(timeout=5)
+        if old_handle is not None:
+            # The old in_queue is now permanently abandoned (its reader process is dead) -
+            # close it and cancel its background feeder thread's join so interpreter exit
+            # never blocks trying to flush a queue nobody will ever read again.
+            old_handle.in_queue.close()
+            old_handle.in_queue.cancel_join_thread()
         self._spawn_worker(slot, generation=old_generation + 1)
         self._await_ready([slot])
         if lease_registry is not None:
@@ -777,31 +848,43 @@ class WholeRunWorkerPool:
         handle.in_queue.put((request_id, "choice", request))
         return request_id
 
-    def _poll_result(self, request_id: int, *, watch_slots: "list[Any] | None" = None):
-        """Waits for `request_id`'s result, polling in short slices so a dead worker
-        process is detected (`WorkerDiedError`) promptly instead of only after the full
-        `request_timeout_s` elapses on a `Queue.get` that will never be satisfied.
-        """
+    def execute(
+        self, slot: Any, request: WorkerExecutionRequest, *, lease_registry: "LeaseRegistry | None" = None
+    ) -> BranchResult:
+        stale_generation = self._workers[slot].worker_generation
+        request_id = self._submit(slot, request)
         poll_s = min(1.0, self.request_timeout_s)
         waited = 0.0
         while waited < self.request_timeout_s:
             try:
-                return self._result_queue.get(timeout=poll_s)
+                received_id, _kind, result = self._result_queue.get(timeout=poll_s)
             except queue.Empty:
                 waited += poll_s
-                for slot in watch_slots or []:
-                    if not self.is_worker_alive(slot):
-                        raise WorkerDiedError(f"worker slot {slot!r} (pid={self.worker_pid(slot)}) is no longer alive")
-        raise TimeoutError(f"timed out waiting for worker request {request_id}")
-
-    def execute(self, slot: Any, request: WorkerExecutionRequest) -> BranchResult:
-        request_id = self._submit(slot, request)
-        received_id, _kind, result = self._poll_result(request_id, watch_slots=[slot])
-        if received_id != request_id:
-            raise RuntimeError(
-                "WholeRunWorkerPool.execute() received an out-of-order result; use dispatch_choice_work_items() for batches"
-            )
-        return result
+                if not self.is_worker_alive(slot):
+                    self.respawn_worker(slot, lease_registry=lease_registry)
+                    return _fault_result(
+                        request.work_item,
+                        request.execution_mode,
+                        slot,
+                        stale_generation,
+                        WorkerDiedError(f"worker slot {slot!r} is no longer alive"),
+                        fault_kind="worker_process_crash",
+                    )
+                continue
+            if received_id == request_id:
+                return result
+            # Stray/late result from an old (respawned-away or previously timed-out)
+            # request - discard rather than raise, matching Combat's contract.
+            continue
+        self.respawn_worker(slot, lease_registry=lease_registry)
+        return _fault_result(
+            request.work_item,
+            request.execution_mode,
+            slot,
+            stale_generation,
+            TimeoutError(f"timed out waiting for worker request {request_id}"),
+            fault_kind="task_timeout",
+        )
 
     def dispatch_choice_work_items(
         self, work_items: list[ChoiceWorkItem], lease_registry: LeaseRegistry, *, holder_slots: "dict[str, Any] | None" = None
@@ -820,9 +903,13 @@ class WholeRunWorkerPool:
         self._next_request_id += 1
         request_id = self._next_request_id
         handle.in_queue.put((request_id, "explore", request))
-        received_id, kind, payload = self._result_queue.get(timeout=self.request_timeout_s)
-        if received_id != request_id:
-            raise RuntimeError("WholeRunWorkerPool.explore() received an out-of-order result")
+        while True:
+            received_id, kind, payload = self._result_queue.get(timeout=self.request_timeout_s)
+            if received_id == request_id:
+                break
+            # Stray/late result targeting a stale request_id - discard and keep waiting
+            # for the one this call actually issued.
+            continue
         if kind == "explore_fault":
             exc_type, msg = payload
             raise RuntimeError(f"explore() failed on worker {slot!r}: {exc_type}: {msg}")
@@ -893,6 +980,7 @@ def dispatch_choice_work_items(
 
     pending: dict[int, ChoiceWorkItem] = {}
     pending_slots: dict[int, Any] = {}
+    pending_execution_modes: dict[int, str] = {}
     for work_item in work_items:
         holder_slot = (holder_slots or {}).get(work_item.work_id)
         request, slot, next_bootstrap_index = _route_choice_work_item(
@@ -906,14 +994,44 @@ def dispatch_choice_work_items(
         request_id = worker_pool._submit(slot, request)  # noqa: SLF001
         pending[request_id] = work_item
         pending_slots[request_id] = slot
+        pending_execution_modes[request_id] = request.execution_mode
 
     results_by_work_id: dict[str, BranchResult] = {}
-    for _ in pending:
-        request_id, _kind, result = worker_pool._poll_result(  # noqa: SLF001
-            0, watch_slots=list(pending_slots.values())
-        )
+    remaining_request_ids: set[int] = set(pending)
+    while remaining_request_ids:
+        try:
+            request_id, _kind, result = worker_pool._result_queue.get(  # noqa: SLF001
+                timeout=worker_pool.request_timeout_s
+            )
+        except queue.Empty:
+            # Every request still outstanding at this point is hung - respawn each
+            # distinct slot exactly once and synthesize a fault result for each of its
+            # still-pending requests, rather than waiting indefinitely.
+            hung_slots = {pending_slots[rid] for rid in remaining_request_ids}
+            for hung_slot in hung_slots:
+                stale_generation = worker_pool.worker_generations.get(hung_slot)
+                worker_pool.respawn_worker(hung_slot, lease_registry=lease_registry)
+                for rid in list(remaining_request_ids):
+                    if pending_slots[rid] != hung_slot:
+                        continue
+                    work_item = pending[rid]
+                    results_by_work_id[work_item.work_id] = _fault_result(
+                        work_item,
+                        pending_execution_modes[rid],
+                        hung_slot,
+                        stale_generation,
+                        TimeoutError(f"timed out waiting for worker request {rid}"),
+                        fault_kind="task_timeout",
+                    )
+                    remaining_request_ids.discard(rid)
+            continue
+        if request_id not in remaining_request_ids:
+            # Stray/late result: either a genuine duplicate, or a response from a worker
+            # generation we already gave up on and respawned away. Discard.
+            continue
         work_item = pending[request_id]
         results_by_work_id[work_item.work_id] = result
+        remaining_request_ids.discard(request_id)
 
     results: list[BranchResult] = []
     for work_item in work_items:

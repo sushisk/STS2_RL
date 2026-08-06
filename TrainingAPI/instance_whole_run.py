@@ -35,7 +35,10 @@ final report rather than silently:
    whole-run Branch simulation to be interruptible mid-flight (e.g. a very long Room
    auto-play), that would need an async submit/poll layer mirroring
    `search/branch_manager.py`, built for `WholeRunWorkerPool` - out of scope for this
-   pass, flagged rather than silently done differently.
+   pass, flagged rather than silently done differently. See `TrainingAPI/dto.py`'s
+   "-- status --" section for the formal statement of which statuses each instance_type
+   can reach - `STATUS_QUEUED`/`STATUS_RUNNING` are declared there for shared vocabulary
+   but are never produced by this module.
 3. Chaining `emulate_action` PAST a newly-reached `map_select` boundary is only
    supported from **root** (which can cheaply `save_state()` in-process); from a Branch,
    landing on `map_select` marks that Branch `chain_blocked` and a further
@@ -46,12 +49,15 @@ final report rather than silently:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Optional
 
 import run_emulator_bridge as bridge
 from whole_run_session import EVENT_CHOICE, MAP_SELECT, RUN_TERMINAL, WholeRunSession
 from worker_pool import (
+    BranchResult,
     ChoiceWorkItem,
+    EventRngReplayPlan,
     LeaseRegistry as WRLeaseRegistry,
     WORK_KIND_SUB_BRANCH,
     WholeRunWorkerPool,
@@ -90,23 +96,26 @@ def _map_rooms_as_legal_actions(session: WholeRunSession) -> list:
     ]
 
 
-class _View:
-    __slots__ = (
-        "legal_actions_raw",
-        "boundary",
-        "observation",
-        "room_context",
-        "map_snapshot",
-        "room_id",
-        "action_prefix",
-        "choice_type",
-        "chain_blocked",
-        "event_rng_state",
-    )
+def _choice_type_from_boundary(boundary: str) -> str:
+    """The one place Observation's `"map_select"` boundary is translated into the
+    internal choice_type `"map"` - every other boundary passes through unchanged. Does
+    not touch the external DTO's own boundary string, only this module's internal
+    routing vocabulary."""
+    return "map" if boundary == MAP_SELECT else boundary
 
-    def __init__(self, **kwargs) -> None:
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+
+@dataclass(frozen=True)
+class _View:
+    legal_actions_raw: list
+    boundary: str
+    observation: dict
+    room_context: dict
+    map_snapshot: "str | None"
+    room_id: "int | None"
+    action_prefix: tuple
+    choice_type: str
+    chain_blocked: bool
+    event_rng_state: "dict | None"
 
     def resolve_action_id(self, public_action_id: str) -> int:
         try:
@@ -118,6 +127,37 @@ class _View:
         return index
 
 
+def _build_child_view(parent_view: _View, chosen_action_id: int, branch_result: BranchResult) -> _View:
+    """Builds the `_View` a Branch reaches after `branch_result` resolves one Action from
+    `parent_view` - the single place Map-transition vs normal-Action-transition shape
+    differences (`legal_actions` source, `room_id`/`action_prefix` reset-vs-append) are
+    decided, done exactly once each (see `worker_pool.py`'s `_WorkerRuntime.execute`, map
+    branch, for why Map's `step_result` shape differs from every other choice type's).
+    """
+    step = branch_result.step
+    new_boundary = step.step_result["observation"]["boundary"]
+    if parent_view.choice_type == "map":
+        new_legal = step.step_result["room_enter_result"]["legal_actions"]
+        new_room_id = chosen_action_id
+        new_action_prefix: tuple = ()
+    else:
+        new_legal = step.step_result["legal_actions"]
+        new_room_id = parent_view.room_id
+        new_action_prefix = parent_view.action_prefix + (chosen_action_id,)
+    return _View(
+        legal_actions_raw=new_legal,
+        boundary=new_boundary,
+        observation=step.step_result["observation"],
+        room_context=step.step_result["room_context"],
+        map_snapshot=parent_view.map_snapshot,
+        room_id=new_room_id,
+        action_prefix=new_action_prefix,
+        choice_type=_choice_type_from_boundary(new_boundary),
+        chain_blocked=(new_boundary == MAP_SELECT),
+        event_rng_state=None,
+    )
+
+
 class _BranchBookkeeping:
     __slots__ = (
         "parent_public_id",
@@ -127,9 +167,7 @@ class _BranchBookkeeping:
         "status",
         "terminal",
         "rng_id",
-        "event_rng_key",
-        "event_rng_override",
-        "event_rng_override_at_index",
+        "event_rng_plan",
     )
 
     def __init__(self, parent_public_id: str, branch_log: list, history: HistoryBuilder, rng_id: int) -> None:
@@ -141,15 +179,9 @@ class _BranchBookkeeping:
         self.status = STATUS_COMPLETED
         self.terminal = False
         # Set only for a Branch created (or inherited) under an Active Event RNG
-        # Hypothesis - `event_rng_key` is the Hypothesis Key `(parent_branch_id,
-        # decision_point_id, rng_id)` it was ESTABLISHED under (may belong to an
-        # ancestor, for a deep Branch that inherited rather than re-derived - see
-        # `WholeRunInstance.emulate_action`); `event_rng_override`/
-        # `event_rng_override_at_index` are the exact values to pass through unchanged
-        # on any further `emulate_action` extending this Branch.
-        self.event_rng_key: "tuple | None" = None
-        self.event_rng_override: "dict | None" = None
-        self.event_rng_override_at_index: "int | None" = None
+        # Hypothesis - may belong to an ancestor's plan unchanged, for a deep Branch
+        # that inherited rather than re-derived (see `WholeRunInstance.emulate_action`).
+        self.event_rng_plan: "EventRngReplayPlan | None" = None
 
 
 class WholeRunInstance:
@@ -216,8 +248,8 @@ class WholeRunInstance:
             room_context=room_context,
             map_snapshot=self._map_snapshot,
             room_id=self._room_id,
-            action_prefix=list(self._action_prefix),
-            choice_type=("map" if boundary == MAP_SELECT else boundary),
+            action_prefix=tuple(self._action_prefix),
+            choice_type=_choice_type_from_boundary(boundary),
             chain_blocked=False,
             event_rng_state=event_rng_state,
         )
@@ -370,23 +402,25 @@ class WholeRunInstance:
         # Hypothesis Key per contract §3: (parent_branch_id, decision_point_id, rng_id).
         # root parents ESTABLISH (or, for a repeat call with the same Key, re-obtain via
         # memoization) a fresh Hypothesis derived from the CURRENT Active Event's own
-        # RNG state. Non-root parents INHERIT their own already-established Hypothesis
+        # RNG state. Non-root parents INHERIT their own already-established plan
         # unchanged (§4: "新しいHypothesisを再生成しない...親Branchが到達したHidden
         # Stateから継続する") - the boundary check above guarantees the parent Branch
         # itself was only ever created under an Active Event Hypothesis, so
-        # `parent_book.event_rng_key` is always set here.
+        # `parent_book.event_rng_plan` is always set here.
         if parent_branch_id == ROOT_BRANCH_ID:
             event_rng_key = (parent_branch_id, decision_point_id, rng_id)
             assert parent_view.event_rng_state is not None
             override_state = self._event_rng_registry.get_or_create(event_rng_key, parent_view.event_rng_state, rng_id)
-            override_at_index = len(parent_view.action_prefix)
+            plan = EventRngReplayPlan(
+                hypothesis_key=event_rng_key,
+                override_state=override_state,
+                apply_before_action_index=len(parent_view.action_prefix),
+            )
         else:
             parent_book = self._bookkeeping[parent_branch_id]
-            assert parent_book.event_rng_key is not None, "non-root parent must have its own established Hypothesis Key"
-            event_rng_key = parent_book.event_rng_key
-            override_state = parent_book.event_rng_override
-            override_at_index = parent_book.event_rng_override_at_index
-        self._event_rng_registry.register_branch(event_rng_key, branch_id)
+            assert parent_book.event_rng_plan is not None, "non-root parent must have its own established Hypothesis plan"
+            plan = parent_book.event_rng_plan
+        self._event_rng_registry.register_branch(plan.hypothesis_key, branch_id)
 
         context_id = wr_derive_context_id(
             map_snapshot=parent_view.map_snapshot,
@@ -406,8 +440,7 @@ class WholeRunInstance:
             target_boundary=parent_view.boundary,
             work_kind=WORK_KIND_SUB_BRANCH,
             resolve_action_id=chosen["action_id"],
-            event_rng_override=override_state,
-            event_rng_override_at_index=override_at_index,
+            event_rng_plan=plan,
         )
 
         parent_history = self._root_history if parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[parent_branch_id].history
@@ -415,16 +448,14 @@ class WholeRunInstance:
         depth = len(parent_log)
         branch_log = parent_log + [{"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": rng_id}]
         book = _BranchBookkeeping(parent_branch_id, branch_log, parent_history.fork(), rng_id)
-        book.event_rng_key = event_rng_key
-        book.event_rng_override = override_state
-        book.event_rng_override_at_index = override_at_index
+        book.event_rng_plan = plan
         self._bookkeeping[branch_id] = book
 
         try:
             results = self._pool.dispatch_choice_work_items([work_item], self._lease_registry)
         except TimeoutError as exc:
             book.status = STATUS_FAULTED
-            self._event_rng_registry.release_branch(event_rng_key, branch_id)
+            self._event_rng_registry.release_branch(plan.hypothesis_key, branch_id)
             return {
                 "status": STATUS_FAULTED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id,
                 "error": str(exc), "fault_kind": FAULT_TASK_TIMEOUT,
@@ -432,7 +463,7 @@ class WholeRunInstance:
         result = results[0]
         if result.status != "success":
             book.status = STATUS_FAULTED
-            self._event_rng_registry.release_branch(event_rng_key, branch_id)
+            self._event_rng_registry.release_branch(plan.hypothesis_key, branch_id)
             diagnostics = result.diagnostics or {}
             return {
                 "status": STATUS_FAULTED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id,
@@ -461,34 +492,8 @@ class WholeRunInstance:
                 "masked_emulator_dto": build_masked_emulator_dto({"run_terminal": True}),
             }
 
-        chain_blocked = new_boundary == MAP_SELECT
-        if parent_view.choice_type == "map":
-            # Map's "step_result" shape is `room_enter_result_to_dict()`'s, not the
-            # ordinary StepResult shape - it carries `legal_actions` under
-            # `room_enter_result`, not at the top level (see `worker_pool.py`'s
-            # `_WorkerRuntime.execute`, map branch).
-            new_legal = step.step_result["room_enter_result"]["legal_actions"]
-        else:
-            new_legal = step.step_result["legal_actions"]
-        if parent_view.choice_type == "map":
-            new_room_id = chosen["action_id"]
-            new_action_prefix: list = []
-        else:
-            new_room_id = parent_view.room_id
-            new_action_prefix = list(parent_view.action_prefix) + [chosen["action_id"]]
-        new_view = _View(
-            legal_actions_raw=new_legal,
-            boundary=new_boundary,
-            observation=step.step_result["observation"],
-            room_context=new_room_context,
-            map_snapshot=parent_view.map_snapshot,
-            room_id=new_room_id,
-            action_prefix=new_action_prefix,
-            choice_type=("map" if new_boundary == MAP_SELECT else new_boundary),
-            chain_blocked=chain_blocked,
-            event_rng_state=None,
-        )
-        # NOTE: deliberately does NOT release_branch()/clear book.event_rng_key here
+        new_view = _build_child_view(parent_view, chosen["action_id"], result)
+        # NOTE: deliberately does NOT release_branch()/clear book.event_rng_plan here
         # even when new_boundary != EVENT_CHOICE (event concluded, moved to Map/Reward/
         # Shop/Rest/whatever) - see the RUN_TERMINAL branch's comment above for why
         # (shared-Hypothesis fairness with sibling Branches). This Branch's OWN resulting
@@ -558,11 +563,9 @@ class WholeRunInstance:
             raise RequestRejected("root cannot be Cancelled/Released/status-queried as a Branch")
 
     def _release_event_rng_reference(self, branch_id: str, book: "_BranchBookkeeping") -> None:
-        if book.event_rng_key is not None:
-            self._event_rng_registry.release_branch(book.event_rng_key, branch_id)
-            book.event_rng_key = None
-            book.event_rng_override = None
-            book.event_rng_override_at_index = None
+        if book.event_rng_plan is not None:
+            self._event_rng_registry.release_branch(book.event_rng_plan.hypothesis_key, branch_id)
+            book.event_rng_plan = None
 
     def _cancel_and_release_all_branches(self) -> None:
         # Keep each bookkeeping ENTRY (status flipped to released) rather than deleting

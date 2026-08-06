@@ -37,6 +37,7 @@ from search.rng_hypothesis import (  # noqa: E402
     HYPOTHESIS_MODE_INDEPENDENT,
     HYPOTHESIS_MODE_STANDARD,
     SearchHypothesisId,
+    apply_hypothesis_to_context,
     build_grid,
     compute_public_multiset_for_combat_start,
     compute_public_multiset,
@@ -254,6 +255,45 @@ def test_derive_substituted_snapshot_restore_round_trip_changes_draw_behavior_on
     original_defend = next(a for a in original_after._cached_legal_actions if a["action_type"] == "card")  # noqa: SLF001
     original_after = original_session.step(original_after, original_defend)
     assert [c["id"] for c in original_after.engine_state["drawPile"]] == original_order
+
+
+def test_apply_hypothesis_to_context_matches_manual_replace_plus_with_search_hypothesis():
+    context, _pipeline = _context_and_pipeline()
+    original_order = _pile_card_ids(context.root_snapshot.Player.DrawPile)
+    hypothesis = SearchHypothesisId(
+        rng=_rng(11),
+        ordered_draw_pile_card_ids=tuple(reversed(original_order)),
+        hypothesis_index=11,
+    )
+
+    got = apply_hypothesis_to_context(context, hypothesis)
+
+    expected_root = derive_substituted_snapshot(context.root_snapshot, hypothesis)
+    expected = with_search_hypothesis(dataclasses.replace(context, root_snapshot=expected_root), hypothesis)
+    assert got == expected
+
+
+def test_apply_hypothesis_to_context_uses_replay_root_branch_for_combat_start():
+    spec = _simple_spec(
+        hand=["STRIKE_IRONCLAD"],
+        draw_pile=["BASH", "DEFEND_IRONCLAD", "STRIKE_IRONCLAD"],
+        discard_pile=["DEFEND_IRONCLAD"],
+    )
+    root = CombatStartReplayRoot(scenario_spec=spec)
+    base_context, _pipeline = _context_and_pipeline()
+    context = dataclasses.replace(base_context, root_snapshot=root)
+    hypothesis = SearchHypothesisId(
+        rng=_rng(23),
+        ordered_draw_pile_card_ids=("STRIKE_IRONCLAD", "BASH", "DEFEND_IRONCLAD"),
+        hypothesis_index=23,
+    )
+
+    got = apply_hypothesis_to_context(context, hypothesis)
+
+    expected_root = derive_substituted_replay_root(root, hypothesis)
+    expected = with_search_hypothesis(dataclasses.replace(context, root_snapshot=expected_root), hypothesis)
+    assert got == expected
+    assert got.root_snapshot.scenario_spec["draw_pile"] == ["STRIKE_IRONCLAD", "BASH", "DEFEND_IRONCLAD"]
 
 
 def test_build_grid_reuses_same_hypothesis_set_for_each_root_action():

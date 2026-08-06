@@ -51,11 +51,11 @@ from search.belief_coverage import (
 from search.main_loop import SearchEvaluationFailure, SearchStrategy
 from search.main_loop import MainLoopState
 from search.rng_hypothesis import (
+    apply_hypothesis_to_context,
     build_grid,
     build_grid_for_combat_start,
     consume_check,
     generate_belief_hypotheses,
-    with_search_hypothesis,
 )
 
 
@@ -294,9 +294,7 @@ def _hypothesis_work_items_with_coverage(
     work_items: list[WorkItem] = []
     for cell in cells:
         root_index = root_index_by_id[id(cell.root_action)]
-        derived_root = cell.derived_replay_root if is_combat_start else cell.derived_snapshot
-        context = dataclasses.replace(decision_context, root_snapshot=derived_root)
-        context = with_search_hypothesis(context, cell.hypothesis)
+        context = apply_hypothesis_to_context(decision_context, cell.hypothesis)
         work_items.append(
             WorkItem.from_candidate_ref(
                 context,

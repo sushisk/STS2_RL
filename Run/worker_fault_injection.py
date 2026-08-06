@@ -10,9 +10,11 @@ Two distinct fault classes are exercised, matching the instruction's "Worker„ÅåÁ
   possibly inconsistent after a fault mid-Choice).
 - OS-level worker death: the process itself is terminated (deliberately here, to simulate a
   genuine crash - e.g. a fatal CLR-level exception that Python's own exception handling
-  cannot catch, unlike the in-worker case above). `WholeRunWorkerPool.is_worker_alive()` /
-  `_poll_result()`'s `WorkerDiedError` detect this without hanging for the full
-  `request_timeout_s`.
+  cannot catch, unlike the in-worker case above). `WholeRunWorkerPool.is_worker_alive()`
+  detects this (polled in short slices inside `execute()`/`dispatch_choice_work_items()`)
+  without hanging for the full `request_timeout_s`, and now auto-respawns + returns a
+  synthesized `BRANCH_STATUS_FAULT` result rather than raising `WorkerDiedError` out to the
+  caller.
 
 In both cases, `WholeRunWorkerPool.respawn_worker(slot, lease_registry)` terminates the old
 process (if still alive), spawns a fresh one with `worker_generation + 1`, and invalidates
