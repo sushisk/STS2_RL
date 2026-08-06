@@ -1,13 +1,4 @@
-"""Minimal asyncio TCP entry point for the STS2_RL API.
-
-The wire format is UTF-8 newline-delimited JSON (one JSON object per line). API
-request objects are passed unchanged to :class:`API.server.RLApiServer`. A small
-transport-level ping is available before loading the Emulator:
-
-    {"transport_operation": "ping"}
-
-which returns ``{"transport_operation": "pong"}``.
-"""
+"""Asyncio TCP entry point for the STS2_RL API."""
 
 from __future__ import annotations
 
@@ -19,6 +10,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from API.faults import fault_response
+
 JsonObject = dict[str, Any]
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
@@ -26,12 +19,7 @@ DEFAULT_MAX_MESSAGE_BYTES = 1024 * 1024
 
 
 class AsyncioTcpServer:
-    """Serve newline-delimited JSON requests over asyncio TCP.
-
-    ``handler`` is deliberately synchronous because the existing RL dispatcher is
-    synchronous and owns process/CLR-backed state. Requests from all connections are
-    serialized so that one ``RLApiServer`` is never entered concurrently.
-    """
+    """Serve newline-delimited JSON requests to a synchronous handler."""
 
     def __init__(
         self,
@@ -53,9 +41,7 @@ class AsyncioTcpServer:
         self._port = port
         self._max_message_bytes = max_message_bytes
         self._server: asyncio.AbstractServer | None = None
-        self._request_lock = asyncio.Lock()
         self._client_tasks: set[asyncio.Task[None]] = set()
-        self._client_writers: set[asyncio.StreamWriter] = set()
 
     @property
     def bound_port(self) -> int:
@@ -87,16 +73,10 @@ class AsyncioTcpServer:
             server.close()
             await server.wait_closed()
 
-        for writer in list(self._client_writers):
-            writer.close()
-        for writer in list(self._client_writers):
-            try:
-                await writer.wait_closed()
-            except (ConnectionError, OSError):
-                pass
-
         current = asyncio.current_task()
         tasks = [task for task in self._client_tasks if task is not current]
+        for task in tasks:
+            task.cancel()
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -114,42 +94,14 @@ class AsyncioTcpServer:
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
     ) -> None:
-        self._client_writers.add(writer)
         try:
-            while True:
-                try:
-                    line = await reader.readline()
-                except (ValueError, asyncio.LimitOverrunError):
-                    await self._write_response(
-                        writer,
-                        {
-                            "transport_error": "message_too_large",
-                            "max_message_bytes": self._max_message_bytes,
-                        },
-                    )
-                    return
-
-                if not line:
-                    return
-                if len(line) > self._max_message_bytes:
-                    await self._write_response(
-                        writer,
-                        {
-                            "transport_error": "message_too_large",
-                            "max_message_bytes": self._max_message_bytes,
-                        },
-                    )
-                    return
-
+            while line := await self._read_line(reader, writer):
                 try:
                     payload = json.loads(line)
                 except (UnicodeDecodeError, json.JSONDecodeError) as exc:
                     await self._write_response(
                         writer,
-                        {
-                            "transport_error": "invalid_json",
-                            "error": str(exc),
-                        },
+                        {"transport_error": "invalid_json", "error": str(exc)},
                     )
                     continue
 
@@ -166,52 +118,58 @@ class AsyncioTcpServer:
                 if payload.get("transport_operation") == "ping":
                     response: JsonObject = {"transport_operation": "pong"}
                 else:
-                    async with self._request_lock:
-                        try:
-                            response = self._handler(payload)
-                        except BaseException as exc:  # noqa: BLE001
-                            response = self._fault_response(payload, exc)
+                    try:
+                        response = self._handler(payload)
+                    except Exception as exc:
+                        response = fault_response(payload, exc)
                     if not isinstance(response, dict):
-                        response = self._fault_response(
+                        response = fault_response(
                             payload,
                             TypeError("RL handler returned a non-dict response"),
                         )
 
                 await self._write_response(writer, response)
         finally:
-            self._client_writers.discard(writer)
             writer.close()
             try:
                 await writer.wait_closed()
             except (ConnectionError, OSError):
                 pass
 
+    async def _read_line(
+        self,
+        reader: asyncio.StreamReader,
+        writer: asyncio.StreamWriter,
+    ) -> bytes:
+        try:
+            line = await reader.readline()
+        except (ValueError, asyncio.LimitOverrunError):
+            line = None
+        if line is not None and len(line) <= self._max_message_bytes:
+            return line
+        await self._write_response(
+            writer,
+            {
+                "transport_error": "message_too_large",
+                "max_message_bytes": self._max_message_bytes,
+            },
+        )
+        return b""
+
     @staticmethod
     async def _write_response(
         writer: asyncio.StreamWriter,
         response: JsonObject,
     ) -> None:
-        encoded = json.dumps(
-            response,
-            ensure_ascii=False,
-            separators=(",", ":"),
-        ).encode("utf-8") + b"\n"
-        writer.write(encoded)
+        writer.write(
+            json.dumps(
+                response,
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            + b"\n"
+        )
         await writer.drain()
-
-    @staticmethod
-    def _fault_response(payload: JsonObject, exc: BaseException) -> JsonObject:
-        response: JsonObject = {
-            "schema_version": payload.get("schema_version", "0.5"),
-            "request_id": payload.get("request_id"),
-            "operation": payload.get("operation"),
-            "status": "faulted",
-            "error": f"{type(exc).__name__}: {exc}",
-            "fault_kind": "emulator_error",
-        }
-        if payload.get("instance_id") is not None:
-            response["instance_id"] = payload["instance_id"]
-        return response
 
 
 async def run_rl_server(
@@ -259,7 +217,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     try:
         asyncio.run(
@@ -270,9 +228,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
     except KeyboardInterrupt:
-        return 0
-    return 0
+        pass
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
