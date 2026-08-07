@@ -7,7 +7,7 @@ processes, so there is never a second `GameInstance` construction in this proces
 Branches are dispatched through the existing, already-tested
 `Combat/search/branch_manager.BranchManager` + `Combat/search/branch_worker_pool.
 BranchWorkerPool` (Phase N) - this module adds no new Worker/Lease/Respawn machinery,
-only the mapping between v0.5's wire vocabulary (Training-assigned `branch_id`,
+only the mapping between v0.7's wire vocabulary (Training-assigned `branch_id`,
 `decision_point_id`, `rng_id`) and BranchManager's own (RL-assigned Branch id,
 DecisionContext, Hypothesis index).
 
@@ -309,11 +309,12 @@ class CombatInstance:
         )
 
     def _validate_emulate_actions_item(self, item: dict) -> "_AdmittedItem":
-        """Phase A (Admission validation) for one ``emulate_actions`` batch item -
-        performs every check `emulate_action` performs before it mutates any registry,
-        without registering the ``branch_id`` or touching the RNG hypothesis table.
-        Raises `RequestRejected` on any invalid item; callers must not apply Phase B
-        for ANY item in the batch if this raises for even one."""
+        """Phase A admission validation for one ``emulate_actions`` item.
+
+        Every parent must already exist and be usable before the batch starts. Because
+        Phase A validates the whole batch before any Branch is registered, an item cannot
+        use a Branch created by another item in the same batch as its parent.
+        """
         parent_branch_id = item["parent_branch_id"]
         branch_id = item["branch_id"]
         rng_id = item["rng_id"]
@@ -361,13 +362,13 @@ class CombatInstance:
         )
 
     def emulate_actions(self, *, items: list, simulation_options: Optional[dict]) -> dict:
-        """Batch counterpart of `emulate_action` (DTO v0.7). Every item is validated
-        (Phase A: Admission validation) before ANY Branch is registered or submitted; if
-        even one item is invalid the whole batch is rejected and no Branch is created.
-        Only once every item passes admission does Phase B register branch_ids, build
-        WorkItems, `submit()` them (one call per distinct parent, mirroring
-        `emulate_action`), flip them all to `queued`, and run exactly one
-        `BranchManager.poll()` so the Worker Pool executes them in parallel."""
+        """Execute a DTO v0.7 batch with all-or-nothing admission.
+
+        Phase A validates every item before any mutation. Therefore every non-root
+        ``parent_branch_id`` must identify a Branch that already existed at batch start.
+        Phase B registers and queues every WorkItem before exactly one blocking
+        ``BranchManager.poll()`` call, then returns terminal per-Branch outcomes.
+        """
         stop_condition = (simulation_options or {}).get("stop_condition")
         if stop_condition not in (None, "next_decision"):
             raise RequestRejected(f"stop_condition {stop_condition!r} is not supported for combat instances")
@@ -433,18 +434,26 @@ class CombatInstance:
             pending.append((admitted_item, internal_id, book, branch_log))
 
         # Every WorkItem above is now `queued`; one poll() dispatches all of them onto
-        # the Worker Pool and blocks until every one of THEM (not any other, previously
-        # queued Branch) has resolved.
+        # the Worker Pool and blocks until every one of THEM has resolved.
         results = self._branch_manager.poll(timeout=(simulation_options or {}).get("max_time_ms", 60000) / 1000.0)
 
-        # Batch status reflects whether the batch itself was admitted and executed, not
-        # the outcome of individual Branches: a per-Branch Worker fault never demotes
-        # the batch away from `completed` (Phase A already guaranteed admission).
+        # Batch status reflects admission/execution of the request as a whole. Individual
+        # Worker faults stay local to their Branch result.
         branch_results: dict = {}
         for admitted_item, internal_id, book, branch_log in pending:
             result = results.get(internal_id)
             if result is None:
-                branch_results[admitted_item.branch_id] = {"status": STATUS_RUNNING}
+                # BranchManager.poll() is synchronous for all Branches it dispatches in
+                # this call. Missing a result here is therefore an internal invariant
+                # violation, never a normal asynchronous "running" outcome.
+                branch_results[admitted_item.branch_id] = {
+                    "status": STATUS_FAULTED,
+                    "branch_id": admitted_item.branch_id,
+                    "parent_branch_id": admitted_item.parent_branch_id,
+                    "rng_id": admitted_item.rng_id,
+                    "error": "BranchManager.poll() returned no terminal result for a dispatched Branch",
+                    "fault_kind": "internal_invariant",
+                }
                 continue
             branch_results[admitted_item.branch_id] = self._finalize_branch_result(
                 branch_id=admitted_item.branch_id,
