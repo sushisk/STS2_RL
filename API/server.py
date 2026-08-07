@@ -23,6 +23,7 @@ from API.dto import (
     OP_RELEASE_BRANCHES,
     OP_START_INSTANCE,
     SCHEMA_VERSION,
+    STATUSES,
     STATUS_COMPLETED,
     STATUS_FAULTED,
     STATUS_REJECTED,
@@ -105,7 +106,7 @@ class RLApiServer:
             except Exception as exc:
                 response = fault_response(payload, exc)
 
-            response = self._wrap(payload, response)
+            response = self._finalize_response(payload, response)
             ledger.complete(response)
             return response
         except RequestRejected as exc:
@@ -231,7 +232,14 @@ class RLApiServer:
 
         self._instances[instance_id] = instance
         try:
-            return instance.start_instance_response()
+            response = instance.start_instance_response()
+            if not isinstance(response, dict):
+                raise TypeError("start_instance_response returned a non-dict response")
+            response = dict(response)
+            # The dispatcher owns instance identity. An Instance implementation must not
+            # be able to redirect session ownership by spoofing the public ID it returns.
+            response["instance_id"] = instance_id
+            return response
         except Exception:
             try:
                 instance.close()
@@ -240,17 +248,37 @@ class RLApiServer:
             self._instances.pop(instance_id, None)
             raise
 
+    def _finalize_response(self, payload: dict, response: Any) -> dict:
+        """Turn an Instance result into one replay-safe, server-owned wire response."""
+        if not isinstance(response, dict):
+            response = fault_response(
+                payload,
+                TypeError("RL handler returned a non-dict response"),
+            )
+        else:
+            status = response.get("status")
+            if not isinstance(status, str) or status not in STATUSES:
+                response = fault_response(
+                    payload,
+                    TypeError(f"RL handler returned invalid status {status!r}"),
+                )
+        return self._wrap(payload, response)
+
     def _wrap(self, payload: dict, response: dict) -> dict:
-        wrapped = {
-            "schema_version": SCHEMA_VERSION,
-            "server_epoch": self.server_epoch,
-            "client_session_id": payload.get("client_session_id"),
-            "request_seq": payload.get("request_seq"),
-            "request_id": payload.get("request_id"),
-            "operation": payload.get("operation"),
-            **response,
-        }
-        if "instance_id" not in wrapped and payload.get("instance_id") is not None:
+        # Instance implementations own operation-specific fields only. Correlation and
+        # transport identity are written last so a buggy lower layer cannot spoof them.
+        wrapped = dict(response)
+        wrapped.update(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "server_epoch": self.server_epoch,
+                "client_session_id": payload.get("client_session_id"),
+                "request_seq": payload.get("request_seq"),
+                "request_id": payload.get("request_id"),
+                "operation": payload.get("operation"),
+            }
+        )
+        if payload.get("instance_id") is not None:
             wrapped["instance_id"] = payload["instance_id"]
         return wrapped
 
