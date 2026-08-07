@@ -40,7 +40,7 @@ class RequestLedger:
 
     Per-instance ledgers default to an unbounded lifetime because request-id uniqueness is
     part of the instance contract. Short-lived server-wide replay caches may opt into
-    ``max_completed_entries``. In-flight entries are never evicted.
+    ``max_completed_entries``. In-flight entries are never evicted or re-executed.
     """
 
     max_completed_entries: int | None = None
@@ -56,13 +56,17 @@ class RequestLedger:
         """Call before executing a request.
 
         Returns a cached RESPONSE to replay verbatim if ``request_id`` was already
-        completed with identical content; returns ``None`` for a genuinely new request
-        or a matching request still in flight. Raises ``RequestRejected`` when the same
-        request id is reused with different content.
+        completed with identical content; returns ``None`` only for a genuinely new
+        request. Raises ``RequestRejected`` when the same request id is reused with
+        different content or while the original request is still in flight.
         """
         request_id = payload["request_id"]
         found, cached_response = self._lookup(payload)
         if found:
+            if cached_response is None:
+                raise RequestRejected(
+                    f"request_id {request_id!r} is already in flight"
+                )
             return cached_response
 
         self._entries[request_id] = (_payload_digest(payload), None)
