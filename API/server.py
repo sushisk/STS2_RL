@@ -28,6 +28,7 @@ from API.dto import (
     OP_START_INSTANCE,
     SCHEMA_VERSION,
     STATUS_COMPLETED,
+    STATUS_FAULTED,
     STATUS_REJECTED,
 )
 from API.faults import fault_response
@@ -50,15 +51,8 @@ class RLApiServer:
 
         self._instances: dict[str, Any] = {}
         self._ledgers: dict[str, RequestLedger] = {}
-        # start_instance has no instance-scoped ledger yet. Retain its completed replay
-        # record while the created instance remains active, then discard it on close.
-        # This preserves lost-response replay without making the server-wide ledger grow
-        # monotonically across start/close cycles.
         self._pre_instance_ledger = RequestLedger()
         self._start_request_ids_by_instance: dict[str, str] = {}
-        # After close_instance succeeds, retain only that close request/response as a
-        # bounded tombstone. The instance's full RequestLedger may contain large
-        # emulator responses and must be released with the closed instance.
         self._closed_ledgers: OrderedDict[str, RequestLedger] = OrderedDict()
         self._replay_cache_entries = replay_cache_entries
         self._instance_serial = itertools.count(1)
@@ -99,9 +93,6 @@ class RLApiServer:
                         fault_kind=exc.fault_kind,
                     )
                 except Exception as exc:
-                    # Unexpected handler failures are terminal for this request_id too.
-                    # Cache the fault so a lost response cannot turn a same-ID retry
-                    # into a second start_instance execution.
                     response = fault_response(payload, exc)
 
                 self._pre_instance_ledger.complete(payload, response)
@@ -136,10 +127,10 @@ class RLApiServer:
             try:
                 response = self._dispatch(instance, operation, payload)
                 response = self._wrap(payload, response)
-                if operation == OP_CLOSE_INSTANCE and response.get("status") == STATUS_COMPLETED:
-                    # Treat close() itself as part of the request transaction. If it
-                    # faults after mutating state, cache that terminal fault rather than
-                    # allowing a same-ID retry to call close() again.
+                if (
+                    operation == OP_CLOSE_INSTANCE
+                    and response.get("status") == STATUS_COMPLETED
+                ):
                     instance.close()
             except RequestRejected as exc:
                 response = self._rejected(
@@ -148,16 +139,20 @@ class RLApiServer:
                     fault_kind=exc.fault_kind,
                 )
             except Exception as exc:
-                # The TCP layer must not be the first place that turns handler
-                # exceptions into API faults: the per-instance ledger has to observe
-                # and cache the same terminal response for safe replay.
                 response = fault_response(payload, exc)
 
             ledger.complete(payload, response)
 
-            if operation == OP_CLOSE_INSTANCE and response.get("status") == STATUS_COMPLETED:
-                del self._instances[instance_id]
-                del self._ledgers[instance_id]
+            if operation == OP_CLOSE_INSTANCE and response.get("status") in {
+                STATUS_COMPLETED,
+                STATUS_FAULTED,
+            }:
+                # close() may partially release resources before raising. A terminal
+                # close fault therefore quarantines the instance instead of returning
+                # it to normal service. Keep only the close replay record so same-ID
+                # retries remain deterministic without retaining the full history.
+                self._instances.pop(instance_id, None)
+                self._ledgers.pop(instance_id, None)
                 start_request_id = self._start_request_ids_by_instance.pop(
                     instance_id,
                     None,
@@ -167,9 +162,6 @@ class RLApiServer:
                 self._remember_close_tombstone(instance_id, payload, response)
             return response
         except RequestRejected as exc:
-            # This path covers pre-dispatch conditions such as request-id conflicts or a
-            # duplicate that is still in flight. Never overwrite the existing ledger
-            # entry with the rejection, because the original request still owns it.
             return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
 
     def _remember_close_tombstone(
@@ -229,8 +221,6 @@ class RLApiServer:
         try:
             return instance.start_instance_response()
         except Exception:
-            # A start response that cannot be constructed must not leave an orphaned
-            # active instance behind. The caller will receive/cache a terminal fault.
             try:
                 instance.close()
             except Exception:
@@ -247,9 +237,6 @@ class RLApiServer:
             "operation": payload["operation"],
             **response,
         }
-        # Contract §2.3: an Instance対象Request's Response必ずRequestと同じinstance_idを含む。
-        # `start_instance`はresponse側(RL発行のinstance_id)がそのまま優先される - この分岐は
-        # 個々のInstanceメソッドがinstance_idを積み忘れても壊れない安全網。
         if "instance_id" not in wrapped and payload.get("instance_id") is not None:
             wrapped["instance_id"] = payload["instance_id"]
         return wrapped
