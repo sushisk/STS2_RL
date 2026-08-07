@@ -1,9 +1,10 @@
-"""Wire-level DTO constants for the RL/Training TCP contract v0.6.
+"""Wire-level DTO constants for the RL/Training TCP contract v0.7.
 
-v0.6 replaces unbounded request-id replay ledgers with a session-sequenced protocol.
-Every API request belongs to one ``client_session_id`` and carries a positive,
-strictly increasing ``request_seq``. ``request_id`` remains on the wire for tracing but
-is deterministically derived from those two fields.
+v0.7 retains v0.6's session-sequenced, single in-flight protocol and adds the plural
+``emulate_actions`` batch operation. Every API request belongs to one
+``client_session_id`` and carries a positive, strictly increasing ``request_seq``.
+``request_id`` remains on the wire for tracing and exact replay, and is deterministically
+derived from those two fields.
 """
 
 from __future__ import annotations
