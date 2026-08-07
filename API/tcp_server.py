@@ -40,6 +40,7 @@ class AsyncioTcpServer:
         self._host = host
         self._port = port
         self._max_message_bytes = max_message_bytes
+        self._handler_lock = asyncio.Lock()
         self._server: asyncio.AbstractServer | None = None
         self._client_tasks: set[asyncio.Task[None]] = set()
 
@@ -121,7 +122,7 @@ class AsyncioTcpServer:
                     response: JsonObject = {"transport_operation": "pong"}
                 else:
                     try:
-                        response = self._handler(payload)
+                        response = await self._call_handler(payload)
                     except Exception as exc:
                         response = fault_response(payload, exc)
                     if not isinstance(response, dict):
@@ -138,6 +139,25 @@ class AsyncioTcpServer:
             except (ConnectionError, OSError):
                 pass
 
+    async def _call_handler(self, payload: JsonObject) -> JsonObject:
+        """Run the synchronous API handler without blocking the asyncio event loop.
+
+        Handler calls remain globally serialized to preserve the pre-existing execution
+        model. If this client task is cancelled (for example during server shutdown),
+        wait for the already-started handler call before releasing the serialization
+        lock so a second handler cannot overlap it in another worker thread.
+        """
+        async with self._handler_lock:
+            handler_task = asyncio.create_task(asyncio.to_thread(self._handler, payload))
+            try:
+                return await asyncio.shield(handler_task)
+            except asyncio.CancelledError:
+                try:
+                    await handler_task
+                except Exception:
+                    pass
+                raise
+
     async def _read_line(
         self,
         reader: asyncio.StreamReader,
@@ -147,8 +167,18 @@ class AsyncioTcpServer:
             line = await reader.readline()
         except (ValueError, asyncio.LimitOverrunError):
             line = None
+
+        if line == b"":
+            return b""
         if line is not None and len(line) <= self._max_message_bytes:
+            # ``StreamReader.readline`` returns a partial buffer when EOF arrives before
+            # the delimiter. NDJSON requires the newline to complete the request frame;
+            # never dispatch an unterminated partial frame because it may have side
+            # effects the sender cannot know were applied.
+            if not line.endswith(b"\n"):
+                return b""
             return line
+
         await self._write_response(
             writer,
             {
