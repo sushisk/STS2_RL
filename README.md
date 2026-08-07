@@ -22,7 +22,8 @@ docs/       引き継ぎ資料・現状サマリ
 
 Trainingとは別プロセスでRL APIを起動する最小構成です。通信形式はUTF-8の
 newline-delimited JSON（1行1JSON）で、既存のAPI request dictをそのまま
-`RLApiServer`へ渡します。
+`RLApiServer`へ渡します。DTO v0.5をTCP上で運ぶ際のframing、相関、timeout時の
+connection破棄ルールは `docs/contracts/rl_training_tcp_transport_v0_5.md` を参照してください。
 
 ```bash
 python -m API.tcp_server --host 127.0.0.1 --port 8765
