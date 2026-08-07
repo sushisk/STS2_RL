@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import itertools
 import json
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -35,30 +36,83 @@ def _payload_digest(payload: dict) -> str:
 
 @dataclass
 class RequestLedger:
-    _entries: dict[str, tuple[str, Optional[dict]]] = field(default_factory=dict)
+    """Remember request digests and completed responses for safe replay.
+
+    Per-instance ledgers default to an unbounded lifetime because request-id uniqueness is
+    part of the instance contract. Server-wide replay caches may opt into
+    ``max_completed_entries`` so old completed responses do not retain large DTOs for the
+    lifetime of a long-running server. In-flight entries are never evicted.
+    """
+
+    max_completed_entries: int | None = None
+    _entries: OrderedDict[str, tuple[str, Optional[dict]]] = field(
+        default_factory=OrderedDict
+    )
+
+    def __post_init__(self) -> None:
+        if self.max_completed_entries is not None and self.max_completed_entries <= 0:
+            raise ValueError("max_completed_entries must be positive when provided")
 
     def begin(self, payload: dict) -> Optional[dict]:
-        """Call before executing a request. Returns a cached RESPONSE to replay verbatim
-        if `request_id` was already completed with identical content; returns None if
-        this is a genuinely new request (or a retry of one still in flight - the caller
-        proceeds normally in that case, since no cached response exists yet). Raises
-        `RequestRejected` if `request_id` was already used with DIFFERENT content.
+        """Call before executing a request.
+
+        Returns a cached RESPONSE to replay verbatim if ``request_id`` was already
+        completed with identical content; returns ``None`` for a genuinely new request
+        or a matching request still in flight. Raises ``RequestRejected`` when the same
+        request id is reused with different content.
         """
         request_id = payload["request_id"]
-        digest = _payload_digest(payload)
-        existing = self._entries.get(request_id)
-        if existing is None:
-            self._entries[request_id] = (digest, None)
-            return None
-        existing_digest, cached_response = existing
-        if existing_digest != digest:
-            raise RequestRejected(f"request_id {request_id!r} reused with different content")
-        return cached_response  # None if still in flight (caller re-executes; not our problem to dedupe races).
+        found, cached_response = self._lookup(payload)
+        if found:
+            return cached_response
+
+        self._entries[request_id] = (_payload_digest(payload), None)
+        return None
+
+    def replay(self, payload: dict) -> Optional[dict]:
+        """Return an existing cached response without inserting a new ledger entry."""
+        found, cached_response = self._lookup(payload)
+        return cached_response if found else None
 
     def complete(self, payload: dict, response: dict) -> None:
         request_id = payload["request_id"]
         digest = _payload_digest(payload)
         self._entries[request_id] = (digest, response)
+        self._entries.move_to_end(request_id)
+        self._evict_completed_entries()
+
+    def __len__(self) -> int:
+        return len(self._entries)
+
+    def _lookup(self, payload: dict) -> tuple[bool, Optional[dict]]:
+        request_id = payload["request_id"]
+        digest = _payload_digest(payload)
+        existing = self._entries.get(request_id)
+        if existing is None:
+            return False, None
+        existing_digest, cached_response = existing
+        if existing_digest != digest:
+            raise RequestRejected(
+                f"request_id {request_id!r} reused with different content"
+            )
+        if cached_response is not None:
+            self._entries.move_to_end(request_id)
+        return True, cached_response
+
+    def _evict_completed_entries(self) -> None:
+        limit = self.max_completed_entries
+        if limit is None:
+            return
+
+        while len(self._entries) > limit:
+            for request_id, (_, cached_response) in self._entries.items():
+                if cached_response is not None:
+                    del self._entries[request_id]
+                    break
+            else:
+                # Every retained entry is still in flight. Do not make a duplicate
+                # execution possible merely to satisfy the memory bound.
+                break
 
 
 @dataclass
