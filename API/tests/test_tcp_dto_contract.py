@@ -39,10 +39,17 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
         self.reader, self.writer = await asyncio.open_connection(
             "127.0.0.1", self.server.bound_port
         )
-        hello = await self._round_trip(
-            {"transport_operation": "hello", "client_session_id": "session-a"}
-        )
+        hello = await self._round_trip(self._hello())
         self.assertEqual(hello["server_epoch"], "epoch-contract")
+        self.assertEqual(hello["schema_version"], "0.6")
+
+    @staticmethod
+    def _hello() -> dict:
+        return {
+            "transport_operation": "hello",
+            "schema_version": "0.6",
+            "client_session_id": "session-a",
+        }
 
     async def asyncTearDown(self) -> None:
         self.writer.close()
@@ -104,9 +111,7 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
             self.reader, self.writer = await asyncio.open_connection(
                 "127.0.0.1", self.server.bound_port
             )
-            await self._round_trip(
-                {"transport_operation": "hello", "client_session_id": "session-a"}
-            )
+            await self._round_trip(self._hello())
             replay = await self._round_trip(request)
 
         self.assertEqual(first, replay)
