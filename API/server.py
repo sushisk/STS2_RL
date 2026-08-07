@@ -235,6 +235,10 @@ class RLApiServer:
             response = instance.start_instance_response()
             if not isinstance(response, dict):
                 raise TypeError("start_instance_response returned a non-dict response")
+            if response.get("status") != STATUS_COMPLETED:
+                raise TypeError(
+                    f"start_instance_response returned invalid status {response.get('status')!r}"
+                )
             response = dict(response)
             # The dispatcher owns instance identity. An Instance implementation must not
             # be able to redirect session ownership by spoofing the public ID it returns.
