@@ -10,6 +10,7 @@ from API.dto import (
     FAULT_INVALID_REQUEST,
     FAULT_SESSION_CAPACITY,
     FAULT_SESSION_INSTANCE_CONFLICT,
+    FAULT_SESSION_SEQUENCE_GAP,
     FAULT_UNKNOWN_INSTANCE,
     INSTANCE_TYPE_COMBAT,
     INSTANCE_TYPE_WHOLE_RUN,
@@ -58,7 +59,6 @@ class RLApiServer:
         self._max_sessions = max_sessions
         self._sessions: dict[str, SessionLedger] = {}
         self._instances: dict[str, Any] = {}
-        self._instance_owner: dict[str, str] = {}
         self._instance_serial = itertools.count(1)
         self._kwargs = instance_factory_kwargs or {}
 
@@ -75,7 +75,6 @@ class RLApiServer:
             except Exception:
                 pass
         self._instances.clear()
-        self._instance_owner.clear()
         self._sessions.clear()
 
     def handle_request(self, payload: dict) -> dict:
@@ -90,7 +89,7 @@ class RLApiServer:
 
         session_id = payload["client_session_id"]
         try:
-            ledger = self._get_or_create_session(session_id)
+            ledger = self._get_or_create_session(session_id, payload["request_seq"])
             cached = ledger.begin(payload)
             if cached is not None:
                 return cached
@@ -114,10 +113,15 @@ class RLApiServer:
             # executable request and therefore are not written into the session ledger.
             return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
 
-    def _get_or_create_session(self, session_id: str) -> SessionLedger:
+    def _get_or_create_session(self, session_id: str, request_seq: int) -> SessionLedger:
         existing = self._sessions.get(session_id)
         if existing is not None:
             return existing
+        if request_seq != 1:
+            raise RequestRejected(
+                f"request_seq must be 1 for a new session, got {request_seq}",
+                fault_kind=FAULT_SESSION_SEQUENCE_GAP,
+            )
         if len(self._sessions) >= self._max_sessions:
             raise RequestRejected(
                 "RL session capacity exhausted; restart RL or reuse an existing client session",
@@ -178,7 +182,6 @@ class RLApiServer:
             }
         finally:
             self._instances.pop(instance_id, None)
-            self._instance_owner.pop(instance_id, None)
             ledger.active_instance_id = None
         return response
 
@@ -228,7 +231,6 @@ class RLApiServer:
             raise RequestRejected(f"unknown instance_config.instance_type {instance_type!r}")
 
         self._instances[instance_id] = instance
-        self._instance_owner[instance_id] = session_id
         try:
             return instance.start_instance_response()
         except Exception:
@@ -237,7 +239,6 @@ class RLApiServer:
             except Exception:
                 pass
             self._instances.pop(instance_id, None)
-            self._instance_owner.pop(instance_id, None)
             raise
 
     def _wrap(self, payload: dict, response: dict) -> dict:
