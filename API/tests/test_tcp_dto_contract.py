@@ -138,6 +138,14 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(close_replay, close_first)
             self.assertEqual(self.dispatcher.instance_count(), 0)
 
+            # Only the close replay tombstone survives instance destruction. The active
+            # ledger (which may contain large historical Decision responses) is released.
+            closed_ledger = self.dispatcher._closed_ledgers[first["instance_id"]]
+            self.assertEqual(
+                set(closed_ledger._entries),
+                {close_request["request_id"]},
+            )
+
     async def test_faulted_request_is_replayed_without_reexecution(self) -> None:
         fake_module = types.ModuleType("API.instance_combat")
         fake_module.CombatInstance = _FakeCombatInstance
