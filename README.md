@@ -17,3 +17,18 @@ docs/       引き継ぎ資料・現状サマリ
 詳細な責務分担、外部依存(STS2_Emulator/STS2_Decompiled_v0109/STS2_Data)、
 現在のデータ資産、既知の未解決事項は `docs/RL_HANDOFF.md` に集約している。
 このファイルはナビゲーションのみを目的とする。
+
+## Asyncio TCP server
+
+Trainingとは別プロセスでRL APIを起動する最小構成です。通信形式はUTF-8の
+newline-delimited JSON（1行1JSON）で、既存のAPI request dictをそのまま
+`RLApiServer`へ渡します。
+
+```bash
+python -m API.tcp_server --host 127.0.0.1 --port 8765
+```
+
+Emulatorを起動せずに経路だけ確認する場合は、接続後に
+`{"transport_operation":"ping"}` を1行送ると
+`{"transport_operation":"pong"}` が返ります。Training側の確認コマンドは
+`STS2_Training` のREADMEを参照してください。
