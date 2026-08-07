@@ -43,6 +43,8 @@ A TCP connection may carry multiple request/response pairs. Multiplexing is not 
 
 Timeout, cancellation, and a local response-size-limit failure can occur after RL has observed or completed a request. Training therefore treats such failures as completion-uncertain and discards the connection. If a caller retries the same logical request, it must preserve the same serialized payload and `request_id`; changing a local `max_response_bytes` value does not change the logical request. Automatic retry/reconciliation remains outside this framing contract.
 
+A response-size-limit failure is recoverable without inventing a new logical request. The Training connection exposes a serialized update of its receiver limit; after raising `max_response_bytes`, the caller replays the exact `RetryRequest` already held by `AsyncTrainingApiClient.pending_retry`. RL then replays the already-completed response from `RequestLedger`, and the larger receiver limit can accept that same response. Reconstructing the operation with a fresh `request_id` is not a valid recovery path for a completion-uncertain state-changing request.
+
 Replay retention follows API object lifetimes rather than server lifetime. While an instance is active, its instance-scoped `RequestLedger` retains completed responses for that instance. The `start_instance` replay record is retained while the instance created by that start remains active and is discarded when that instance closes, so repeated start/close cycles do not make the server-wide pre-instance ledger grow monotonically. A successful `close_instance` keeps only a bounded server-wide tombstone for the close request/response (default: the most recent 1024 closed instances); the closed instance's full request history is released. If a close tombstone has already been evicted, the caller must use external reconciliation and MUST NOT convert the same completion-uncertain logical operation into a fresh `request_id` merely to make progress.
 
 ## 4. Transport-only messages
@@ -85,7 +87,7 @@ An oversized inbound request may return:
 
 These objects describe failures to obtain an API DTO request frame and are not API DTO responses. Once a valid JSON object is forwarded to `RLApiServer`, API validation and execution semantics remain those of the existing DTO contract.
 
-A receiver-side `max_response_bytes` failure is different: the request may already have executed, so Training reports it as completion-uncertain and invalidates the stream instead of pretending the API operation was rejected.
+A receiver-side `max_response_bytes` failure is different: the request may already have executed, so Training reports it as completion-uncertain and invalidates the stream instead of pretending the API operation was rejected. Recovery is to increase the receiver-side limit and replay the exact same request token; RL must continue returning the cached response for that request id.
 
 ## 6. Process boundary
 
