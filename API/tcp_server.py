@@ -24,6 +24,10 @@ class AsyncioTcpServer:
     API work runs in worker threads so slow Emulator calls do not block the asyncio
     event loop. Requests targeting the same instance remain serialized, while distinct
     instances may execute concurrently and transport ping remains responsive.
+
+    ``max_message_bytes`` limits inbound request frames only. API responses are written
+    without a transport-size substitution so a completed non-idempotent operation can
+    always return (or replay) its actual correlated API response.
     """
 
     def __init__(
@@ -186,27 +190,15 @@ class AsyncioTcpServer:
         )
         return b""
 
+    @staticmethod
     async def _write_response(
-        self,
         writer: asyncio.StreamWriter,
         response: JsonObject,
     ) -> None:
-        encoded = self._encode(response)
-        if len(encoded) > self._max_message_bytes:
-            encoded = self._encode(
-                {
-                    "transport_error": "message_too_large",
-                    "direction": "response",
-                    "max_message_bytes": self._max_message_bytes,
-                }
-            )
-            # Extremely small custom limits may be unable to carry even the compact
-            # transport error. In that case close the stream rather than violating the
-            # configured frame limit.
-            if len(encoded) > self._max_message_bytes:
-                writer.close()
-                return
-        writer.write(encoded)
+        # Do not replace oversized API responses with a transport error. If a
+        # non-idempotent request completed successfully, the exact response must remain
+        # observable and replayable with the same request_id.
+        writer.write(AsyncioTcpServer._encode(response))
         await writer.drain()
 
     @staticmethod
@@ -262,6 +254,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--max-message-bytes",
         type=int,
         default=DEFAULT_MAX_MESSAGE_BYTES,
+        help="maximum inbound request frame size, including the trailing newline",
     )
     return parser.parse_args(argv)
 
