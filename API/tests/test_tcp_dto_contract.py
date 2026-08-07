@@ -17,14 +17,10 @@ class _FakeCombatInstance:
     def __init__(self, instance_id: str, instance_config: dict, **kwargs) -> None:
         type(self).created += 1
         self.instance_id = instance_id
-        self.instance_config = dict(instance_config)
         self.closed = False
 
     def start_instance_response(self) -> dict:
-        return {
-            "status": "completed",
-            "instance_id": self.instance_id,
-        }
+        return {"status": "completed", "instance_id": self.instance_id}
 
     def close(self) -> None:
         self.closed = True
@@ -33,13 +29,20 @@ class _FakeCombatInstance:
 class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         _FakeCombatInstance.created = 0
-        self.dispatcher = RLApiServer()
-        self.server = AsyncioTcpServer(self.dispatcher.handle_request, port=0)
+        self.dispatcher = RLApiServer(server_epoch="epoch-contract")
+        self.server = AsyncioTcpServer(
+            self.dispatcher.handle_request,
+            server_epoch=self.dispatcher.server_epoch,
+            port=0,
+        )
         await self.server.start()
         self.reader, self.writer = await asyncio.open_connection(
-            "127.0.0.1",
-            self.server.bound_port,
+            "127.0.0.1", self.server.bound_port
         )
+        hello = await self._round_trip(
+            {"transport_operation": "hello", "client_session_id": "session-a"}
+        )
+        self.assertEqual(hello["server_epoch"], "epoch-contract")
 
     async def asyncTearDown(self) -> None:
         self.writer.close()
@@ -52,52 +55,81 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
 
     async def _round_trip(self, request: dict) -> dict:
         self.writer.write(
-            json.dumps(
-                request,
-                ensure_ascii=False,
-                separators=(",", ":"),
-            ).encode("utf-8")
+            json.dumps(request, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
             + b"\n"
         )
         await self.writer.drain()
         return json.loads(await self.reader.readline())
 
-    async def test_valid_dto_is_correlated_across_tcp(self) -> None:
-        request = {
-            "schema_version": "0.5",
-            "request_id": "req-001",
-            "operation": "get_decision",
-            "instance_id": "inst-missing",
-            "branch_id": "root",
+    @staticmethod
+    def _request(seq: int, operation: str, **fields) -> dict:
+        return {
+            "schema_version": "0.6",
+            "client_session_id": "session-a",
+            "request_seq": seq,
+            "request_id": f"session-a:{seq}",
+            "operation": operation,
+            **fields,
         }
 
+    async def test_rejected_dto_is_correlated_across_tcp(self) -> None:
+        request = self._request(
+            1,
+            "start_instance",
+            instance_config={"instance_type": "invalid"},
+        )
         response = await self._round_trip(request)
 
-        self.assertEqual(response["schema_version"], "0.5")
+        self.assertEqual(response["schema_version"], "0.6")
+        self.assertEqual(response["server_epoch"], "epoch-contract")
+        self.assertEqual(response["client_session_id"], request["client_session_id"])
+        self.assertEqual(response["request_seq"], request["request_seq"])
         self.assertEqual(response["request_id"], request["request_id"])
         self.assertEqual(response["operation"], request["operation"])
-        self.assertEqual(response["instance_id"], request["instance_id"])
         self.assertEqual(response["status"], "rejected")
-        self.assertIn("unknown instance_id", response["error"])
 
-    async def test_start_instance_dto_round_trips_over_tcp(self) -> None:
+    async def test_start_instance_same_sequence_replays_over_fresh_tcp_stream(self) -> None:
         fake_module = types.ModuleType("API.instance_combat")
         fake_module.CombatInstance = _FakeCombatInstance
+        request = self._request(
+            1,
+            "start_instance",
+            instance_config={"instance_type": "combat"},
+        )
         with patch.dict(sys.modules, {"API.instance_combat": fake_module}):
-            request = {
-                "schema_version": "0.5",
-                "request_id": "req-start",
-                "operation": "start_instance",
-                "instance_config": {"instance_type": "combat"},
-            }
-            response = await self._round_trip(request)
+            first = await self._round_trip(request)
 
-        self.assertEqual(response["schema_version"], "0.5")
-        self.assertEqual(response["request_id"], request["request_id"])
-        self.assertEqual(response["operation"], request["operation"])
-        self.assertEqual(response["status"], "completed")
-        self.assertTrue(response["instance_id"].startswith("inst-"))
+            self.writer.close()
+            await self.writer.wait_closed()
+            self.reader, self.writer = await asyncio.open_connection(
+                "127.0.0.1", self.server.bound_port
+            )
+            await self._round_trip(
+                {"transport_operation": "hello", "client_session_id": "session-a"}
+            )
+            replay = await self._round_trip(request)
+
+        self.assertEqual(first, replay)
+        self.assertEqual(first["status"], "completed")
         self.assertEqual(_FakeCombatInstance.created, 1)
+
+    async def test_api_before_hello_is_rejected_at_transport_layer(self) -> None:
+        reader, writer = await asyncio.open_connection(
+            "127.0.0.1", self.server.bound_port
+        )
+        try:
+            request = self._request(
+                1,
+                "start_instance",
+                instance_config={"instance_type": "combat"},
+            )
+            writer.write(json.dumps(request).encode("utf-8") + b"\n")
+            await writer.drain()
+            response = json.loads(await reader.readline())
+            self.assertEqual(response["transport_error"], "hello_required")
+        finally:
+            writer.close()
+            await writer.wait_closed()
 
 
 if __name__ == "__main__":
