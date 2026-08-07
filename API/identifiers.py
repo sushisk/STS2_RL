@@ -139,12 +139,36 @@ class RngHypothesisTable:
         self._next_index_by_parent_decision[parent_decision_key] = next_index + 1
         return next_index
 
-    def snapshot(self) -> tuple[dict[tuple, int], dict[tuple, int]]:
-        """Return a cheap coordinator-side rollback snapshot for one batch admission."""
-        return dict(self._index_by_key), dict(self._next_index_by_parent_decision)
+    def snapshot(self) -> int:
+        """Return an O(1) rollback marker for allocations made after this point.
 
-    def restore(self, snapshot: tuple[dict[tuple, int], dict[tuple, int]]) -> None:
-        """Restore a snapshot after a coordinator-side batch failure."""
-        index_by_key, next_index_by_parent_decision = snapshot
-        self._index_by_key = dict(index_by_key)
-        self._next_index_by_parent_decision = dict(next_index_by_parent_decision)
+        ``dict`` preserves insertion order, and ``popitem()`` removes the newest entry.
+        That lets failure rollback remove only keys allocated by the current batch instead
+        of copying the complete hypothesis table on every successful batch.
+        """
+        return len(self._index_by_key)
+
+    def restore(self, snapshot: int) -> None:
+        """Rollback allocations made after ``snapshot`` in O(delta) time.
+
+        Successful batches pay no copy/commit cost. On failure, only keys added since the
+        marker are removed, and each affected parent/decision counter is rewound to the
+        index of the removed allocation.
+        """
+        if not isinstance(snapshot, int) or isinstance(snapshot, bool):
+            raise TypeError("RNG rollback snapshot must be an integer marker")
+        if snapshot < 0 or snapshot > len(self._index_by_key):
+            raise ValueError("RNG rollback snapshot is outside the current allocation history")
+
+        while len(self._index_by_key) > snapshot:
+            key, index = self._index_by_key.popitem()
+            parent_decision_key = (key[0], key[1])
+            current_next = self._next_index_by_parent_decision.get(parent_decision_key)
+            if current_next != index + 1:
+                raise RuntimeError(
+                    "RNG hypothesis allocation order invariant violated during rollback"
+                )
+            if index == 0:
+                self._next_index_by_parent_decision.pop(parent_decision_key, None)
+            else:
+                self._next_index_by_parent_decision[parent_decision_key] = index
