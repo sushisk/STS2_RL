@@ -135,6 +135,7 @@ def test_batch_capacity_boundary_is_explicitly_64_then_65_rejects() -> None:
 
     try:
         start = inst.start_instance_response()
+        assert start["max_emulate_actions_items"] == 64
         inst._branch_manager.submit_many = _stop_at_submit  # type: ignore[method-assign]  # noqa: SLF001
 
         try:
@@ -204,9 +205,11 @@ class _FakePool:
         self._next_request_id = 0
         self._clock = clock
         self.respawns: list[tuple[int, float]] = []
+        self.submissions: list[tuple[int, int, float]] = []
 
     def _submit(self, worker_id: int, request) -> int:
         self._next_request_id += 1
+        self.submissions.append((self._next_request_id, worker_id, self._clock[0]))
         return self._next_request_id
 
     def respawn_worker(self, worker_id: int, *, lease_registry) -> None:
@@ -265,8 +268,8 @@ def test_dispatch_exception_after_first_submit_releases_entire_poll_batch() -> N
     assert pool.respawns == [(0, 0.0)]
 
 
-def test_four_items_two_workers_hung_worker_keeps_absolute_deadline() -> None:
-    """A healthy worker result must not reset another worker's timeout."""
+def test_four_items_two_workers_hung_worker_tail_gets_fresh_deadline() -> None:
+    """Only the executing Branch times out; queued tail is dispatched with a new timer."""
     clock = [0.0]
     healthy_result_1 = SimpleNamespace(
         status="fault", established_lease=None, worker_id=1, diagnostics={"fault_kind": "synthetic"}
@@ -278,7 +281,7 @@ def test_four_items_two_workers_hung_worker_keeps_absolute_deadline() -> None:
         clock,
         [
             (0.6, 2, healthy_result_1),
-            (1.2, 4, healthy_result_2),
+            (1.2, 3, healthy_result_2),
         ],
     )
     pool = _FakePool(clock, timed_queue)
@@ -311,9 +314,15 @@ def test_four_items_two_workers_hung_worker_keeps_absolute_deadline() -> None:
         branch_manager_module.time.monotonic = original_monotonic
 
     assert len(results) == 4
-    assert pool.respawns == [(0, 1.0)]
+    assert pool.submissions == [
+        (1, 0, 0.0),
+        (2, 1, 0.0),
+        (3, 1, 0.6),
+        (4, 0, 1.0),
+    ]
+    assert pool.respawns == [(0, 1.0), (0, 2.0)]
     assert results[branch_ids[0]].diagnostics["fault_kind"] == "task_timeout"
-    assert results[branch_ids[2]].diagnostics["fault_kind"] == "task_timeout"
     assert results[branch_ids[1]] is healthy_result_1
-    assert results[branch_ids[3]] is healthy_result_2
-    assert clock[0] == 1.2
+    assert results[branch_ids[2]] is healthy_result_2
+    assert results[branch_ids[3]].diagnostics["fault_kind"] == "task_timeout"
+    assert clock[0] == 2.0
