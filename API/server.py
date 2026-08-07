@@ -52,6 +52,9 @@ class RLApiServer:
         self._instances: dict[str, Any] = {}
         self._ledgers: dict[str, RequestLedger] = {}
         self._pre_instance_ledger = RequestLedger()
+        self._failed_start_ledger = RequestLedger(
+            max_completed_entries=replay_cache_entries
+        )
         self._start_request_ids_by_instance: dict[str, str] = {}
         self._closed_ledgers: OrderedDict[str, RequestLedger] = OrderedDict()
         self._replay_cache_entries = replay_cache_entries
@@ -67,6 +70,7 @@ class RLApiServer:
         self._instances.clear()
         self._ledgers.clear()
         self._pre_instance_ledger.clear()
+        self._failed_start_ledger.clear()
         self._start_request_ids_by_instance.clear()
         self._closed_ledgers.clear()
 
@@ -79,6 +83,10 @@ class RLApiServer:
         operation = payload["operation"]
         try:
             if operation == OP_START_INSTANCE:
+                failed = self._failed_start_ledger.replay(payload)
+                if failed is not None:
+                    return failed
+
                 cached = self._pre_instance_ledger.begin(payload)
                 if cached is not None:
                     return cached
@@ -95,13 +103,19 @@ class RLApiServer:
                 except Exception as exc:
                     response = fault_response(payload, exc)
 
-                self._pre_instance_ledger.complete(payload, response)
                 if response.get("status") == STATUS_COMPLETED:
+                    self._pre_instance_ledger.complete(payload, response)
                     instance_id = response.get("instance_id")
                     if isinstance(instance_id, str) and instance_id:
                         self._start_request_ids_by_instance[instance_id] = payload[
                             "request_id"
                         ]
+                else:
+                    # Failed starts have no instance lifetime that can bound replay.
+                    # Move their terminal response into the bounded failure cache instead
+                    # of retaining it forever in the active-start ledger.
+                    self._pre_instance_ledger.discard(payload["request_id"])
+                    self._failed_start_ledger.complete(payload, response)
                 return response
 
             instance_id = payload["instance_id"]
