@@ -61,10 +61,18 @@ def _validate_simulation_options(payload: dict) -> None:
         raise RequestRejected("field 'simulation_options' must be an object")
     for key, value in options.items():
         expected = _OPTIONAL_SIMULATION_OPTION_TYPES.get(key)
-        if expected is None:
+        if expected is None or value is None:
             continue
-        if value is not None and not isinstance(value, expected):
-            raise RequestRejected(f"simulation_options.{key!r} must be of type {expected.__name__}")
+        if expected is int:
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise RequestRejected(
+                    f"simulation_options.{key!r} must be a positive integer"
+                )
+            continue
+        if not isinstance(value, expected):
+            raise RequestRejected(
+                f"simulation_options.{key!r} must be of type {expected.__name__}"
+            )
     stop_condition = options.get("stop_condition")
     if stop_condition is not None and stop_condition not in _SUPPORTED_STOP_CONDITIONS:
         raise RequestRejected(
