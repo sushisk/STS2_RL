@@ -13,6 +13,7 @@ from API.tcp_server import AsyncioTcpServer
 
 class _FakeCombatInstance:
     created = 0
+    decision_calls = 0
 
     def __init__(self, instance_id: str, instance_config: dict, **kwargs) -> None:
         type(self).created += 1
@@ -26,6 +27,10 @@ class _FakeCombatInstance:
             "instance_id": self.instance_id,
         }
 
+    def get_decision(self, branch_id: str) -> dict:
+        type(self).decision_calls += 1
+        raise RuntimeError("simulated decision failure")
+
     def close(self) -> None:
         self.closed = True
 
@@ -33,6 +38,7 @@ class _FakeCombatInstance:
 class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         _FakeCombatInstance.created = 0
+        _FakeCombatInstance.decision_calls = 0
         self.dispatcher = RLApiServer()
         self.server = AsyncioTcpServer(self.dispatcher.handle_request, port=0)
         await self.server.start()
@@ -131,6 +137,33 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(close_first["status"], "completed")
             self.assertEqual(close_replay, close_first)
             self.assertEqual(self.dispatcher.instance_count(), 0)
+
+    async def test_faulted_request_is_replayed_without_reexecution(self) -> None:
+        fake_module = types.ModuleType("API.instance_combat")
+        fake_module.CombatInstance = _FakeCombatInstance
+        with patch.dict(sys.modules, {"API.instance_combat": fake_module}):
+            start = await self._round_trip(
+                {
+                    "schema_version": "0.5",
+                    "request_id": "req-start-for-fault",
+                    "operation": "start_instance",
+                    "instance_config": {"instance_type": "combat"},
+                }
+            )
+            request = {
+                "schema_version": "0.5",
+                "request_id": "req-fault-stable",
+                "operation": "get_decision",
+                "instance_id": start["instance_id"],
+                "branch_id": "root",
+            }
+
+            first = await self._round_trip(request)
+            replay = await self._round_trip(request)
+
+            self.assertEqual(first["status"], "faulted")
+            self.assertEqual(replay, first)
+            self.assertEqual(_FakeCombatInstance.decision_calls, 1)
 
     async def test_reused_start_request_id_with_different_content_is_rejected(self) -> None:
         fake_module = types.ModuleType("API.instance_combat")
