@@ -43,6 +43,8 @@ A TCP connection may carry multiple request/response pairs. Multiplexing is not 
 
 Timeout, cancellation, and a local response-size-limit failure can occur after RL has observed or completed a request. Training therefore treats such failures as completion-uncertain and discards the connection. If a caller retries the same logical request, it must preserve the same serialized payload and `request_id`; changing a local `max_response_bytes` value does not change the logical request. Automatic retry/reconciliation remains outside this framing contract.
 
+RL replay retention is intentionally bounded across instance lifetimes. While an instance is active, its instance-scoped `RequestLedger` retains completed responses for that instance. `start_instance` responses and successful `close_instance` tombstones use bounded server-wide replay caches (default: the most recent 1024 completed entries of each kind). A close tombstone stores only the successful close request/response, never the closed instance's full request history. If the relevant bounded replay entry has already been evicted, the caller must use external reconciliation; it MUST NOT convert the same completion-uncertain logical operation into a fresh `request_id` merely to make progress.
+
 ## 4. Transport-only messages
 
 The following exact JSON object is reserved for a transport-path responsiveness check and is outside API DTO v0.5:
