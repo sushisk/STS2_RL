@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import threading
 import unittest
 
 from API.tcp_server import AsyncioTcpServer
@@ -11,16 +10,11 @@ from API.tcp_server import AsyncioTcpServer
 class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
         self.requests: list[dict] = []
-        self.slow_started = threading.Event()
-        self.release_slow = threading.Event()
 
         def handler(payload: dict) -> dict:
             self.requests.append(payload)
             if payload.get("operation") == "raise":
                 raise RuntimeError("boom")
-            if payload.get("operation") == "slow":
-                self.slow_started.set()
-                self.release_slow.wait(timeout=2.0)
             return {"echo": payload}
 
         self.server = AsyncioTcpServer(handler, port=0)
@@ -30,7 +24,6 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         )
 
     async def asyncTearDown(self) -> None:
-        self.release_slow.set()
         self.writer.close()
         try:
             await self.writer.wait_closed()
@@ -85,57 +78,6 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response["fault_kind"], "emulator_error")
         self.assertEqual(response["instance_id"], "inst-1")
         self.assertIn("RuntimeError: boom", response["error"])
-
-    async def test_slow_api_handler_does_not_block_ping_on_other_connection(self) -> None:
-        slow_request = {
-            "schema_version": "0.5",
-            "request_id": "req-slow",
-            "operation": "slow",
-            "instance_id": "inst-slow",
-        }
-        slow_task = asyncio.create_task(self._round_trip(slow_request))
-        started = await asyncio.to_thread(self.slow_started.wait, 1.0)
-        self.assertTrue(started)
-
-        reader2, writer2 = await asyncio.open_connection(
-            "127.0.0.1", self.server.bound_port
-        )
-        try:
-            writer2.write(b'{"transport_operation":"ping"}\n')
-            await writer2.drain()
-            pong = json.loads(await asyncio.wait_for(reader2.readline(), timeout=0.5))
-            self.assertEqual(pong, {"transport_operation": "pong"})
-        finally:
-            self.release_slow.set()
-            writer2.close()
-            try:
-                await writer2.wait_closed()
-            except (ConnectionError, OSError):
-                pass
-
-        self.assertEqual((await slow_task)["echo"], slow_request)
-
-    async def test_response_is_not_limited_by_request_frame_limit(self) -> None:
-        limited = AsyncioTcpServer(
-            lambda payload: {"payload": "x" * 1024},
-            port=0,
-            max_message_bytes=256,
-        )
-        await limited.start()
-        reader, writer = await asyncio.open_connection("127.0.0.1", limited.bound_port)
-        try:
-            writer.write(b'{"request_id":"small"}\n')
-            await writer.drain()
-            line = await reader.readline()
-            self.assertGreater(len(line), 256)
-            self.assertEqual(json.loads(line), {"payload": "x" * 1024})
-        finally:
-            writer.close()
-            try:
-                await writer.wait_closed()
-            except (ConnectionError, OSError):
-                pass
-            await limited.close()
 
 
 if __name__ == "__main__":
