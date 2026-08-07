@@ -133,7 +133,6 @@ class RLApiServer:
 
     def _execute_new_request(self, ledger: SessionLedger, payload: dict) -> dict:
         operation = payload["operation"]
-        session_id = payload["client_session_id"]
 
         if operation == OP_START_INSTANCE:
             if ledger.active_instance_id is not None:
@@ -141,7 +140,7 @@ class RLApiServer:
                     f"session already owns active instance {ledger.active_instance_id!r}",
                     fault_kind=FAULT_SESSION_INSTANCE_CONFLICT,
                 )
-            response = self._handle_start_instance(payload, session_id)
+            response = self._handle_start_instance(payload)
             instance_id = response.get("instance_id")
             if isinstance(instance_id, str) and instance_id:
                 ledger.active_instance_id = instance_id
@@ -207,7 +206,7 @@ class RLApiServer:
             return instance.get_branch_status(payload["branch_ids"])
         raise RequestRejected(f"unhandled operation {operation!r}")
 
-    def _handle_start_instance(self, payload: dict, session_id: str) -> dict:
+    def _handle_start_instance(self, payload: dict) -> dict:
         instance_config = payload["instance_config"]
         instance_type = instance_config.get("instance_type")
         instance_id = f"inst-{next(self._instance_serial):06d}"
