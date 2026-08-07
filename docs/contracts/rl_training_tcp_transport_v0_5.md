@@ -4,7 +4,7 @@
 
 This document defines how the existing RL–Training Communication DTO v0.5 is carried between independently started `STS2_RL` and `STS2_Training` processes.
 
-The DTO contract remains the source of truth for API request/response fields and semantics. TCP adds framing and transport-only failure behavior; it does not add another API envelope.
+The DTO contract remains the source of truth for API request/response fields and semantics. TCP adds framing and transport-only framing failures; it does not add another API envelope or redefine API lifecycle semantics.
 
 ## 2. Framing
 
@@ -34,9 +34,9 @@ In particular:
 - `request_id` in the response MUST equal the request `request_id`.
 - `operation` in the response MUST equal the request `operation`.
 - For instance-targeting operations, response `instance_id` MUST equal request `instance_id`.
-- `rejected` and `faulted` are normal API DTO responses, not transport failures.
+- `rejected` and `faulted` are normal API DTO responses, not transport framing failures.
 
-A TCP connection may carry multiple request/response pairs. Multiplexing and cross-connection retry/replay semantics are not defined by this transport-framing PR.
+A TCP connection may carry multiple request/response pairs. Multiplexing, timeout/cancellation semantics, cross-connection retry/replay, idempotency, and ambiguous-completion recovery are not defined by this transport-framing contract.
 
 ## 4. Transport-only messages
 
@@ -56,7 +56,7 @@ Only the exact one-field object above is a transport ping. An API DTO that conta
 
 `ping` MUST NOT be forwarded to `RLApiServer.handle_request` and MUST NOT initialize the Emulator.
 
-## 5. Transport errors
+## 5. Transport framing errors
 
 If a frame cannot be interpreted as a valid JSON object at the transport layer, RL may return a transport-only error object such as:
 
@@ -70,23 +70,17 @@ or:
 {"transport_error":"invalid_message","error":"top-level JSON value must be an object"}
 ```
 
-An oversized request may return:
+An oversized inbound request may return:
 
 ```json
 {"transport_error":"message_too_large","direction":"request","max_message_bytes":1048576}
 ```
 
-Transport-only error objects are not API DTO responses. Training MUST classify them as transport failures before API envelope/correlation validation.
+These objects describe failures to obtain an API DTO request frame and are not API DTO responses. Once a valid JSON object is forwarded to `RLApiServer`, API validation and execution semantics remain those of the existing DTO contract.
 
-Once a valid JSON object is forwarded to `RLApiServer`, API validation failures are represented by the normal DTO `status="rejected"` response.
+This contract does not assign retry, idempotency, timeout, cancellation, or reconciliation meaning to transport failures. Those concerns require a separate design and contract change.
 
-## 6. Timeout and connection handling
-
-Training owns TCP request timeouts. A socket timeout or task cancellation is a transport failure and does not synthesize an API DTO response.
-
-If a client abandons an exchange after sending has started, it SHOULD discard that connection before issuing another request so a late response cannot be mistaken for a later response. The exact retry/reconciliation semantics for ambiguous completion, especially for non-idempotent API operations, are intentionally deferred to a separate contract change.
-
-## 7. Process boundary
+## 6. Process boundary
 
 Recommended local startup:
 
@@ -98,6 +92,6 @@ python -m API.tcp_server --host 127.0.0.1 --port 8765
 
 The current transport provides no authentication or TLS and defaults to loopback. It should not be exposed to an untrusted network without a separate security layer.
 
-## 8. Compatibility rule
+## 7. Compatibility rule
 
 TCP framing does not change API DTO semantics. Any future DTO revision should continue to be selected by the DTO `schema_version`; a separate transport schema version is not introduced by v0.5.
