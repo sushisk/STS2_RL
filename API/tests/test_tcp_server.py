@@ -23,6 +23,10 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         self.reader, self.writer = await asyncio.open_connection(
             "127.0.0.1", self.server.bound_port
         )
+        hello = await self._round_trip(
+            {"transport_operation": "hello", "client_session_id": "session-a"}
+        )
+        self.assertEqual(hello["server_epoch"], "epoch-test")
 
     async def asyncTearDown(self) -> None:
         self.writer.close()
@@ -108,13 +112,36 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             await writer.drain()
             writer.write_eof()
             self.assertEqual(await asyncio.wait_for(reader.read(), timeout=1.0), b"")
-            self.assertEqual(self.requests, [])
         finally:
             writer.close()
             try:
                 await writer.wait_closed()
             except (ConnectionError, OSError):
                 pass
+
+    async def test_api_before_hello_is_rejected(self) -> None:
+        reader, writer = await asyncio.open_connection(
+            "127.0.0.1", self.server.bound_port
+        )
+        try:
+            writer.write(
+                json.dumps(
+                    {
+                        "schema_version": "0.6",
+                        "client_session_id": "session-b",
+                        "request_seq": 1,
+                        "request_id": "session-b:1",
+                        "operation": "start_instance",
+                    }
+                ).encode("utf-8")
+                + b"\n"
+            )
+            await writer.drain()
+            response = json.loads(await reader.readline())
+            self.assertEqual(response["transport_error"], "hello_required")
+        finally:
+            writer.close()
+            await writer.wait_closed()
 
     async def test_ping_remains_responsive_while_api_handler_runs(self) -> None:
         started = threading.Event()
@@ -141,7 +168,19 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         timer.start()
         try:
             first_writer.write(
-                json.dumps({"operation": "block"}).encode("utf-8") + b"\n"
+                b'{"transport_operation":"hello","client_session_id":"session-block"}\n'
+            )
+            await first_writer.drain()
+            await first_reader.readline()
+
+            first_writer.write(
+                json.dumps(
+                    {
+                        "client_session_id": "session-block",
+                        "operation": "block",
+                    }
+                ).encode("utf-8")
+                + b"\n"
             )
             await first_writer.drain()
             self.assertTrue(await asyncio.to_thread(started.wait, 0.5))
@@ -161,7 +200,15 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             response = json.loads(
                 await asyncio.wait_for(first_reader.readline(), timeout=1.0)
             )
-            self.assertEqual(response, {"echo": {"operation": "block"}})
+            self.assertEqual(
+                response,
+                {
+                    "echo": {
+                        "client_session_id": "session-block",
+                        "operation": "block",
+                    }
+                },
+            )
         finally:
             release.set()
             timer.cancel()
