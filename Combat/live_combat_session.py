@@ -233,6 +233,59 @@ class FaultedCombatSessionError(RuntimeError):
         super().__init__(message)
 
 
+class SnapshotRestoreMissingMoveError(RuntimeError):
+    """Raised by `step()` when asked to execute an End Turn (`action_type == "system"`)
+    against a `battle_state` where a living enemy's current Move (`Intent.stateId`) is
+    still the Emulator's own `UNSET_MOVE` sentinel - i.e. this state descends from a
+    Snapshot Restore whose enemies never got a Move established.
+
+    Root cause (confirmed empirically, not speculative): `SnapshotRestorer` deliberately
+    never touches `Intent`/calls `RollMove()` (a Restore fresh-start hook it must never
+    invoke - see `Combat/tests/test_restore_snapshot_phase3c1.py::
+    _strip_known_restore_boundary_diffs`'s own docstring), so EVERY Snapshot restored
+    through `restore_snapshot()`/`restore_snapshot_json()` currently comes back with
+    every enemy's Move unset, and it stays unset through any further card-play Steps
+    from that same branch (nothing else in this engine sets it either). Actually ending
+    such a turn makes the underlying C# monster-move state machine hang inside
+    `GameInstance.WaitUntilChoiceOrSettled()` for ~15s before surfacing only as a generic
+    `TimeoutException` ("Timed out waiting for the next decision point or settlement") -
+    the real cause (`InvalidOperationException("No move has been set for the monster")`,
+    thrown from `MonsterMoveStateMachine/MoveState.cs`'s `UnsetMove()`) never reaches
+    Python at all. This check fails FAST, before the CLR `Step()` call that would hang,
+    with the actual cause and the specific enemies affected - instead of a caller (e.g. a
+    Branch Worker) burning a full `request_timeout_s` discovering it the hard way.
+
+    This is a genuine Emulator (`SnapshotRestorer`) scope gap, not something the RL side
+    can fix by itself - only detect and report clearly. Fixing it for real (making
+    Restore establish a real Move, or exposing a supported RL-callable re-roll) requires
+    Emulator-side work; see `docs/contracts/combat_state_contract.v0.5.md`'s
+    known-limitations section. The engine itself is never touched by this check (raised
+    before any CLR call), so unlike an actual engine fault this does NOT mark the session
+    faulted - `battle_state` remains valid for any non-End-Turn action.
+    """
+
+    fault_kind = "snapshot_restore_missing_monster_move"
+
+    def __init__(self, missing_enemies: "list[dict]") -> None:
+        self.missing_enemies = missing_enemies
+        super().__init__(
+            "Refusing to execute End Turn: living enemies still lack a current Move "
+            f"(Intent.stateId == 'UNSET_MOVE'): {missing_enemies!r}. This is a known "
+            "Emulator SnapshotRestorer gap (Intent/RollMove is never touched by Restore) "
+            "- ending this turn would hang waiting for a Move that will never be set "
+            "(see MonsterMoveStateMachine/MoveState.cs's UnsetMove())."
+        )
+
+
+def _enemies_missing_current_move(engine_state: dict) -> "list[dict]":
+    missing = []
+    for enemy in engine_state.get("enemies") or []:
+        alive = enemy.get("isAlive", True) and (enemy.get("hp", 0) or 0) > 0
+        if alive and (enemy.get("intent") or {}).get("stateId") == "UNSET_MOVE":
+            missing.append({"index": enemy.get("index"), "id": enemy.get("id")})
+    return missing
+
+
 def _str_or_none(value) -> "str | None":
     return None if value is None else str(value)
 
@@ -472,6 +525,25 @@ class LiveCombatSession:
         self._session_faulted = True
         raise SnapshotRestoreFailedError(context) from clr_exc
 
+    def _finish_restore(self, result) -> BattleState:
+        """Shared tail of `restore_snapshot()`/`restore_snapshot_json()`: wraps the CLR
+        restore result and commits it as this session's current frame.
+
+        Deliberately does NOT check for `SnapshotRestoreMissingMoveError` here - per that
+        exception's own docstring, `Intent`/Move is unconditionally absent on EVERY
+        Snapshot Restore result (a Restore-wide Emulator gap, not specific to any one
+        Snapshot), so checking at Restore time would reject every restore outright,
+        including the overwhelming majority that never end the turn from this exact
+        state (card-play evaluation, Branch Worker candidate scoring, etc.) and are
+        entirely unaffected by it. The check instead runs in `step()`, gated on the
+        specific action that actually triggers the hang (`action_type == "system"`,
+        i.e. End Turn) - see `step()`'s own docstring.
+        """
+        battle_state = self._wrap_restore_result(result)
+        self._current_frame = battle_state.decision_frame
+        self._session_faulted = False
+        return battle_state
+
     def restore_snapshot(self, snapshot) -> BattleState:
         """Restores a clean snapshot and establishes a fresh live session identity.
 
@@ -489,10 +561,7 @@ class LiveCombatSession:
         except _quiescent_exception_type() as exc:  # noqa: BLE001
             raise QuiescentBoundaryViolation(str(exc)) from exc
 
-        battle_state = self._wrap_restore_result(result)
-        self._current_frame = battle_state.decision_frame
-        self._session_faulted = False
-        return battle_state
+        return self._finish_restore(result)
 
     def restore_snapshot_json(self, json_text: str) -> BattleState:
         """Restores from canonical Snapshot JSON through the public CLR JSON API."""
@@ -506,10 +575,7 @@ class LiveCombatSession:
         except _quiescent_exception_type() as exc:  # noqa: BLE001
             raise QuiescentBoundaryViolation(str(exc)) from exc
 
-        battle_state = self._wrap_restore_result(result)
-        self._current_frame = battle_state.decision_frame
-        self._session_faulted = False
-        return battle_state
+        return self._finish_restore(result)
 
     def resume_from(self, battle_state: BattleState) -> BattleState:
         """`CombatEnv.adopt_state()`'s counterpart to `start_combat()` - establishes
@@ -674,6 +740,12 @@ class LiveCombatSession:
         legal_actions across a state change, against legal_action_schema.json's own
         rule) is rejected here rather than silently misexecuted.
 
+        End Turn (`action_type == "system"`) is additionally rejected up front, before
+        ever calling into the CLR, if a living enemy still has no current Move
+        (`Intent.stateId == "UNSET_MOVE"`) - see `SnapshotRestoreMissingMoveError`.
+        Without this guard, that same situation makes the underlying engine hang for
+        ~15s and then raise an opaque wait-timeout instead of the real cause.
+
         Phase 3A.3 (Action fault contract): if the underlying C# action genuinely faults
         or is canceled, this method raises `ActionExecutionError` INSTEAD OF returning a
         `BattleState` - no StepResult/Observation/LegalActions from the faulted attempt
@@ -693,6 +765,10 @@ class LiveCombatSession:
                 f"action submitted against stale DecisionFrame {battle_state.decision_frame!r} - "
                 f"session's current frame is {self._current_frame!r}"
             )
+        if action.get("action_type") == "system":
+            missing = _enemies_missing_current_move(battle_state.engine_state)
+            if missing:
+                raise SnapshotRestoreMissingMoveError(missing)
 
         self.last_step_resynchronized = False
         if not self._is_still_current():

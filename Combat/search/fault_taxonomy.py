@@ -25,6 +25,7 @@ from live_combat_session import (
     FaultedCombatSessionError,
     QuiescentBoundaryViolation,
     SnapshotRestoreFailedError,
+    SnapshotRestoreMissingMoveError,
     SnapshotRestoreRejectedError,
 )
 from search.branch_worker_pool import BRANCH_STATUS_FAULT, BRANCH_STATUS_SUCCESS, BranchResult, WorkItem
@@ -42,6 +43,11 @@ FAULT_TASK_TIMEOUT = "task_timeout"
 FAULT_WORKER_PROCESS_CRASH = "worker_process_crash"
 FAULT_DEPTH_CAP_EXCEEDED = "depth_cap_exceeded"
 FAULT_ZERO_CANDIDATES = "zero_candidates"
+# `SnapshotRestoreMissingMoveError.fault_kind` - a living enemy still has no current Move
+# (`Intent.stateId == "UNSET_MOVE"`) when `step()` is asked to execute End Turn. Caught at
+# the actual trigger point (before the CLR call that would otherwise hang ~15s and
+# collapse into an opaque `FAULT_TASK_TIMEOUT`) - see that exception's own docstring.
+FAULT_SNAPSHOT_MOVE_MISSING = SnapshotRestoreMissingMoveError.fault_kind
 
 BRANCH_FAULT_KINDS = frozenset(
     {
@@ -53,6 +59,7 @@ BRANCH_FAULT_KINDS = frozenset(
         FAULT_WORKER_PROCESS_CRASH,
         FAULT_DEPTH_CAP_EXCEEDED,
         FAULT_ZERO_CANDIDATES,
+        FAULT_SNAPSHOT_MOVE_MISSING,
     }
 )
 
@@ -90,6 +97,7 @@ DECISION_LOG_STATUS_DIAGNOSTIC_ONLY = "diagnostic_only"
 _FAULT_BY_EXCEPTION_TYPE = {
     SnapshotRestoreRejectedError.__name__: FAULT_VALIDATION_REJECTION,
     SnapshotRestoreFailedError.__name__: FAULT_POST_TEARDOWN_RESTORE_FAILURE,
+    SnapshotRestoreMissingMoveError.__name__: FAULT_SNAPSHOT_MOVE_MISSING,
     ActionExecutionError.__name__: FAULT_ACTION_FAULT,
     FaultedCombatSessionError.__name__: FAULT_ACTION_FAULT,
     QuiescentBoundaryViolation.__name__: FAULT_ACTION_FAULT,
@@ -105,6 +113,8 @@ _FAULT_BY_DIAGNOSTIC_KIND = {
     "post_teardown_restore_failure": FAULT_POST_TEARDOWN_RESTORE_FAILURE,
     "snapshot_restore_failed": FAULT_POST_TEARDOWN_RESTORE_FAILURE,
     "SnapshotRestoreFailedError": FAULT_POST_TEARDOWN_RESTORE_FAILURE,
+    FAULT_SNAPSHOT_MOVE_MISSING: FAULT_SNAPSHOT_MOVE_MISSING,
+    "SnapshotRestoreMissingMoveError": FAULT_SNAPSHOT_MOVE_MISSING,
     "action_fault": FAULT_ACTION_FAULT,
     "worker_exception": FAULT_ACTION_FAULT,
     "task_timeout": FAULT_TASK_TIMEOUT,
@@ -125,6 +135,7 @@ _DECISION_LOG_STATUS_BY_FAULT = {
     FAULT_WORKER_PROCESS_CRASH: DECISION_LOG_STATUS_DIAGNOSTIC_ONLY,
     FAULT_DEPTH_CAP_EXCEEDED: DECISION_LOG_STATUS_DIAGNOSTIC_ONLY,
     FAULT_ZERO_CANDIDATES: DECISION_LOG_STATUS_COVERAGE_FAILED,
+    FAULT_SNAPSHOT_MOVE_MISSING: DECISION_LOG_STATUS_VALIDATION_REJECTED,
 }
 
 
@@ -150,6 +161,7 @@ def classify_fault(exc_or_diagnostics: Any) -> str:
     for exc_type, fault_kind in (
         (SnapshotRestoreRejectedError, FAULT_VALIDATION_REJECTION),
         (SnapshotRestoreFailedError, FAULT_POST_TEARDOWN_RESTORE_FAILURE),
+        (SnapshotRestoreMissingMoveError, FAULT_SNAPSHOT_MOVE_MISSING),
         (ActionExecutionError, FAULT_ACTION_FAULT),
         (FaultedCombatSessionError, FAULT_ACTION_FAULT),
         (QuiescentBoundaryViolation, FAULT_ACTION_FAULT),

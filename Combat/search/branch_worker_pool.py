@@ -566,6 +566,11 @@ class _WorkerRuntime:
                 self.worker_id,
                 self.worker_generation,
                 exc,
+                # Exceptions that already carry their own diagnostic classification (e.g.
+                # `SnapshotRestoreMissingMoveError.fault_kind`) keep it, instead of
+                # collapsing into the generic "worker_exception" default - see
+                # `fault_taxonomy.py`'s own `carried_fault_kind` convention.
+                fault_kind=getattr(exc, "fault_kind", None) or "worker_exception",
             )
 
 
@@ -585,6 +590,7 @@ def _worker_main(worker_id: int, worker_generation: int, repo_root: Optional[str
                 worker_id,
                 worker_generation,
                 exc,
+                fault_kind=getattr(exc, "fault_kind", None) or "worker_exception",
             )
         out_queue.put((request_id, result))
 
