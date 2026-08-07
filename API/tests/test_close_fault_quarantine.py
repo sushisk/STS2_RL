@@ -22,27 +22,32 @@ class _FaultingCloseCombatInstance:
 
 
 class CloseFaultQuarantineTest(unittest.TestCase):
+    @staticmethod
+    def _request(seq: int, operation: str, **fields) -> dict:
+        return {
+            "schema_version": "0.6",
+            "client_session_id": "session-a",
+            "request_seq": seq,
+            "request_id": f"session-a:{seq}",
+            "operation": operation,
+            **fields,
+        }
+
     def test_faulted_close_quarantines_instance_and_replays_terminal_fault(self) -> None:
         fake_module = types.ModuleType("API.instance_combat")
         fake_module.CombatInstance = _FaultingCloseCombatInstance
         with patch.dict(sys.modules, {"API.instance_combat": fake_module}):
-            server = RLApiServer(replay_cache_entries=4)
+            server = RLApiServer()
             start = server.handle_request(
-                {
-                    "schema_version": "0.5",
-                    "request_id": "start-1",
-                    "operation": "start_instance",
-                    "instance_config": {"instance_type": "combat"},
-                }
+                self._request(
+                    1,
+                    "start_instance",
+                    instance_config={"instance_type": "combat"},
+                )
             )
             instance_id = start["instance_id"]
             instance = server._instances[instance_id]
-            close_request = {
-                "schema_version": "0.5",
-                "request_id": "close-1",
-                "operation": "close_instance",
-                "instance_id": instance_id,
-            }
+            close_request = self._request(2, "close_instance", instance_id=instance_id)
 
             first = server.handle_request(close_request)
             replay = server.handle_request(close_request)
@@ -51,19 +56,17 @@ class CloseFaultQuarantineTest(unittest.TestCase):
         self.assertEqual(first, replay)
         self.assertEqual(instance.close_calls, 1)
         self.assertEqual(server.instance_count(), 0)
-        self.assertNotIn(instance_id, server._ledgers)
-        self.assertIn(instance_id, server._closed_ledgers)
+        self.assertIsNone(server._sessions["session-a"].active_instance_id)
 
-        stale_request = {
-            "schema_version": "0.5",
-            "request_id": "decision-after-close-fault",
-            "operation": "get_decision",
-            "instance_id": instance_id,
-            "branch_id": "root",
-        }
+        stale_request = self._request(
+            3,
+            "get_decision",
+            instance_id=instance_id,
+            branch_id="root",
+        )
         rejected = server.handle_request(stale_request)
         self.assertEqual(rejected["status"], "rejected")
-        self.assertEqual(rejected["fault_kind"], "unknown_instance")
+        self.assertEqual(rejected["fault_kind"], "session_instance_conflict")
 
 
 if __name__ == "__main__":
