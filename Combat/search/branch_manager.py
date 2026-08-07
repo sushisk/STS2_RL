@@ -162,8 +162,19 @@ class BranchManager:
 
     # -- dispatch / polling ---------------------------------------------------------
 
-    def poll(self, timeout: float = 120.0) -> dict[str, BranchResult]:
-        """Resolve every Branch that is ``queued`` when this call starts.
+    def poll(
+        self,
+        timeout: float = 120.0,
+        *,
+        branch_ids: Optional[list[str]] = None,
+    ) -> dict[str, BranchResult]:
+        """Resolve selected queued Branches, or every queued Branch when unspecified.
+
+        ``branch_ids`` lets a coordinator bind one poll to the Branches owned by the
+        current request. This prevents a pre-existing queued Branch from another caller
+        or transaction from being dispatched, timed out, or quarantined as collateral.
+        Every explicitly selected Branch must exist and still be ``queued`` when polling
+        starts.
 
         ``timeout`` is a per-Branch execution timeout. ``poll()`` keeps at most one
         outstanding request on each worker, so Branches beyond the worker count stay
@@ -182,11 +193,29 @@ class BranchManager:
         if timeout <= 0:
             raise ValueError("timeout must be positive")
 
-        poll_branch_ids = [
-            branch_id
-            for branch_id, record in list(self._records.items())
-            if record.state == BRANCH_STATE_QUEUED
-        ]
+        if branch_ids is None:
+            poll_branch_ids = [
+                branch_id
+                for branch_id, record in list(self._records.items())
+                if record.state == BRANCH_STATE_QUEUED
+            ]
+        else:
+            poll_branch_ids = []
+            seen: set[str] = set()
+            for branch_id in branch_ids:
+                if branch_id in seen:
+                    continue
+                seen.add(branch_id)
+                record = self._records.get(branch_id)
+                if record is None:
+                    raise UnknownBranchError(branch_id)
+                if record.state != BRANCH_STATE_QUEUED:
+                    raise RuntimeError(
+                        f"Branch {branch_id} must be queued when explicitly polled, "
+                        f"got state={record.state!r}"
+                    )
+                poll_branch_ids.append(branch_id)
+
         waiting = list(poll_branch_ids)
         running_by_request_id: dict[int, str] = {}
         request_worker_ids: dict[int, int] = {}
