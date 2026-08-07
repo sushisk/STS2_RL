@@ -115,7 +115,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual((await slow_task)["echo"], slow_request)
 
-    async def test_response_frame_limit_returns_transport_error(self) -> None:
+    async def test_response_is_not_limited_by_request_frame_limit(self) -> None:
         limited = AsyncioTcpServer(
             lambda payload: {"payload": "x" * 1024},
             port=0,
@@ -127,11 +127,8 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             writer.write(b'{"request_id":"small"}\n')
             await writer.drain()
             line = await reader.readline()
-            self.assertLessEqual(len(line), 256)
-            response = json.loads(line)
-            self.assertEqual(response["transport_error"], "message_too_large")
-            self.assertEqual(response["direction"], "response")
-            self.assertEqual(response["max_message_bytes"], 256)
+            self.assertGreater(len(line), 256)
+            self.assertEqual(json.loads(line), {"payload": "x" * 1024})
         finally:
             writer.close()
             try:
