@@ -77,9 +77,6 @@ def _target_params(action: dict) -> tuple:
 
 
 class _DecisionView:
-    """Uniform "what's the current Decision here" record - built fresh for root on
-    every access, cached (immutable) for a completed Branch's resulting decision."""
-
     __slots__ = ("legal_actions_raw", "decision_context", "boundary", "public_id_by_index")
 
     def __init__(self, legal_actions_raw: list, decision_context: DecisionContext, boundary: str) -> None:
@@ -109,10 +106,6 @@ class _BranchBookkeeping:
 
 @dataclass(frozen=True)
 class _AdmittedItem:
-    """One `emulate_actions` batch item that passed Phase A (Admission validation),
-    carrying everything Phase B needs to build its WorkItem without re-resolving the
-    parent's Decision view a second time."""
-
     parent_branch_id: str
     branch_id: str
     rng_id: int
@@ -136,34 +129,26 @@ class CombatInstance:
             + scenario_spec.get("discard_pile", []).count(card_id)
             for card_id in set(scenario_spec.get("hand", []) + scenario_spec.get("draw_pile", []) + scenario_spec.get("discard_pile", []))
         }
-
         self._pool = BranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
         self._lease_registry = LeaseRegistry()
         self._branch_manager = BranchManager(self._pool, self._lease_registry, max_branches=max_branches)
-
         self._branch_ids = BranchIdRegistry()
         self._decision_points = DecisionPointRegistry()
         self._rng_table = RngHypothesisTable()
-
         self._root_branch_log: list = []
         self._root_history = HistoryBuilder()
         self._bookkeeping: dict[str, _BranchBookkeeping] = {}
         self._closed = False
-
         self._decision_points.issue(ROOT_BRANCH_ID)
 
     def _ensure_open(self) -> None:
         if self._closed:
             raise RequestRejected("combat instance is closed after an unrecoverable cleanup failure")
 
-    # -- root decision view --------------------------------------------------------
-
     def _root_view(self) -> _DecisionView:
         legal = list(self._root_state._cached_legal_actions or [])
         representative = legal[0] if legal else {"action_type": "system", "parameters": {}}
-        signature = DecisionSignature.from_battle_state(
-            self._root_state, semantic_action=_semantic_action_for(representative), resolved_action=representative
-        )
+        signature = DecisionSignature.from_battle_state(self._root_state, semantic_action=_semantic_action_for(representative), resolved_action=representative)
         context = DecisionContext.from_main_stable_capture(self._session.capture_snapshot(), self._root_state, signature)
         return _DecisionView(legal, context, signature.boundary)
 
@@ -178,22 +163,12 @@ class CombatInstance:
     def _decision_response_fields(self, public_branch_id: str, view: _DecisionView, *, branch_log: list) -> dict:
         engine_state = dict(view.decision_context.current_decision_result.engine_state)
         masked = build_masked_emulator_dto(engine_state, extra={"legal_actions": mask_legal_actions(view.legal_actions_raw)})
-        return {
-            "branch_id": public_branch_id,
-            "decision_point_id": self._decision_points.current(public_branch_id),
-            "branch_log": branch_log,
-            "masked_emulator_dto": masked,
-        }
+        return {"branch_id": public_branch_id, "decision_point_id": self._decision_points.current(public_branch_id), "branch_log": branch_log, "masked_emulator_dto": masked}
 
     def start_instance_response(self) -> dict:
         self._ensure_open()
         view = self._root_view()
-        return {
-            "status": STATUS_COMPLETED,
-            "instance_id": self.instance_id,
-            "max_emulate_actions_items": self._branch_manager.max_branches,
-            **self._decision_response_fields(ROOT_BRANCH_ID, view, branch_log=list(self._root_branch_log)),
-        }
+        return {"status": STATUS_COMPLETED, "instance_id": self.instance_id, "max_emulate_actions_items": self._branch_manager.max_branches, **self._decision_response_fields(ROOT_BRANCH_ID, view, branch_log=list(self._root_branch_log))}
 
     def get_decision(self, branch_id: str) -> dict:
         self._ensure_open()
@@ -218,9 +193,7 @@ class CombatInstance:
         chosen = view.legal_actions_raw[index]
         target_index, target_enemy_index = _target_params(chosen)
         try:
-            next_state = self._session.step(
-                self._root_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True
-            )
+            next_state = self._session.step(self._root_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True)
         except Exception as exc:
             return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
         depth = len(self._root_branch_log)
@@ -262,7 +235,7 @@ class CombatInstance:
         branch_log = parent_log + [{"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": rng_id}]
         book = _BranchBookkeeping(internal_id, parent_branch_id, branch_log, parent_history.fork(), rng_id)
         self._bookkeeping[branch_id] = book
-        results = self._branch_manager.poll(timeout=(simulation_options or {}).get("max_time_ms", 60000) / 1000.0)
+        results = self._branch_manager.poll(timeout=(simulation_options or {}).get("max_time_ms", 60000) / 1000.0, branch_ids=[internal_id])
         result = results.get(internal_id)
         if result is None:
             return {"status": STATUS_RUNNING, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id}
@@ -339,7 +312,7 @@ class CombatInstance:
                 self._bookkeeping[admitted_item.branch_id] = book
                 pending.append((admitted_item, internal_id, book, branch_log))
             branch_timeout_s = (simulation_options or {}).get("max_time_ms", 60000) / 1000.0
-            results = self._branch_manager.poll(timeout=branch_timeout_s)
+            results = self._branch_manager.poll(timeout=branch_timeout_s, branch_ids=internal_ids)
             branch_results: dict = {}
             for admitted_item, internal_id, book, branch_log in pending:
                 result = results.get(internal_id)
@@ -367,9 +340,7 @@ class CombatInstance:
                     self.close()
                 except Exception as exc:
                     cleanup_errors.append(exc)
-                raise RuntimeError(
-                    "emulate_actions cleanup failed; combat instance was closed to prevent ghost Branch execution"
-                ) from cleanup_errors[0]
+                raise RuntimeError("emulate_actions cleanup failed; combat instance was closed to prevent ghost Branch execution") from cleanup_errors[0]
             raise original_exc
 
     def _finalize_branch_result(self, *, branch_id: str, parent_branch_id: str, rng_id: int, book: _BranchBookkeeping, branch_log: list, result: Any) -> dict:
@@ -441,11 +412,4 @@ class CombatInstance:
 
 
 def _translate_branch_status(internal_status: str) -> str:
-    return {
-        "queued": STATUS_QUEUED,
-        "running": STATUS_RUNNING,
-        "completed": STATUS_COMPLETED,
-        "cancelled": STATUS_CANCELLED,
-        "faulted": STATUS_FAULTED,
-        "released": STATUS_RELEASED,
-    }.get(internal_status, internal_status)
+    return {"queued": STATUS_QUEUED, "running": STATUS_RUNNING, "completed": STATUS_COMPLETED, "cancelled": STATUS_CANCELLED, "faulted": STATUS_FAULTED, "released": STATUS_RELEASED}.get(internal_status, internal_status)
