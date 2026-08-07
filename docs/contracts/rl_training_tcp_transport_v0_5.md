@@ -13,11 +13,13 @@ The DTO contract remains the source of truth for API request/response fields and
 - Framing: newline-delimited JSON (NDJSON), one JSON object per line.
 - One request DTO occupies exactly one frame.
 - One response DTO occupies exactly one frame.
+- A frame is complete only when its trailing newline delimiter has been received. If EOF arrives first, the partial bytes MUST NOT be dispatched as an API request.
 - The top-level JSON value for API traffic MUST be an object.
 - The JSON object is the API v0.5 DTO itself. It is not wrapped in a transport-specific `payload` or `data` field.
 - The current default inbound request-frame limit is 1 MiB, including the trailing newline.
 - An oversized inbound request is rejected at the transport layer.
-- This transport contract does not impose the request-frame limit on response frames. A response is read through its terminating newline; any future response-size policy belongs in a separate API/transport design.
+- The RL server does not apply the 1 MiB request-frame limit to outbound response frames.
+- A receiver MUST still bound response buffering independently. `STS2_Training.TcpConnection` defaults `max_response_bytes` to 64 MiB and may be configured higher when the API payload requires it.
 
 Example API request frame:
 
@@ -37,11 +39,13 @@ In particular:
 - For instance-targeting operations, response `instance_id` MUST equal request `instance_id`.
 - `rejected` and `faulted` are normal API DTO responses, not transport framing failures.
 
-A TCP connection may carry multiple request/response pairs. Multiplexing, timeout/cancellation semantics, cross-connection retry/replay, idempotency, and ambiguous-completion recovery are not defined by this transport-framing contract.
+A TCP connection may carry multiple request/response pairs. Multiplexing is not defined by this transport-framing contract.
+
+Timeout, cancellation, and a local response-size-limit failure can occur after RL has observed or completed a request. Training therefore treats such failures as completion-uncertain and discards the connection. If a caller retries the same logical request, it must preserve the same serialized payload and `request_id`; changing a local `max_response_bytes` value does not change the logical request. Automatic retry/reconciliation remains outside this framing contract.
 
 ## 4. Transport-only messages
 
-The following exact JSON object is reserved for transport liveness checks and is outside API DTO v0.5:
+The following exact JSON object is reserved for a transport-path responsiveness check and is outside API DTO v0.5:
 
 ```json
 {"transport_operation":"ping"}
@@ -55,7 +59,7 @@ The server replies:
 
 Only the exact one-field object above is a transport ping. An API DTO that contains an additional field named `transport_operation` is still API traffic and MUST be forwarded to `RLApiServer.handle_request` unchanged.
 
-`ping` MUST NOT be forwarded to `RLApiServer.handle_request` and MUST NOT initialize the Emulator.
+`ping` MUST NOT be forwarded to `RLApiServer.handle_request` and MUST NOT initialize the Emulator. Synchronous API handler calls are executed off the asyncio event loop and remain globally serialized, so a handler running on another connection does not by itself prevent `ping` from being processed. A successful `pong` does not guarantee that an API operation will complete within any particular timeout.
 
 ## 5. Transport framing errors
 
@@ -79,7 +83,7 @@ An oversized inbound request may return:
 
 These objects describe failures to obtain an API DTO request frame and are not API DTO responses. Once a valid JSON object is forwarded to `RLApiServer`, API validation and execution semantics remain those of the existing DTO contract.
 
-This contract does not assign retry, idempotency, timeout, cancellation, or reconciliation meaning to transport failures. Those concerns require a separate design and contract change.
+A receiver-side `max_response_bytes` failure is different: the request may already have executed, so Training reports it as completion-uncertain and invalidates the stream instead of pretending the API operation was rejected.
 
 ## 6. Process boundary
 
