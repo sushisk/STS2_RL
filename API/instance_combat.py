@@ -56,6 +56,13 @@ from API.masking import build_masked_emulator_dto, mask_legal_actions
 from API.validation import RequestRejected
 
 
+INSTANCE_LIFECYCLE_ACTIVE = "active"
+INSTANCE_LIFECYCLE_CLOSING = "closing"
+INSTANCE_LIFECYCLE_CLOSED = "closed"
+ROOT_EXECUTION_IDLE = "idle"
+ROOT_EXECUTION_RUNNING = "running"
+
+
 def _semantic_action_for(action: dict) -> SemanticAction:
     params = action.get("parameters") or {}
     return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
@@ -132,9 +139,18 @@ class CombatInstance:
         self._root_branch_log: list = []
         self._root_history = HistoryBuilder()
         self._bookkeeping: dict[str, _BranchBookkeeping] = {}  # public branch_id -> bookkeeping (non-root only)
-        self._closed = False
+        self._lifecycle_state = INSTANCE_LIFECYCLE_ACTIVE
+        self._root_execution_state = ROOT_EXECUTION_IDLE
 
         self._decision_points.issue(ROOT_BRANCH_ID)
+
+    @property
+    def lifecycle_state(self) -> str:
+        return self._lifecycle_state
+
+    @property
+    def root_execution_state(self) -> str:
+        return self._root_execution_state
 
     # -- root decision view --------------------------------------------------------
 
@@ -191,35 +207,39 @@ class CombatInstance:
 
     def commit_action(self, decision_point_id: str, action_id: str) -> dict:
         self._decision_points.validate(ROOT_BRANCH_ID, decision_point_id)
-        view = self._root_view()
-        index = view.resolve_action_id(action_id)
-        chosen = view.legal_actions_raw[index]
-        target_index, target_enemy_index = _target_params(chosen)
+        self._begin_root_execution()
         try:
-            next_state = self._session.step(
-                self._root_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True
-            )
-        except Exception as exc:  # noqa: BLE001
-            return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
+            view = self._root_view()
+            index = view.resolve_action_id(action_id)
+            chosen = view.legal_actions_raw[index]
+            target_index, target_enemy_index = _target_params(chosen)
+            try:
+                next_state = self._session.step(
+                    self._root_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True
+                )
+            except Exception as exc:  # noqa: BLE001
+                return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
 
-        depth = len(self._root_branch_log)
-        self._root_branch_log.append({"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": ROOT_RNG_ID})
-        self._root_state = next_state
+            depth = len(self._root_branch_log)
+            self._root_branch_log.append({"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": ROOT_RNG_ID})
+            self._root_state = next_state
 
-        # Contract §4.2: Cancel+Release every Branch derived from the just-committed
-        # root Decision (their `parent_public_id` traces back through this decision's
-        # descendants). We conservatively Cancel+Release ALL currently-tracked
-        # non-root Branches - v0.5 gives root exactly one live Decision at a time, so
-        # every extant Branch was, by construction, derived from some ancestor of the
-        # Decision just committed.
-        self._cancel_and_release_all_branches()
+            # Contract §4.2: Cancel+Release every Branch derived from the just-committed
+            # root Decision (their `parent_public_id` traces back through this decision's
+            # descendants). We conservatively Cancel+Release ALL currently-tracked
+            # non-root Branches - v0.5 gives root exactly one live Decision at a time, so
+            # every extant Branch was, by construction, derived from some ancestor of the
+            # Decision just committed.
+            self._cancel_and_release_all_branches()
 
-        self._decision_points.issue(ROOT_BRANCH_ID)
-        view = self._root_view()
-        return {
-            "status": STATUS_COMPLETED,
-            **self._decision_response_fields(ROOT_BRANCH_ID, view, branch_log=list(self._root_branch_log)),
-        }
+            self._decision_points.issue(ROOT_BRANCH_ID)
+            view = self._root_view()
+            return {
+                "status": STATUS_COMPLETED,
+                **self._decision_response_fields(ROOT_BRANCH_ID, view, branch_log=list(self._root_branch_log)),
+            }
+        finally:
+            self._end_root_execution()
 
     def emulate_action(
         self,
@@ -360,13 +380,24 @@ class CombatInstance:
         return {"status": STATUS_COMPLETED, "branch_statuses": statuses}
 
     def close(self) -> None:
-        if self._closed:
+        if self._lifecycle_state in (INSTANCE_LIFECYCLE_CLOSING, INSTANCE_LIFECYCLE_CLOSED):
             return
-        self._closed = True
-        self._branch_manager.close_all()
-        self._pool.close()
+        self._lifecycle_state = INSTANCE_LIFECYCLE_CLOSING
+        try:
+            self._branch_manager.close_all()
+            self._pool.close()
+        finally:
+            self._lifecycle_state = INSTANCE_LIFECYCLE_CLOSED
 
     # -- helpers ------------------------------------------------------------------------
+
+    def _begin_root_execution(self) -> None:
+        if self._root_execution_state != ROOT_EXECUTION_IDLE:
+            raise RequestRejected(f"root is already {self._root_execution_state}")
+        self._root_execution_state = ROOT_EXECUTION_RUNNING
+
+    def _end_root_execution(self) -> None:
+        self._root_execution_state = ROOT_EXECUTION_IDLE
 
     def _internal_id_or_reject(self, public_branch_id: str) -> str:
         if public_branch_id == ROOT_BRANCH_ID:
