@@ -18,7 +18,6 @@ from __future__ import annotations
 import hashlib
 import itertools
 import json
-import threading
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -35,90 +34,31 @@ def _payload_digest(payload: dict) -> str:
 
 
 @dataclass
-class _RequestEntry:
-    digest: str
-    response: Optional[dict] = None
-    done: threading.Event = field(default_factory=threading.Event)
-
-
-@dataclass
 class RequestLedger:
-    _entries: dict[str, _RequestEntry] = field(default_factory=dict)
-    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
+    _entries: dict[str, tuple[str, Optional[dict]]] = field(default_factory=dict)
 
     def begin(self, payload: dict) -> Optional[dict]:
-        """Claim a request or replay an identical completed request.
-
-        When an identical request is already in flight, callers wait for that execution
-        to complete and then receive the cached response. This makes a retry arriving on
-        another TCP connection safe: the retry never executes the operation a second time.
-        If the owning execution aborts, one waiter claims a fresh execution and the others
-        continue waiting on that new owner.
+        """Call before executing a request. Returns a cached RESPONSE to replay verbatim
+        if `request_id` was already completed with identical content; returns None if
+        this is a genuinely new request (or a retry of one still in flight - the caller
+        proceeds normally in that case, since no cached response exists yet). Raises
+        `RequestRejected` if `request_id` was already used with DIFFERENT content.
         """
         request_id = payload["request_id"]
         digest = _payload_digest(payload)
-
-        while True:
-            with self._lock:
-                existing = self._entries.get(request_id)
-                if existing is None:
-                    self._entries[request_id] = _RequestEntry(digest=digest)
-                    return None
-                if existing.digest != digest:
-                    raise RequestRejected(
-                        f"request_id {request_id!r} reused with different content"
-                    )
-                if existing.done.is_set():
-                    return existing.response
-                event = existing.done
-
-            event.wait()
-
-    def lookup_completed(self, payload: dict) -> Optional[dict]:
-        """Return an identical completed response without claiming a new request."""
-        request_id = payload["request_id"]
-        digest = _payload_digest(payload)
-
-        while True:
-            with self._lock:
-                existing = self._entries.get(request_id)
-                if existing is None:
-                    return None
-                if existing.digest != digest:
-                    raise RequestRejected(
-                        f"request_id {request_id!r} reused with different content"
-                    )
-                if existing.done.is_set():
-                    return existing.response
-                event = existing.done
-
-            event.wait()
+        existing = self._entries.get(request_id)
+        if existing is None:
+            self._entries[request_id] = (digest, None)
+            return None
+        existing_digest, cached_response = existing
+        if existing_digest != digest:
+            raise RequestRejected(f"request_id {request_id!r} reused with different content")
+        return cached_response  # None if still in flight (caller re-executes; not our problem to dedupe races).
 
     def complete(self, payload: dict, response: dict) -> None:
         request_id = payload["request_id"]
         digest = _payload_digest(payload)
-        with self._lock:
-            entry = self._entries.get(request_id)
-            if entry is None:
-                entry = _RequestEntry(digest=digest)
-                self._entries[request_id] = entry
-            elif entry.digest != digest:
-                raise RequestRejected(
-                    f"request_id {request_id!r} reused with different content"
-                )
-            entry.response = response
-            entry.done.set()
-
-    def abort(self, payload: dict) -> None:
-        """Release an in-flight claim when execution failed before a response existed."""
-        request_id = payload["request_id"]
-        digest = _payload_digest(payload)
-        with self._lock:
-            entry = self._entries.get(request_id)
-            if entry is None or entry.digest != digest or entry.done.is_set():
-                return
-            del self._entries[request_id]
-            entry.done.set()
+        self._entries[request_id] = (digest, response)
 
 
 @dataclass
