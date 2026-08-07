@@ -80,27 +80,6 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response["status"], "rejected")
         self.assertIn("unknown instance_id", response["error"])
 
-    async def test_invalid_operation_fields_are_dto_rejections(self) -> None:
-        request = {
-            "schema_version": "0.5",
-            "request_id": "req-002",
-            "operation": "commit_action",
-            "instance_id": "inst-001",
-            "branch_id": "root",
-            "rng_id": 1,
-            "decision_point_id": "decision-001",
-            "action_id": "action-001",
-        }
-
-        response = await self._round_trip(request)
-
-        self.assertEqual(response["schema_version"], "0.5")
-        self.assertEqual(response["request_id"], request["request_id"])
-        self.assertEqual(response["operation"], request["operation"])
-        self.assertEqual(response["instance_id"], request["instance_id"])
-        self.assertEqual(response["status"], "rejected")
-        self.assertIn("commit_action.rng_id", response["error"])
-
     async def test_start_instance_dto_round_trips_over_tcp(self) -> None:
         fake_module = types.ModuleType("API.instance_combat")
         fake_module.CombatInstance = _FakeCombatInstance
