@@ -19,16 +19,7 @@ DEFAULT_MAX_MESSAGE_BYTES = 1024 * 1024
 
 
 class AsyncioTcpServer:
-    """Serve newline-delimited JSON requests to a synchronous handler.
-
-    API work runs in worker threads so slow Emulator calls do not block the asyncio
-    event loop. Requests targeting the same instance remain serialized, while distinct
-    instances may execute concurrently and transport ping remains responsive.
-
-    ``max_message_bytes`` limits inbound request frames only. API responses are written
-    without a transport-size substitution so a completed non-idempotent operation can
-    always return (or replay) its actual correlated API response.
-    """
+    """Serve newline-delimited JSON requests to a synchronous handler."""
 
     def __init__(
         self,
@@ -51,9 +42,6 @@ class AsyncioTcpServer:
         self._max_message_bytes = max_message_bytes
         self._server: asyncio.AbstractServer | None = None
         self._client_tasks: set[asyncio.Task[None]] = set()
-        self._start_request_lock = asyncio.Lock()
-        self._unscoped_request_lock = asyncio.Lock()
-        self._instance_request_locks: dict[str, asyncio.Lock] = {}
 
     @property
     def bound_port(self) -> int:
@@ -127,13 +115,20 @@ class AsyncioTcpServer:
                     )
                     continue
 
-                # Transport messages occupy an exact namespace. An otherwise valid API
-                # DTO that merely contains an unknown transport_operation field must still
-                # reach the API validator/dispatcher unchanged.
+                # ping is a transport-only message and occupies this exact shape.
+                # DTOs with any additional fields still go through normal API validation.
                 if payload == {"transport_operation": "ping"}:
                     response: JsonObject = {"transport_operation": "pong"}
                 else:
-                    response = await self._dispatch_api(payload)
+                    try:
+                        response = self._handler(payload)
+                    except Exception as exc:
+                        response = fault_response(payload, exc)
+                    if not isinstance(response, dict):
+                        response = fault_response(
+                            payload,
+                            TypeError("RL handler returned a non-dict response"),
+                        )
 
                 await self._write_response(writer, response)
         finally:
@@ -142,32 +137,6 @@ class AsyncioTcpServer:
                 await writer.wait_closed()
             except (ConnectionError, OSError):
                 pass
-
-    async def _dispatch_api(self, payload: JsonObject) -> JsonObject:
-        lock = self._request_lock(payload)
-        async with lock:
-            try:
-                response = await asyncio.to_thread(self._handler, payload)
-            except Exception as exc:
-                response = fault_response(payload, exc)
-            if not isinstance(response, dict):
-                response = fault_response(
-                    payload,
-                    TypeError("RL handler returned a non-dict response"),
-                )
-            return response
-
-    def _request_lock(self, payload: JsonObject) -> asyncio.Lock:
-        if payload.get("operation") == "start_instance":
-            return self._start_request_lock
-        instance_id = payload.get("instance_id")
-        if isinstance(instance_id, str) and instance_id:
-            lock = self._instance_request_locks.get(instance_id)
-            if lock is None:
-                lock = asyncio.Lock()
-                self._instance_request_locks[instance_id] = lock
-            return lock
-        return self._unscoped_request_lock
 
     async def _read_line(
         self,
@@ -195,15 +164,7 @@ class AsyncioTcpServer:
         writer: asyncio.StreamWriter,
         response: JsonObject,
     ) -> None:
-        # Do not replace oversized API responses with a transport error. If a
-        # non-idempotent request completed successfully, the exact response must remain
-        # observable and replayable with the same request_id.
-        writer.write(AsyncioTcpServer._encode(response))
-        await writer.drain()
-
-    @staticmethod
-    def _encode(response: JsonObject) -> bytes:
-        return (
+        writer.write(
             json.dumps(
                 response,
                 ensure_ascii=False,
@@ -211,6 +172,7 @@ class AsyncioTcpServer:
             ).encode("utf-8")
             + b"\n"
         )
+        await writer.drain()
 
 
 async def run_rl_server(
