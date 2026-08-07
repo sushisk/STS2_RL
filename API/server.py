@@ -30,6 +30,7 @@ from API.dto import (
     STATUS_COMPLETED,
     STATUS_REJECTED,
 )
+from API.faults import fault_response
 from API.identifiers import RequestLedger
 from API.validation import RequestRejected, validate_request
 
@@ -123,9 +124,11 @@ class RLApiServer:
             response = execute()
         except RequestRejected as exc:
             response = self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
-        except Exception:
-            ledger.abort(payload)
-            raise
+        except BaseException as exc:  # noqa: BLE001 - API faults must be replayable.
+            # Cache the API fault response as the completed result of this logical
+            # request. If the transport loses that response, a same-ID retry must replay
+            # it rather than executing a potentially non-idempotent operation again.
+            response = fault_response(payload, exc)
 
         ledger.complete(payload, response)
         return response, True
