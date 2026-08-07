@@ -7,6 +7,7 @@ import uuid
 from typing import Any
 
 from API.dto import (
+    FAULT_INVALID_REQUEST,
     FAULT_SESSION_CAPACITY,
     FAULT_SESSION_INSTANCE_CONFLICT,
     FAULT_UNKNOWN_INSTANCE,
@@ -81,7 +82,11 @@ class RLApiServer:
         try:
             validate_request(payload)
         except RequestRejected as exc:
-            return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
+            return self._rejected(
+                payload,
+                exc.error,
+                fault_kind=exc.fault_kind or FAULT_INVALID_REQUEST,
+            )
 
         session_id = payload["client_session_id"]
         try:
@@ -93,7 +98,11 @@ class RLApiServer:
             try:
                 response = self._execute_new_request(ledger, payload)
             except RequestRejected as exc:
-                response = self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
+                response = {
+                    "status": STATUS_REJECTED,
+                    "error": exc.error,
+                    "fault_kind": exc.fault_kind,
+                }
             except Exception as exc:
                 response = fault_response(payload, exc)
 
@@ -101,6 +110,8 @@ class RLApiServer:
             ledger.complete(response)
             return response
         except RequestRejected as exc:
+            # Session capacity/sequence errors happen before the new sequence becomes an
+            # executable request and therefore are not written into the session ledger.
             return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
 
     def _get_or_create_session(self, session_id: str) -> SessionLedger:
