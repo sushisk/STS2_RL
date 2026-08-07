@@ -12,6 +12,7 @@ constructs a second `GameInstance` in ITS OWN process - see the module docstring
 from __future__ import annotations
 
 import itertools
+from collections.abc import Callable
 from typing import Any
 
 from API.dto import (
@@ -37,6 +38,10 @@ class RLApiServer:
     def __init__(self, *, instance_factory_kwargs: "dict | None" = None) -> None:
         self._instances: dict[str, Any] = {}
         self._ledgers: dict[str, RequestLedger] = {}
+        # Completed close_instance requests remain replayable after their Instance and
+        # active ledger have been removed. This is required for ambiguous TCP completion:
+        # a client may need to retry the exact same close request after a lost response.
+        self._closed_ledgers: dict[str, RequestLedger] = {}
         self._pre_instance_ledger = RequestLedger()
         self._instance_serial = itertools.count(1)
         self._kwargs = instance_factory_kwargs or {}
@@ -48,6 +53,7 @@ class RLApiServer:
         for instance in list(self._instances.values()):
             instance.close()
         self._instances.clear()
+        self._ledgers.clear()
 
     def handle_request(self, payload: dict) -> dict:
         try:
@@ -56,36 +62,73 @@ class RLApiServer:
             return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
 
         operation = payload["operation"]
-        try:
-            if operation == OP_START_INSTANCE:
-                cached = self._pre_instance_ledger.begin(payload)
-                if cached is not None:
-                    return cached
-                response = self._handle_start_instance(payload)
-                response = self._wrap(payload, response)
-                self._pre_instance_ledger.complete(payload, response)
-                return response
-
-            instance_id = payload["instance_id"]
-            instance = self._instances.get(instance_id)
-            if instance is None:
-                raise RequestRejected(f"unknown instance_id {instance_id!r}")
-            ledger = self._ledgers[instance_id]
-            cached = ledger.begin(payload)
-            if cached is not None:
-                return cached
-
-            response = self._dispatch(instance, operation, payload)
-            response = self._wrap(payload, response)
-            ledger.complete(payload, response)
-
-            if operation == OP_CLOSE_INSTANCE:
-                instance.close()
-                del self._instances[instance_id]
-                del self._ledgers[instance_id]
+        if operation == OP_START_INSTANCE:
+            response, _ = self._run_with_ledger(
+                self._pre_instance_ledger,
+                payload,
+                lambda: self._wrap(payload, self._handle_start_instance(payload)),
+            )
             return response
+
+        instance_id = payload["instance_id"]
+        instance = self._instances.get(instance_id)
+        if instance is None:
+            if operation == OP_CLOSE_INSTANCE:
+                closed_ledger = self._closed_ledgers.get(instance_id)
+                if closed_ledger is not None:
+                    try:
+                        cached = closed_ledger.lookup_completed(payload)
+                    except RequestRejected as exc:
+                        return self._rejected(
+                            payload,
+                            exc.error,
+                            fault_kind=exc.fault_kind,
+                        )
+                    if cached is not None:
+                        return cached
+            return self._rejected(payload, f"unknown instance_id {instance_id!r}")
+
+        ledger = self._ledgers[instance_id]
+        response, executed = self._run_with_ledger(
+            ledger,
+            payload,
+            lambda: self._wrap(payload, self._dispatch(instance, operation, payload)),
+        )
+
+        if (
+            executed
+            and operation == OP_CLOSE_INSTANCE
+            and response.get("status") == STATUS_COMPLETED
+        ):
+            instance.close()
+            self._instances.pop(instance_id, None)
+            self._ledgers.pop(instance_id, None)
+            self._closed_ledgers[instance_id] = ledger
+        return response
+
+    def _run_with_ledger(
+        self,
+        ledger: RequestLedger,
+        payload: dict,
+        execute: Callable[[], dict],
+    ) -> tuple[dict, bool]:
+        try:
+            cached = ledger.begin(payload)
         except RequestRejected as exc:
-            return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
+            return self._rejected(payload, exc.error, fault_kind=exc.fault_kind), False
+        if cached is not None:
+            return cached, False
+
+        try:
+            response = execute()
+        except RequestRejected as exc:
+            response = self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
+        except Exception:
+            ledger.abort(payload)
+            raise
+
+        ledger.complete(payload, response)
+        return response, True
 
     def _dispatch(self, instance: Any, operation: str, payload: dict) -> dict:
         if operation == OP_GET_DECISION:
