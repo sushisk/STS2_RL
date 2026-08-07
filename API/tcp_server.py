@@ -19,7 +19,12 @@ DEFAULT_MAX_MESSAGE_BYTES = 1024 * 1024
 
 
 class AsyncioTcpServer:
-    """Serve newline-delimited JSON requests to a synchronous handler."""
+    """Serve newline-delimited JSON requests to a synchronous handler.
+
+    API work runs in worker threads so slow Emulator calls do not block the asyncio
+    event loop. Requests targeting the same instance remain serialized, while distinct
+    instances may execute concurrently and transport ping remains responsive.
+    """
 
     def __init__(
         self,
@@ -42,6 +47,9 @@ class AsyncioTcpServer:
         self._max_message_bytes = max_message_bytes
         self._server: asyncio.AbstractServer | None = None
         self._client_tasks: set[asyncio.Task[None]] = set()
+        self._start_request_lock = asyncio.Lock()
+        self._unscoped_request_lock = asyncio.Lock()
+        self._instance_request_locks: dict[str, asyncio.Lock] = {}
 
     @property
     def bound_port(self) -> int:
@@ -115,18 +123,13 @@ class AsyncioTcpServer:
                     )
                     continue
 
-                if payload.get("transport_operation") == "ping":
+                # Transport messages occupy an exact namespace. An otherwise valid API
+                # DTO that merely contains an unknown transport_operation field must still
+                # reach the API validator/dispatcher unchanged.
+                if payload == {"transport_operation": "ping"}:
                     response: JsonObject = {"transport_operation": "pong"}
                 else:
-                    try:
-                        response = self._handler(payload)
-                    except Exception as exc:
-                        response = fault_response(payload, exc)
-                    if not isinstance(response, dict):
-                        response = fault_response(
-                            payload,
-                            TypeError("RL handler returned a non-dict response"),
-                        )
+                    response = await self._dispatch_api(payload)
 
                 await self._write_response(writer, response)
         finally:
@@ -135,6 +138,32 @@ class AsyncioTcpServer:
                 await writer.wait_closed()
             except (ConnectionError, OSError):
                 pass
+
+    async def _dispatch_api(self, payload: JsonObject) -> JsonObject:
+        lock = self._request_lock(payload)
+        async with lock:
+            try:
+                response = await asyncio.to_thread(self._handler, payload)
+            except Exception as exc:
+                response = fault_response(payload, exc)
+            if not isinstance(response, dict):
+                response = fault_response(
+                    payload,
+                    TypeError("RL handler returned a non-dict response"),
+                )
+            return response
+
+    def _request_lock(self, payload: JsonObject) -> asyncio.Lock:
+        if payload.get("operation") == "start_instance":
+            return self._start_request_lock
+        instance_id = payload.get("instance_id")
+        if isinstance(instance_id, str) and instance_id:
+            lock = self._instance_request_locks.get(instance_id)
+            if lock is None:
+                lock = asyncio.Lock()
+                self._instance_request_locks[instance_id] = lock
+            return lock
+        return self._unscoped_request_lock
 
     async def _read_line(
         self,
@@ -151,17 +180,38 @@ class AsyncioTcpServer:
             writer,
             {
                 "transport_error": "message_too_large",
+                "direction": "request",
                 "max_message_bytes": self._max_message_bytes,
             },
         )
         return b""
 
-    @staticmethod
     async def _write_response(
+        self,
         writer: asyncio.StreamWriter,
         response: JsonObject,
     ) -> None:
-        writer.write(
+        encoded = self._encode(response)
+        if len(encoded) > self._max_message_bytes:
+            encoded = self._encode(
+                {
+                    "transport_error": "message_too_large",
+                    "direction": "response",
+                    "max_message_bytes": self._max_message_bytes,
+                }
+            )
+            # Extremely small custom limits may be unable to carry even the compact
+            # transport error. In that case close the stream rather than violating the
+            # configured frame limit.
+            if len(encoded) > self._max_message_bytes:
+                writer.close()
+                return
+        writer.write(encoded)
+        await writer.drain()
+
+    @staticmethod
+    def _encode(response: JsonObject) -> bytes:
+        return (
             json.dumps(
                 response,
                 ensure_ascii=False,
@@ -169,7 +219,6 @@ class AsyncioTcpServer:
             ).encode("utf-8")
             + b"\n"
         )
-        await writer.drain()
 
 
 async def run_rl_server(
