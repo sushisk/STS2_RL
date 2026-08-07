@@ -1,4 +1,4 @@
-"""Asyncio TCP entry point for the STS2_RL API."""
+"""Asyncio TCP entry point for the STS2_RL API v0.6."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import json
 import sys
+import uuid
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -19,12 +20,13 @@ DEFAULT_MAX_MESSAGE_BYTES = 1024 * 1024
 
 
 class AsyncioTcpServer:
-    """Serve newline-delimited JSON requests to a synchronous handler."""
+    """Serve UTF-8 NDJSON API requests while keeping emulator work off the event loop."""
 
     def __init__(
         self,
         handler: Callable[[JsonObject], JsonObject],
         *,
+        server_epoch: str | None = None,
         host: str = DEFAULT_HOST,
         port: int = DEFAULT_PORT,
         max_message_bytes: int = DEFAULT_MAX_MESSAGE_BYTES,
@@ -35,14 +37,18 @@ class AsyncioTcpServer:
             raise ValueError("port must be between 0 and 65535")
         if max_message_bytes <= 0:
             raise ValueError("max_message_bytes must be positive")
-
         self._handler = handler
+        self._server_epoch = server_epoch or str(uuid.uuid4())
         self._host = host
         self._port = port
         self._max_message_bytes = max_message_bytes
         self._handler_lock = asyncio.Lock()
         self._server: asyncio.AbstractServer | None = None
         self._client_tasks: set[asyncio.Task[None]] = set()
+
+    @property
+    def server_epoch(self) -> str:
+        return self._server_epoch
 
     @property
     def bound_port(self) -> int:
@@ -73,7 +79,6 @@ class AsyncioTcpServer:
         if server is not None:
             server.close()
             await server.wait_closed()
-
         current = asyncio.current_task()
         tasks = [task for task in self._client_tasks if task is not current]
         for task in tasks:
@@ -81,31 +86,21 @@ class AsyncioTcpServer:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    def _client_connected(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> None:
+    def _client_connected(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
         task = asyncio.create_task(self._handle_client(reader, writer))
         self._client_tasks.add(task)
         task.add_done_callback(self._client_tasks.discard)
 
-    async def _handle_client(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> None:
+    async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
         try:
             while line := await self._read_line(reader, writer):
                 try:
                     payload = json.loads(line)
                 except (UnicodeDecodeError, json.JSONDecodeError) as exc:
                     await self._write_response(
-                        writer,
-                        {"transport_error": "invalid_json", "error": str(exc)},
+                        writer, {"transport_error": "invalid_json", "error": str(exc)}
                     )
                     continue
-
                 if not isinstance(payload, dict):
                     await self._write_response(
                         writer,
@@ -116,10 +111,17 @@ class AsyncioTcpServer:
                     )
                     continue
 
-                # ping is a transport-only message and occupies this exact shape.
-                # DTOs with any additional fields still go through normal API validation.
                 if payload == {"transport_operation": "ping"}:
-                    response: JsonObject = {"transport_operation": "pong"}
+                    response: JsonObject = {
+                        "transport_operation": "pong",
+                        "server_epoch": self._server_epoch,
+                    }
+                elif self._is_hello(payload):
+                    response = {
+                        "transport_operation": "hello",
+                        "server_epoch": self._server_epoch,
+                        "client_session_id": payload["client_session_id"],
+                    }
                 else:
                     try:
                         response = await self._call_handler(payload)
@@ -127,10 +129,8 @@ class AsyncioTcpServer:
                         response = fault_response(payload, exc)
                     if not isinstance(response, dict):
                         response = fault_response(
-                            payload,
-                            TypeError("RL handler returned a non-dict response"),
+                            payload, TypeError("RL handler returned a non-dict response")
                         )
-
                 await self._write_response(writer, response)
         finally:
             writer.close()
@@ -139,14 +139,16 @@ class AsyncioTcpServer:
             except (ConnectionError, OSError):
                 pass
 
-    async def _call_handler(self, payload: JsonObject) -> JsonObject:
-        """Run the synchronous API handler without blocking the asyncio event loop.
+    @staticmethod
+    def _is_hello(payload: JsonObject) -> bool:
+        return (
+            set(payload) == {"transport_operation", "client_session_id"}
+            and payload.get("transport_operation") == "hello"
+            and isinstance(payload.get("client_session_id"), str)
+            and bool(payload["client_session_id"])
+        )
 
-        Handler calls remain globally serialized to preserve the pre-existing execution
-        model. If this client task is cancelled (for example during server shutdown),
-        wait for the already-started handler call before releasing the serialization
-        lock so a second handler cannot overlap it in another worker thread.
-        """
+    async def _call_handler(self, payload: JsonObject) -> JsonObject:
         async with self._handler_lock:
             handler_task = asyncio.create_task(asyncio.to_thread(self._handler, payload))
             try:
@@ -158,27 +160,17 @@ class AsyncioTcpServer:
                     pass
                 raise
 
-    async def _read_line(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> bytes:
+    async def _read_line(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> bytes:
         try:
             line = await reader.readline()
         except (ValueError, asyncio.LimitOverrunError):
             line = None
-
         if line == b"":
             return b""
         if line is not None and len(line) <= self._max_message_bytes:
-            # ``StreamReader.readline`` returns a partial buffer when EOF arrives before
-            # the delimiter. NDJSON requires the newline to complete the request frame;
-            # never dispatch an unterminated partial frame because it may have side
-            # effects the sender cannot know were applied.
             if not line.endswith(b"\n"):
                 return b""
             return line
-
         await self._write_response(
             writer,
             {
@@ -190,16 +182,9 @@ class AsyncioTcpServer:
         return b""
 
     @staticmethod
-    async def _write_response(
-        writer: asyncio.StreamWriter,
-        response: JsonObject,
-    ) -> None:
+    async def _write_response(writer: asyncio.StreamWriter, response: JsonObject) -> None:
         writer.write(
-            json.dumps(
-                response,
-                ensure_ascii=False,
-                separators=(",", ":"),
-            ).encode("utf-8")
+            json.dumps(response, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
             + b"\n"
         )
         await writer.drain()
@@ -225,12 +210,16 @@ async def run_rl_server(
     dispatcher = RLApiServer()
     server = AsyncioTcpServer(
         dispatcher.handle_request,
+        server_epoch=dispatcher.server_epoch,
         host=host,
         port=port,
         max_message_bytes=max_message_bytes,
     )
     await server.start()
-    print(f"STS2_RL asyncio TCP listening on {host}:{server.bound_port}", flush=True)
+    print(
+        f"STS2_RL asyncio TCP listening on {host}:{server.bound_port} epoch={dispatcher.server_epoch}",
+        flush=True,
+    )
     try:
         await server.serve_forever()
     finally:
@@ -242,12 +231,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
-    parser.add_argument(
-        "--max-message-bytes",
-        type=int,
-        default=DEFAULT_MAX_MESSAGE_BYTES,
-        help="maximum inbound request frame size, including the trailing newline",
-    )
+    parser.add_argument("--max-message-bytes", type=int, default=DEFAULT_MAX_MESSAGE_BYTES)
     return parser.parse_args(argv)
 
 
