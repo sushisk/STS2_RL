@@ -18,9 +18,9 @@ Design notes
   running Branch is currently occupying, so Cancel can act on exactly that worker.
 * Worker affinity guarantee this relies on: each worker process consumes its input
   Queue strictly one request at a time (see ``_worker_main`` in
-  ``branch_worker_pool.py``), so at most one Branch is ever "running" on a given worker
-  at once. Killing that worker to cancel Branch B therefore can never interrupt some
-  *other* Branch's in-flight request - there isn't one.
+  ``branch_worker_pool.py``), and ``poll()`` never submits a second request to a busy
+  worker. Therefore at most one Branch is ever ``running`` on a given worker at once.
+  Branches waiting for that worker remain coordinator-side ``queued`` Branches.
 * Cancelling a Branch never touches Main Run state (Main never holds a Branch Worker
   slot - see ``BranchWorkerPool.respawn_worker`` docstring) and never invalidates a
   *different* Branch's Lease: worker-kill-based Cancel only invalidates Leases owned by
@@ -163,20 +163,21 @@ class BranchManager:
     # -- dispatch / polling ---------------------------------------------------------
 
     def poll(self, timeout: float = 120.0) -> dict[str, BranchResult]:
-        """Route every still-``queued`` Branch onto a worker, then drain the shared
-        result Queue until every Branch this call put into ``running`` has resolved.
+        """Resolve every Branch that is ``queued`` when this call starts.
 
-        ``timeout`` is a per-worker-head Branch execution timeout, not a batch-wide idle
-        timeout. Each worker gets an absolute deadline for the Branch currently at the
-        head of its FIFO; completion on one worker never extends another worker's hung
-        Branch. When a worker completes one Branch, the next queued Branch assigned to
-        that worker receives a fresh deadline. A timed-out worker is respawned and all
-        still-outstanding requests already submitted to that worker are faulted because
-        its process queue is discarded by the respawn.
+        ``timeout`` is a per-Branch execution timeout. ``poll()`` keeps at most one
+        outstanding request on each worker, so Branches beyond the worker count stay
+        coordinator-side ``queued`` until a compatible worker slot becomes available.
+        The deadline starts only when that Branch is actually submitted to a worker;
+        completion on another worker never extends it. If a worker times out, only its
+        executing Branch receives ``task_timeout``. The worker is respawned, and queued
+        tails are routed to the replacement (or another compatible worker) with a fresh
+        deadline.
 
-        If coordinator-side dispatch raises unexpectedly, every Branch admitted by this
-        poll call is cancelled and released before the exception propagates, preventing
-        queued/running leftovers from being executed by a later unrelated ``poll()``.
+        If coordinator-side dispatch/result handling raises unexpectedly, every Branch
+        admitted by this poll call is cancelled and released before the exception
+        propagates, preventing queued/running leftovers from being executed by a later
+        unrelated ``poll()``.
         """
         if timeout <= 0:
             raise ValueError("timeout must be positive")
@@ -186,66 +187,126 @@ class BranchManager:
             for branch_id, record in list(self._records.items())
             if record.state == BRANCH_STATE_QUEUED
         ]
-        newly_running: dict[int, str] = {}
+        waiting = list(poll_branch_ids)
+        running_by_request_id: dict[int, str] = {}
         request_worker_ids: dict[int, int] = {}
+        worker_request_ids: dict[int, int] = {}
         worker_deadlines: dict[int, float] = {}
-        try:
-            for branch_id in poll_branch_ids:
-                record = self._records[branch_id]
-                if record.state != BRANCH_STATE_QUEUED:
-                    continue
-                request, worker_id, self._next_bootstrap_index, _ = _route_work_item(
-                    record.work_item,
-                    self._lease_registry,
-                    worker_ids=self._pool.worker_ids,
-                    worker_generations=self._pool.worker_generations,
-                    next_bootstrap_index=self._next_bootstrap_index,
-                )
-                ipc_work_item = _work_item_for_ipc(record.work_item)
-                ipc_request = request.__class__(ipc_work_item, request.execution_mode, request.expected_lease)
-                request_id = self._pool._submit(worker_id, ipc_request)  # noqa: SLF001
-                record.state = BRANCH_STATE_RUNNING
-                record.worker_id = worker_id
-                record.worker_generation = self._pool.worker_generations[worker_id]
-                record.request_id = request_id
-                record.execution_mode = request.execution_mode
-                self._request_id_to_branch_id[request_id] = branch_id
-                newly_running[request_id] = branch_id
-                request_worker_ids[request_id] = worker_id
-                worker_deadlines.setdefault(worker_id, time.monotonic() + timeout)
-        except Exception:
-            self._quarantine_poll_branches(poll_branch_ids)
-            raise
-
         results: dict[str, BranchResult] = {}
-        remaining = set(newly_running)
-        while remaining:
-            active_worker_ids = {
-                request_worker_ids[rid]
-                for rid in remaining
-                if request_worker_ids[rid] in worker_deadlines
-            }
-            if not active_worker_ids:
-                break
-            now = time.monotonic()
-            next_deadline = min(worker_deadlines[worker_id] for worker_id in active_worker_ids)
-            wait_s = max(0.0, next_deadline - now)
-            try:
-                received_id, result = self._pool._result_queue.get(timeout=wait_s)  # noqa: SLF001
-            except queue.Empty:
-                now = time.monotonic()
-                expired_worker_ids = {
+
+        def _dispatch_available() -> None:
+            """Fill every currently free worker without queueing behind a live request."""
+            while waiting:
+                free_worker_ids = [
                     worker_id
-                    for worker_id in active_worker_ids
-                    if worker_deadlines[worker_id] <= now
-                }
-                for hung_worker_id in expired_worker_ids:
-                    stale_generation = self._pool.worker_generations.get(hung_worker_id)
-                    self._pool.respawn_worker(hung_worker_id, lease_registry=self._lease_registry)
-                    for rid in list(remaining):
-                        if request_worker_ids[rid] != hung_worker_id:
+                    for worker_id in self._pool.worker_ids
+                    if worker_id not in worker_request_ids
+                ]
+                if not free_worker_ids:
+                    return
+
+                dispatched = False
+                for branch_id in list(waiting):
+                    record = self._records[branch_id]
+                    if record.state != BRANCH_STATE_QUEUED:
+                        waiting.remove(branch_id)
+                        continue
+
+                    # A valid continuation Lease must retain worker affinity. If its
+                    # holder is busy, leave this Branch queued and try another item.
+                    lease = None
+                    if getattr(record.work_item, "work_kind", None) == "continuation":
+                        lease = self._lease_registry.get(
+                            record.work_item.context_id,
+                            record.work_item.search_hypothesis_id,
+                        )
+                    if lease is not None:
+                        generation = self._pool.worker_generations.get(lease.worker_id)
+                        if (
+                            generation is not None
+                            and lease.is_valid_for(record.work_item, worker_generation=generation)
+                            and lease.worker_id not in free_worker_ids
+                        ):
                             continue
-                        record = self._records[newly_running[rid]]
+
+                    request, worker_id, self._next_bootstrap_index, _ = _route_work_item(
+                        record.work_item,
+                        self._lease_registry,
+                        worker_ids=free_worker_ids,
+                        worker_generations=self._pool.worker_generations,
+                        next_bootstrap_index=self._next_bootstrap_index,
+                    )
+                    if worker_id not in free_worker_ids:
+                        # Defensive invariant: the only legitimate non-free route is a
+                        # valid holder Lease, and that case is deferred above.
+                        raise RuntimeError(
+                            f"routing selected busy worker {worker_id} for Branch {branch_id}"
+                        )
+
+                    ipc_work_item = _work_item_for_ipc(record.work_item)
+                    ipc_request = request.__class__(
+                        ipc_work_item,
+                        request.execution_mode,
+                        request.expected_lease,
+                    )
+                    request_id = self._pool._submit(worker_id, ipc_request)  # noqa: SLF001
+                    record.state = BRANCH_STATE_RUNNING
+                    record.worker_id = worker_id
+                    record.worker_generation = self._pool.worker_generations[worker_id]
+                    record.request_id = request_id
+                    record.execution_mode = request.execution_mode
+                    self._request_id_to_branch_id[request_id] = branch_id
+                    running_by_request_id[request_id] = branch_id
+                    request_worker_ids[request_id] = worker_id
+                    worker_request_ids[worker_id] = request_id
+                    worker_deadlines[worker_id] = time.monotonic() + timeout
+                    waiting.remove(branch_id)
+                    dispatched = True
+                    break
+
+                if not dispatched:
+                    return
+
+        try:
+            _dispatch_available()
+            while waiting or running_by_request_id:
+                if not running_by_request_id:
+                    # With no live request, every worker is free. If routing still could
+                    # not dispatch a queued Branch, the state machine is inconsistent.
+                    _dispatch_available()
+                    if not running_by_request_id:
+                        raise RuntimeError("queued Branches could not be routed to any worker")
+
+                next_deadline = min(worker_deadlines.values())
+                wait_s = max(0.0, next_deadline - time.monotonic())
+                try:
+                    received_id, result = self._pool._result_queue.get(timeout=wait_s)  # noqa: SLF001
+                except queue.Empty:
+                    now = time.monotonic()
+                    expired_worker_ids = [
+                        worker_id
+                        for worker_id, deadline in worker_deadlines.items()
+                        if deadline <= now
+                    ]
+                    for hung_worker_id in expired_worker_ids:
+                        request_id = worker_request_ids.pop(hung_worker_id)
+                        branch_id = running_by_request_id.pop(request_id)
+                        request_worker_ids.pop(request_id, None)
+                        worker_deadlines.pop(hung_worker_id, None)
+                        self._request_id_to_branch_id.pop(request_id, None)
+                        record = self._records[branch_id]
+
+                        # A concurrent Cancel may already have respawned this worker.
+                        # Preserve that terminal state instead of overwriting it with a
+                        # synthetic timeout when the abandoned request never responds.
+                        if record.state in (BRANCH_STATE_CANCELLED, BRANCH_STATE_RELEASED):
+                            continue
+
+                        stale_generation = self._pool.worker_generations.get(hung_worker_id)
+                        self._pool.respawn_worker(
+                            hung_worker_id,
+                            lease_registry=self._lease_registry,
+                        )
                         fault = _fault_result(
                             record.work_item,
                             record.execution_mode,
@@ -256,30 +317,30 @@ class BranchManager:
                         )
                         self._finish(record, fault)
                         results[record.branch_id] = fault
-                        remaining.discard(rid)
-                        self._request_id_to_branch_id.pop(rid, None)
-                    worker_deadlines.pop(hung_worker_id, None)
-                continue
-            if received_id not in remaining:
-                continue
-            branch_id = newly_running[received_id]
-            record = self._records[branch_id]
-            worker_id = request_worker_ids[received_id]
-            if record.state == BRANCH_STATE_CANCELLED:
-                # Cancelled after submission but before its result arrived - discard.
-                remaining.discard(received_id)
-                self._request_id_to_branch_id.pop(received_id, None)
-            else:
-                self._finish(record, result)
-                results[branch_id] = result
-                remaining.discard(received_id)
-                self._request_id_to_branch_id.pop(received_id, None)
 
-            if any(request_worker_ids[rid] == worker_id for rid in remaining):
-                worker_deadlines[worker_id] = time.monotonic() + timeout
-            else:
+                    _dispatch_available()
+                    continue
+
+                if received_id not in running_by_request_id:
+                    # Stray/late result from a request already cancelled/timed out.
+                    continue
+
+                branch_id = running_by_request_id.pop(received_id)
+                worker_id = request_worker_ids.pop(received_id)
+                worker_request_ids.pop(worker_id, None)
                 worker_deadlines.pop(worker_id, None)
-        return results
+                self._request_id_to_branch_id.pop(received_id, None)
+                record = self._records[branch_id]
+
+                if record.state not in (BRANCH_STATE_CANCELLED, BRANCH_STATE_RELEASED):
+                    self._finish(record, result)
+                    results[branch_id] = result
+                _dispatch_available()
+
+            return results
+        except Exception:
+            self._quarantine_poll_branches(poll_branch_ids)
+            raise
 
     def _quarantine_poll_branches(self, branch_ids: list[str]) -> None:
         """Best-effort cleanup for coordinator exceptions during dispatch."""
