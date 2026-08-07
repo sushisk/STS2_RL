@@ -196,6 +196,8 @@ class CombatInstance:
     def get_decision(self, branch_id: str) -> dict:
         if branch_id != ROOT_BRANCH_ID and not self._branch_ids.is_known(branch_id):
             raise RequestRejected(f"unknown branch_id {branch_id!r}")
+        if branch_id != ROOT_BRANCH_ID and branch_id not in self._bookkeeping:
+            raise RequestRejected(f"branch_id {branch_id!r} is unavailable after a failed batch")
         if branch_id != ROOT_BRANCH_ID:
             status = self._branch_manager.get_branch_status([self._bookkeeping[branch_id].internal_id])[self._bookkeeping[branch_id].internal_id]
             translated = _translate_branch_status(status)
