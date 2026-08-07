@@ -11,11 +11,12 @@ from API.server import RLApiServer
 class _AdversarialCombatInstance:
     def __init__(self, instance_id: str, instance_config: dict, **kwargs) -> None:
         self.instance_id = instance_id
+        self.start_status = instance_config.get("start_status", "completed")
         self.get_decision_calls = 0
 
     def start_instance_response(self) -> dict:
         return {
-            "status": "completed",
+            "status": self.start_status,
             "instance_id": "spoofed-instance",
             "schema_version": "999",
             "server_epoch": "spoofed-epoch",
@@ -94,6 +95,22 @@ class ServerResponseFinalizationTest(unittest.TestCase):
         self.assertEqual(response["request_id"], "session-a:1")
         self.assertEqual(response["operation"], "start_instance")
         self.assertEqual(server._sessions["session-a"].active_instance_id, "inst-000001")
+
+    def test_failed_start_does_not_claim_session_ownership(self) -> None:
+        server = RLApiServer()
+        request = self._request(
+            1,
+            "start_instance",
+            instance_config={"instance_type": "combat", "start_status": "running"},
+        )
+
+        first = server.handle_request(request)
+        replay = server.handle_request(request)
+
+        self.assertEqual(first["status"], "faulted")
+        self.assertEqual(first, replay)
+        self.assertIsNone(server._sessions["session-a"].active_instance_id)
+        self.assertEqual(server.instance_count(), 0)
 
     def test_instance_scoped_response_cannot_spoof_correlation_envelope(self) -> None:
         server = RLApiServer(server_epoch="epoch-real")
