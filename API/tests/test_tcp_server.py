@@ -23,10 +23,16 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         self.reader, self.writer = await asyncio.open_connection(
             "127.0.0.1", self.server.bound_port
         )
-        hello = await self._round_trip(
-            {"transport_operation": "hello", "client_session_id": "session-a"}
-        )
+        hello = await self._round_trip(self._hello("session-a"))
         self.assertEqual(hello["server_epoch"], "epoch-test")
+
+    @staticmethod
+    def _hello(session_id: str, schema_version: str = "0.6") -> dict:
+        return {
+            "transport_operation": "hello",
+            "schema_version": schema_version,
+            "client_session_id": session_id,
+        }
 
     async def asyncTearDown(self) -> None:
         self.writer.close()
@@ -41,19 +47,32 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         await self.writer.drain()
         return json.loads(await self.reader.readline())
 
-    async def test_hello_returns_server_epoch_without_dispatch(self) -> None:
-        response = await self._round_trip(
-            {"transport_operation": "hello", "client_session_id": "session-a"}
-        )
+    async def test_hello_returns_schema_and_server_epoch_without_dispatch(self) -> None:
+        response = await self._round_trip(self._hello("session-a"))
         self.assertEqual(
             response,
             {
                 "transport_operation": "hello",
+                "schema_version": "0.6",
                 "client_session_id": "session-a",
                 "server_epoch": "epoch-test",
             },
         )
         self.assertEqual(self.requests, [])
+
+    async def test_hello_rejects_unsupported_schema_before_api_traffic(self) -> None:
+        reader, writer = await asyncio.open_connection(
+            "127.0.0.1", self.server.bound_port
+        )
+        try:
+            writer.write(json.dumps(self._hello("session-old", "0.5")).encode() + b"\n")
+            await writer.drain()
+            response = json.loads(await reader.readline())
+            self.assertEqual(response["transport_error"], "unsupported_schema")
+            self.assertEqual(response["supported_schema_version"], "0.6")
+        finally:
+            writer.close()
+            await writer.wait_closed()
 
     async def test_ping_does_not_enter_api_dispatcher(self) -> None:
         response = await self._round_trip({"transport_operation": "ping"})
@@ -167,9 +186,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         timer = threading.Timer(1.0, lambda: (fallback_fired.set(), release.set()))
         timer.start()
         try:
-            first_writer.write(
-                b'{"transport_operation":"hello","client_session_id":"session-block"}\n'
-            )
+            first_writer.write(json.dumps(self._hello("session-block")).encode() + b"\n")
             await first_writer.drain()
             await first_reader.readline()
 
