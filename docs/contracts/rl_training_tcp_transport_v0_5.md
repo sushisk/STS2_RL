@@ -17,6 +17,7 @@ The DTO contract remains the source of truth for API request/response fields and
 - The JSON object is the API v0.5 DTO itself. It is not wrapped in a transport-specific `payload` or `data` field.
 - The current default inbound request-frame limit is 1 MiB, including the trailing newline.
 - An oversized inbound request is rejected at the transport layer.
+- This transport contract does not impose the request-frame limit on response frames. A response is read through its terminating newline; any future response-size policy belongs in a separate API/transport design.
 
 Example API request frame:
 
