@@ -17,8 +17,10 @@ For the TCP path, a socket timeout or cancellation is a transport failure and do
 - One response DTO occupies exactly one frame.
 - The top-level JSON value for API traffic MUST be an object.
 - The JSON object is the API v0.5 DTO itself. It is not wrapped in a transport-specific `payload` or `data` field.
-- The current default maximum frame size is 1 MiB, including the trailing newline, in **both** directions.
-- RL rejects an oversized request at the transport layer. RL also replaces an oversized response frame with a transport-only `message_too_large` response rather than sending a frame above the configured limit.
+- The current default **request** frame limit is 1 MiB, including the trailing newline.
+- RL rejects an oversized request at the transport layer.
+- API response frames are not replaced by a transport size error. A completed non-idempotent operation must keep its actual correlated response observable and replayable; replacing a large success response after execution would make same-ID retry unable to reconcile completion.
+- Training therefore reads one complete response frame to its terminating newline without applying the request-frame limit to that response.
 
 Example API request frame:
 
@@ -42,7 +44,7 @@ In particular:
 
 A new logical request MUST use a new `request_id`. A retry of the same logical request MUST reuse the same API payload and the same `request_id`; changing only the `request_id` turns it into a different logical request and may execute a non-idempotent operation again.
 
-RL keeps request-ledger state long enough to deduplicate concurrent/in-flight retries and to replay completed responses. For `close_instance`, the completed close request remains replayable after the active instance has been removed, so a response-loss retry with the same payload/request_id does not fail merely because the instance is already closed.
+RL keeps request-ledger state long enough to deduplicate concurrent/in-flight retries and to replay completed responses. For `close_instance`, RL retains only a compact tombstone containing that completed close request/response after the active instance has been removed. Historical Decision/simulation responses from the closed instance are released.
 
 A TCP connection is persistent and may carry multiple request/response pairs. The current Training transport serializes exchanges so there is at most one outstanding API request per connection. Responses are therefore consumed in request order; there is no multiplexing identifier beyond the DTO `request_id`.
 
@@ -84,13 +86,9 @@ An oversized request may return:
 {"transport_error":"message_too_large","direction":"request","max_message_bytes":1048576}
 ```
 
-An API response that would exceed the configured frame limit is replaced by:
-
-```json
-{"transport_error":"message_too_large","direction":"response","max_message_bytes":1048576}
-```
-
 Transport-only error objects are not API DTO responses. Training MUST classify them as transport failures before API envelope/correlation validation.
+
+There is no response-direction `message_too_large` substitution in v0.5. If response-size control becomes necessary later, it must be defined at the API/payload level or by a replay-safe transport revision rather than by discarding an already-completed non-idempotent result.
 
 Once a valid JSON object is forwarded to `RLApiServer`, API validation failures are represented by the normal DTO `status="rejected"` response.
 
@@ -107,7 +105,7 @@ The next TCP attempt may use a fresh connection. Retry semantics are:
 - Retrying the **same logical request**: resend the same payload with the same `request_id`.
 - Starting a **new logical request**: construct a new payload with a new `request_id`.
 - Do not convert an ambiguous completion into a retry merely by calling the high-level operation again with a newly generated ID; for non-idempotent operations such as `start_instance`, `commit_action`, and `emulate_action`, that can execute the operation twice.
-- `close_instance` follows the same same-ID retry rule; RL retains the completed close response for replay after instance removal.
+- `close_instance` follows the same same-ID retry rule; RL retains the compact completed-close tombstone for replay after instance removal.
 
 ## 7. Execution model
 
@@ -126,6 +124,8 @@ python -m API.tcp_server --host 127.0.0.1 --port 8765
 `STS2_Training` connects independently to the configured host/port. RL does not need to be imported into the Training process.
 
 The current transport provides no authentication or TLS and defaults to loopback. It should not be exposed to an untrusted network without a separate security layer.
+
+Because v0.5 does not impose a transport response-size cap, the endpoint is intended for the trusted local RL/Training process boundary described above. Future untrusted-network deployment should add explicit payload/resource controls together with authentication/TLS.
 
 ## 9. Compatibility rule
 
