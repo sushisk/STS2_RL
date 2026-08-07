@@ -7,8 +7,9 @@ instance/root execution state explicit; asynchronous scheduling remains unchange
 from __future__ import annotations
 
 import sys
-import traceback
 from pathlib import Path
+
+import pytest
 
 _ROOT = Path(__file__).resolve().parents[2]
 for _p in (_ROOT / "Combat", _ROOT):
@@ -85,12 +86,8 @@ def test_explicit_state_defaults_and_root_transition() -> None:
     inst._begin_root_execution()
     assert inst.root_execution_state == ROOT_EXECUTION_RUNNING
 
-    try:
+    with pytest.raises(RequestRejected):
         inst._begin_root_execution()
-    except RequestRejected:
-        pass
-    else:
-        raise AssertionError("a second root execution must be rejected while running")
 
     inst._end_root_execution()
     assert inst.root_execution_state == ROOT_EXECUTION_IDLE
@@ -122,23 +119,3 @@ def test_close_transitions_active_to_closing_to_closed() -> None:
     inst.close()
     assert branch_manager.calls == 1
     assert pool.calls == 1
-
-
-def _run_all() -> int:
-    tests = [obj for name, obj in list(globals().items()) if name.startswith("test_") and callable(obj)]
-    passed, failed = [], []
-    for test in tests:
-        try:
-            test()
-            passed.append(test.__name__)
-            print(f"PASS {test.__name__}")
-        except Exception:  # noqa: BLE001
-            failed.append(test.__name__)
-            print(f"FAIL {test.__name__}")
-            traceback.print_exc()
-    print(f"\n{len(passed)} passed, {len(failed)} failed")
-    return 0 if not failed else 1
-
-
-if __name__ == "__main__":
-    sys.exit(_run_all())
