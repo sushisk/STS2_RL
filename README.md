@@ -31,11 +31,12 @@ v0.6では各Training clientが`client_session_id`と単調増加`request_seq`�
 RLはsessionごとに直前request/responseだけを保持します。同一seqの再送は再実行せず
 replayされ、RL再起動は`server_epoch`変更として明示的に検出されます。
 
-接続時はAPI trafficより先に次のhelloを送ります。
+接続時はAPI trafficより先にDTO schemaを含むhelloを送ります。
 
 ```json
-{"transport_operation":"hello","client_session_id":"<uuid>"}
+{"transport_operation":"hello","schema_version":"0.6","client_session_id":"<uuid>"}
 ```
 
-疎通確認だけなら `{"transport_operation":"ping"}` を送れます。pong/hello応答には
-現在の`server_epoch`が含まれます。Training側の確認コマンドは`STS2_Training`のREADMEを参照してください。
+schemaが一致しなければAPIを送る前にtransport layerで拒否されます。疎通確認だけなら
+`{"transport_operation":"ping"}` を送れます。pong/hello応答には現在の`server_epoch`が含まれます。
+Training側の確認コマンドは`STS2_Training`のREADMEを参照してください。
