@@ -202,6 +202,7 @@ class _FakePool:
         self.worker_generations = {0: 1, 1: 1}
         self._result_queue = result_queue
         self._next_request_id = 0
+        self._clock = clock
         self.respawns: list[tuple[int, float]] = []
 
     def _submit(self, worker_id: int, request) -> int:
@@ -209,13 +210,63 @@ class _FakePool:
         return self._next_request_id
 
     def respawn_worker(self, worker_id: int, *, lease_registry) -> None:
-        self.respawns.append((worker_id, clock[0]))
+        self.respawns.append((worker_id, self._clock[0]))
         self.worker_generations[worker_id] += 1
+
+
+class _ExplodingPool(_FakePool):
+    def _submit(self, worker_id: int, request) -> int:
+        self._next_request_id += 1
+        if self._next_request_id == 2:
+            raise RuntimeError("synthetic IPC submit failure")
+        return self._next_request_id
+
+
+def _install_fake_routing():
+    original_route = branch_manager_module._route_work_item
+    original_ipc = branch_manager_module._work_item_for_ipc
+
+    def _route(work_item, lease_registry, *, worker_ids, worker_generations, next_bootstrap_index):
+        worker_id = worker_ids[next_bootstrap_index % len(worker_ids)]
+        return (
+            _FakeRequest(work_item, "bootstrap_step"),
+            worker_id,
+            next_bootstrap_index + 1,
+            None,
+        )
+
+    branch_manager_module._route_work_item = _route
+    branch_manager_module._work_item_for_ipc = lambda item: item
+    return original_route, original_ipc
+
+
+def test_dispatch_exception_after_first_submit_releases_entire_poll_batch() -> None:
+    clock = [0.0]
+    pool = _ExplodingPool(clock, _TimedResultQueue(clock, []))
+    manager = BranchManager(pool, _FakeLeaseRegistry(), max_branches=8)  # type: ignore[arg-type]
+    branch_ids = manager.submit_many(
+        [(_FakeWorkItem(index), None) for index in range(4)]  # type: ignore[list-item]
+    )
+
+    original_route, original_ipc = _install_fake_routing()
+    try:
+        try:
+            manager.poll(timeout=1.0)
+        except RuntimeError as exc:
+            assert "synthetic IPC submit failure" in str(exc)
+        else:
+            raise AssertionError("synthetic IPC submit failure must propagate")
+    finally:
+        branch_manager_module._route_work_item = original_route
+        branch_manager_module._work_item_for_ipc = original_ipc
+
+    assert manager.active_branch_count() == 0
+    assert {manager._records[branch_id].state for branch_id in branch_ids} == {"released"}  # noqa: SLF001
+    assert pool.respawns == [(0, 0.0)]
 
 
 def test_four_items_two_workers_hung_worker_keeps_absolute_deadline() -> None:
     """A healthy worker result must not reset another worker's timeout."""
-    global clock
     clock = [0.0]
     healthy_result_1 = SimpleNamespace(
         status="fault", established_lease=None, worker_id=1, diagnostics={"fault_kind": "synthetic"}
@@ -234,19 +285,9 @@ def test_four_items_two_workers_hung_worker_keeps_absolute_deadline() -> None:
     leases = _FakeLeaseRegistry()
     manager = BranchManager(pool, leases, max_branches=8)  # type: ignore[arg-type]
 
-    original_route = branch_manager_module._route_work_item
-    original_ipc = branch_manager_module._work_item_for_ipc
+    original_route, original_ipc = _install_fake_routing()
     original_fault = branch_manager_module._fault_result
     original_monotonic = branch_manager_module.time.monotonic
-
-    def _route(work_item, lease_registry, *, worker_ids, worker_generations, next_bootstrap_index):
-        worker_id = worker_ids[next_bootstrap_index % len(worker_ids)]
-        return (
-            _FakeRequest(work_item, "bootstrap_step"),
-            worker_id,
-            next_bootstrap_index + 1,
-            None,
-        )
 
     def _fault(work_item, execution_mode, worker_id, worker_generation, exc, *, fault_kind):
         return SimpleNamespace(
@@ -256,8 +297,6 @@ def test_four_items_two_workers_hung_worker_keeps_absolute_deadline() -> None:
             diagnostics={"fault_kind": fault_kind, "message": str(exc)},
         )
 
-    branch_manager_module._route_work_item = _route
-    branch_manager_module._work_item_for_ipc = lambda item: item
     branch_manager_module._fault_result = _fault
     branch_manager_module.time.monotonic = lambda: clock[0]
     try:
