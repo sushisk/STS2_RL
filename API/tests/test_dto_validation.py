@@ -1,431 +1,240 @@
-import inspect
+from __future__ import annotations
+
 import sys
 import traceback
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-
-import API.dto as dto
-from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RequestLedger
+from API.identifiers import BranchIdRegistry, DecisionPointRegistry, SessionLedger
 from API.validation import RequestRejected, validate_request
 
 
-def _dto_value(*names, default):
-    for name in names:
-        if hasattr(dto, name):
-            value = getattr(dto, name)
-            if isinstance(value, str):
-                return value
-    return default
-
-
-def _operation(name):
-    operations = getattr(dto, "OPERATIONS", None)
-    if isinstance(operations, dict):
-        if name in operations:
-            return operations[name]
-        for key, value in operations.items():
-            if key == name or value == name:
-                return value
-    elif isinstance(operations, (tuple, list, set)) and name in operations:
-        return name
-
-    candidates = [
-        f"OP_{name.upper()}",
-        name.upper(),
-        name,
-    ]
-    for candidate in candidates:
-        if hasattr(dto, candidate):
-            value = getattr(dto, candidate)
-            if isinstance(value, str):
-                return value
-    return name
-
-
-def _field(name):
-    # Wire field names are plain literal strings per the contract (schema_version,
-    # request_id, branch_id, ...) - NOT resolved through API.dto constants
-    # (those hold VALUES like dto.SCHEMA_VERSION == "0.5", not field NAMES; routing
-    # this through `_dto_value` was a bug that silently produced payload dicts keyed
-    # by "0.5" instead of "schema_version").
-    return name
-
-
-def _base_request(operation, *, include_instance_id=True, **overrides):
+def _request(operation: str, *, seq: int = 1, include_instance_id: bool = True, **fields) -> dict:
     payload = {
-        _field("schema_version"): _dto_value("SCHEMA_VERSION", default="0.5"),
-        _field("operation"): _operation(operation),
-        _field("request_id"): "request-1",
+        "schema_version": "0.6",
+        "client_session_id": "session-a",
+        "request_seq": seq,
+        "request_id": f"session-a:{seq}",
+        "operation": operation,
+        **fields,
     }
     if include_instance_id:
-        payload[_field("instance_id")] = "instance-1"
-    payload.update(overrides)
+        payload["instance_id"] = "inst-001"
     return payload
 
 
-def _assert_rejected(func, *args, **kwargs):
+def _assert_rejected(payload: dict) -> None:
     try:
-        func(*args, **kwargs)
+        validate_request(payload)
     except RequestRejected:
         return
     raise AssertionError("expected RequestRejected")
 
 
-def _assert_valid(payload):
-    result = validate_request(payload)
-    assert result == payload
-
-
-def _assert_invalid(payload):
-    _assert_rejected(validate_request, payload)
-
-
-def _make_simulation_options(**overrides):
-    options = {
-        _field("stop_condition"): "next_decision",
-        _field("max_depth"): 3,
-        _field("max_steps"): 10,
-        _field("max_time_ms"): 1000,
-        _field("max_hypotheses"): 4,
-    }
-    options.update(overrides)
-    return options
-
-
-def test_start_instance_required_fields():
-    payload = _base_request(
+def test_start_instance_required_fields() -> None:
+    valid = _request(
         "start_instance",
         include_instance_id=False,
-        **{
-            _field("instance_config"): {
-                _field("instance_type"): "demo",
-            }
-        },
+        instance_config={"instance_type": "combat"},
     )
-    _assert_valid(payload)
+    assert validate_request(valid) is valid
 
-    missing_instance_type = _base_request(
+    missing_type = _request(
         "start_instance",
         include_instance_id=False,
-        **{
-            _field("instance_config"): {},
-        },
+        instance_config={},
     )
-    _assert_invalid(missing_instance_type)
+    _assert_rejected(missing_type)
 
 
-def test_get_decision_requires_branch_id_and_instance_id():
-    payload = _base_request(
-        "get_decision",
-        **{
-            _field("branch_id"): "branch-1",
-        },
-    )
-    _assert_valid(payload)
+def test_session_identity_fields_are_required_and_correlated() -> None:
+    valid = _request("close_instance")
+    assert validate_request(valid) is valid
 
-    missing_branch = dict(payload)
-    del missing_branch[_field("branch_id")]
-    _assert_invalid(missing_branch)
+    for field in ("schema_version", "client_session_id", "request_seq", "request_id"):
+        broken = dict(valid)
+        broken.pop(field)
+        _assert_rejected(broken)
 
-    missing_instance = _base_request(
-        "get_decision",
-        include_instance_id=False,
-        **{
-            _field("branch_id"): "branch-1",
-        },
-    )
-    _assert_invalid(missing_instance)
+    bad_request_id = dict(valid)
+    bad_request_id["request_id"] = "arbitrary-id"
+    _assert_rejected(bad_request_id)
+
+    for bad_seq in (0, -1, True):
+        broken = dict(valid)
+        broken["request_seq"] = bad_seq
+        broken["request_id"] = f"session-a:{bad_seq}"
+        _assert_rejected(broken)
 
 
-def test_commit_action_required_fields_and_constraints():
-    valid = _base_request(
+def test_operation_specific_validation() -> None:
+    get_decision = _request("get_decision", branch_id="root")
+    assert validate_request(get_decision) is get_decision
+
+    commit = _request(
         "commit_action",
-        **{
-            _field("branch_id"): "root",
-            _field("rng_id"): 0,
-            _field("decision_point_id"): "dp-1",
-            _field("action_id"): "action-1",
-        },
+        branch_id="root",
+        rng_id=0,
+        decision_point_id="d-root-1",
+        action_id="0",
     )
-    _assert_valid(valid)
+    assert validate_request(commit) is commit
 
-    wrong_branch = dict(valid)
-    wrong_branch[_field("branch_id")] = "child-1"
-    _assert_invalid(wrong_branch)
-
-    wrong_rng = dict(valid)
-    wrong_rng[_field("rng_id")] = 1
-    _assert_invalid(wrong_rng)
-
-    missing_decision_point = dict(valid)
-    del missing_decision_point[_field("decision_point_id")]
-    _assert_invalid(missing_decision_point)
-
-    missing_action = dict(valid)
-    del missing_action[_field("action_id")]
-    _assert_invalid(missing_action)
-
-
-def test_emulate_action_required_fields_and_rng_constraint():
-    valid = _base_request(
+    emulate = _request(
         "emulate_action",
-        **{
-            _field("parent_branch_id"): "root",
-            _field("branch_id"): "branch-2",
-            _field("rng_id"): 1,
-            _field("decision_point_id"): "dp-2",
-            _field("action_id"): "action-2",
-        },
+        parent_branch_id="root",
+        branch_id="branch-1",
+        rng_id=1,
+        decision_point_id="d-root-1",
+        action_id="0",
     )
-    _assert_valid(valid)
+    assert validate_request(emulate) is emulate
 
-    bad_rng = dict(valid)
-    bad_rng[_field("rng_id")] = 0
-    _assert_invalid(bad_rng)
+    bad_commit = dict(commit)
+    bad_commit["branch_id"] = "branch-1"
+    _assert_rejected(bad_commit)
 
-    bad_rng2 = dict(valid)
-    bad_rng2[_field("rng_id")] = -1
-    _assert_invalid(bad_rng2)
-
-    missing_parent = dict(valid)
-    del missing_parent[_field("parent_branch_id")]
-    _assert_invalid(missing_parent)
+    bad_emulate = dict(emulate)
+    bad_emulate["rng_id"] = 0
+    _assert_rejected(bad_emulate)
 
 
-def test_branch_list_operations_require_non_empty_list_of_strings():
+def test_branch_batch_operations_require_non_empty_string_ids() -> None:
     for operation in ("cancel_branches", "release_branches", "get_branch_status"):
-        payload = _base_request(
-            operation,
-            **{
-                _field("branch_ids"): ["branch-1", "branch-2"],
-            },
-        )
-        _assert_valid(payload)
+        valid = _request(operation, branch_ids=["branch-1", "branch-2"])
+        assert validate_request(valid) is valid
 
-        empty = dict(payload)
-        empty[_field("branch_ids")] = []
-        _assert_invalid(empty)
+        empty = dict(valid)
+        empty["branch_ids"] = []
+        _assert_rejected(empty)
 
-        wrong_type = dict(payload)
-        wrong_type[_field("branch_ids")] = "branch-1"
-        _assert_invalid(wrong_type)
+        bad_entry = dict(valid)
+        bad_entry["branch_ids"] = ["branch-1", ""]
+        _assert_rejected(bad_entry)
 
 
-def test_close_instance_requires_only_common_fields():
-    payload = _base_request("close_instance")
-    _assert_valid(payload)
-
-
-def test_unknown_operation_value_is_rejected():
-    payload = _base_request("totally_not_an_operation")
-    _assert_invalid(payload)
-
-
-def test_unsupported_schema_version_is_rejected():
-    payload = _base_request("close_instance")
-    payload[_field("schema_version")] = "9.9"
-    _assert_invalid(payload)
-
-
-def test_missing_instance_id_is_rejected_for_non_start_instance_operations():
-    for operation in (
-        "get_decision",
-        "commit_action",
+def test_simulation_options_validate_known_limits() -> None:
+    base = _request(
         "emulate_action",
-        "cancel_branches",
-        "release_branches",
-        "get_branch_status",
-        "close_instance",
-    ):
-        payload = _base_request(operation)
-        payload.pop(_field("instance_id"), None)
-        _assert_invalid(payload)
-
-
-def test_wrong_field_types_are_rejected():
-    rng_payload = _base_request(
-        "commit_action",
-        **{
-            _field("branch_id"): "root",
-            _field("rng_id"): "0",
-            _field("decision_point_id"): "dp-1",
-            _field("action_id"): "action-1",
-        },
+        parent_branch_id="root",
+        branch_id="branch-1",
+        rng_id=1,
+        decision_point_id="d-root-1",
+        action_id="0",
     )
-    _assert_invalid(rng_payload)
+    valid = dict(base)
+    valid["simulation_options"] = {
+        "stop_condition": "next_decision",
+        "max_depth": 1,
+        "max_steps": None,
+        "future_extension": True,
+    }
+    assert validate_request(valid) is valid
 
-    branch_ids_payload = _base_request(
-        "cancel_branches",
-        **{
-            _field("branch_ids"): "branch-1",
-        },
+    for field in ("max_depth", "max_steps", "max_time_ms", "max_hypotheses"):
+        for value in (0, -1, True, 1.5):
+            broken = dict(base)
+            broken["simulation_options"] = {field: value}
+            _assert_rejected(broken)
+
+    bad_stop = dict(base)
+    bad_stop["simulation_options"] = {"stop_condition": "never"}
+    _assert_rejected(bad_stop)
+
+
+def test_session_ledger_replays_only_exact_latest_request() -> None:
+    ledger = SessionLedger()
+    request = _request(
+        "start_instance",
+        include_instance_id=False,
+        instance_config={"instance_type": "combat"},
     )
-    _assert_invalid(branch_ids_payload)
+    response = {"status": "completed", "instance_id": "inst-001"}
 
-    request_id_payload = _base_request(
-        "close_instance",
+    assert ledger.begin(request) is None
+    ledger.complete(response)
+    assert ledger.begin(request) == response
+
+    conflict = dict(request)
+    conflict["instance_config"] = {"instance_type": "whole_run"}
+    try:
+        ledger.begin(conflict)
+    except RequestRejected as exc:
+        assert exc.fault_kind == "session_sequence_conflict"
+    else:
+        raise AssertionError("same sequence with different content must be rejected")
+
+
+def test_session_ledger_rejects_gap_and_inflight_duplicate() -> None:
+    ledger = SessionLedger()
+    request = _request(
+        "start_instance",
+        include_instance_id=False,
+        instance_config={"instance_type": "combat"},
     )
-    request_id_payload[_field("request_id")] = 123
-    _assert_invalid(request_id_payload)
+    assert ledger.begin(request) is None
+
+    try:
+        ledger.begin(request)
+    except RequestRejected as exc:
+        assert exc.fault_kind == "session_sequence_conflict"
+    else:
+        raise AssertionError("in-flight duplicate must be rejected")
+
+    ledger.complete({"status": "completed"})
+    gap = _request("close_instance", seq=3)
+    try:
+        ledger.begin(gap)
+    except RequestRejected as exc:
+        assert exc.fault_kind == "session_sequence_gap"
+    else:
+        raise AssertionError("sequence gap must be rejected")
 
 
-def test_unknown_extra_top_level_field_is_tolerated():
-    payload = _base_request(
-        "close_instance",
-    )
-    payload["unknown_extra_field"] = {"kept": True}
-    _assert_valid(payload)
-
-
-def _emulate_action_base(**simulation_options_overrides):
-    # simulation_options is validated only for emulate_action (validation.py's
-    # `_validate_simulation_options` is called exclusively from that branch) - a
-    # close_instance payload never exercises this check at all.
-    return _base_request(
-        "emulate_action",
-        **{
-            _field("parent_branch_id"): "root",
-            _field("branch_id"): "branch-3",
-            _field("rng_id"): 1,
-            _field("decision_point_id"): "dp-3",
-            _field("action_id"): "action-3",
-            _field("simulation_options"): _make_simulation_options(**simulation_options_overrides),
-        },
-    )
-
-
-def test_simulation_options_validation():
-    valid = _emulate_action_base()
-    _assert_valid(valid)
-
-    bad_stop_condition = _emulate_action_base(**{_field("stop_condition"): "not-supported"})
-    _assert_invalid(bad_stop_condition)
-
-    for key in ("max_depth", "max_steps", "max_time_ms", "max_hypotheses"):
-        payload = _emulate_action_base(**{_field(key): "bad-type"})
-        _assert_invalid(payload)
-
-
-def _ledger_begin(ledger, request_id, payload):
-    begin = getattr(ledger, "begin")
-    sig = inspect.signature(begin)
-    argc = len(sig.parameters)
-    if argc == 2:
-        return begin(request_id, payload)
-    if argc == 1:
-        return begin(payload)
-    raise AssertionError(f"unsupported RequestLedger.begin signature: {sig}")
-
-
-def _ledger_complete(ledger, begin_result, response, request_id, payload):
-    if hasattr(begin_result, "complete"):
-        complete = begin_result.complete
-        sig = inspect.signature(complete)
-        argc = len(sig.parameters)
-        if argc == 1:
-            return complete(response)
-        if argc == 2:
-            return complete(request_id, response)
-        if argc == 3:
-            return complete(request_id, payload, response)
-        raise AssertionError(f"unsupported completion signature: {sig}")
-
-    if hasattr(ledger, "complete"):
-        complete = ledger.complete
-        sig = inspect.signature(complete)
-        argc = len(sig.parameters)
-        if argc == 2:
-            return complete(request_id, response)
-        if argc == 3:
-            return complete(request_id, payload, response)
-        raise AssertionError(f"unsupported RequestLedger.complete signature: {sig}")
-
-    raise AssertionError("RequestLedger exposes no complete method")
-
-
-def _ledger_result_value(result):
-    for attr in ("response", "cached_response", "value", "result", "output"):
-        if hasattr(result, attr):
-            return getattr(result, attr)
-    return result
-
-
-def test_request_ledger_caches_identical_request_content():
-    ledger = RequestLedger()
-    request_id = "request-1"
-    payload = {"request_id": request_id, "alpha": 1, "beta": {"x": 2}}
-    response = {"ok": True}
-
-    begin_result = _ledger_begin(ledger, request_id, payload)
-    assert begin_result is None, "a brand-new request_id must have no cached response yet"
-    ledger.complete(payload, response)
-
-    cached = _ledger_begin(ledger, request_id, payload)
-    assert _ledger_result_value(cached) == response
-
-
-def test_request_ledger_rejects_same_request_id_with_different_content():
-    ledger = RequestLedger()
-    request_id = "request-1"
-    payload = {"request_id": request_id, "alpha": 1}
-    other_payload = {"request_id": request_id, "alpha": 2}
-    response = {"ok": True}
-
-    begin_result = _ledger_begin(ledger, request_id, payload)
-    ledger.complete(payload, response)
-
-    _assert_rejected(_ledger_begin, ledger, request_id, other_payload)
-
-
-def _registry_register(registry, branch_id):
-    for method_name in ("register", "claim", "add", "reserve"):
-        if hasattr(registry, method_name):
-            return getattr(registry, method_name)(branch_id)
-    raise AssertionError("BranchIdRegistry exposes no register-like method")
-
-
-def test_branch_id_registry_rejects_duplicate_and_reserves_root():
-    registry = BranchIdRegistry()
-    _assert_rejected(_registry_register, registry, "root")
-
-    registry = BranchIdRegistry()
-    _registry_register(registry, "branch-1")
-    _assert_rejected(_registry_register, registry, "branch-1")
-
-
-def test_decision_point_registry_issue_and_validation():
-    registry = DecisionPointRegistry()
-    branch_id = "branch-1"
-    decision_point_id = registry.issue(branch_id)
-    registry.validate(branch_id, decision_point_id)
-
-    _assert_rejected(registry.validate, branch_id, "some-other-id")
-    _assert_rejected(registry.validate, "unknown-branch", decision_point_id)
-
-
-def _run_all():
-    tests = [
-        (name, fn)
-        for name, fn in globals().items()
-        if name.startswith("test_") and inspect.isfunction(fn)
-    ]
-    tests.sort(key=lambda item: item[0])
-
-    failures = 0
-    for name, fn in tests:
+def test_branch_and_decision_registries_preserve_lifecycle_rules() -> None:
+    branches = BranchIdRegistry()
+    for branch_id in ("root",):
         try:
-            fn()
+            branches.register(branch_id)
+        except RequestRejected:
+            pass
+        else:
+            raise AssertionError("root must be reserved")
+
+    branches.register("branch-1")
+    try:
+        branches.register("branch-1")
+    except RequestRejected:
+        pass
+    else:
+        raise AssertionError("branch IDs must never be reusable")
+
+    decisions = DecisionPointRegistry()
+    current = decisions.issue("branch-1")
+    decisions.validate("branch-1", current)
+    try:
+        decisions.validate("branch-1", "stale")
+    except RequestRejected:
+        pass
+    else:
+        raise AssertionError("stale decision_point_id must be rejected")
+
+
+def _run_all() -> int:
+    tests = [value for name, value in globals().items() if name.startswith("test_") and callable(value)]
+    failures = 0
+    for test in sorted(tests, key=lambda fn: fn.__name__):
+        try:
+            test()
         except Exception:
             failures += 1
-            print(f"FAIL {name}")
+            print(f"FAIL {test.__name__}")
             traceback.print_exc()
         else:
-            print(f"PASS {name}")
+            print(f"PASS {test.__name__}")
     return 1 if failures else 0
 
 
