@@ -30,10 +30,12 @@ from API.dto import (
     STATUS_COMPLETED,
     STATUS_REJECTED,
 )
+from API.faults import fault_response
 from API.identifiers import RequestLedger
 from API.validation import RequestRejected, validate_request
 
 DEFAULT_REPLAY_CACHE_ENTRIES = 1024
+UNKNOWN_INSTANCE_FAULT_KIND = "unknown_instance"
 
 
 class RLApiServer:
@@ -86,14 +88,29 @@ class RLApiServer:
                 cached = self._pre_instance_ledger.begin(payload)
                 if cached is not None:
                     return cached
-                response = self._handle_start_instance(payload)
-                response = self._wrap(payload, response)
+
+                try:
+                    response = self._handle_start_instance(payload)
+                    response = self._wrap(payload, response)
+                except RequestRejected as exc:
+                    response = self._rejected(
+                        payload,
+                        exc.error,
+                        fault_kind=exc.fault_kind,
+                    )
+                except Exception as exc:
+                    # Unexpected handler failures are terminal for this request_id too.
+                    # Cache the fault so a lost response cannot turn a same-ID retry
+                    # into a second start_instance execution.
+                    response = fault_response(payload, exc)
+
                 self._pre_instance_ledger.complete(payload, response)
-                instance_id = response.get("instance_id")
-                if isinstance(instance_id, str) and instance_id:
-                    self._start_request_ids_by_instance[instance_id] = payload[
-                        "request_id"
-                    ]
+                if response.get("status") == STATUS_COMPLETED:
+                    instance_id = response.get("instance_id")
+                    if isinstance(instance_id, str) and instance_id:
+                        self._start_request_ids_by_instance[instance_id] = payload[
+                            "request_id"
+                        ]
                 return response
 
             instance_id = payload["instance_id"]
@@ -106,19 +123,39 @@ class RLApiServer:
                         if cached is not None:
                             self._closed_ledgers.move_to_end(instance_id)
                             return cached
-                raise RequestRejected(f"unknown instance_id {instance_id!r}")
+                raise RequestRejected(
+                    f"unknown instance_id {instance_id!r}",
+                    fault_kind=UNKNOWN_INSTANCE_FAULT_KIND,
+                )
 
             ledger = self._ledgers[instance_id]
             cached = ledger.begin(payload)
             if cached is not None:
                 return cached
 
-            response = self._dispatch(instance, operation, payload)
-            response = self._wrap(payload, response)
+            try:
+                response = self._dispatch(instance, operation, payload)
+                response = self._wrap(payload, response)
+                if operation == OP_CLOSE_INSTANCE and response.get("status") == STATUS_COMPLETED:
+                    # Treat close() itself as part of the request transaction. If it
+                    # faults after mutating state, cache that terminal fault rather than
+                    # allowing a same-ID retry to call close() again.
+                    instance.close()
+            except RequestRejected as exc:
+                response = self._rejected(
+                    payload,
+                    exc.error,
+                    fault_kind=exc.fault_kind,
+                )
+            except Exception as exc:
+                # The TCP layer must not be the first place that turns handler
+                # exceptions into API faults: the per-instance ledger has to observe
+                # and cache the same terminal response for safe replay.
+                response = fault_response(payload, exc)
+
             ledger.complete(payload, response)
 
-            if operation == OP_CLOSE_INSTANCE:
-                instance.close()
+            if operation == OP_CLOSE_INSTANCE and response.get("status") == STATUS_COMPLETED:
                 del self._instances[instance_id]
                 del self._ledgers[instance_id]
                 start_request_id = self._start_request_ids_by_instance.pop(
@@ -130,6 +167,9 @@ class RLApiServer:
                 self._remember_close_tombstone(instance_id, payload, response)
             return response
         except RequestRejected as exc:
+            # This path covers pre-dispatch conditions such as request-id conflicts or a
+            # duplicate that is still in flight. Never overwrite the existing ledger
+            # entry with the rejection, because the original request still owns it.
             return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
 
     def _remember_close_tombstone(
@@ -186,7 +226,18 @@ class RLApiServer:
 
         self._instances[instance_id] = instance
         self._ledgers[instance_id] = RequestLedger()
-        return instance.start_instance_response()
+        try:
+            return instance.start_instance_response()
+        except Exception:
+            # A start response that cannot be constructed must not leave an orphaned
+            # active instance behind. The caller will receive/cache a terminal fault.
+            try:
+                instance.close()
+            except Exception:
+                pass
+            self._instances.pop(instance_id, None)
+            self._ledgers.pop(instance_id, None)
+            raise
 
     @staticmethod
     def _wrap(payload: dict, response: dict) -> dict:
