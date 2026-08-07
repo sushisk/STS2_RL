@@ -318,6 +318,10 @@ class BranchResult:
     pending_decision_context: Optional[DecisionContext] = None
     pending_pipeline_result: Optional[CandidatePipelineResult] = None
     established_lease: Optional[Lease] = None
+    next_decision_result: Optional[Any] = None
+    """Populated only for a Stable-boundary success with the exact post-step
+    `BattleState` produced by the Branch Worker. This lets API consumers expose and
+    extend the branch's actual state instead of reconstructing it from its parent."""
     next_legal_actions: Optional[list] = None
     """Populated only for a Stable-boundary success (`child_snapshot is not None`) -
     the resolved state's own cached legal actions, so a caller can present/branch
@@ -430,6 +434,7 @@ def _build_success_result(
             worker_generation=worker_generation,
             result_signature=signature,
             child_snapshot=session.capture_snapshot(),
+            next_decision_result=next_state,
             next_legal_actions=list(next_state._cached_legal_actions or []),  # noqa: SLF001
         )
     if boundary == BOUNDARY_TERMINAL:
