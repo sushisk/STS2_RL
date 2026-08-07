@@ -106,7 +106,13 @@ class RLApiServer:
             except Exception as exc:
                 response = fault_response(payload, exc)
 
-            response = self._finalize_response(payload, response)
+            status = response.get("status") if isinstance(response, dict) else None
+            if not isinstance(response, dict) or not isinstance(status, str) or status not in STATUSES:
+                response = fault_response(
+                    payload,
+                    TypeError(f"RL handler returned invalid response status {status!r}"),
+                )
+            response = self._wrap(payload, response)
             ledger.complete(response)
             return response
         except RequestRejected as exc:
@@ -233,17 +239,9 @@ class RLApiServer:
         self._instances[instance_id] = instance
         try:
             response = instance.start_instance_response()
-            if not isinstance(response, dict):
-                raise TypeError("start_instance_response returned a non-dict response")
-            if response.get("status") != STATUS_COMPLETED:
-                raise TypeError(
-                    f"start_instance_response returned invalid status {response.get('status')!r}"
-                )
-            response = dict(response)
-            # The dispatcher owns instance identity. An Instance implementation must not
-            # be able to redirect session ownership by spoofing the public ID it returns.
-            response["instance_id"] = instance_id
-            return response
+            if not isinstance(response, dict) or response.get("status") != STATUS_COMPLETED:
+                raise TypeError("start_instance_response must return a completed response")
+            return {**response, "instance_id": instance_id}
         except Exception:
             try:
                 instance.close()
@@ -251,22 +249,6 @@ class RLApiServer:
                 pass
             self._instances.pop(instance_id, None)
             raise
-
-    def _finalize_response(self, payload: dict, response: Any) -> dict:
-        """Turn an Instance result into one replay-safe, server-owned wire response."""
-        if not isinstance(response, dict):
-            response = fault_response(
-                payload,
-                TypeError("RL handler returned a non-dict response"),
-            )
-        else:
-            status = response.get("status")
-            if not isinstance(status, str) or status not in STATUSES:
-                response = fault_response(
-                    payload,
-                    TypeError(f"RL handler returned invalid status {status!r}"),
-                )
-        return self._wrap(payload, response)
 
     def _wrap(self, payload: dict, response: dict) -> dict:
         # Instance implementations own operation-specific fields only. Correlation and
