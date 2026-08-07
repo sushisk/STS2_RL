@@ -92,6 +92,7 @@ class AsyncioTcpServer:
         task.add_done_callback(self._client_tasks.discard)
 
     async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
+        hello_session_id: str | None = None
         try:
             while line := await self._read_line(reader, writer):
                 try:
@@ -117,12 +118,38 @@ class AsyncioTcpServer:
                         "server_epoch": self._server_epoch,
                     }
                 elif self._is_hello(payload):
-                    response = {
-                        "transport_operation": "hello",
-                        "server_epoch": self._server_epoch,
-                        "client_session_id": payload["client_session_id"],
-                    }
+                    requested_session = payload["client_session_id"]
+                    if hello_session_id is not None and requested_session != hello_session_id:
+                        response = {
+                            "transport_error": "session_mismatch",
+                            "error": "one TCP stream may bind only one client_session_id",
+                        }
+                    else:
+                        hello_session_id = requested_session
+                        response = {
+                            "transport_operation": "hello",
+                            "server_epoch": self._server_epoch,
+                            "client_session_id": requested_session,
+                        }
                 else:
+                    if hello_session_id is None:
+                        await self._write_response(
+                            writer,
+                            {
+                                "transport_error": "hello_required",
+                                "error": "send transport hello before API traffic",
+                            },
+                        )
+                        continue
+                    if payload.get("client_session_id") != hello_session_id:
+                        await self._write_response(
+                            writer,
+                            {
+                                "transport_error": "session_mismatch",
+                                "error": "API client_session_id differs from stream hello",
+                            },
+                        )
+                        continue
                     try:
                         response = await self._call_handler(payload)
                     except Exception as exc:
