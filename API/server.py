@@ -12,6 +12,7 @@ constructs a second `GameInstance` in ITS OWN process - see the module docstring
 from __future__ import annotations
 
 import itertools
+from collections import OrderedDict
 from typing import Any
 
 from API.dto import (
@@ -32,12 +33,32 @@ from API.dto import (
 from API.identifiers import RequestLedger
 from API.validation import RequestRejected, validate_request
 
+DEFAULT_REPLAY_CACHE_ENTRIES = 1024
+
 
 class RLApiServer:
-    def __init__(self, *, instance_factory_kwargs: "dict | None" = None) -> None:
+    def __init__(
+        self,
+        *,
+        instance_factory_kwargs: "dict | None" = None,
+        replay_cache_entries: int = DEFAULT_REPLAY_CACHE_ENTRIES,
+    ) -> None:
+        if replay_cache_entries <= 0:
+            raise ValueError("replay_cache_entries must be positive")
+
         self._instances: dict[str, Any] = {}
         self._ledgers: dict[str, RequestLedger] = {}
-        self._pre_instance_ledger = RequestLedger()
+        # start_instance has no instance-scoped ledger yet. Keep a bounded server-wide
+        # replay window so a lost start response can be retried with the same request id
+        # without retaining every initial decision DTO for the lifetime of the process.
+        self._pre_instance_ledger = RequestLedger(
+            max_completed_entries=replay_cache_entries
+        )
+        # After close_instance succeeds, retain only that close request/response as a
+        # bounded tombstone. The instance's full RequestLedger may contain large
+        # emulator responses and must be released with the closed instance.
+        self._closed_ledgers: OrderedDict[str, RequestLedger] = OrderedDict()
+        self._replay_cache_entries = replay_cache_entries
         self._instance_serial = itertools.count(1)
         self._kwargs = instance_factory_kwargs or {}
 
@@ -48,6 +69,8 @@ class RLApiServer:
         for instance in list(self._instances.values()):
             instance.close()
         self._instances.clear()
+        self._ledgers.clear()
+        self._closed_ledgers.clear()
 
     def handle_request(self, payload: dict) -> dict:
         try:
@@ -69,7 +92,15 @@ class RLApiServer:
             instance_id = payload["instance_id"]
             instance = self._instances.get(instance_id)
             if instance is None:
+                if operation == OP_CLOSE_INSTANCE:
+                    closed_ledger = self._closed_ledgers.get(instance_id)
+                    if closed_ledger is not None:
+                        cached = closed_ledger.replay(payload)
+                        if cached is not None:
+                            self._closed_ledgers.move_to_end(instance_id)
+                            return cached
                 raise RequestRejected(f"unknown instance_id {instance_id!r}")
+
             ledger = self._ledgers[instance_id]
             cached = ledger.begin(payload)
             if cached is not None:
@@ -83,9 +114,23 @@ class RLApiServer:
                 instance.close()
                 del self._instances[instance_id]
                 del self._ledgers[instance_id]
+                self._remember_close_tombstone(instance_id, payload, response)
             return response
         except RequestRejected as exc:
             return self._rejected(payload, exc.error, fault_kind=exc.fault_kind)
+
+    def _remember_close_tombstone(
+        self,
+        instance_id: str,
+        payload: dict,
+        response: dict,
+    ) -> None:
+        tombstone = RequestLedger(max_completed_entries=1)
+        tombstone.complete(payload, response)
+        self._closed_ledgers[instance_id] = tombstone
+        self._closed_ledgers.move_to_end(instance_id)
+        while len(self._closed_ledgers) > self._replay_cache_entries:
+            self._closed_ledgers.popitem(last=False)
 
     def _dispatch(self, instance: Any, operation: str, payload: dict) -> dict:
         if operation == OP_GET_DECISION:
