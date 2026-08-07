@@ -20,15 +20,23 @@ docs/       引き継ぎ資料・現状サマリ
 
 ## Asyncio TCP server
 
-Trainingとは別プロセスでRL APIを起動する最小構成です。通信形式はUTF-8の
-newline-delimited JSON（1行1JSON）で、既存のAPI request dictをそのまま
-`RLApiServer`へ渡します。
+Trainingとは別プロセスでRL APIを起動できます。非同期TCP/DTO v0.6契約は
+`docs/contracts/rl_training_tcp_transport_v0_6.md` を参照してください。
 
 ```bash
 python -m API.tcp_server --host 127.0.0.1 --port 8765
 ```
 
-Emulatorを起動せずに経路だけ確認する場合は、接続後に
-`{"transport_operation":"ping"}` を1行送ると
-`{"transport_operation":"pong"}` が返ります。Training側の確認コマンドは
-`STS2_Training` のREADMEを参照してください。
+v0.6では各Training clientが`client_session_id`と単調増加`request_seq`を持ち、
+RLはsessionごとに直前request/responseだけを保持します。同一seqの再送は再実行せず
+replayされ、RL再起動は`server_epoch`変更として明示的に検出されます。
+
+接続時はAPI trafficより先にDTO schemaを含むhelloを送ります。
+
+```json
+{"transport_operation":"hello","schema_version":"0.6","client_session_id":"<uuid>"}
+```
+
+schemaが一致しなければAPIを送る前にtransport layerで拒否されます。疎通確認だけなら
+`{"transport_operation":"ping"}` を送れます。pong/hello応答には現在の`server_epoch`が含まれます。
+Training側の確認コマンドは`STS2_Training`のREADMEを参照してください。

@@ -11,6 +11,8 @@ def fault_response(payload: Any, exc: BaseException) -> dict:
     request = payload if isinstance(payload, dict) else {}
     response = {
         "schema_version": SCHEMA_VERSION,
+        "client_session_id": request.get("client_session_id"),
+        "request_seq": request.get("request_seq"),
         "request_id": request.get("request_id"),
         "operation": request.get("operation"),
         "status": STATUS_FAULTED,

@@ -1,16 +1,8 @@
-"""Identifier lifecycle management for the RL-Training Communication contract v0.5.
+"""Identifier lifecycle management for RL/Training DTO v0.6.
 
-Three independent per-instance ledgers, matching contract §3:
-
-* `RequestLedger` - `request_id` dedup/conflict ("同一要求の再送で処理を二重実行しない" /
-  "同一IDで内容が異なる場合はrejected").
-* `BranchIdRegistry` - `branch_id` uniqueness for the lifetime of the instance, even
-  across Cancel/Release ("Cancel／Release後も再利用禁止").
-* `DecisionPointRegistry` - per-Branch `decision_point_id` issuance/staleness
-  ("古いIDによる要求はrejected").
-
-None of these know anything about Combat/Whole Run - they operate purely on opaque
-strings, so both `instance_combat.py` and `instance_whole_run.py` share them unchanged.
+``SessionLedger`` owns transport request sequencing. Branch, decision-point, and RNG
+hypothesis registries remain per-instance gameplay identifiers and are independent of the
+transport redesign.
 """
 
 from __future__ import annotations
@@ -19,46 +11,66 @@ import hashlib
 import itertools
 import json
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Optional
 
-from API.dto import ROOT_BRANCH_ID
+from API.dto import (
+    FAULT_SESSION_SEQUENCE_CONFLICT,
+    FAULT_SESSION_SEQUENCE_GAP,
+    ROOT_BRANCH_ID,
+)
 from API.validation import RequestRejected
 
 
 def _payload_digest(payload: dict) -> str:
-    # request_id itself is excluded - it's the ledger KEY, not part of the content being
-    # compared for "same id, same content" vs "same id, different content".
-    body = {k: v for k, v in payload.items() if k != "request_id"}
-    text = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    canonical = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 @dataclass
-class RequestLedger:
-    _entries: dict[str, tuple[str, Optional[dict]]] = field(default_factory=dict)
+class SessionLedger:
+    """Retain only the latest executable request for one logical client session."""
+
+    last_seq: int = 0
+    last_digest: str | None = None
+    last_response: Optional[dict] = None
+    active_instance_id: str | None = None
 
     def begin(self, payload: dict) -> Optional[dict]:
-        """Call before executing a request. Returns a cached RESPONSE to replay verbatim
-        if `request_id` was already completed with identical content; returns None if
-        this is a genuinely new request (or a retry of one still in flight - the caller
-        proceeds normally in that case, since no cached response exists yet). Raises
-        `RequestRejected` if `request_id` was already used with DIFFERENT content.
-        """
-        request_id = payload["request_id"]
+        seq = payload["request_seq"]
         digest = _payload_digest(payload)
-        existing = self._entries.get(request_id)
-        if existing is None:
-            self._entries[request_id] = (digest, None)
-            return None
-        existing_digest, cached_response = existing
-        if existing_digest != digest:
-            raise RequestRejected(f"request_id {request_id!r} reused with different content")
-        return cached_response  # None if still in flight (caller re-executes; not our problem to dedupe races).
 
-    def complete(self, payload: dict, response: dict) -> None:
-        request_id = payload["request_id"]
-        digest = _payload_digest(payload)
-        self._entries[request_id] = (digest, response)
+        if seq == self.last_seq:
+            if digest != self.last_digest:
+                raise RequestRejected(
+                    f"request_seq {seq} reused with different content",
+                    fault_kind=FAULT_SESSION_SEQUENCE_CONFLICT,
+                )
+            if self.last_response is None:
+                raise RequestRejected(
+                    f"request_seq {seq} is already in flight",
+                    fault_kind=FAULT_SESSION_SEQUENCE_CONFLICT,
+                )
+            return self.last_response
+
+        expected = self.last_seq + 1
+        if seq != expected:
+            raise RequestRejected(
+                f"request_seq must be {expected}, got {seq}",
+                fault_kind=FAULT_SESSION_SEQUENCE_GAP,
+            )
+
+        self.last_seq = seq
+        self.last_digest = digest
+        self.last_response = None
+        return None
+
+    def complete(self, response: dict) -> None:
+        self.last_response = response
 
 
 @dataclass
@@ -67,7 +79,9 @@ class BranchIdRegistry:
 
     def register(self, branch_id: str) -> None:
         if branch_id in self._ever_used:
-            raise RequestRejected(f"branch_id {branch_id!r} already used (branch IDs are never reusable)")
+            raise RequestRejected(
+                f"branch_id {branch_id!r} already used (branch IDs are never reusable)"
+            )
         self._ever_used.add(branch_id)
 
     def is_known(self, branch_id: str) -> bool:
@@ -90,11 +104,13 @@ class DecisionPointRegistry:
     def validate(self, branch_id: str, given_decision_point_id: str) -> None:
         current = self._current.get(branch_id)
         if current is None:
-            raise RequestRejected(f"branch_id {branch_id!r} has no active decision_point_id")
+            raise RequestRejected(
+                f"branch_id {branch_id!r} has no active decision_point_id"
+            )
         if current != given_decision_point_id:
             raise RequestRejected(
-                f"stale decision_point_id for branch_id {branch_id!r}: given={given_decision_point_id!r} "
-                f"current={current!r}"
+                f"stale decision_point_id for branch_id {branch_id!r}: "
+                f"given={given_decision_point_id!r} current={current!r}"
             )
 
     def clear(self, branch_id: str) -> None:
@@ -103,18 +119,17 @@ class DecisionPointRegistry:
 
 @dataclass
 class RngHypothesisTable:
-    """Maps `(parent_branch_id, decision_point_id, rng_id)` -> a stable 0-based
-    hypothesis index (contract §3 "Hypothesisの識別単位"). First-seen rng_id for a given
-    (parent, decision_point) key gets index 0, second-seen gets index 1, etc. - a purely
-    positional mapping, so "same rng_id => same Hypothesis" and "different rng_id =>
-    different Hypothesis" both hold trivially without needing rng_id values themselves to
-    be contiguous or bounded ahead of time.
-    """
+    """Map `(parent_branch_id, decision_point_id, rng_id)` to a stable index."""
 
     _index_by_key: dict[tuple, int] = field(default_factory=dict)
     _next_index_by_parent_decision: dict[tuple, int] = field(default_factory=dict)
 
-    def hypothesis_index_for(self, parent_branch_id: str, decision_point_id: str, rng_id: int) -> int:
+    def hypothesis_index_for(
+        self,
+        parent_branch_id: str,
+        decision_point_id: str,
+        rng_id: int,
+    ) -> int:
         key = (parent_branch_id, decision_point_id, rng_id)
         if key in self._index_by_key:
             return self._index_by_key[key]

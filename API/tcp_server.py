@@ -1,4 +1,4 @@
-"""Asyncio TCP entry point for the STS2_RL API."""
+"""Asyncio TCP entry point for the STS2_RL API v0.6."""
 
 from __future__ import annotations
 
@@ -6,10 +6,12 @@ import argparse
 import asyncio
 import json
 import sys
+import uuid
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from API.dto import SCHEMA_VERSION
 from API.faults import fault_response
 
 JsonObject = dict[str, Any]
@@ -19,12 +21,13 @@ DEFAULT_MAX_MESSAGE_BYTES = 1024 * 1024
 
 
 class AsyncioTcpServer:
-    """Serve newline-delimited JSON requests to a synchronous handler."""
+    """Serve UTF-8 NDJSON API requests while keeping emulator work off the event loop."""
 
     def __init__(
         self,
         handler: Callable[[JsonObject], JsonObject],
         *,
+        server_epoch: str | None = None,
         host: str = DEFAULT_HOST,
         port: int = DEFAULT_PORT,
         max_message_bytes: int = DEFAULT_MAX_MESSAGE_BYTES,
@@ -35,13 +38,18 @@ class AsyncioTcpServer:
             raise ValueError("port must be between 0 and 65535")
         if max_message_bytes <= 0:
             raise ValueError("max_message_bytes must be positive")
-
         self._handler = handler
+        self._server_epoch = server_epoch or str(uuid.uuid4())
         self._host = host
         self._port = port
         self._max_message_bytes = max_message_bytes
+        self._handler_lock = asyncio.Lock()
         self._server: asyncio.AbstractServer | None = None
         self._client_tasks: set[asyncio.Task[None]] = set()
+
+    @property
+    def server_epoch(self) -> str:
+        return self._server_epoch
 
     @property
     def bound_port(self) -> int:
@@ -72,7 +80,6 @@ class AsyncioTcpServer:
         if server is not None:
             server.close()
             await server.wait_closed()
-
         current = asyncio.current_task()
         tasks = [task for task in self._client_tasks if task is not current]
         for task in tasks:
@@ -80,31 +87,22 @@ class AsyncioTcpServer:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    def _client_connected(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> None:
+    def _client_connected(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
         task = asyncio.create_task(self._handle_client(reader, writer))
         self._client_tasks.add(task)
         task.add_done_callback(self._client_tasks.discard)
 
-    async def _handle_client(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> None:
+    async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
+        hello_session_id: str | None = None
         try:
             while line := await self._read_line(reader, writer):
                 try:
                     payload = json.loads(line)
                 except (UnicodeDecodeError, json.JSONDecodeError) as exc:
                     await self._write_response(
-                        writer,
-                        {"transport_error": "invalid_json", "error": str(exc)},
+                        writer, {"transport_error": "invalid_json", "error": str(exc)}
                     )
                     continue
-
                 if not isinstance(payload, dict):
                     await self._write_response(
                         writer,
@@ -115,19 +113,44 @@ class AsyncioTcpServer:
                     )
                     continue
 
-                if payload.get("transport_operation") == "ping":
-                    response: JsonObject = {"transport_operation": "pong"}
+                if payload == {"transport_operation": "ping"}:
+                    response: JsonObject = {
+                        "transport_operation": "pong",
+                        "server_epoch": self._server_epoch,
+                    }
+                elif payload.get("transport_operation") == "hello":
+                    response, bound_session = self._handle_hello(
+                        payload, hello_session_id
+                    )
+                    if bound_session is not None:
+                        hello_session_id = bound_session
                 else:
+                    if hello_session_id is None:
+                        await self._write_response(
+                            writer,
+                            {
+                                "transport_error": "hello_required",
+                                "error": "send transport hello before API traffic",
+                            },
+                        )
+                        continue
+                    if payload.get("client_session_id") != hello_session_id:
+                        await self._write_response(
+                            writer,
+                            {
+                                "transport_error": "session_mismatch",
+                                "error": "API client_session_id differs from stream hello",
+                            },
+                        )
+                        continue
                     try:
-                        response = self._handler(payload)
+                        response = await self._call_handler(payload)
                     except Exception as exc:
                         response = fault_response(payload, exc)
                     if not isinstance(response, dict):
                         response = fault_response(
-                            payload,
-                            TypeError("RL handler returned a non-dict response"),
+                            payload, TypeError("RL handler returned a non-dict response")
                         )
-
                 await self._write_response(writer, response)
         finally:
             writer.close()
@@ -136,37 +159,93 @@ class AsyncioTcpServer:
             except (ConnectionError, OSError):
                 pass
 
-    async def _read_line(
+    def _handle_hello(
         self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> bytes:
+        payload: JsonObject,
+        current_session_id: str | None,
+    ) -> tuple[JsonObject, str | None]:
+        required_keys = {"transport_operation", "schema_version", "client_session_id"}
+        if set(payload) != required_keys:
+            return (
+                {
+                    "transport_error": "invalid_hello",
+                    "error": "hello must contain exactly transport_operation, schema_version, and client_session_id",
+                },
+                None,
+            )
+        session_id = payload.get("client_session_id")
+        if not isinstance(session_id, str) or not session_id:
+            return (
+                {
+                    "transport_error": "invalid_hello",
+                    "error": "client_session_id must be a non-empty string",
+                },
+                None,
+            )
+        if payload.get("schema_version") != SCHEMA_VERSION:
+            return (
+                {
+                    "transport_error": "unsupported_schema",
+                    "requested_schema_version": payload.get("schema_version"),
+                    "supported_schema_version": SCHEMA_VERSION,
+                },
+                None,
+            )
+        if current_session_id is not None and session_id != current_session_id:
+            return (
+                {
+                    "transport_error": "session_mismatch",
+                    "error": "one TCP stream may bind only one client_session_id",
+                },
+                None,
+            )
+        return (
+            {
+                "transport_operation": "hello",
+                "schema_version": SCHEMA_VERSION,
+                "server_epoch": self._server_epoch,
+                "client_session_id": session_id,
+            },
+            session_id,
+        )
+
+    async def _call_handler(self, payload: JsonObject) -> JsonObject:
+        async with self._handler_lock:
+            handler_task = asyncio.create_task(asyncio.to_thread(self._handler, payload))
+            try:
+                return await asyncio.shield(handler_task)
+            except asyncio.CancelledError:
+                try:
+                    await handler_task
+                except Exception:
+                    pass
+                raise
+
+    async def _read_line(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> bytes:
         try:
             line = await reader.readline()
         except (ValueError, asyncio.LimitOverrunError):
             line = None
+        if line == b"":
+            return b""
         if line is not None and len(line) <= self._max_message_bytes:
+            if not line.endswith(b"\n"):
+                return b""
             return line
         await self._write_response(
             writer,
             {
                 "transport_error": "message_too_large",
+                "direction": "request",
                 "max_message_bytes": self._max_message_bytes,
             },
         )
         return b""
 
     @staticmethod
-    async def _write_response(
-        writer: asyncio.StreamWriter,
-        response: JsonObject,
-    ) -> None:
+    async def _write_response(writer: asyncio.StreamWriter, response: JsonObject) -> None:
         writer.write(
-            json.dumps(
-                response,
-                ensure_ascii=False,
-                separators=(",", ":"),
-            ).encode("utf-8")
+            json.dumps(response, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
             + b"\n"
         )
         await writer.drain()
@@ -192,12 +271,16 @@ async def run_rl_server(
     dispatcher = RLApiServer()
     server = AsyncioTcpServer(
         dispatcher.handle_request,
+        server_epoch=dispatcher.server_epoch,
         host=host,
         port=port,
         max_message_bytes=max_message_bytes,
     )
     await server.start()
-    print(f"STS2_RL asyncio TCP listening on {host}:{server.bound_port}", flush=True)
+    print(
+        f"STS2_RL asyncio TCP listening on {host}:{server.bound_port} epoch={dispatcher.server_epoch}",
+        flush=True,
+    )
     try:
         await server.serve_forever()
     finally:
@@ -209,11 +292,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
-    parser.add_argument(
-        "--max-message-bytes",
-        type=int,
-        default=DEFAULT_MAX_MESSAGE_BYTES,
-    )
+    parser.add_argument("--max-message-bytes", type=int, default=DEFAULT_MAX_MESSAGE_BYTES)
     return parser.parse_args(argv)
 
 
