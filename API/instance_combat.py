@@ -190,6 +190,7 @@ class CombatInstance:
         return {
             "status": STATUS_COMPLETED,
             "instance_id": self.instance_id,
+            "max_emulate_actions_items": self._branch_manager.max_branches,
             **self._decision_response_fields(ROOT_BRANCH_ID, view, branch_log=list(self._root_branch_log)),
         }
 
@@ -485,18 +486,13 @@ class CombatInstance:
             for admitted_item, internal_id, book, branch_log in pending:
                 result = results.get(internal_id)
                 if result is None:
-                    # BranchManager.poll() is synchronous for all Branches it dispatches
-                    # in this call. Missing a result is an internal invariant violation,
-                    # never a normal asynchronous "running" outcome.
-                    branch_results[admitted_item.branch_id] = {
-                        "status": STATUS_FAULTED,
-                        "branch_id": admitted_item.branch_id,
-                        "parent_branch_id": admitted_item.parent_branch_id,
-                        "rng_id": admitted_item.rng_id,
-                        "error": "BranchManager.poll() returned no terminal result for a dispatched Branch",
-                        "fault_kind": "internal_invariant",
-                    }
-                    continue
+                    # poll() is synchronous for every Branch admitted by this call.
+                    # Treat a missing result as a coordinator invariant failure so the
+                    # whole Phase B transaction takes the quarantine path below.
+                    raise RuntimeError(
+                        "BranchManager.poll() returned no terminal result for "
+                        f"dispatched Branch {internal_id}"
+                    )
                 branch_results[admitted_item.branch_id] = self._finalize_branch_result(
                     branch_id=admitted_item.branch_id,
                     parent_branch_id=admitted_item.parent_branch_id,
