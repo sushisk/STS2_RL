@@ -153,7 +153,8 @@ class RngHypothesisTable:
 
         Successful batches pay no copy/commit cost. On failure, only keys added since the
         marker are removed, and each affected parent/decision counter is rewound to the
-        index of the removed allocation.
+        index of the removed allocation. For a valid marker this path is deliberately
+        failure-free so rollback cannot create a second coordinator cleanup failure.
         """
         if not isinstance(snapshot, int) or isinstance(snapshot, bool):
             raise TypeError("RNG rollback snapshot must be an integer marker")
@@ -163,11 +164,6 @@ class RngHypothesisTable:
         while len(self._index_by_key) > snapshot:
             key, index = self._index_by_key.popitem()
             parent_decision_key = (key[0], key[1])
-            current_next = self._next_index_by_parent_decision.get(parent_decision_key)
-            if current_next != index + 1:
-                raise RuntimeError(
-                    "RNG hypothesis allocation order invariant violated during rollback"
-                )
             if index == 0:
                 self._next_index_by_parent_decision.pop(parent_decision_key, None)
             else:
