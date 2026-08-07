@@ -39,9 +39,9 @@ class RLApiServer:
     def __init__(self, *, instance_factory_kwargs: "dict | None" = None) -> None:
         self._instances: dict[str, Any] = {}
         self._ledgers: dict[str, RequestLedger] = {}
-        # Completed close_instance requests remain replayable after their Instance and
-        # active ledger have been removed. This is required for ambiguous TCP completion:
-        # a client may need to retry the exact same close request after a lost response.
+        # Closed instances retain only the completed close_instance request/response.
+        # Keeping the whole active ledger would pin every historical Decision response
+        # (including potentially large masked_emulator_dto payloads) until server exit.
         self._closed_ledgers: dict[str, RequestLedger] = {}
         self._pre_instance_ledger = RequestLedger()
         self._instance_serial = itertools.count(1)
@@ -104,7 +104,13 @@ class RLApiServer:
             instance.close()
             self._instances.pop(instance_id, None)
             self._ledgers.pop(instance_id, None)
-            self._closed_ledgers[instance_id] = ledger
+
+            # Preserve only the close tombstone. The active ledger may contain a large
+            # number of completed simulation/decision responses and is no longer needed
+            # once the instance has been destroyed.
+            close_tombstone = RequestLedger()
+            close_tombstone.complete(payload, response)
+            self._closed_ledgers[instance_id] = close_tombstone
         return response
 
     def _run_with_ledger(
