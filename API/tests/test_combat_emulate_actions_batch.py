@@ -293,51 +293,66 @@ def test_mixed_execution_outcome_flows_through_emulate_actions() -> None:
         inst.close()
 
 
-def test_missing_poll_result_becomes_faulted_invariant_not_running() -> None:
+def test_missing_poll_result_quarantines_entire_batch() -> None:
     inst = CombatInstance("batch-missing-result", _combat_config(), worker_count=2)
     try:
         start = inst.start_instance_response()
         legal = start["masked_emulator_dto"]["legal_actions"]
         original_poll = inst._branch_manager.poll  # noqa: SLF001
 
+        # Simulate the true invariant breach: poll returns before resolving anything,
+        # leaving both manager records queued. emulate_actions must not translate that
+        # into a normal completed response with a synthetic per-Branch fault.
         def _missing_poll(*args, **kwargs):
-            results = original_poll(*args, **kwargs)
-            missing_internal_id = inst._bookkeeping["missing"].internal_id  # noqa: SLF001
-            results.pop(missing_internal_id)
-            return results
+            return {}
 
         inst._branch_manager.poll = _missing_poll  # noqa: SLF001
         try:
-            response = inst.emulate_actions(
-                items=[
-                    {
-                        "parent_branch_id": "root",
-                        "branch_id": "ok",
-                        "rng_id": 1,
-                        "decision_point_id": start["decision_point_id"],
-                        "action_id": _bash_action_id(legal),
-                    },
-                    {
-                        "parent_branch_id": "root",
-                        "branch_id": "missing",
-                        "rng_id": 2,
-                        "decision_point_id": start["decision_point_id"],
-                        "action_id": _defend_action_id(legal),
-                    },
-                ],
-                simulation_options=None,
-            )
+            try:
+                inst.emulate_actions(
+                    items=[
+                        {
+                            "parent_branch_id": "root",
+                            "branch_id": "ok",
+                            "rng_id": 1,
+                            "decision_point_id": start["decision_point_id"],
+                            "action_id": _bash_action_id(legal),
+                        },
+                        {
+                            "parent_branch_id": "root",
+                            "branch_id": "missing",
+                            "rng_id": 2,
+                            "decision_point_id": start["decision_point_id"],
+                            "action_id": _defend_action_id(legal),
+                        },
+                    ],
+                    simulation_options=None,
+                )
+            except RuntimeError as exc:
+                assert "no terminal result" in str(exc)
+            else:
+                raise AssertionError("missing poll result must fail the whole batch")
         finally:
             inst._branch_manager.poll = original_poll  # noqa: SLF001
 
-        assert response["status"] == "completed", response
-        missing = response["branch_results"]["missing"]
-        assert missing["status"] == "faulted", missing
-        assert missing["fault_kind"] == "internal_invariant", missing
-        assert missing["branch_id"] == "missing"
-        assert missing["parent_branch_id"] == "root"
-        assert missing["rng_id"] == 2
-        assert all(result["status"] != "running" for result in response["branch_results"].values())
+        assert inst._branch_manager.active_branch_count() == 0  # noqa: SLF001
+        assert {record.state for record in inst._branch_manager._records.values()} == {"released"}  # noqa: SLF001
+        assert inst._bookkeeping == {}  # noqa: SLF001
+        assert inst._rng_table._index_by_key == {}  # noqa: SLF001
+        assert inst._rng_table._next_index_by_parent_decision == {}  # noqa: SLF001
+
+        # IDs were committed before the invariant failure, so they stay burned but no
+        # longer expose a contradictory public running/completed state.
+        assert inst._branch_ids.is_known("ok")  # noqa: SLF001
+        assert inst._branch_ids.is_known("missing")  # noqa: SLF001
+        for branch_id in ("ok", "missing"):
+            try:
+                inst.get_decision(branch_id)
+            except RequestRejected:
+                pass
+            else:
+                raise AssertionError("quarantined public branch must not be usable")
+        assert original_poll(timeout=0.01) == {}
     finally:
         inst.close()
 
