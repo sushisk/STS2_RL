@@ -47,6 +47,8 @@ A response-size-limit failure is recoverable without inventing a new logical req
 
 Replay retention follows API object lifetimes rather than server lifetime. While an instance is active, its instance-scoped `RequestLedger` retains completed responses for that instance. The `start_instance` replay record is retained while the instance created by that start remains active and is discarded when that instance closes, so repeated start/close cycles do not make the server-wide pre-instance ledger grow monotonically. A successful `close_instance` keeps only a bounded server-wide tombstone for the close request/response (default: the most recent 1024 closed instances); the closed instance's full request history is released. If a close tombstone has already been evicted, the caller must use external reconciliation and MUST NOT convert the same completion-uncertain logical operation into a fresh `request_id` merely to make progress.
 
+`close_instance` treats `instance.close()` as part of the close transaction. If `instance.close()` raises after partial cleanup, RL returns and caches a terminal `faulted` close response, removes the instance from the active map, and retains only the bounded close tombstone. The instance MUST NOT be used for later API operations. Training may therefore discard its local active-instance state when it receives a correlated `faulted` close response; a lost close response remains completion-uncertain and must still use same-ID replay or explicit reconciliation.
+
 ## 4. Transport-only messages
 
 The following exact JSON object is reserved for a transport-path responsiveness check and is outside API DTO v0.5:
