@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import unittest
 
 from API.tcp_server import AsyncioTcpServer
@@ -78,6 +79,88 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response["fault_kind"], "emulator_error")
         self.assertEqual(response["instance_id"], "inst-1")
         self.assertIn("RuntimeError: boom", response["error"])
+
+    async def test_partial_frame_at_eof_is_not_dispatched(self) -> None:
+        reader, writer = await asyncio.open_connection(
+            "127.0.0.1", self.server.bound_port
+        )
+        try:
+            writer.write(
+                json.dumps(
+                    {
+                        "schema_version": "0.5",
+                        "request_id": "req-partial",
+                        "operation": "start_instance",
+                    }
+                ).encode("utf-8")
+            )
+            await writer.drain()
+            writer.write_eof()
+
+            self.assertEqual(await asyncio.wait_for(reader.read(), timeout=1.0), b"")
+            self.assertEqual(self.requests, [])
+        finally:
+            writer.close()
+            try:
+                await writer.wait_closed()
+            except (ConnectionError, OSError):
+                pass
+
+    async def test_ping_remains_responsive_while_api_handler_runs(self) -> None:
+        started = threading.Event()
+        release = threading.Event()
+        fallback_fired = threading.Event()
+
+        def blocking_handler(payload: dict) -> dict:
+            if payload.get("operation") == "block":
+                started.set()
+                release.wait(timeout=2.0)
+            return {"echo": payload}
+
+        server = AsyncioTcpServer(blocking_handler, port=0)
+        await server.start()
+        first_reader, first_writer = await asyncio.open_connection(
+            "127.0.0.1", server.bound_port
+        )
+        second_reader, second_writer = await asyncio.open_connection(
+            "127.0.0.1", server.bound_port
+        )
+        timer = threading.Timer(
+            1.0,
+            lambda: (fallback_fired.set(), release.set()),
+        )
+        timer.start()
+        try:
+            first_writer.write(
+                json.dumps({"operation": "block"}).encode("utf-8") + b"\n"
+            )
+            await first_writer.drain()
+            self.assertTrue(await asyncio.to_thread(started.wait, 0.5))
+
+            second_writer.write(b'{"transport_operation":"ping"}\n')
+            await second_writer.drain()
+            pong = json.loads(
+                await asyncio.wait_for(second_reader.readline(), timeout=0.5)
+            )
+
+            self.assertEqual(pong, {"transport_operation": "pong"})
+            self.assertFalse(fallback_fired.is_set())
+
+            release.set()
+            response = json.loads(
+                await asyncio.wait_for(first_reader.readline(), timeout=1.0)
+            )
+            self.assertEqual(response, {"echo": {"operation": "block"}})
+        finally:
+            release.set()
+            timer.cancel()
+            for writer in (first_writer, second_writer):
+                writer.close()
+                try:
+                    await writer.wait_closed()
+                except (ConnectionError, OSError):
+                    pass
+            await server.close()
 
 
 if __name__ == "__main__":
