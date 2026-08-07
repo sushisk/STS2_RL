@@ -114,14 +114,21 @@ class ServerReplayCacheTest(unittest.TestCase):
         self.assertIn(closed_ids[1], server._closed_ledgers)
         self.assertIn(closed_ids[2], server._closed_ledgers)
 
-    def test_start_replay_cache_is_bounded(self) -> None:
+    def test_start_replay_entry_is_released_when_instance_closes(self) -> None:
         server = RLApiServer(replay_cache_entries=2)
-        for index in range(3):
-            response = server.handle_request(self._start_request(f"start-{index}"))
-            self.assertEqual(response["status"], "completed")
+        start_request = self._start_request("start-1")
+        first = server.handle_request(start_request)
+        replay = server.handle_request(start_request)
 
-        self.assertEqual(len(server._pre_instance_ledger), 2)
-        server.close_all()
+        self.assertEqual(first, replay)
+        self.assertEqual(len(server._pre_instance_ledger), 1)
+
+        server.handle_request(
+            self._close_request("close-1", first["instance_id"])
+        )
+
+        self.assertEqual(len(server._pre_instance_ledger), 0)
+        self.assertNotIn(first["instance_id"], server._start_request_ids_by_instance)
 
 
 if __name__ == "__main__":
