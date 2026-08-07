@@ -138,3 +138,13 @@ class RngHypothesisTable:
         self._index_by_key[key] = next_index
         self._next_index_by_parent_decision[parent_decision_key] = next_index + 1
         return next_index
+
+    def snapshot(self) -> tuple[dict[tuple, int], dict[tuple, int]]:
+        """Return a cheap coordinator-side rollback snapshot for one batch admission."""
+        return dict(self._index_by_key), dict(self._next_index_by_parent_decision)
+
+    def restore(self, snapshot: tuple[dict[tuple, int], dict[tuple, int]]) -> None:
+        """Restore a snapshot after a coordinator-side batch failure."""
+        index_by_key, next_index_by_parent_decision = snapshot
+        self._index_by_key = dict(index_by_key)
+        self._next_index_by_parent_decision = dict(next_index_by_parent_decision)
