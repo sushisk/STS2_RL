@@ -48,12 +48,12 @@ class RLApiServer:
 
         self._instances: dict[str, Any] = {}
         self._ledgers: dict[str, RequestLedger] = {}
-        # start_instance has no instance-scoped ledger yet. Keep a bounded server-wide
-        # replay window so a lost start response can be retried with the same request id
-        # without retaining every initial decision DTO for the lifetime of the process.
-        self._pre_instance_ledger = RequestLedger(
-            max_completed_entries=replay_cache_entries
-        )
+        # start_instance has no instance-scoped ledger yet. Retain its completed replay
+        # record while the created instance remains active, then discard it on close.
+        # This preserves lost-response replay without making the server-wide ledger grow
+        # monotonically across start/close cycles.
+        self._pre_instance_ledger = RequestLedger()
+        self._start_request_ids_by_instance: dict[str, str] = {}
         # After close_instance succeeds, retain only that close request/response as a
         # bounded tombstone. The instance's full RequestLedger may contain large
         # emulator responses and must be released with the closed instance.
@@ -70,6 +70,8 @@ class RLApiServer:
             instance.close()
         self._instances.clear()
         self._ledgers.clear()
+        self._pre_instance_ledger.clear()
+        self._start_request_ids_by_instance.clear()
         self._closed_ledgers.clear()
 
     def handle_request(self, payload: dict) -> dict:
@@ -87,6 +89,11 @@ class RLApiServer:
                 response = self._handle_start_instance(payload)
                 response = self._wrap(payload, response)
                 self._pre_instance_ledger.complete(payload, response)
+                instance_id = response.get("instance_id")
+                if isinstance(instance_id, str) and instance_id:
+                    self._start_request_ids_by_instance[instance_id] = payload[
+                        "request_id"
+                    ]
                 return response
 
             instance_id = payload["instance_id"]
@@ -114,6 +121,12 @@ class RLApiServer:
                 instance.close()
                 del self._instances[instance_id]
                 del self._ledgers[instance_id]
+                start_request_id = self._start_request_ids_by_instance.pop(
+                    instance_id,
+                    None,
+                )
+                if start_request_id is not None:
+                    self._pre_instance_ledger.discard(start_request_id)
                 self._remember_close_tombstone(instance_id, payload, response)
             return response
         except RequestRejected as exc:
