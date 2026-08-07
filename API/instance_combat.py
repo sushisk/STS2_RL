@@ -366,8 +366,9 @@ class CombatInstance:
 
         Phase A validates every item before any mutation. Therefore every non-root
         ``parent_branch_id`` must identify a Branch that already existed at batch start.
-        Phase B registers and queues every WorkItem before exactly one blocking
-        ``BranchManager.poll()`` call, then returns terminal per-Branch outcomes.
+        Phase B prepares the whole batch, atomically registers all internal Branches, and
+        invokes one blocking ``BranchManager.poll()``. ``max_time_ms`` is a per-Branch
+        execution timeout; it is not a wall-clock deadline for the whole batch.
         """
         stop_condition = (simulation_options or {}).get("stop_condition")
         if stop_condition not in (None, "next_decision"):
@@ -386,85 +387,143 @@ class CombatInstance:
             seen_branch_ids.add(branch_id)
             admitted.append(self._validate_emulate_actions_item(item))
 
-        if self._branch_manager.active_branch_count() + len(admitted) > self._branch_manager.max_branches:
+        if len(admitted) > self._branch_manager.max_branches:
+            raise RequestRejected(
+                f"emulate_actions batch size {len(admitted)} exceeds max batch size "
+                f"{self._branch_manager.max_branches}; chunk the frontier into multiple requests"
+            )
+        active_count = self._branch_manager.active_branch_count()
+        if active_count + len(admitted) > self._branch_manager.max_branches:
             raise RequestRejected(
                 f"submitting {len(admitted)} Branch(es) would exceed max_branches="
-                f"{self._branch_manager.max_branches} (currently {self._branch_manager.active_branch_count()} active)"
+                f"{self._branch_manager.max_branches} (currently {active_count} active)"
             )
 
-        # -- Phase B: batch submission / execution -------------------------------------
+        # -- Phase B: prepare / atomically submit / execute ----------------------------
+        rng_snapshot = self._rng_table.snapshot()
+        internal_ids: list[str] = []
         pending: list[tuple] = []  # (admitted_item, internal_id, book, branch_log)
-        for admitted_item in admitted:
-            self._branch_ids.register(admitted_item.branch_id)
+        try:
+            prepared: list[tuple] = []
+            for admitted_item in admitted:
+                hypothesis_index = self._rng_table.hypothesis_index_for(
+                    admitted_item.parent_branch_id,
+                    admitted_item.decision_point_id,
+                    admitted_item.rng_id,
+                )
+                work_item = build_single_hypothesis_work_item(
+                    admitted_item.parent_view.decision_context,
+                    admitted_item.candidate,
+                    hypothesis_index,
+                    work_kind=WORK_KIND_SUB_BRANCH,
+                    combat_start_deck_multiset=self._combat_start_deck_multiset,
+                )
+                parent_internal_id = (
+                    None
+                    if admitted_item.parent_branch_id == ROOT_BRANCH_ID
+                    else self._bookkeeping[admitted_item.parent_branch_id].internal_id
+                )
+                parent_history = (
+                    self._root_history
+                    if admitted_item.parent_branch_id == ROOT_BRANCH_ID
+                    else self._bookkeeping[admitted_item.parent_branch_id].history
+                )
+                parent_log = (
+                    list(self._root_branch_log)
+                    if admitted_item.parent_branch_id == ROOT_BRANCH_ID
+                    else list(self._bookkeeping[admitted_item.parent_branch_id].branch_log)
+                )
+                depth = len(parent_log)
+                branch_log = parent_log + [
+                    {
+                        "depth": depth,
+                        "decision_point_id": admitted_item.decision_point_id,
+                        "action_id": admitted_item.action_id,
+                        "rng_id": admitted_item.rng_id,
+                    }
+                ]
+                prepared.append(
+                    (
+                        admitted_item,
+                        work_item,
+                        parent_internal_id,
+                        branch_log,
+                        parent_history.fork(),
+                    )
+                )
 
-            hypothesis_index = self._rng_table.hypothesis_index_for(
-                admitted_item.parent_branch_id, admitted_item.decision_point_id, admitted_item.rng_id
-            )
-            work_item = build_single_hypothesis_work_item(
-                admitted_item.parent_view.decision_context,
-                admitted_item.candidate,
-                hypothesis_index,
-                work_kind=WORK_KIND_SUB_BRANCH,
-                combat_start_deck_multiset=self._combat_start_deck_multiset,
-            )
-            parent_internal_id = (
-                None if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].internal_id
-            )
-            (internal_id,) = self._branch_manager.submit([work_item], parent_branch_id=parent_internal_id)
-
-            parent_history = (
-                self._root_history if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].history
-            )
-            parent_log = (
-                list(self._root_branch_log)
-                if admitted_item.parent_branch_id == ROOT_BRANCH_ID
-                else list(self._bookkeeping[admitted_item.parent_branch_id].branch_log)
-            )
-            depth = len(parent_log)
-            branch_log = parent_log + [
-                {
-                    "depth": depth,
-                    "decision_point_id": admitted_item.decision_point_id,
-                    "action_id": admitted_item.action_id,
-                    "rng_id": admitted_item.rng_id,
-                }
-            ]
-            book = _BranchBookkeeping(internal_id, admitted_item.parent_branch_id, branch_log, parent_history.fork(), admitted_item.rng_id)
-            self._bookkeeping[admitted_item.branch_id] = book
-            pending.append((admitted_item, internal_id, book, branch_log))
-
-        # Every WorkItem above is now `queued`; one poll() dispatches all of them onto
-        # the Worker Pool and blocks until every one of THEM has resolved.
-        results = self._branch_manager.poll(timeout=(simulation_options or {}).get("max_time_ms", 60000) / 1000.0)
-
-        # Batch status reflects admission/execution of the request as a whole. Individual
-        # Worker faults stay local to their Branch result.
-        branch_results: dict = {}
-        for admitted_item, internal_id, book, branch_log in pending:
-            result = results.get(internal_id)
-            if result is None:
-                # BranchManager.poll() is synchronous for all Branches it dispatches in
-                # this call. Missing a result here is therefore an internal invariant
-                # violation, never a normal asynchronous "running" outcome.
-                branch_results[admitted_item.branch_id] = {
-                    "status": STATUS_FAULTED,
-                    "branch_id": admitted_item.branch_id,
-                    "parent_branch_id": admitted_item.parent_branch_id,
-                    "rng_id": admitted_item.rng_id,
-                    "error": "BranchManager.poll() returned no terminal result for a dispatched Branch",
-                    "fault_kind": "internal_invariant",
-                }
-                continue
-            branch_results[admitted_item.branch_id] = self._finalize_branch_result(
-                branch_id=admitted_item.branch_id,
-                parent_branch_id=admitted_item.parent_branch_id,
-                rng_id=admitted_item.rng_id,
-                book=book,
-                branch_log=branch_log,
-                result=result,
+            internal_ids = self._branch_manager.submit_many(
+                [(work_item, parent_internal_id) for _, work_item, parent_internal_id, _, _ in prepared]
             )
 
-        return {"status": STATUS_COMPLETED, "branch_results": branch_results}
+            local_books: list[tuple] = []
+            for prepared_item, internal_id in zip(prepared, internal_ids, strict=True):
+                admitted_item, _, _, branch_log, history = prepared_item
+                book = _BranchBookkeeping(
+                    internal_id,
+                    admitted_item.parent_branch_id,
+                    branch_log,
+                    history,
+                    admitted_item.rng_id,
+                )
+                local_books.append((admitted_item, internal_id, book, branch_log))
+
+            for admitted_item in admitted:
+                self._branch_ids.register(admitted_item.branch_id)
+            for admitted_item, internal_id, book, branch_log in local_books:
+                self._bookkeeping[admitted_item.branch_id] = book
+                pending.append((admitted_item, internal_id, book, branch_log))
+
+            branch_timeout_s = (simulation_options or {}).get("max_time_ms", 60000) / 1000.0
+            results = self._branch_manager.poll(timeout=branch_timeout_s)
+
+            # Batch status reflects admission/execution of the request as a whole.
+            # Individual Worker faults stay local to their Branch result.
+            branch_results: dict = {}
+            for admitted_item, internal_id, book, branch_log in pending:
+                result = results.get(internal_id)
+                if result is None:
+                    # BranchManager.poll() is synchronous for all Branches it dispatches
+                    # in this call. Missing a result is an internal invariant violation,
+                    # never a normal asynchronous "running" outcome.
+                    branch_results[admitted_item.branch_id] = {
+                        "status": STATUS_FAULTED,
+                        "branch_id": admitted_item.branch_id,
+                        "parent_branch_id": admitted_item.parent_branch_id,
+                        "rng_id": admitted_item.rng_id,
+                        "error": "BranchManager.poll() returned no terminal result for a dispatched Branch",
+                        "fault_kind": "internal_invariant",
+                    }
+                    continue
+                branch_results[admitted_item.branch_id] = self._finalize_branch_result(
+                    branch_id=admitted_item.branch_id,
+                    parent_branch_id=admitted_item.parent_branch_id,
+                    rng_id=admitted_item.rng_id,
+                    book=book,
+                    branch_log=branch_log,
+                    result=result,
+                )
+
+            return {"status": STATUS_COMPLETED, "branch_results": branch_results}
+        except Exception:
+            # The session ledger will cache the terminal fault for this wire request, so
+            # no internal Branch from the failed coordinator transaction may survive to
+            # an unrelated later poll. Public branch IDs already registered remain burned
+            # (never reusable), but their bookkeeping/decision state is quarantined.
+            if internal_ids:
+                try:
+                    self._branch_manager.cancel_branches(internal_ids)
+                except Exception:
+                    pass
+                try:
+                    self._branch_manager.release_branches(internal_ids)
+                except Exception:
+                    pass
+            for admitted_item in admitted:
+                self._bookkeeping.pop(admitted_item.branch_id, None)
+                self._decision_points.clear(admitted_item.branch_id)
+            self._rng_table.restore(rng_snapshot)
+            raise
 
     def _finalize_branch_result(
         self,
