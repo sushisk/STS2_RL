@@ -18,7 +18,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
                 raise RuntimeError("boom")
             return {"echo": payload}
 
-        self.server = AsyncioTcpServer(handler, port=0)
+        self.server = AsyncioTcpServer(handler, server_epoch="epoch-test", port=0)
         await self.server.start()
         self.reader, self.writer = await asyncio.open_connection(
             "127.0.0.1", self.server.bound_port
@@ -37,15 +37,34 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         await self.writer.drain()
         return json.loads(await self.reader.readline())
 
+    async def test_hello_returns_server_epoch_without_dispatch(self) -> None:
+        response = await self._round_trip(
+            {"transport_operation": "hello", "client_session_id": "session-a"}
+        )
+        self.assertEqual(
+            response,
+            {
+                "transport_operation": "hello",
+                "client_session_id": "session-a",
+                "server_epoch": "epoch-test",
+            },
+        )
+        self.assertEqual(self.requests, [])
+
     async def test_ping_does_not_enter_api_dispatcher(self) -> None:
         response = await self._round_trip({"transport_operation": "ping"})
-        self.assertEqual(response, {"transport_operation": "pong"})
+        self.assertEqual(
+            response,
+            {"transport_operation": "pong", "server_epoch": "epoch-test"},
+        )
         self.assertEqual(self.requests, [])
 
     async def test_ping_namespace_requires_exact_transport_message(self) -> None:
         request = {
-            "schema_version": "0.5",
-            "request_id": "req-mixed",
+            "schema_version": "0.6",
+            "client_session_id": "session-a",
+            "request_seq": 1,
+            "request_id": "session-a:1",
             "operation": "get_decision",
             "instance_id": "inst-1",
             "branch_id": "root",
@@ -55,22 +74,12 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response, {"echo": request})
         self.assertEqual(self.requests, [request])
 
-    async def test_api_request_is_dispatched_unchanged(self) -> None:
-        request = {
-            "schema_version": "0.5",
-            "request_id": "req-1",
-            "operation": "get_decision",
-            "instance_id": "inst-1",
-            "branch_id": "root",
-        }
-        response = await self._round_trip(request)
-        self.assertEqual(response, {"echo": request})
-        self.assertEqual(self.requests, [request])
-
     async def test_handler_error_uses_api_fault_response(self) -> None:
         request = {
-            "schema_version": "0.5",
-            "request_id": "req-2",
+            "schema_version": "0.6",
+            "client_session_id": "session-a",
+            "request_seq": 1,
+            "request_id": "session-a:1",
             "operation": "raise",
             "instance_id": "inst-1",
         }
@@ -88,15 +97,16 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             writer.write(
                 json.dumps(
                     {
-                        "schema_version": "0.5",
-                        "request_id": "req-partial",
+                        "schema_version": "0.6",
+                        "client_session_id": "session-a",
+                        "request_seq": 1,
+                        "request_id": "session-a:1",
                         "operation": "start_instance",
                     }
                 ).encode("utf-8")
             )
             await writer.drain()
             writer.write_eof()
-
             self.assertEqual(await asyncio.wait_for(reader.read(), timeout=1.0), b"")
             self.assertEqual(self.requests, [])
         finally:
@@ -117,7 +127,9 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
                 release.wait(timeout=2.0)
             return {"echo": payload}
 
-        server = AsyncioTcpServer(blocking_handler, port=0)
+        server = AsyncioTcpServer(
+            blocking_handler, server_epoch="epoch-block", port=0
+        )
         await server.start()
         first_reader, first_writer = await asyncio.open_connection(
             "127.0.0.1", server.bound_port
@@ -125,10 +137,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         second_reader, second_writer = await asyncio.open_connection(
             "127.0.0.1", server.bound_port
         )
-        timer = threading.Timer(
-            1.0,
-            lambda: (fallback_fired.set(), release.set()),
-        )
+        timer = threading.Timer(1.0, lambda: (fallback_fired.set(), release.set()))
         timer.start()
         try:
             first_writer.write(
@@ -142,8 +151,10 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             pong = json.loads(
                 await asyncio.wait_for(second_reader.readline(), timeout=0.5)
             )
-
-            self.assertEqual(pong, {"transport_operation": "pong"})
+            self.assertEqual(
+                pong,
+                {"transport_operation": "pong", "server_epoch": "epoch-block"},
+            )
             self.assertFalse(fallback_fired.is_set())
 
             release.set()
