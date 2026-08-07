@@ -39,9 +39,8 @@ class RequestLedger:
     """Remember request digests and completed responses for safe replay.
 
     Per-instance ledgers default to an unbounded lifetime because request-id uniqueness is
-    part of the instance contract. Server-wide replay caches may opt into
-    ``max_completed_entries`` so old completed responses do not retain large DTOs for the
-    lifetime of a long-running server. In-flight entries are never evicted.
+    part of the instance contract. Short-lived server-wide replay caches may opt into
+    ``max_completed_entries``. In-flight entries are never evicted.
     """
 
     max_completed_entries: int | None = None
@@ -81,6 +80,13 @@ class RequestLedger:
         self._entries.move_to_end(request_id)
         self._evict_completed_entries()
 
+    def discard(self, request_id: str) -> None:
+        """Forget one request once its replay lifetime has explicitly ended."""
+        self._entries.pop(request_id, None)
+
+    def clear(self) -> None:
+        self._entries.clear()
+
     def __len__(self) -> int:
         return len(self._entries)
 
@@ -105,14 +111,19 @@ class RequestLedger:
             return
 
         while len(self._entries) > limit:
-            for request_id, (_, cached_response) in self._entries.items():
-                if cached_response is not None:
-                    del self._entries[request_id]
-                    break
-            else:
+            evict_id = next(
+                (
+                    request_id
+                    for request_id, (_, cached_response) in self._entries.items()
+                    if cached_response is not None
+                ),
+                None,
+            )
+            if evict_id is None:
                 # Every retained entry is still in flight. Do not make a duplicate
                 # execution possible merely to satisfy the memory bound.
                 break
+            del self._entries[evict_id]
 
 
 @dataclass
