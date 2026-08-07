@@ -123,6 +123,26 @@ class SessionSequencingTest(unittest.TestCase):
         self.assertEqual(response["status"], "rejected")
         self.assertEqual(response["fault_kind"], "session_sequence_gap")
 
+    def test_new_session_sequence_gap_does_not_consume_capacity(self) -> None:
+        server = RLApiServer(max_sessions=1)
+        response = server.handle_request(
+            self._request(
+                "session-a",
+                2,
+                "start_instance",
+                instance_config={"instance_type": "combat"},
+            )
+        )
+
+        self.assertEqual(response["status"], "rejected")
+        self.assertEqual(response["fault_kind"], "session_sequence_gap")
+        self.assertEqual(server.session_count(), 0)
+        self.assertEqual(_FakeCombatInstance.creations, 0)
+
+        start = self._start(server, "session-b")
+        self.assertEqual(start["status"], "completed")
+        self.assertEqual(server.session_count(), 1)
+
     def test_faulted_state_change_is_terminal_and_replayed(self) -> None:
         server = RLApiServer()
         start = self._start(server)
