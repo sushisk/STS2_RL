@@ -20,6 +20,7 @@ intermediate actions Training never specified, which is out of scope for a singl
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Optional
 
 from combat_state_snapshot import CombatStateSnapshot
@@ -104,6 +105,21 @@ class _BranchBookkeeping:
         self.rng_id = rng_id
         self.view: Optional[_DecisionView] = None
         self.terminal = False
+
+
+@dataclass(frozen=True)
+class _AdmittedItem:
+    """One `emulate_actions` batch item that passed Phase A (Admission validation),
+    carrying everything Phase B needs to build its WorkItem without re-resolving the
+    parent's Decision view a second time."""
+
+    parent_branch_id: str
+    branch_id: str
+    rng_id: int
+    decision_point_id: str
+    action_id: str
+    parent_view: "_DecisionView"
+    candidate: PipelineCandidateRef
 
 
 class CombatInstance:
@@ -288,6 +304,172 @@ class CombatInstance:
         if result is None:
             return {"status": STATUS_RUNNING, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id}
 
+        return self._finalize_branch_result(
+            branch_id=branch_id, parent_branch_id=parent_branch_id, rng_id=rng_id, book=book, branch_log=branch_log, result=result
+        )
+
+    def _validate_emulate_actions_item(self, item: dict) -> "_AdmittedItem":
+        """Phase A (Admission validation) for one ``emulate_actions`` batch item -
+        performs every check `emulate_action` performs before it mutates any registry,
+        without registering the ``branch_id`` or touching the RNG hypothesis table.
+        Raises `RequestRejected` on any invalid item; callers must not apply Phase B
+        for ANY item in the batch if this raises for even one."""
+        parent_branch_id = item["parent_branch_id"]
+        branch_id = item["branch_id"]
+        rng_id = item["rng_id"]
+        decision_point_id = item["decision_point_id"]
+        action_id = item["action_id"]
+
+        if self._branch_ids.is_known(branch_id):
+            raise RequestRejected(f"branch_id {branch_id!r} already used (branch IDs are never reusable)")
+
+        if parent_branch_id != ROOT_BRANCH_ID:
+            if not self._branch_ids.is_known(parent_branch_id) or parent_branch_id not in self._bookkeeping:
+                raise RequestRejected(f"parent_branch_id {parent_branch_id!r} does not exist")
+            parent_status = self._branch_manager.get_branch_status([self._bookkeeping[parent_branch_id].internal_id])[
+                self._bookkeeping[parent_branch_id].internal_id
+            ]
+            if parent_status in ("cancelled", "released", "faulted"):
+                raise RequestRejected(f"parent_branch_id {parent_branch_id!r} is {parent_status} and cannot be extended")
+            parent_rng_id = self._bookkeeping[parent_branch_id].rng_id
+            if rng_id != parent_rng_id:
+                raise RequestRejected(
+                    f"non-root parent_branch_id {parent_branch_id!r} requires rng_id={parent_rng_id!r} "
+                    f"(its own lineage rng_id), got {rng_id!r}"
+                )
+
+        self._decision_points.validate(parent_branch_id, decision_point_id)
+
+        parent_view = self._view_for(parent_branch_id)
+        index = parent_view.resolve_action_id(action_id)
+        chosen = parent_view.legal_actions_raw[index]
+        target_index, target_enemy_index = _target_params(chosen)
+        candidate = PipelineCandidateRef(
+            current_context_signature=parent_view.decision_context.current_context_signature,
+            semantic_action=_semantic_action_for(chosen),
+            target_index=target_index,
+            target_enemy_index=target_enemy_index,
+        )
+        return _AdmittedItem(
+            parent_branch_id=parent_branch_id,
+            branch_id=branch_id,
+            rng_id=rng_id,
+            decision_point_id=decision_point_id,
+            action_id=action_id,
+            parent_view=parent_view,
+            candidate=candidate,
+        )
+
+    def emulate_actions(self, *, items: list, simulation_options: Optional[dict]) -> dict:
+        """Batch counterpart of `emulate_action` (DTO v0.7). Every item is validated
+        (Phase A: Admission validation) before ANY Branch is registered or submitted; if
+        even one item is invalid the whole batch is rejected and no Branch is created.
+        Only once every item passes admission does Phase B register branch_ids, build
+        WorkItems, `submit()` them (one call per distinct parent, mirroring
+        `emulate_action`), flip them all to `queued`, and run exactly one
+        `BranchManager.poll()` so the Worker Pool executes them in parallel."""
+        stop_condition = (simulation_options or {}).get("stop_condition")
+        if stop_condition not in (None, "next_decision"):
+            raise RequestRejected(f"stop_condition {stop_condition!r} is not supported for combat instances")
+
+        if not items:
+            raise RequestRejected("emulate_actions.items must be a non-empty list")
+
+        # -- Phase A: Admission validation (no mutation) ------------------------------
+        seen_branch_ids: set = set()
+        admitted: list[_AdmittedItem] = []
+        for item in items:
+            branch_id = item["branch_id"]
+            if branch_id in seen_branch_ids:
+                raise RequestRejected(f"branch_id {branch_id!r} is duplicated within this batch")
+            seen_branch_ids.add(branch_id)
+            admitted.append(self._validate_emulate_actions_item(item))
+
+        if self._branch_manager.active_branch_count() + len(admitted) > self._branch_manager.max_branches:
+            raise RequestRejected(
+                f"submitting {len(admitted)} Branch(es) would exceed max_branches="
+                f"{self._branch_manager.max_branches} (currently {self._branch_manager.active_branch_count()} active)"
+            )
+
+        # -- Phase B: batch submission / execution -------------------------------------
+        pending: list[tuple] = []  # (admitted_item, internal_id, book, branch_log)
+        for admitted_item in admitted:
+            self._branch_ids.register(admitted_item.branch_id)
+
+            hypothesis_index = self._rng_table.hypothesis_index_for(
+                admitted_item.parent_branch_id, admitted_item.decision_point_id, admitted_item.rng_id
+            )
+            work_item = build_single_hypothesis_work_item(
+                admitted_item.parent_view.decision_context,
+                admitted_item.candidate,
+                hypothesis_index,
+                work_kind=WORK_KIND_SUB_BRANCH,
+                combat_start_deck_multiset=self._combat_start_deck_multiset,
+            )
+            parent_internal_id = (
+                None if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].internal_id
+            )
+            (internal_id,) = self._branch_manager.submit([work_item], parent_branch_id=parent_internal_id)
+
+            parent_history = (
+                self._root_history if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].history
+            )
+            parent_log = (
+                list(self._root_branch_log)
+                if admitted_item.parent_branch_id == ROOT_BRANCH_ID
+                else list(self._bookkeeping[admitted_item.parent_branch_id].branch_log)
+            )
+            depth = len(parent_log)
+            branch_log = parent_log + [
+                {
+                    "depth": depth,
+                    "decision_point_id": admitted_item.decision_point_id,
+                    "action_id": admitted_item.action_id,
+                    "rng_id": admitted_item.rng_id,
+                }
+            ]
+            book = _BranchBookkeeping(internal_id, admitted_item.parent_branch_id, branch_log, parent_history.fork(), admitted_item.rng_id)
+            self._bookkeeping[admitted_item.branch_id] = book
+            pending.append((admitted_item, internal_id, book, branch_log))
+
+        # Every WorkItem above is now `queued`; one poll() dispatches all of them onto
+        # the Worker Pool and blocks until every one of THEM (not any other, previously
+        # queued Branch) has resolved.
+        results = self._branch_manager.poll(timeout=(simulation_options or {}).get("max_time_ms", 60000) / 1000.0)
+
+        # Batch status reflects whether the batch itself was admitted and executed, not
+        # the outcome of individual Branches: a per-Branch Worker fault never demotes
+        # the batch away from `completed` (Phase A already guaranteed admission).
+        branch_results: dict = {}
+        for admitted_item, internal_id, book, branch_log in pending:
+            result = results.get(internal_id)
+            if result is None:
+                branch_results[admitted_item.branch_id] = {"status": STATUS_RUNNING}
+                continue
+            branch_results[admitted_item.branch_id] = self._finalize_branch_result(
+                branch_id=admitted_item.branch_id,
+                parent_branch_id=admitted_item.parent_branch_id,
+                rng_id=admitted_item.rng_id,
+                book=book,
+                branch_log=branch_log,
+                result=result,
+            )
+
+        return {"status": STATUS_COMPLETED, "branch_results": branch_results}
+
+    def _finalize_branch_result(
+        self,
+        *,
+        branch_id: str,
+        parent_branch_id: str,
+        rng_id: int,
+        book: "_BranchBookkeeping",
+        branch_log: list,
+        result: Any,
+    ) -> dict:
+        """Translate one resolved `BranchResult` (already drained off `BranchManager`)
+        into the public per-Branch response shape shared by `emulate_action` and
+        `emulate_actions`."""
         if result.status != "success":
             diagnostics = result.diagnostics or {}
             return {
@@ -320,25 +502,23 @@ class CombatInstance:
         book.view = next_view
         self._decision_points.issue(branch_id)
         if next_view is not None:
-            response = {
+            return {
                 "status": STATUS_COMPLETED,
                 **self._decision_response_fields(branch_id, next_view, branch_log=branch_log),
                 "parent_branch_id": parent_branch_id,
                 "rng_id": rng_id,
             }
-        else:
-            response = {
-                "status": STATUS_COMPLETED,
-                "branch_id": branch_id,
-                "parent_branch_id": parent_branch_id,
-                "rng_id": rng_id,
-                "decision_point_id": self._decision_points.current(branch_id),
-                "branch_log": branch_log,
-                "masked_emulator_dto": build_masked_emulator_dto(
-                    {"terminal": True, "outcome": result.terminal_result.outcome if result.terminal_result else None}
-                ),
-            }
-        return response
+        return {
+            "status": STATUS_COMPLETED,
+            "branch_id": branch_id,
+            "parent_branch_id": parent_branch_id,
+            "rng_id": rng_id,
+            "decision_point_id": self._decision_points.current(branch_id),
+            "branch_log": branch_log,
+            "masked_emulator_dto": build_masked_emulator_dto(
+                {"terminal": True, "outcome": result.terminal_result.outcome if result.terminal_result else None}
+            ),
+        }
 
     def cancel_branches(self, branch_ids: list) -> dict:
         internal_ids = [self._internal_id_or_reject(bid) for bid in branch_ids]

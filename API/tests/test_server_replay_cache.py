@@ -57,7 +57,7 @@ class SessionSequencingTest(unittest.TestCase):
     @staticmethod
     def _request(session: str, seq: int, operation: str, **fields) -> dict:
         return {
-            "schema_version": "0.6",
+            "schema_version": "0.7",
             "client_session_id": session,
             "request_seq": seq,
             "request_id": f"{session}:{seq}",

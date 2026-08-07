@@ -27,7 +27,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(hello["server_epoch"], "epoch-test")
 
     @staticmethod
-    def _hello(session_id: str, schema_version: str = "0.6") -> dict:
+    def _hello(session_id: str, schema_version: str = "0.7") -> dict:
         return {
             "transport_operation": "hello",
             "schema_version": schema_version,
@@ -53,7 +53,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             response,
             {
                 "transport_operation": "hello",
-                "schema_version": "0.6",
+                "schema_version": "0.7",
                 "client_session_id": "session-a",
                 "server_epoch": "epoch-test",
             },
@@ -69,7 +69,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             await writer.drain()
             response = json.loads(await reader.readline())
             self.assertEqual(response["transport_error"], "unsupported_schema")
-            self.assertEqual(response["supported_schema_version"], "0.6")
+            self.assertEqual(response["supported_schema_version"], "0.7")
         finally:
             writer.close()
             await writer.wait_closed()
@@ -84,7 +84,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_ping_namespace_requires_exact_transport_message(self) -> None:
         request = {
-            "schema_version": "0.6",
+            "schema_version": "0.7",
             "client_session_id": "session-a",
             "request_seq": 1,
             "request_id": "session-a:1",
@@ -99,7 +99,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_handler_error_uses_api_fault_response(self) -> None:
         request = {
-            "schema_version": "0.6",
+            "schema_version": "0.7",
             "client_session_id": "session-a",
             "request_seq": 1,
             "request_id": "session-a:1",
@@ -120,7 +120,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             writer.write(
                 json.dumps(
                     {
-                        "schema_version": "0.6",
+                        "schema_version": "0.7",
                         "client_session_id": "session-a",
                         "request_seq": 1,
                         "request_id": "session-a:1",
@@ -146,7 +146,7 @@ class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):
             writer.write(
                 json.dumps(
                     {
-                        "schema_version": "0.6",
+                        "schema_version": "0.7",
                         "client_session_id": "session-b",
                         "request_seq": 1,
                         "request_id": "session-b:1",

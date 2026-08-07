@@ -8,7 +8,7 @@ is deterministically derived from those two fields.
 
 from __future__ import annotations
 
-SCHEMA_VERSION = "0.6"
+SCHEMA_VERSION = "0.7"
 SUPPORTED_SCHEMA_VERSIONS = frozenset({SCHEMA_VERSION})
 
 DTO_VERSION = "emulator-fca2f06"
@@ -18,6 +18,7 @@ OP_START_INSTANCE = "start_instance"
 OP_GET_DECISION = "get_decision"
 OP_COMMIT_ACTION = "commit_action"
 OP_EMULATE_ACTION = "emulate_action"
+OP_EMULATE_ACTIONS = "emulate_actions"
 OP_CANCEL_BRANCHES = "cancel_branches"
 OP_RELEASE_BRANCHES = "release_branches"
 OP_GET_BRANCH_STATUS = "get_branch_status"
@@ -29,6 +30,7 @@ OPERATIONS = frozenset(
         OP_GET_DECISION,
         OP_COMMIT_ACTION,
         OP_EMULATE_ACTION,
+        OP_EMULATE_ACTIONS,
         OP_CANCEL_BRANCHES,
         OP_RELEASE_BRANCHES,
         OP_GET_BRANCH_STATUS,

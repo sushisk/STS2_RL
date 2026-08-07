@@ -25,7 +25,7 @@ class CloseFaultQuarantineTest(unittest.TestCase):
     @staticmethod
     def _request(seq: int, operation: str, **fields) -> dict:
         return {
-            "schema_version": "0.6",
+            "schema_version": "0.7",
             "client_session_id": "session-a",
             "request_seq": seq,
             "request_id": f"session-a:{seq}",

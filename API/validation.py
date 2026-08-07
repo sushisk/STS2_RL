@@ -9,6 +9,7 @@ from API.dto import (
     OP_CLOSE_INSTANCE,
     OP_COMMIT_ACTION,
     OP_EMULATE_ACTION,
+    OP_EMULATE_ACTIONS,
     OP_GET_BRANCH_STATUS,
     OP_GET_DECISION,
     OP_RELEASE_BRANCHES,
@@ -80,6 +81,34 @@ def _validate_simulation_options(payload: dict) -> None:
         )
 
 
+_EMULATE_ACTIONS_ITEM_STR_FIELDS = ("parent_branch_id", "branch_id", "decision_point_id", "action_id")
+
+
+def _validate_emulate_actions_items(payload: dict) -> None:
+    items = _require(payload, "items", list)
+    if not items:
+        raise RequestRejected("emulate_actions.items must be a non-empty list")
+    seen_branch_ids: set = set()
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise RequestRejected(f"emulate_actions.items[{index}] must be an object")
+        for field in _EMULATE_ACTIONS_ITEM_STR_FIELDS:
+            value = item.get(field)
+            if not isinstance(value, str) or not value:
+                raise RequestRejected(
+                    f"emulate_actions.items[{index}].{field} must be a non-empty string"
+                )
+        rng_id = item.get("rng_id")
+        if not isinstance(rng_id, int) or isinstance(rng_id, bool) or rng_id <= 0:
+            raise RequestRejected(f"emulate_actions.items[{index}].rng_id must be a positive integer")
+        branch_id = item["branch_id"]
+        if branch_id in seen_branch_ids:
+            raise RequestRejected(
+                f"emulate_actions.items[{index}].branch_id {branch_id!r} is duplicated within this batch"
+            )
+        seen_branch_ids.add(branch_id)
+
+
 def validate_request(payload: Any) -> dict:
     if not isinstance(payload, dict):
         raise RequestRejected("request must be a JSON object (dict)")
@@ -126,6 +155,9 @@ def validate_request(payload: Any) -> dict:
             raise RequestRejected("emulate_action.rng_id must be positive")
         _require(payload, "decision_point_id", str)
         _require(payload, "action_id", str)
+        _validate_simulation_options(payload)
+    elif operation == OP_EMULATE_ACTIONS:
+        _validate_emulate_actions_items(payload)
         _validate_simulation_options(payload)
     elif operation in (OP_CANCEL_BRANCHES, OP_RELEASE_BRANCHES, OP_GET_BRANCH_STATUS):
         branch_ids = _require(payload, "branch_ids", list)

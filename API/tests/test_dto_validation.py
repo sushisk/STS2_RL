@@ -14,7 +14,7 @@ from API.validation import RequestRejected, validate_request
 
 def _request(operation: str, *, seq: int = 1, include_instance_id: bool = True, **fields) -> dict:
     payload = {
-        "schema_version": "0.6",
+        "schema_version": "0.7",
         "client_session_id": "session-a",
         "request_seq": seq,
         "request_id": f"session-a:{seq}",

@@ -18,6 +18,7 @@ from API.dto import (
     OP_CLOSE_INSTANCE,
     OP_COMMIT_ACTION,
     OP_EMULATE_ACTION,
+    OP_EMULATE_ACTIONS,
     OP_GET_BRANCH_STATUS,
     OP_GET_DECISION,
     OP_RELEASE_BRANCHES,
@@ -203,6 +204,11 @@ class RLApiServer:
                 rng_id=payload["rng_id"],
                 decision_point_id=payload["decision_point_id"],
                 action_id=payload["action_id"],
+                simulation_options=payload.get("simulation_options"),
+            )
+        if operation == OP_EMULATE_ACTIONS:
+            return instance.emulate_actions(
+                items=payload["items"],
                 simulation_options=payload.get("simulation_options"),
             )
         if operation == OP_CANCEL_BRANCHES:
