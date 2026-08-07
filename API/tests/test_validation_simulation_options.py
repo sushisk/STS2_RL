@@ -30,13 +30,13 @@ class SimulationOptionsValidationTest(unittest.TestCase):
                     with self.assertRaisesRegex(RequestRejected, "positive integer"):
                         validate_request(self._request({field: value}))
 
-    def test_valid_nullable_and_extension_options_are_preserved(self) -> None:
+    def test_valid_options_remain_accepted(self) -> None:
         request = self._request(
             {
                 "max_depth": 1,
                 "max_steps": None,
                 "stop_condition": "next_decision",
-                "future_extension": {"enabled": True},
+                "future_extension": True,
             }
         )
         self.assertIs(validate_request(request), request)
