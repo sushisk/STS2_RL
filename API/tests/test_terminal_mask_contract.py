@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from API.masking import build_masked_emulator_dto
 
 
@@ -48,3 +50,15 @@ def test_whole_run_terminal_shortcut_may_omit_legal_actions() -> None:
     )
 
     assert "legal_actions" not in masked
+
+
+def test_mask_rejects_conflicting_combat_and_run_terminal_markers() -> None:
+    with pytest.raises(RuntimeError, match="both terminal and run_terminal"):
+        build_masked_emulator_dto(
+            {},
+            extra={
+                "terminal": True,
+                "run_terminal": True,
+                "outcome": "victory",
+            },
+        )
