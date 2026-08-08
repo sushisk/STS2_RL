@@ -23,6 +23,12 @@ class _FakeWorkItem:
     search_hypothesis_id = "new-hypothesis"
 
 
+class _ContinuationFakeWorkItem:
+    work_kind = "continuation"
+    context_id = "pending-context"
+    search_hypothesis_id = "new-hypothesis"
+
+
 class _HeavyFakeWorkItem(_FakeWorkItem):
     def __init__(self) -> None:
         self.payload = bytearray(1024)
@@ -45,6 +51,19 @@ class _SubmitFailPool:
 
 class _SentinelLease:
     pass
+
+
+class _EstablishedLease:
+    key = ("pending-context", "new-hypothesis")
+    worker_id = 0
+
+
+class _PendingResult:
+    status = "success"
+    worker_id = 0
+
+    def __init__(self, lease) -> None:
+        self.established_lease = lease
 
 
 def test_branch_manager_rejects_nonpositive_capacity() -> None:
@@ -135,3 +154,34 @@ def test_released_parent_keeps_only_links_needed_for_cancel_cascade() -> None:
 
     manager.release_branches([child_id])
     assert manager._records[parent_id].child_branch_ids == []  # noqa: SLF001
+
+
+def test_release_terminal_pending_branch_invalidates_lease_and_child_can_bootstrap() -> None:
+    leases = LeaseRegistry()
+    manager = BranchManager(object(), leases, max_branches=2)  # type: ignore[arg-type]
+    (parent_id,) = manager.submit([_FakeWorkItem()])  # type: ignore[list-item]
+    child_work_item = _ContinuationFakeWorkItem()
+    (child_id,) = manager.submit([child_work_item], parent_branch_id=parent_id)  # type: ignore[list-item]
+
+    lease = _EstablishedLease()
+    manager._finish(manager._records[parent_id], _PendingResult(lease))  # type: ignore[arg-type]  # noqa: SLF001
+    assert leases.get(*lease.key) is lease
+
+    manager.release_branches([parent_id])
+
+    assert leases.get(*lease.key) is None
+    assert manager.get_branch_status([parent_id])[parent_id] == "released"
+    assert manager.get_branch_status([child_id])[child_id] == "queued"
+    assert manager._records[parent_id].child_branch_ids == [child_id]  # noqa: SLF001
+
+    request, worker_id, next_index, _ = branch_manager_module._route_work_item(
+        child_work_item,  # type: ignore[arg-type]
+        leases,
+        worker_ids=[0],
+        worker_generations={0: 1},
+        next_bootstrap_index=0,
+    )
+    assert request.execution_mode == "bootstrap_step"
+    assert request.expected_lease is None
+    assert worker_id == 0
+    assert next_index == 1
