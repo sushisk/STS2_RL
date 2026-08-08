@@ -103,6 +103,8 @@ class BranchManager:
         *,
         max_branches: int = 256,
     ) -> None:
+        if not isinstance(max_branches, int) or isinstance(max_branches, bool) or max_branches <= 0:
+            raise ValueError("max_branches must be a positive integer")
         self._pool = pool
         self._lease_registry = lease_registry
         self.max_branches = max_branches
@@ -258,16 +260,22 @@ class BranchManager:
                         ):
                             continue
 
-                    request, worker_id, self._next_bootstrap_index, _ = _route_work_item(
+                    previous_bootstrap_index = self._next_bootstrap_index
+                    lease_table = getattr(self._lease_registry, "_leases", None)
+                    lease_snapshot = dict(lease_table) if isinstance(lease_table, dict) else None
+                    request, worker_id, next_bootstrap_index, _ = _route_work_item(
                         record.work_item,
                         self._lease_registry,
                         worker_ids=free_worker_ids,
                         worker_generations=self._pool.worker_generations,
-                        next_bootstrap_index=self._next_bootstrap_index,
+                        next_bootstrap_index=previous_bootstrap_index,
                     )
                     if worker_id not in free_worker_ids:
                         # Defensive invariant: the only legitimate non-free route is a
                         # valid holder Lease, and that case is deferred above.
+                        if lease_snapshot is not None:
+                            lease_table.clear()
+                            lease_table.update(lease_snapshot)
                         raise RuntimeError(
                             f"routing selected busy worker {worker_id} for Branch {branch_id}"
                         )
@@ -278,7 +286,15 @@ class BranchManager:
                         request.execution_mode,
                         request.expected_lease,
                     )
-                    request_id = self._pool._submit(worker_id, ipc_request)  # noqa: SLF001
+                    try:
+                        request_id = self._pool._submit(worker_id, ipc_request)  # noqa: SLF001
+                    except Exception:
+                        self._next_bootstrap_index = previous_bootstrap_index
+                        if lease_snapshot is not None:
+                            lease_table.clear()
+                            lease_table.update(lease_snapshot)
+                        raise
+                    self._next_bootstrap_index = next_bootstrap_index
                     record.state = BRANCH_STATE_RUNNING
                     record.worker_id = worker_id
                     record.worker_generation = self._pool.worker_generations[worker_id]
