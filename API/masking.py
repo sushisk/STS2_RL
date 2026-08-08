@@ -151,13 +151,20 @@ def build_masked_emulator_dto(raw_state: dict, *, extra: "dict | None" = None) -
     publish an explicit empty ``legal_actions`` list. Whole Run terminal Branch shortcuts
     may omit the field, but whenever ``legal_actions`` is present at ``run_terminal`` it
     is normalized to an empty list so stale cached actions can never cross the wire.
+    Combat ``terminal`` and Whole Run ``run_terminal`` are mutually exclusive markers.
     """
     masked = _scrub(copy.deepcopy(raw_state))
     if extra:
         masked.update(_scrub(copy.deepcopy(extra)))
-    if masked.get("terminal") is True:
+    combat_terminal = masked.get("terminal") is True
+    run_terminal = masked.get("run_terminal") is True
+    if combat_terminal and run_terminal:
+        raise RuntimeError(
+            "masked_emulator_dto cannot be both terminal and run_terminal"
+        )
+    if combat_terminal:
         masked["legal_actions"] = []
-    elif masked.get("run_terminal") is True and "legal_actions" in masked:
+    elif run_terminal and "legal_actions" in masked:
         masked["legal_actions"] = []
     masked["dto_version"] = DTO_VERSION
     masked["mask_version"] = MASK_VERSION
