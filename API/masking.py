@@ -146,14 +146,19 @@ def build_masked_emulator_dto(raw_state: dict, *, extra: "dict | None" = None) -
     """Return a masked copy of `raw_state` (a Combat `engine_state`/Whole Run
     `Observation.State`-shaped dict, or a full StepResult-shaped dict containing one)
     plus `dto_version`/`mask_version` stamps. `raw_state` is never mutated.
+
+    Terminal observations have no legal continuation, but they still participate in the
+    same decision-payload wire shape as other successful results. Publish an explicit
+    empty ``legal_actions`` list so Training can validate terminal Combat results without
+    confusing Combat termination with whole-run ``run_terminal`` semantics.
     """
     masked = _scrub(copy.deepcopy(raw_state))
-    masked["dto_version"] = DTO_VERSION
-    masked["mask_version"] = MASK_VERSION
     if extra:
         masked.update(_scrub(copy.deepcopy(extra)))
-        masked["dto_version"] = DTO_VERSION
-        masked["mask_version"] = MASK_VERSION
+    if masked.get("terminal") is True:
+        masked.setdefault("legal_actions", [])
+    masked["dto_version"] = DTO_VERSION
+    masked["mask_version"] = MASK_VERSION
     return masked
 
 

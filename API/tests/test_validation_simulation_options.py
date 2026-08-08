@@ -9,7 +9,7 @@ class SimulationOptionsValidationTest(unittest.TestCase):
     @staticmethod
     def _request(options: dict) -> dict:
         return {
-            "schema_version": "0.6",
+            "schema_version": "0.7",
             "client_session_id": "session-a",
             "request_seq": 1,
             "request_id": "session-a:1",

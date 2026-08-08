@@ -18,6 +18,7 @@ from API.dto import (
     OP_CLOSE_INSTANCE,
     OP_COMMIT_ACTION,
     OP_EMULATE_ACTION,
+    OP_EMULATE_ACTIONS,
     OP_GET_BRANCH_STATUS,
     OP_GET_DECISION,
     OP_RELEASE_BRANCHES,
@@ -33,6 +34,10 @@ from API.identifiers import SessionLedger
 from API.validation import RequestRejected, validate_request
 
 DEFAULT_MAX_SESSIONS = 4096
+
+_OPERATION_INSTANCE_TYPES: dict[str, frozenset[str]] = {
+    OP_EMULATE_ACTIONS: frozenset({INSTANCE_TYPE_COMBAT}),
+}
 
 
 class RLApiServer:
@@ -192,6 +197,13 @@ class RLApiServer:
         return response
 
     def _dispatch(self, instance: Any, operation: str, payload: dict) -> dict:
+        allowed_instance_types = _OPERATION_INSTANCE_TYPES.get(operation)
+        instance_type = getattr(instance, "instance_type", None)
+        if allowed_instance_types is not None and instance_type not in allowed_instance_types:
+            raise RequestRejected(
+                f"operation {operation!r} is not supported for instance_type {instance_type!r}"
+            )
+
         if operation == OP_GET_DECISION:
             return instance.get_decision(payload["branch_id"])
         if operation == OP_COMMIT_ACTION:
@@ -203,6 +215,11 @@ class RLApiServer:
                 rng_id=payload["rng_id"],
                 decision_point_id=payload["decision_point_id"],
                 action_id=payload["action_id"],
+                simulation_options=payload.get("simulation_options"),
+            )
+        if operation == OP_EMULATE_ACTIONS:
+            return instance.emulate_actions(
+                items=payload["items"],
                 simulation_options=payload.get("simulation_options"),
             )
         if operation == OP_CANCEL_BRANCHES:
