@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import gc
 import sys
+import weakref
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +21,11 @@ class _FakeWorkItem:
     work_kind = "sub_branch"
     context_id = "new-context"
     search_hypothesis_id = "new-hypothesis"
+
+
+class _HeavyFakeWorkItem(_FakeWorkItem):
+    def __init__(self) -> None:
+        self.payload = bytearray(1024)
 
 
 class _FakeRequest:
@@ -82,3 +89,49 @@ def test_submit_failure_restores_route_side_effects() -> None:
     assert leases._leases == {("existing-context", "existing-hypothesis"): sentinel}  # noqa: SLF001
     assert manager._next_bootstrap_index == 0  # noqa: SLF001
     assert manager.get_branch_status([branch_id])[branch_id] == "released"
+
+
+def test_release_drops_heavy_work_items_across_many_tombstones() -> None:
+    manager = BranchManager(object(), LeaseRegistry(), max_branches=1)  # type: ignore[arg-type]
+    refs: list[weakref.ReferenceType[_HeavyFakeWorkItem]] = []
+
+    for _ in range(5000):
+        item = _HeavyFakeWorkItem()
+        refs.append(weakref.ref(item))
+        (branch_id,) = manager.submit([item])  # type: ignore[list-item]
+        manager.release_branches([branch_id])
+
+    del item
+    gc.collect()
+
+    assert manager.active_branch_count() == 0
+    assert len(manager._records) == 5000  # noqa: SLF001 - lightweight status tombstones remain intentional.
+    assert all(ref() is None for ref in refs)
+    assert all(
+        record.work_item is None
+        and record.result is None
+        and record.worker_id is None
+        and record.worker_generation is None
+        and record.request_id is None
+        and record.execution_mode is None
+        and not record.child_branch_ids
+        for record in manager._records.values()  # noqa: SLF001
+    )
+
+
+def test_released_parent_keeps_only_links_needed_for_cancel_cascade() -> None:
+    manager = BranchManager(object(), LeaseRegistry(), max_branches=2)  # type: ignore[arg-type]
+    (parent_id,) = manager.submit([_FakeWorkItem()])  # type: ignore[list-item]
+    (child_id,) = manager.submit([_FakeWorkItem()], parent_branch_id=parent_id)  # type: ignore[list-item]
+
+    manager.release_branches([parent_id])
+    parent = manager._records[parent_id]  # noqa: SLF001
+    assert parent.work_item is None
+    assert parent.child_branch_ids == [child_id]
+
+    statuses = manager.cancel_branches([parent_id])
+    assert statuses[parent_id] == "released"
+    assert statuses[child_id] == "cancelled"
+
+    manager.release_branches([child_id])
+    assert manager._records[parent_id].child_branch_ids == []  # noqa: SLF001
