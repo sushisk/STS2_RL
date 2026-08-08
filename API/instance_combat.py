@@ -147,7 +147,13 @@ class CombatInstance:
 
     def _root_view(self) -> _DecisionView:
         legal = list(self._root_state._cached_legal_actions or [])
-        representative = legal[0] if legal else {"action_type": "system", "parameters": {}}
+        # A terminal state (combat just concluded) has no real action to be
+        # "representative" of - `action_id` is otherwise always present on a genuine
+        # legal_actions entry, so DecisionSignature.from_battle_state's
+        # `int(resolved_action["action_id"])` KeyErrors here without this sentinel; -1
+        # never collides with a real (non-negative) action_id and this signature is
+        # never used to branch further from a terminal state anyway.
+        representative = legal[0] if legal else {"action_type": "system", "parameters": {}, "action_id": -1}
         signature = DecisionSignature.from_battle_state(self._root_state, semantic_action=_semantic_action_for(representative), resolved_action=representative)
         context = DecisionContext.from_main_stable_capture(self._session.capture_snapshot(), self._root_state, signature)
         return _DecisionView(legal, context, signature.boundary)
@@ -161,8 +167,21 @@ class CombatInstance:
         return book.view
 
     def _decision_response_fields(self, public_branch_id: str, view: _DecisionView, *, branch_log: list) -> dict:
-        engine_state = dict(view.decision_context.current_decision_result.engine_state)
-        masked = build_masked_emulator_dto(engine_state, extra={"legal_actions": mask_legal_actions(view.legal_actions_raw)})
+        battle_state = view.decision_context.current_decision_result
+        engine_state = dict(battle_state.engine_state)
+        # `legal_actions` is already `[]` at combat end (BattleState.is_terminal), but
+        # `terminal`/`outcome` themselves are Python-side BattleState attributes - never
+        # part of `engine_state` - so without this they never reach Training at all,
+        # leaving win/loss undetectable from the wire payload alone. Key name matches
+        # the branch-result terminal payload built in _finalize_branch_result() below
+        # (`{"terminal": True, "outcome": ...}`), which Training's beam_search._is_terminal
+        # already checks for - this just makes root/get_decision responses consistent
+        # with what branch results already send.
+        extra: dict[str, Any] = {"legal_actions": mask_legal_actions(view.legal_actions_raw)}
+        if battle_state.is_terminal:
+            extra["terminal"] = True
+            extra["outcome"] = battle_state.outcome
+        masked = build_masked_emulator_dto(engine_state, extra=extra)
         return {"branch_id": public_branch_id, "decision_point_id": self._decision_points.current(public_branch_id), "branch_log": branch_log, "masked_emulator_dto": masked}
 
     def start_instance_response(self) -> dict:

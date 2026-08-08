@@ -166,6 +166,7 @@ class _BranchBookkeeping:
         "view",
         "status",
         "terminal",
+        "outcome",
         "rng_id",
         "event_rng_plan",
     )
@@ -178,6 +179,11 @@ class _BranchBookkeeping:
         self.view: Optional[_View] = None
         self.status = STATUS_COMPLETED
         self.terminal = False
+        # Set alongside `terminal` when the run concludes (see `emulate_action`'s
+        # RUN_TERMINAL handling below) - the run's win/loss signal, captured from the
+        # Observation at the moment of transition since it is not retrievable from this
+        # Branch afterward (`view` becomes None once terminal).
+        self.outcome: "str | None" = None
         # Set only for a Branch created (or inherited) under an Active Event RNG
         # Hypothesis - may belong to an ancestor's plan unchanged, for a deep Branch
         # that inherited rather than re-derived (see `WholeRunInstance.emulate_action`).
@@ -274,15 +280,21 @@ class WholeRunInstance:
     # -- response builders --------------------------------------------------------------
 
     def _decision_response_fields(self, public_branch_id: str, view: _View, *, branch_log: list, history: HistoryBuilder) -> dict:
-        masked = build_masked_emulator_dto(
-            view.observation.get("state") or {},
-            extra={
-                "boundary": view.boundary,
-                "legal_actions": mask_legal_actions(view.legal_actions_raw),
-                "room_context": view.room_context,
-                "history": history.to_public_list(),
-            },
-        )
+        extra: dict = {
+            "boundary": view.boundary,
+            "legal_actions": mask_legal_actions(view.legal_actions_raw),
+            "room_context": view.room_context,
+            "history": history.to_public_list(),
+        }
+        # Root never gets the Branch-side {"run_terminal": True} shortcut (it always
+        # flows through this method, live off `self._session`), so this is root's only
+        # place to surface the win/loss signal `view.observation` already carries
+        # (`observation_to_dict()`'s `outcome` field) - mirrors the Branch RUN_TERMINAL
+        # payload in `emulate_action()` below for a consistent shape either way.
+        if view.boundary == RUN_TERMINAL:
+            extra["run_terminal"] = True
+            extra["outcome"] = view.observation.get("outcome")
+        masked = build_masked_emulator_dto(view.observation.get("state") or {}, extra=extra)
         return {
             "branch_id": public_branch_id,
             "decision_point_id": self._decision_points.current(public_branch_id),
@@ -313,7 +325,9 @@ class WholeRunInstance:
                     "branch_id": branch_id,
                     "decision_point_id": self._decision_points.current(branch_id),
                     "branch_log": book.branch_log,
-                    "masked_emulator_dto": build_masked_emulator_dto({"run_terminal": True}),
+                    "masked_emulator_dto": build_masked_emulator_dto(
+                        {"run_terminal": True, "outcome": book.outcome}
+                    ),
                 }
             return {
                 "status": STATUS_COMPLETED,
@@ -471,11 +485,16 @@ class WholeRunInstance:
             }
 
         step = result.step
-        new_boundary = step.step_result["observation"]["boundary"]
+        new_observation = step.step_result["observation"]
+        new_boundary = new_observation["boundary"]
         new_room_context = step.step_result["room_context"]
         book.history.observe_room_context(new_room_context)
         if new_boundary == RUN_TERMINAL:
             book.terminal = True
+            # observation_to_dict() (run_emulator_bridge.py) already carries the
+            # authoritative win/loss signal (obs.Outcome) - captured here since `view`
+            # becomes None below and this Branch has no other way to recover it later.
+            book.outcome = new_observation.get("outcome")
             # NOTE: deliberately does NOT release_branch(event_rng_key, branch_id) here.
             # The same Hypothesis Key may still be referenced by SIBLING Branches from
             # the same parent Decision (contract fairness: "同一親Decision＋同一rng_id
@@ -489,7 +508,7 @@ class WholeRunInstance:
             return {
                 "status": STATUS_COMPLETED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id,
                 "decision_point_id": self._decision_points.current(branch_id), "branch_log": branch_log,
-                "masked_emulator_dto": build_masked_emulator_dto({"run_terminal": True}),
+                "masked_emulator_dto": build_masked_emulator_dto({"run_terminal": True, "outcome": book.outcome}),
             }
 
         new_view = _build_child_view(parent_view, chosen["action_id"], result)
