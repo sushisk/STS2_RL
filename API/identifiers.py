@@ -1,8 +1,8 @@
-"""Identifier lifecycle management for RL/Training DTO v0.6.
+"""Identifier lifecycle management for RL/Training DTO v0.7.
 
 ``SessionLedger`` owns transport request sequencing. Branch, decision-point, and RNG
 hypothesis registries remain per-instance gameplay identifiers and are independent of the
-transport redesign.
+transport protocol version.
 """
 
 from __future__ import annotations
@@ -19,6 +19,9 @@ from API.dto import (
     ROOT_BRANCH_ID,
 )
 from API.validation import RequestRejected
+
+RngKey = tuple[str, str, int]
+ParentDecisionKey = tuple[str, str]
 
 
 def _payload_digest(payload: dict) -> str:
@@ -75,7 +78,7 @@ class SessionLedger:
 
 @dataclass
 class BranchIdRegistry:
-    _ever_used: set = field(default_factory=lambda: {ROOT_BRANCH_ID})
+    _ever_used: set[str] = field(default_factory=lambda: {ROOT_BRANCH_ID})
 
     def register(self, branch_id: str) -> None:
         if branch_id in self._ever_used:
@@ -119,10 +122,12 @@ class DecisionPointRegistry:
 
 @dataclass
 class RngHypothesisTable:
-    """Map `(parent_branch_id, decision_point_id, rng_id)` to a stable index."""
+    """Map ``(parent_branch_id, decision_point_id, rng_id)`` to a stable index."""
 
-    _index_by_key: dict[tuple, int] = field(default_factory=dict)
-    _next_index_by_parent_decision: dict[tuple, int] = field(default_factory=dict)
+    _index_by_key: dict[RngKey, int] = field(default_factory=dict)
+    _next_index_by_parent_decision: dict[ParentDecisionKey, int] = field(
+        default_factory=dict
+    )
 
     def hypothesis_index_for(
         self,
@@ -130,10 +135,14 @@ class RngHypothesisTable:
         decision_point_id: str,
         rng_id: int,
     ) -> int:
-        key = (parent_branch_id, decision_point_id, rng_id)
+        key: RngKey = (parent_branch_id, decision_point_id, rng_id)
         if key in self._index_by_key:
             return self._index_by_key[key]
-        parent_decision_key = (parent_branch_id, decision_point_id)
+
+        parent_decision_key: ParentDecisionKey = (
+            parent_branch_id,
+            decision_point_id,
+        )
         next_index = self._next_index_by_parent_decision.get(parent_decision_key, 0)
         self._index_by_key[key] = next_index
         self._next_index_by_parent_decision[parent_decision_key] = next_index + 1
@@ -159,11 +168,18 @@ class RngHypothesisTable:
         if not isinstance(snapshot, int) or isinstance(snapshot, bool):
             raise TypeError("RNG rollback snapshot must be an integer marker")
         if snapshot < 0 or snapshot > len(self._index_by_key):
-            raise ValueError("RNG rollback snapshot is outside the current allocation history")
+            raise ValueError(
+                "RNG rollback snapshot is outside the current allocation history"
+            )
 
         while len(self._index_by_key) > snapshot:
-            key, index = self._index_by_key.popitem()
-            parent_decision_key = (key[0], key[1])
+            (parent_branch_id, decision_point_id, _), index = (
+                self._index_by_key.popitem()
+            )
+            parent_decision_key: ParentDecisionKey = (
+                parent_branch_id,
+                decision_point_id,
+            )
             if index == 0:
                 self._next_index_by_parent_decision.pop(parent_decision_key, None)
             else:
