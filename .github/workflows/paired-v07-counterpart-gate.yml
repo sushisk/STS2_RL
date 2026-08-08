@@ -41,7 +41,10 @@ jobs:
             API/tests/test_tcp_server.py \
             API/tests/test_validation_simulation_options.py \
             API/tests/test_terminal_mask_contract.py \
-            API/tests/test_rng_hypothesis_rollback.py
+            API/tests/test_rng_hypothesis_rollback.py \
+            API/tests/test_branch_manager_poll_scope.py \
+            API/tests/test_branch_manager_stale_results.py \
+            API/tests/test_review_followup_fixes.py
 
       - name: Explain real-Emulator coverage
         if: always()
