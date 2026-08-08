@@ -7,16 +7,65 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
+  statuses: read
 
 jobs:
   training-counterpart:
     name: current Training head attests this RL head
-    # Reciprocal exact-pair validation depends on the real Emulator test that
-    # is intentionally executed outside GitHub Actions. Missing external
-    # attestation must not appear as a red PR check, because that can hide
-    # genuine code/test failures among environment-only failures.
-    if: ${{ false }}
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ATTESTATION_CONTEXT: paired-v07-exact-pair
     steps:
-      - name: Real-environment counterpart validation is external-only
-        run: echo "Environment-dependent exact-pair validation is intentionally skipped in GitHub Actions."
+      - name: Verify trusted exact-pair attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rl_repo='sushisk/STS2_RL'
+          training_repo='sushisk/STS2_Training'
+          rl_sha="$(gh api "repos/${rl_repo}/pulls/8" --jq '.head.sha')"
+          training_sha="$(gh api "repos/${training_repo}/pulls/19" --jq '.head.sha')"
+          pair_description="Training=${training_sha} RL=${rl_sha}"
+
+          event_head="$(python - <<'PY'
+          import json, os
+          with open(os.environ['GITHUB_EVENT_PATH'], encoding='utf-8') as handle:
+              event = json.load(handle)
+          print(event.get('pull_request', {}).get('head', {}).get('sha', ''))
+          PY
+          )"
+          if [[ -n "${event_head}" && "${event_head}" != "${rl_sha}" ]]; then
+            echo "RL PR head moved while this gate was queued: event=${event_head} current=${rl_sha}" >&2
+            exit 1
+          fi
+
+          verify_status() {
+            local repo="$1"
+            local sha="$2"
+            local payload
+            payload="$(mktemp)"
+            gh api "repos/${repo}/commits/${sha}/statuses?per_page=100" >"${payload}"
+            python - "${payload}" "${ATTESTATION_CONTEXT}" "${pair_description}" <<'PY'
+          import json, sys
+          path, context, description = sys.argv[1:]
+          with open(path, encoding='utf-8') as handle:
+              statuses = json.load(handle)
+          ok = any(
+              item.get('state') == 'success'
+              and item.get('context') == context
+              and item.get('description') == description
+              for item in statuses
+          )
+          if not ok:
+              raise SystemExit(
+                  f"missing successful {context!r} status with description {description!r}"
+              )
+          PY
+            rm -f "${payload}"
+          }
+
+          verify_status "${training_repo}" "${training_sha}"
+          verify_status "${rl_repo}" "${rl_sha}"
+          echo "Verified trusted attestation for ${pair_description}"
