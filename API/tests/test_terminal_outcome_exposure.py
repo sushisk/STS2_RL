@@ -1,24 +1,25 @@
-"""Regression coverage for terminal win/loss exposure in Combat and Whole Run.
-
-Combat tests drive real terminal transitions. Whole Run response shaping uses
-hand-crafted terminal views/bookkeeping because a full God Mode run is impractical
-for a focused regression test.
-"""
+"""Regression coverage for terminal win/loss exposure in Combat and Whole Run."""
 
 from __future__ import annotations
 
 import sys
 import traceback
 from pathlib import Path
+from types import SimpleNamespace
 
 _ROOT = Path(__file__).resolve().parents[2]
 for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from API.instance_combat import CombatInstance  # noqa: E402
-from API.instance_whole_run import WholeRunInstance, _BranchBookkeeping, _View  # noqa: E402
 from API.history_builder import HistoryBuilder  # noqa: E402
+from API.identifiers import BranchIdRegistry, DecisionPointRegistry  # noqa: E402
+from API.instance_combat import (  # noqa: E402
+    CombatInstance,
+    _BranchBookkeeping as _CombatBranchBookkeeping,
+)
+from API.instance_whole_run import WholeRunInstance, _View  # noqa: E402
+from API.terminal_outcome import require_terminal_outcome  # noqa: E402
 
 
 def _victory_combat_config() -> dict:
@@ -40,7 +41,6 @@ def _victory_combat_config() -> dict:
 
 
 def _defeat_combat_config() -> dict:
-    # A large-HP enemy defeats the 1-HP player after a few unblocked turns.
     return {
         "instance_type": "combat",
         "character_id": "IRONCLAD",
@@ -104,6 +104,43 @@ def test_combat_non_terminal_decision_has_no_terminal_key():
         inst.close()
 
 
+def test_combat_empty_legal_actions_non_terminal_is_invariant_failure():
+    inst = CombatInstance("c-empty-legal", _victory_combat_config(), worker_count=1)
+    try:
+        assert not inst._root_state.is_terminal  # noqa: SLF001
+        inst._root_state._cached_legal_actions = []  # noqa: SLF001
+        try:
+            inst._root_view()  # noqa: SLF001
+        except RuntimeError as exc:
+            assert "non-terminal combat state" in str(exc)
+        else:
+            raise AssertionError("non-terminal empty legal-actions cache must fail")
+    finally:
+        inst.close()
+
+
+def test_combat_terminal_branch_get_decision_preserves_outcome():
+    inst = CombatInstance.__new__(CombatInstance)
+    inst._closed = False  # noqa: SLF001
+    inst._branch_ids = BranchIdRegistry()  # noqa: SLF001
+    inst._decision_points = DecisionPointRegistry()  # noqa: SLF001
+    inst._bookkeeping = {}  # noqa: SLF001
+    inst._branch_manager = SimpleNamespace(  # noqa: SLF001
+        get_branch_status=lambda ids: {ids[0]: "completed"}
+    )
+    book = _CombatBranchBookkeeping("internal-b1", "root", [], HistoryBuilder(), 1)
+    book.terminal = True
+    book.outcome = "victory"
+    inst._bookkeeping["b1"] = book  # noqa: SLF001
+    inst._branch_ids.register("b1")  # noqa: SLF001
+    inst._decision_points.issue("b1")  # noqa: SLF001
+
+    response = inst.get_decision("b1")
+    dto = response["masked_emulator_dto"]
+    assert dto.get("terminal") is True
+    assert dto.get("outcome") == "victory"
+
+
 def _whole_run_config() -> dict:
     return {"instance_type": "whole_run", "seed": 1, "character_id": "IRONCLAD", "ascension": 0}
 
@@ -145,22 +182,112 @@ def test_whole_run_non_terminal_view_has_no_run_terminal_key():
         inst.close()
 
 
-def test_whole_run_branch_get_decision_preserves_captured_outcome():
-    inst = WholeRunInstance("wr-branch-terminal", _whole_run_config(), branch_worker_count=1)
-    try:
-        book = _BranchBookkeeping("root", [], HistoryBuilder(), rng_id=1)
-        book.terminal = True
-        book.outcome = "defeat"
-        inst._bookkeeping["b1"] = book  # noqa: SLF001
-        inst._branch_ids.register("b1")  # noqa: SLF001
-        inst._decision_points.issue("b1")  # noqa: SLF001
+class _FakeEventRngRegistry:
+    def get_or_create(self, key: tuple, state: dict, rng_id: int) -> dict:
+        return dict(state)
 
-        response = inst.get_decision("b1")
-        dto = response["masked_emulator_dto"]
-        assert dto.get("run_terminal") is True
-        assert dto.get("outcome") == "defeat"
-    finally:
-        inst.close()
+    def register_branch(self, key: tuple, branch_id: str) -> None:
+        return None
+
+    def release_branch(self, key: tuple, branch_id: str) -> None:
+        return None
+
+
+class _FakeWholeRunPool:
+    def __init__(self, outcome: object) -> None:
+        self.outcome = outcome
+
+    def dispatch_choice_work_items(self, work_items: list, lease_registry: object) -> list:
+        return [
+            SimpleNamespace(
+                status="success",
+                step=SimpleNamespace(
+                    step_result={
+                        "observation": {
+                            "boundary": "run_terminal",
+                            "outcome": self.outcome,
+                        },
+                        "room_context": {},
+                    }
+                ),
+            )
+        ]
+
+
+def _whole_run_stub_instance(outcome: object) -> WholeRunInstance:
+    inst = WholeRunInstance.__new__(WholeRunInstance)
+    inst.max_branches = 64
+    inst._bookkeeping = {}  # noqa: SLF001
+    inst._branch_ids = BranchIdRegistry()  # noqa: SLF001
+    inst._decision_points = DecisionPointRegistry()  # noqa: SLF001
+    inst._decision_points.issue("root")  # noqa: SLF001
+    inst._event_rng_registry = _FakeEventRngRegistry()  # noqa: SLF001
+    inst._root_history = HistoryBuilder()  # noqa: SLF001
+    inst._root_branch_log = []  # noqa: SLF001
+    inst._pool = _FakeWholeRunPool(outcome)  # noqa: SLF001
+    inst._lease_registry = object()  # noqa: SLF001
+    parent_view = _View(
+        legal_actions_raw=[{"action_id": 7}],
+        boundary="event_choice",
+        observation={"boundary": "event_choice", "state": {}},
+        room_context={},
+        map_snapshot="stub-map-snapshot",
+        room_id=1,
+        action_prefix=(),
+        choice_type="event_choice",
+        chain_blocked=False,
+        event_rng_state={"stub": 1},
+    )
+    inst._view_for = lambda branch_id: parent_view  # type: ignore[method-assign]  # noqa: SLF001
+    return inst
+
+
+def test_whole_run_emulate_action_wires_terminal_outcome_into_response_and_get_decision():
+    inst = _whole_run_stub_instance("defeat")
+    decision_point_id = inst._decision_points.current("root")  # noqa: SLF001
+
+    response = inst.emulate_action(
+        parent_branch_id="root",
+        branch_id="b1",
+        rng_id=1,
+        decision_point_id=decision_point_id,
+        action_id="0",
+        simulation_options=None,
+    )
+
+    assert inst._bookkeeping["b1"].outcome == "defeat"  # noqa: SLF001
+    assert response["masked_emulator_dto"]["outcome"] == "defeat"
+    replay = inst.get_decision("b1")
+    assert replay["masked_emulator_dto"]["run_terminal"] is True
+    assert replay["masked_emulator_dto"]["outcome"] == "defeat"
+
+
+def test_whole_run_emulate_action_rejects_missing_terminal_outcome():
+    inst = _whole_run_stub_instance(None)
+    decision_point_id = inst._decision_points.current("root")  # noqa: SLF001
+
+    try:
+        inst.emulate_action(
+            parent_branch_id="root",
+            branch_id="b1",
+            rng_id=1,
+            decision_point_id=decision_point_id,
+            action_id="0",
+            simulation_options=None,
+        )
+    except RuntimeError as exc:
+        assert "without a valid outcome" in str(exc)
+    else:
+        raise AssertionError("terminal Whole Run result without outcome must fail")
+
+
+def test_terminal_outcome_helper_rejects_unknown_value():
+    try:
+        require_terminal_outcome("draw", context="test")
+    except RuntimeError as exc:
+        assert "without a valid outcome" in str(exc)
+    else:
+        raise AssertionError("unknown terminal outcome must fail")
 
 
 def _run_all() -> int:
