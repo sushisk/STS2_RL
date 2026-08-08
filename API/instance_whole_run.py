@@ -180,7 +180,14 @@ class _BranchBookkeeping:
         self.view: Optional[_View] = None
         self.status = STATUS_COMPLETED
         self.terminal = False
+        # Set alongside `terminal` when the run concludes (see `emulate_action`'s
+        # RUN_TERMINAL handling below) - the run's win/loss signal, captured from the
+        # Observation at the moment of transition since it is not retrievable from this
+        # Branch afterward (`view` becomes None once terminal).
         self.outcome: "str | None" = None
+        # Set only for a Branch created (or inherited) under an Active Event RNG
+        # Hypothesis - may belong to an ancestor's plan unchanged, for a deep Branch
+        # that inherited rather than re-derived (see `WholeRunInstance.emulate_action`).
         self.event_rng_plan: "EventRngReplayPlan | None" = None
 
 
@@ -280,6 +287,11 @@ class WholeRunInstance:
             "room_context": view.room_context,
             "history": history.to_public_list(),
         }
+        # Root never gets the Branch-side {"run_terminal": True} shortcut (it always
+        # flows through this method, live off `self._session`), so this is root's only
+        # place to surface the win/loss signal `view.observation` already carries
+        # (`observation_to_dict()`'s `outcome` field) - mirrors the Branch RUN_TERMINAL
+        # payload in `emulate_action()` below for a consistent shape either way.
         if view.boundary == RUN_TERMINAL:
             extra["run_terminal"] = True
             extra["outcome"] = require_terminal_outcome(
@@ -379,11 +391,19 @@ class WholeRunInstance:
         if parent_view.boundary == RUN_TERMINAL:
             raise RequestRejected(f"parent_branch_id {parent_branch_id!r} has reached run_terminal; cannot branch further")
         if parent_view.map_snapshot is None:
+            # No map_select boundary has been reached yet on this progression line (can
+            # happen for the very first room of a run, auto-entered before any explicit
+            # Map Decision) - the Branch Worker bootstrap path requires a Map Snapshot to
+            # load from (see module docstring), so there is nothing to branch from yet.
             raise RequestRejected(
                 f"parent_branch_id {parent_branch_id!r} has not reached a map_select boundary yet; "
                 "emulate_action is unavailable until the first Map Decision is reached"
             )
         if parent_view.boundary != EVENT_CHOICE:
+            # RL担当指示：Active Event RNG Hypothesis実装 §1/§5 - a positive rng_id is
+            # only meaningful (and only accepted) at an Active Event boundary; every
+            # other boundary is rejected outright, never silently accepted as
+            # bookkeeping-only.
             raise RequestRejected(
                 "Active Event RNG hypothesis is not available at this boundary.",
                 fault_kind=FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
@@ -401,6 +421,14 @@ class WholeRunInstance:
         index = parent_view.resolve_action_id(action_id)
         chosen = parent_view.legal_actions_raw[index]
 
+        # Hypothesis Key per contract §3: (parent_branch_id, decision_point_id, rng_id).
+        # root parents ESTABLISH (or, for a repeat call with the same Key, re-obtain via
+        # memoization) a fresh Hypothesis derived from the CURRENT Active Event's own
+        # RNG state. Non-root parents INHERIT their own already-established plan
+        # unchanged (§4: "新しいHypothesisを再生成しない...親Branchが到達したHidden
+        # Stateから継続する") - the boundary check above guarantees the parent Branch
+        # itself was only ever created under an Active Event Hypothesis, so
+        # `parent_book.event_rng_plan` is always set here.
         if parent_branch_id == ROOT_BRANCH_ID:
             event_rng_key = (parent_branch_id, decision_point_id, rng_id)
             assert parent_view.event_rng_state is not None
@@ -470,10 +498,22 @@ class WholeRunInstance:
         new_room_context = step.step_result["room_context"]
         book.history.observe_room_context(new_room_context)
         if new_boundary == RUN_TERMINAL:
-            book.terminal = True
+            # observation_to_dict() (run_emulator_bridge.py) already carries the
+            # authoritative win/loss signal (obs.Outcome) - captured here since `view`
+            # becomes None below and this Branch has no other way to recover it later.
             book.outcome = require_terminal_outcome(
                 new_observation.get("outcome"), context=f"whole-run branch {branch_id!r}"
             )
+            book.terminal = True
+            # NOTE: deliberately does NOT release_branch(event_rng_key, branch_id) here.
+            # The same Hypothesis Key may still be referenced by SIBLING Branches from
+            # the same parent Decision (contract fairness: "同一親Decision＋同一rng_id
+            # の複数Actionは同一Hypothesisを共有する") - releasing on this one Branch's
+            # own outcome would drop the SHARED registry entry out from under them.
+            # Further use of THIS branch_id as a parent is already correctly rejected by
+            # the boundary check above regardless (a terminal Branch has no Decision to
+            # branch from at all) - actual release only happens via explicit Cancel/
+            # Release, root Commit, or instance Close (contract §6).
             self._decision_points.issue(branch_id)
             return {
                 "status": STATUS_COMPLETED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id,
@@ -482,6 +522,15 @@ class WholeRunInstance:
             }
 
         new_view = _build_child_view(parent_view, chosen["action_id"], result)
+        # NOTE: deliberately does NOT release_branch()/clear book.event_rng_plan here
+        # even when new_boundary != EVENT_CHOICE (event concluded, moved to Map/Reward/
+        # Shop/Rest/whatever) - see the RUN_TERMINAL branch's comment above for why
+        # (shared-Hypothesis fairness with sibling Branches). This Branch's OWN resulting
+        # boundary being non-event_choice already, by itself, correctly blocks any
+        # further emulate_action FROM it (the general boundary check at the top of this
+        # method applies uniformly to root and non-root parents alike) - the contract's
+        # "Event終了後のMap、Encounter等へ同じHypothesisの意味を引き継がないでください"
+        # is satisfied structurally, without needing an extra release here.
         book.view = new_view
         self._decision_points.issue(branch_id)
         return {
@@ -529,6 +578,7 @@ class WholeRunInstance:
         if self._closed:
             return
         self._closed = True
+        # Contract §6: instance Close -> every live Hypothesis reference is released.
         self._event_rng_registry.release_all()
         self._pool.close()
 
@@ -547,9 +597,18 @@ class WholeRunInstance:
             book.event_rng_plan = None
 
     def _cancel_and_release_all_branches(self) -> None:
+        # Keep each bookkeeping ENTRY (status flipped to released) rather than deleting
+        # it - branch_id must stay permanently non-reusable and `get_decision`/
+        # `get_branch_status` must keep answering "released" for it, never "unknown".
         for bid, book in self._bookkeeping.items():
             if book.status not in (STATUS_CANCELLED, STATUS_RELEASED):
                 book.status = STATUS_RELEASED
             book.view = None
             self._decision_points.clear(bid)
+        # Contract §6: root Commit -> every Hypothesis derived from the just-committed
+        # (now stale) root Decision is released, regardless of which Branch referenced
+        # it - a blanket release_all() rather than per-Branch bookkeeping is correct
+        # here because a root commit_action always invalidates the ENTIRE current
+        # Decision's derived tree at once (see `_cancel_and_release_all_branches`'s own
+        # caller, `commit_action`).
         self._event_rng_registry.release_all()
