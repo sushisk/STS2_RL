@@ -35,6 +35,10 @@ from API.validation import RequestRejected, validate_request
 
 DEFAULT_MAX_SESSIONS = 4096
 
+_OPERATION_INSTANCE_TYPES: dict[str, frozenset[str]] = {
+    OP_EMULATE_ACTIONS: frozenset({INSTANCE_TYPE_COMBAT}),
+}
+
 
 class RLApiServer:
     """Execute one strictly ordered request stream per logical Training session.
@@ -193,6 +197,13 @@ class RLApiServer:
         return response
 
     def _dispatch(self, instance: Any, operation: str, payload: dict) -> dict:
+        allowed_instance_types = _OPERATION_INSTANCE_TYPES.get(operation)
+        instance_type = getattr(instance, "instance_type", None)
+        if allowed_instance_types is not None and instance_type not in allowed_instance_types:
+            raise RequestRejected(
+                f"operation {operation!r} is not supported for instance_type {instance_type!r}"
+            )
+
         if operation == OP_GET_DECISION:
             return instance.get_decision(payload["branch_id"])
         if operation == OP_COMMIT_ACTION:
