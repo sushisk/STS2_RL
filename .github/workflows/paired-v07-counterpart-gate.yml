@@ -46,7 +46,8 @@ jobs:
             API/tests/test_branch_manager_poll_scope.py \
             API/tests/test_branch_manager_stale_results.py \
             API/tests/test_emulate_actions_oversize_preflight.py \
-            API/tests/test_review_followup_fixes.py
+            API/tests/test_review_followup_fixes.py \
+            API/tests/test_root_commit_release_lifecycle.py
 
       - name: Explain paired validation boundary
         if: always()
