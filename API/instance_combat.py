@@ -372,6 +372,8 @@ class CombatInstance:
         self._ensure_open()
         internal_ids = [self._internal_id_or_reject(bid) for bid in branch_ids]
         self._branch_manager.release_branches(internal_ids)
+        for bid in branch_ids:
+            self._compact_bookkeeping_for_release(bid)
         return {"status": STATUS_COMPLETED, "branch_statuses": {bid: STATUS_RELEASED for bid in branch_ids}}
 
     def get_branch_status(self, branch_ids: list) -> dict:
@@ -401,14 +403,24 @@ class CombatInstance:
             raise RequestRejected(f"unknown branch_id {public_branch_id!r}")
         return book.internal_id
 
+    def _compact_bookkeeping_for_release(self, public_branch_id: str) -> None:
+        """Retain only the lightweight public-to-internal tombstone for a released Branch."""
+        book = self._bookkeeping.get(public_branch_id)
+        if book is None:
+            return
+        book.branch_log.clear()
+        book.history = None
+        book.view = None
+        book.terminal = True
+        self._decision_points.clear(public_branch_id)
+
     def _cancel_and_release_all_branches(self) -> None:
         internal_ids = [book.internal_id for book in self._bookkeeping.values() if book.view is not None or not book.terminal]
         if internal_ids:
             self._branch_manager.cancel_branches(internal_ids)
             self._branch_manager.release_branches(internal_ids)
-        for bid, book in self._bookkeeping.items():
-            book.view = None
-            self._decision_points.clear(bid)
+        for bid in list(self._bookkeeping):
+            self._compact_bookkeeping_for_release(bid)
 
 
 def _translate_branch_status(internal_status: str) -> str:
