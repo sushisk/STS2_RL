@@ -263,30 +263,27 @@ class BranchManager:
                     previous_bootstrap_index = self._next_bootstrap_index
                     lease_table = getattr(self._lease_registry, "_leases", None)
                     lease_snapshot = dict(lease_table) if isinstance(lease_table, dict) else None
-                    request, worker_id, next_bootstrap_index, _ = _route_work_item(
-                        record.work_item,
-                        self._lease_registry,
-                        worker_ids=free_worker_ids,
-                        worker_generations=self._pool.worker_generations,
-                        next_bootstrap_index=previous_bootstrap_index,
-                    )
-                    if worker_id not in free_worker_ids:
-                        # Defensive invariant: the only legitimate non-free route is a
-                        # valid holder Lease, and that case is deferred above.
-                        if lease_snapshot is not None:
-                            lease_table.clear()
-                            lease_table.update(lease_snapshot)
-                        raise RuntimeError(
-                            f"routing selected busy worker {worker_id} for Branch {branch_id}"
-                        )
-
-                    ipc_work_item = _work_item_for_ipc(record.work_item)
-                    ipc_request = request.__class__(
-                        ipc_work_item,
-                        request.execution_mode,
-                        request.expected_lease,
-                    )
                     try:
+                        request, worker_id, next_bootstrap_index, _ = _route_work_item(
+                            record.work_item,
+                            self._lease_registry,
+                            worker_ids=free_worker_ids,
+                            worker_generations=self._pool.worker_generations,
+                            next_bootstrap_index=previous_bootstrap_index,
+                        )
+                        if worker_id not in free_worker_ids:
+                            # Defensive invariant: the only legitimate non-free route is a
+                            # valid holder Lease, and that case is deferred above.
+                            raise RuntimeError(
+                                f"routing selected busy worker {worker_id} for Branch {branch_id}"
+                            )
+
+                        ipc_work_item = _work_item_for_ipc(record.work_item)
+                        ipc_request = request.__class__(
+                            ipc_work_item,
+                            request.execution_mode,
+                            request.expected_lease,
+                        )
                         request_id = self._pool._submit(worker_id, ipc_request)  # noqa: SLF001
                     except Exception:
                         self._next_bootstrap_index = previous_bootstrap_index
