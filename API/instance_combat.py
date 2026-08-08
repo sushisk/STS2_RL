@@ -54,6 +54,7 @@ from API.dto import (
 from API.history_builder import HistoryBuilder
 from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
 from API.masking import build_masked_emulator_dto, mask_legal_actions
+from API.terminal_outcome import require_terminal_outcome
 from API.validation import RequestRejected
 
 
@@ -92,7 +93,7 @@ class _DecisionView:
 
 
 class _BranchBookkeeping:
-    __slots__ = ("internal_id", "parent_public_id", "branch_log", "history", "view", "terminal", "combat_start_deck_multiset", "rng_id")
+    __slots__ = ("internal_id", "parent_public_id", "branch_log", "history", "view", "terminal", "outcome", "combat_start_deck_multiset", "rng_id")
 
     def __init__(self, internal_id: str, parent_public_id: str, branch_log: list, history: HistoryBuilder, rng_id: int) -> None:
         self.internal_id = internal_id
@@ -102,6 +103,7 @@ class _BranchBookkeeping:
         self.rng_id = rng_id
         self.view: Optional[_DecisionView] = None
         self.terminal = False
+        self.outcome: "str | None" = None
 
 
 @dataclass(frozen=True)
@@ -147,6 +149,8 @@ class CombatInstance:
 
     def _root_view(self) -> _DecisionView:
         legal = list(self._root_state._cached_legal_actions or [])
+        if not legal and not self._root_state.is_terminal:
+            raise RuntimeError("non-terminal combat state has no cached legal actions")
         # A terminal state (combat just concluded) has no real action to be
         # "representative" of - `action_id` is otherwise always present on a genuine
         # legal_actions entry, so DecisionSignature.from_battle_state's
@@ -169,18 +173,12 @@ class CombatInstance:
     def _decision_response_fields(self, public_branch_id: str, view: _DecisionView, *, branch_log: list) -> dict:
         battle_state = view.decision_context.current_decision_result
         engine_state = dict(battle_state.engine_state)
-        # `legal_actions` is already `[]` at combat end (BattleState.is_terminal), but
-        # `terminal`/`outcome` themselves are Python-side BattleState attributes - never
-        # part of `engine_state` - so without this they never reach Training at all,
-        # leaving win/loss undetectable from the wire payload alone. Key name matches
-        # the branch-result terminal payload built in _finalize_branch_result() below
-        # (`{"terminal": True, "outcome": ...}`), which Training's beam_search._is_terminal
-        # already checks for - this just makes root/get_decision responses consistent
-        # with what branch results already send.
         extra: dict[str, Any] = {"legal_actions": mask_legal_actions(view.legal_actions_raw)}
         if battle_state.is_terminal:
             extra["terminal"] = True
-            extra["outcome"] = battle_state.outcome
+            extra["outcome"] = require_terminal_outcome(
+                battle_state.outcome, context="combat root decision"
+            )
         masked = build_masked_emulator_dto(engine_state, extra=extra)
         return {"branch_id": public_branch_id, "decision_point_id": self._decision_points.current(public_branch_id), "branch_log": branch_log, "masked_emulator_dto": masked}
 
@@ -196,10 +194,26 @@ class CombatInstance:
         if branch_id != ROOT_BRANCH_ID and branch_id not in self._bookkeeping:
             raise RequestRejected(f"branch_id {branch_id!r} is unavailable after a failed batch")
         if branch_id != ROOT_BRANCH_ID:
-            status = self._branch_manager.get_branch_status([self._bookkeeping[branch_id].internal_id])[self._bookkeeping[branch_id].internal_id]
+            book = self._bookkeeping[branch_id]
+            status = self._branch_manager.get_branch_status([book.internal_id])[book.internal_id]
             translated = _translate_branch_status(status)
             if translated in (STATUS_QUEUED, STATUS_RUNNING, STATUS_CANCELLED, STATUS_FAULTED, STATUS_RELEASED):
                 return {"status": translated, "branch_id": branch_id}
+            if book.terminal:
+                return {
+                    "status": STATUS_COMPLETED,
+                    "branch_id": branch_id,
+                    "decision_point_id": self._decision_points.current(branch_id),
+                    "branch_log": list(book.branch_log),
+                    "masked_emulator_dto": build_masked_emulator_dto(
+                        {
+                            "terminal": True,
+                            "outcome": require_terminal_outcome(
+                                book.outcome, context=f"combat branch {branch_id!r}"
+                            ),
+                        }
+                    ),
+                }
         view = self._view_for(branch_id)
         branch_log = list(self._root_branch_log) if branch_id == ROOT_BRANCH_ID else list(self._bookkeeping[branch_id].branch_log)
         return {"status": STATUS_COMPLETED, **self._decision_response_fields(branch_id, view, branch_log=branch_log)}
@@ -372,14 +386,20 @@ class CombatInstance:
         elif boundary == BOUNDARY_STABLE:
             next_context = DecisionContext.from_main_stable_capture(result.child_snapshot, result.next_decision_result, result.result_signature)
             next_view = _DecisionView(list(result.next_legal_actions or []), next_context, boundary)
-        else:
+        elif boundary == BOUNDARY_TERMINAL:
             book.terminal = True
+            book.outcome = require_terminal_outcome(
+                result.terminal_result.outcome if result.terminal_result else None,
+                context=f"combat branch {branch_id!r}",
+            )
             next_view = None
+        else:
+            raise RuntimeError(f"unexpected combat branch boundary: {boundary!r}")
         book.view = next_view
         self._decision_points.issue(branch_id)
         if next_view is not None:
             return {"status": STATUS_COMPLETED, **self._decision_response_fields(branch_id, next_view, branch_log=branch_log), "parent_branch_id": parent_branch_id, "rng_id": rng_id}
-        return {"status": STATUS_COMPLETED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id, "decision_point_id": self._decision_points.current(branch_id), "branch_log": branch_log, "masked_emulator_dto": build_masked_emulator_dto({"terminal": True, "outcome": result.terminal_result.outcome if result.terminal_result else None})}
+        return {"status": STATUS_COMPLETED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id, "decision_point_id": self._decision_points.current(branch_id), "branch_log": branch_log, "masked_emulator_dto": build_masked_emulator_dto({"terminal": True, "outcome": book.outcome})}
 
     def cancel_branches(self, branch_ids: list) -> dict:
         self._ensure_open()
