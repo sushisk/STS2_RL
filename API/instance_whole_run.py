@@ -501,9 +501,20 @@ class WholeRunInstance:
             # observation_to_dict() (run_emulator_bridge.py) already carries the
             # authoritative win/loss signal (obs.Outcome) - captured here since `view`
             # becomes None below and this Branch has no other way to recover it later.
-            book.outcome = require_terminal_outcome(
-                new_observation.get("outcome"), context=f"whole-run branch {branch_id!r}"
-            )
+            try:
+                terminal_outcome = require_terminal_outcome(
+                    new_observation.get("outcome"), context=f"whole-run branch {branch_id!r}"
+                )
+            except RuntimeError:
+                # The worker completed, but its terminal payload violated the producer
+                # invariant. Keep the public Branch tombstone, but never leave it looking
+                # completed/non-terminal (which would consume capacity and later try to
+                # build a response from book.view=None). Release this Branch's RNG-plan
+                # reference just like other fault paths before surfacing the invariant.
+                book.status = STATUS_FAULTED
+                self._release_event_rng_reference(branch_id, book)
+                raise
+            book.outcome = terminal_outcome
             book.terminal = True
             # NOTE: deliberately does NOT release_branch(event_rng_key, branch_id) here.
             # The same Hypothesis Key may still be referenced by SIBLING Branches from
