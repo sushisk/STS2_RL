@@ -271,8 +271,10 @@ class CombatInstance:
         stop_condition = (simulation_options or {}).get("stop_condition")
         if stop_condition not in (None, "next_decision"):
             raise RequestRejected(f"stop_condition {stop_condition!r} is not supported for combat instances")
-        if not items:
+        if not isinstance(items, list) or not items:
             raise RequestRejected("emulate_actions.items must be a non-empty list")
+        if len(items) > self._branch_manager.max_branches:
+            raise RequestRejected(f"emulate_actions batch size {len(items)} exceeds max batch size {self._branch_manager.max_branches}; chunk the frontier into multiple requests")
         seen_branch_ids: set = set()
         admitted: list[_AdmittedItem] = []
         for item in items:
@@ -281,8 +283,6 @@ class CombatInstance:
                 raise RequestRejected(f"branch_id {branch_id!r} is duplicated within this batch")
             seen_branch_ids.add(branch_id)
             admitted.append(self._validate_emulate_actions_item(item))
-        if len(admitted) > self._branch_manager.max_branches:
-            raise RequestRejected(f"emulate_actions batch size {len(admitted)} exceeds max batch size {self._branch_manager.max_branches}; chunk the frontier into multiple requests")
         active_count = self._branch_manager.active_branch_count()
         if active_count + len(admitted) > self._branch_manager.max_branches:
             raise RequestRejected(f"submitting {len(admitted)} Branch(es) would exceed max_branches={self._branch_manager.max_branches} (currently {active_count} active)")
