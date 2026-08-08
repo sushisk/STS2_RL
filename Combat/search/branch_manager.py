@@ -482,9 +482,11 @@ class BranchManager:
         """Release each Branch while retaining only a lightweight status tombstone.
 
         Non-terminal Branches are cancelled first so ``release`` remains safe to call
-        unconditionally. The public/internal Branch id remains known and reports
-        ``released``, but execution-heavy state is dropped immediately rather than being
-        retained for the lifetime of the manager.
+        unconditionally. Terminal Pending successes relinquish their established Lease
+        before compaction; descendants can still continue by replaying their retained
+        DecisionContext through the normal bootstrap route. The public/internal Branch
+        id remains known and reports ``released``, but execution-heavy state is dropped
+        immediately rather than being retained for the lifetime of the manager.
         """
         statuses: dict[str, str] = {}
         for branch_id in branch_ids:
@@ -494,6 +496,8 @@ class BranchManager:
             if record.state != BRANCH_STATE_RELEASED:
                 if record.state in _ACTIVE_STATES or record.state not in _TERMINAL_STATES:
                     self._cancel_one(record)
+                elif record.result is not None and record.result.established_lease is not None:
+                    self._lease_registry.invalidate_lease(record.result.established_lease)
                 record.state = BRANCH_STATE_RELEASED
             self._compact_released_record(record)
             statuses[branch_id] = record.state
