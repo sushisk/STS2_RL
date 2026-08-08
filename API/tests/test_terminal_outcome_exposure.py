@@ -1,30 +1,8 @@
-"""Regression coverage for exposing the win/loss `outcome` signal at terminal
-decisions - Combat combat-end (victory/defeat) and Whole Run `RUN_TERMINAL`.
+"""Regression coverage for terminal win/loss exposure in Combat and Whole Run.
 
-Before this change, `masked_emulator_dto` at a normal (non-faulted) terminal
-decision carried no win/loss signal Training could read:
-
-- Combat: `legal_actions` became `[]`, but `BattleState.is_terminal`/`.outcome` are
-  Python-side attributes never copied into `engine_state` (see
-  `instance_combat.py::_decision_response_fields`).
-- Whole Run: the `RUN_TERMINAL` payload was hardcoded to `{"run_terminal": True}`,
-  discarding the `outcome` `Run/run_emulator_bridge.py::observation_to_dict()`
-  already puts on the raw Observation (see `instance_whole_run.py`'s
-  `_decision_response_fields`/`emulate_action`/`get_decision`).
-
-Combat cases are driven for real (cheap - a single card play settles it, matching
-`Combat/tests/test_battle_emulator_transition_outcome.py`'s proven scenarios). Whole
-Run cases are NOT driven to a real RUN_TERMINAL (WholeRunInstance always enables
-God Mode, and a full run naturally reaching floor-17 victory or defeat is not a
-practical regression test) - instead the two response-building code paths
-(`_decision_response_fields` for root, and the Branch bookkeeping capture/re-serve
-pair in `emulate_action`/`get_decision`) are exercised directly against a
-hand-crafted terminal `_View`/`_BranchBookkeeping`, which is how
-`API/tests/test_whole_run_view.py` already tests this instance's response-shaping
-logic without a full playthrough.
-
-Native assertion runner, no pytest dependency (matches this package's convention).
-Run: `python test_terminal_outcome_exposure.py`.
+Combat tests drive real terminal transitions. Whole Run response shaping uses
+hand-crafted terminal views/bookkeeping because a full God Mode run is impractical
+for a focused regression test.
 """
 
 from __future__ import annotations
@@ -62,9 +40,7 @@ def _victory_combat_config() -> dict:
 
 
 def _defeat_combat_config() -> dict:
-    # Exact scenario proven in Combat/tests/test_battle_emulator_transition_outcome.py's
-    # test_defeat_step_reports_terminal_defeat - player_hp=1 vs a large-HP enemy that
-    # kills in a couple of unblocked turns.
+    # A large-HP enemy defeats the 1-HP player after a few unblocked turns.
     return {
         "instance_type": "combat",
         "character_id": "IRONCLAD",
@@ -133,9 +109,6 @@ def _whole_run_config() -> dict:
 
 
 def test_whole_run_root_run_terminal_view_exposes_outcome():
-    """Exercises the exact `_decision_response_fields` code path root's real
-    get_decision/commit_action use, against a hand-crafted RUN_TERMINAL `_View` -
-    see module docstring for why this isn't driven via a real full playthrough."""
     inst = WholeRunInstance("wr-root-terminal", _whole_run_config(), branch_worker_count=1)
     try:
         terminal_view = _View(
@@ -150,7 +123,7 @@ def test_whole_run_root_run_terminal_view_exposes_outcome():
             chain_blocked=False,
             event_rng_state=None,
         )
-        response = inst._decision_response_fields(  # noqa: SLF001 - see module docstring
+        response = inst._decision_response_fields(  # noqa: SLF001
             "root", terminal_view, branch_log=[], history=HistoryBuilder()
         )
         dto = response["masked_emulator_dto"]
@@ -172,15 +145,13 @@ def test_whole_run_non_terminal_view_has_no_run_terminal_key():
         inst.close()
 
 
-def test_whole_run_branch_get_decision_reserves_captured_outcome():
-    """Exercises get_decision's `book.terminal` re-serve branch directly against a
-    hand-crafted already-terminal bookkeeping entry - see module docstring."""
+def test_whole_run_branch_get_decision_preserves_captured_outcome():
     inst = WholeRunInstance("wr-branch-terminal", _whole_run_config(), branch_worker_count=1)
     try:
         book = _BranchBookkeeping("root", [], HistoryBuilder(), rng_id=1)
         book.terminal = True
         book.outcome = "defeat"
-        inst._bookkeeping["b1"] = book  # noqa: SLF001 - see module docstring
+        inst._bookkeeping["b1"] = book  # noqa: SLF001
         inst._branch_ids.register("b1")  # noqa: SLF001
         inst._decision_points.issue("b1")  # noqa: SLF001
 
