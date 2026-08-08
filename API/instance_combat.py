@@ -415,9 +415,12 @@ class CombatInstance:
         self._decision_points.clear(public_branch_id)
 
     def _cancel_and_release_all_branches(self) -> None:
-        internal_ids = [book.internal_id for book in self._bookkeeping.values() if book.view is not None or not book.terminal]
+        # Release every tracked Branch, including terminal speculative Branches whose
+        # Decision view has already been compacted. BranchManager.release_branches()
+        # safely cancels active Branches first and drops execution-heavy state for
+        # terminal Branches, so filtering here would leave completed records resident.
+        internal_ids = [book.internal_id for book in self._bookkeeping.values()]
         if internal_ids:
-            self._branch_manager.cancel_branches(internal_ids)
             self._branch_manager.release_branches(internal_ids)
         for bid in list(self._bookkeeping):
             self._compact_bookkeeping_for_release(bid)
