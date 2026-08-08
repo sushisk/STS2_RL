@@ -82,7 +82,7 @@ class BranchReleasedError(RuntimeError):
 @dataclass
 class BranchRecord:
     branch_id: str
-    work_item: WorkItem
+    work_item: Optional[WorkItem]
     state: str
     parent_branch_id: Optional[str] = None
     child_branch_ids: list = field(default_factory=list)
@@ -242,20 +242,23 @@ class BranchManager:
                     if record.state != BRANCH_STATE_QUEUED:
                         waiting.remove(branch_id)
                         continue
+                    work_item = record.work_item
+                    if work_item is None:
+                        raise RuntimeError(f"queued Branch {branch_id} has no WorkItem")
 
                     # A valid continuation Lease must retain worker affinity. If its
                     # holder is busy, leave this Branch queued and try another item.
                     lease = None
-                    if getattr(record.work_item, "work_kind", None) == "continuation":
+                    if getattr(work_item, "work_kind", None) == "continuation":
                         lease = self._lease_registry.get(
-                            record.work_item.context_id,
-                            record.work_item.search_hypothesis_id,
+                            work_item.context_id,
+                            work_item.search_hypothesis_id,
                         )
                     if lease is not None:
                         generation = self._pool.worker_generations.get(lease.worker_id)
                         if (
                             generation is not None
-                            and lease.is_valid_for(record.work_item, worker_generation=generation)
+                            and lease.is_valid_for(work_item, worker_generation=generation)
                             and lease.worker_id not in free_worker_ids
                         ):
                             continue
@@ -265,7 +268,7 @@ class BranchManager:
                     lease_snapshot = dict(lease_table) if isinstance(lease_table, dict) else None
                     try:
                         request, worker_id, next_bootstrap_index, _ = _route_work_item(
-                            record.work_item,
+                            work_item,
                             self._lease_registry,
                             worker_ids=free_worker_ids,
                             worker_generations=self._pool.worker_generations,
@@ -278,7 +281,7 @@ class BranchManager:
                                 f"routing selected busy worker {worker_id} for Branch {branch_id}"
                             )
 
-                        ipc_work_item = _work_item_for_ipc(record.work_item)
+                        ipc_work_item = _work_item_for_ipc(work_item)
                         ipc_request = request.__class__(
                             ipc_work_item,
                             request.execution_mode,
@@ -344,13 +347,16 @@ class BranchManager:
                         if record.state in (BRANCH_STATE_CANCELLED, BRANCH_STATE_RELEASED):
                             continue
 
+                        work_item = record.work_item
+                        if work_item is None:
+                            raise RuntimeError(f"running Branch {branch_id} has no WorkItem")
                         stale_generation = self._pool.worker_generations.get(hung_worker_id)
                         self._pool.respawn_worker(
                             hung_worker_id,
                             lease_registry=self._lease_registry,
                         )
                         fault = _fault_result(
-                            record.work_item,
+                            work_item,
                             record.execution_mode,
                             hung_worker_id,
                             stale_generation,
@@ -395,9 +401,12 @@ class BranchManager:
             self.release_branches(known)
 
     def _finish(self, record: BranchRecord, result: BranchResult) -> None:
+        work_item = record.work_item
+        if work_item is None:
+            raise RuntimeError(f"active Branch {record.branch_id} has no WorkItem")
         record.result = result
         record.state = BRANCH_STATE_COMPLETED if result.status == "success" else BRANCH_STATE_FAULTED
-        self._lease_registry.invalidate(record.work_item.context_id, record.work_item.search_hypothesis_id)
+        self._lease_registry.invalidate(work_item.context_id, work_item.search_hypothesis_id)
         if result.status == "success" and result.established_lease is not None:
             self._lease_registry.set(result.established_lease)
         if result.status == "fault" and result.worker_id is not None:
@@ -470,23 +479,65 @@ class BranchManager:
         return record.state
 
     def release_branches(self, branch_ids: list[str]) -> dict[str, str]:
-        """Release each Branch. Non-terminal Branches are cancelled first (their result,
-        if any, is discarded) so ``release`` is always safe to call unconditionally.
-        Idempotent on an already-``released`` Branch."""
+        """Release each Branch while retaining only a lightweight status tombstone.
+
+        Non-terminal Branches are cancelled first so ``release`` remains safe to call
+        unconditionally. The public/internal Branch id remains known and reports
+        ``released``, but execution-heavy state is dropped immediately rather than being
+        retained for the lifetime of the manager.
+        """
         statuses: dict[str, str] = {}
         for branch_id in branch_ids:
             record = self._records.get(branch_id)
             if record is None:
                 raise UnknownBranchError(branch_id)
-            if record.state == BRANCH_STATE_RELEASED:
-                statuses[branch_id] = record.state
-                continue
-            if record.state in _ACTIVE_STATES or record.state not in _TERMINAL_STATES:
-                self._cancel_one(record)
-            record.result = None
-            record.state = BRANCH_STATE_RELEASED
+            if record.state != BRANCH_STATE_RELEASED:
+                if record.state in _ACTIVE_STATES or record.state not in _TERMINAL_STATES:
+                    self._cancel_one(record)
+                record.state = BRANCH_STATE_RELEASED
+            self._compact_released_record(record)
             statuses[branch_id] = record.state
         return statuses
+
+    def _compact_released_record(self, record: BranchRecord) -> None:
+        """Discard heavy execution state while preserving status/cascade correctness."""
+        record.work_item = None
+        record.result = None
+        record.worker_id = None
+        record.worker_generation = None
+        record.request_id = None
+        record.execution_mode = None
+
+        # A released descendant that is itself a leaf no longer needs to stay in the
+        # cascade graph. Keep links that still bridge to a non-released descendant so a
+        # later parent Cancel retains the existing cascade semantics.
+        retained_children: list[str] = []
+        for child_id in record.child_branch_ids:
+            child = self._records.get(child_id)
+            if child is None:
+                continue
+            if child.state != BRANCH_STATE_RELEASED or child.child_branch_ids:
+                retained_children.append(child_id)
+        record.child_branch_ids[:] = retained_children
+        self._prune_released_leaf_from_parent(record)
+
+    def _prune_released_leaf_from_parent(self, record: BranchRecord) -> None:
+        current = record
+        while (
+            current.state == BRANCH_STATE_RELEASED
+            and not current.child_branch_ids
+            and current.parent_branch_id is not None
+        ):
+            parent = self._records.get(current.parent_branch_id)
+            if parent is None:
+                current.parent_branch_id = None
+                return
+            try:
+                parent.child_branch_ids.remove(current.branch_id)
+            except ValueError:
+                pass
+            current.parent_branch_id = None
+            current = parent
 
     def close_all(self) -> None:
         """Episode-close / Training-disconnect cleanup: cancel and release every Branch
