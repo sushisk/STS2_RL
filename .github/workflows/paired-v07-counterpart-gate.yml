@@ -37,6 +37,7 @@ jobs:
             API/tests/test_dto_validation.py \
             API/tests/test_server_replay_cache.py \
             API/tests/test_server_response_finalization.py \
+            API/tests/test_server_operation_capabilities.py \
             API/tests/test_tcp_dto_contract.py \
             API/tests/test_tcp_server.py \
             API/tests/test_validation_simulation_options.py \
