@@ -119,13 +119,23 @@ class _View:
     event_rng_state: "dict | None"
 
     def resolve_action_id(self, public_action_id: str) -> int:
-        try:
-            index = int(public_action_id)
-        except (TypeError, ValueError):
-            raise RequestRejected(f"action_id {public_action_id!r} is not a valid index") from None
-        if index < 0 or index >= len(self.legal_actions_raw):
+        """Resolve the opaque public ActionId back to this Decision's raw action slot.
+
+        ``mask_legal_actions`` publishes the Emulator's ActionId unchanged except for
+        string conversion, so the numeric spelling of the token is not a positional
+        index. Reward/Shop/Map decisions may legitimately use sparse IDs such as 3, 10,
+        or arbitrary room IDs.
+        """
+        matches = [
+            index
+            for index, action in enumerate(self.legal_actions_raw)
+            if "action_id" in action and str(action["action_id"]) == public_action_id
+        ]
+        if not matches:
             raise RequestRejected(f"action_id {public_action_id!r} is not among current legal actions")
-        return index
+        if len(matches) != 1:
+            raise RequestRejected(f"action_id {public_action_id!r} is ambiguous among current legal actions")
+        return matches[0]
 
 
 def _build_child_view(parent_view: _View, chosen_action_id: int, branch_result: BranchResult) -> _View:
