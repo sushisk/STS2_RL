@@ -674,8 +674,13 @@ def test_wriggler_slot_name_inference_and_restore():
     ]
 
 
-def test_wriggler_missing_slot_without_encounter_is_detected():
-    """Without source encounter metadata, Wriggler SlotName is unavailable and invalid."""
+def test_wriggler_missing_slot_without_encounter_defaults_to_wriggler1():
+    """Without source encounter metadata, the Emulator itself now defaults a slot-dependent
+    monster's SlotName (docs/reports/wriggler_timeout_investigation_20260731.md) rather than
+    hanging on RollMove's fallback-less ConditionalBranchState. RL's own slot_name_manifest
+    still correctly reports "unavailable" - it has no encounter provenance for this synthetic
+    spec - the Emulator's default is a search-convenience fallback, not a claim of historical
+    accuracy."""
     emu = BattleEmulator()
     spec = {
         "character_id": "REGENT", "player_hp": None, "player_max_hp": None,
@@ -684,8 +689,10 @@ def test_wriggler_missing_slot_without_encounter_is_detected():
         "enemies": [{"monster_id": "WRIGGLER", "hp": 22}],
     }
     result = preflight_validate(spec, emu)
-    assert result["status"] == "quarantined", result
-    assert "no_legal_actions" in result["reasons"], result
+    assert result["status"] == "ok", result
+    enemies = result["battle_state"].engine_state["enemies"]
+    assert enemies[0]["slotName"] == "wriggler1", enemies
+    assert enemies[0]["intent"]["stateId"] != "UNSET_MOVE", enemies
     assert spec["slot_name_manifest"][0]["slot_name_source"] == "unavailable", spec["slot_name_manifest"]
 
 
