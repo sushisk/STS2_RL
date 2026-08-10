@@ -3,7 +3,9 @@ from __future__ import annotations
 from collections.abc import Container
 from typing import Any
 
-VALID_COMBAT_TERMINAL_OUTCOMES = frozenset({"victory", "defeat"})
+VALID_TERMINAL_OUTCOMES = frozenset({"victory", "defeat"})
+# Preserve the pre-split name for callers that import the original vocabulary directly.
+VALID_COMBAT_TERMINAL_OUTCOMES = VALID_TERMINAL_OUTCOMES
 # Whole-run completion uses a distinct victory token while sharing defeat semantics.
 VALID_WHOLE_RUN_TERMINAL_OUTCOMES = VALID_COMBAT_TERMINAL_OUTCOMES | {"run_victory"}
 
