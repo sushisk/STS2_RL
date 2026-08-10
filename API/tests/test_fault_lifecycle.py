@@ -14,7 +14,6 @@ Native assertion runner, no pytest dependency.
 
 from __future__ import annotations
 
-import itertools
 import sys
 import traceback
 import uuid
@@ -38,6 +37,24 @@ def _combat_config():
         "hand": ["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "BASH"], "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
         "player_powers": [], "relics": [], "potions": [], "seed": 1, "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
     }
+
+
+def _make_req():
+    session_id = str(uuid.uuid4())
+    request_seq = 0
+
+    def req(**fields) -> dict:
+        nonlocal request_seq
+        request_seq += 1
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "client_session_id": session_id,
+            "request_seq": request_seq,
+            "request_id": f"{session_id}:{request_seq}",
+            **fields,
+        }
+
+    return req
 
 
 def test_worker_timeout_surfaces_as_faulted_and_pool_recovers():
@@ -127,20 +144,8 @@ def test_holder_lease_invalidated_on_cancel():
 
 
 def test_close_instance_is_idempotent_via_server():
+    req = _make_req()
     server = RLApiServer()
-    session_id = str(uuid.uuid4())
-    seq = itertools.count(1)
-
-    def req(**fields) -> dict:
-        n = next(seq)
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "client_session_id": session_id,
-            "request_seq": n,
-            "request_id": f"{session_id}:{n}",
-            **fields,
-        }
-
     try:
         start_resp = server.handle_request(req(operation="start_instance", instance_config=_combat_config()))
         assert start_resp["status"] == "completed"
@@ -173,18 +178,9 @@ def test_training_disconnect_without_explicit_close_instance_still_cleans_up():
     ever sending `close_instance` first. `_rl_runtime_process_main`'s `finally:
     server.close_all()` must still run and release every resource - proc.close() itself
     must complete promptly (no hang) even though an instance was left open."""
+    req = _make_req()
     proc = RLApiServerProcess(request_timeout_s=60.0)
-    session_id = str(uuid.uuid4())
-    start_resp = proc.call(
-        {
-            "schema_version": SCHEMA_VERSION,
-            "client_session_id": session_id,
-            "request_seq": 1,
-            "request_id": f"{session_id}:1",
-            "operation": "start_instance",
-            "instance_config": _combat_config(),
-        }
-    )
+    start_resp = proc.call(req(operation="start_instance", instance_config=_combat_config()))
     assert start_resp["status"] == "completed", start_resp
     # No close_instance call here - simulate an abrupt Training-side disconnect.
     proc.close()
