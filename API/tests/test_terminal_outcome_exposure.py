@@ -20,7 +20,10 @@ from API.instance_combat import (  # noqa: E402
     _BranchBookkeeping as _CombatBranchBookkeeping,
 )
 from API.instance_whole_run import WholeRunInstance, _View  # noqa: E402
-from API.terminal_outcome import require_terminal_outcome  # noqa: E402
+from API.terminal_outcome import (  # noqa: E402
+    VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
+    require_terminal_outcome,
+)
 
 
 def _victory_combat_config() -> dict:
@@ -290,6 +293,58 @@ def test_whole_run_root_run_terminal_view_exposes_outcome():
         assert dto.get("outcome") == "victory"
     finally:
         inst.close()
+
+
+def test_whole_run_root_run_terminal_view_exposes_run_victory_outcome():
+    """`"run_victory"` (Emulator commit 72ac8df, 2026-08-10) is the whole-Run analogue of
+    clearing the game - deliberately distinct from combat-scoped `"victory"` (see
+    `API/terminal_outcome.py`'s module docstring). This must flow through the Whole Run
+    root decision path exactly like `"victory"`/`"defeat"` do above.
+    """
+    inst = WholeRunInstance("wr-root-run-victory", _whole_run_config(), branch_worker_count=1)
+    try:
+        terminal_view = _View(
+            legal_actions_raw=[],
+            boundary="run_terminal",
+            observation={"boundary": "run_terminal", "outcome": "run_victory", "state": {}},
+            room_context={},
+            map_snapshot=None,
+            room_id=None,
+            action_prefix=(),
+            choice_type="run_terminal",
+            chain_blocked=False,
+            event_rng_state=None,
+        )
+        response = inst._decision_response_fields(  # noqa: SLF001
+            "root", terminal_view, branch_log=[], history=HistoryBuilder()
+        )
+        dto = response["masked_emulator_dto"]
+        assert dto.get("run_terminal") is True
+        assert dto.get("outcome") == "run_victory"
+    finally:
+        inst.close()
+
+
+def test_combat_terminal_outcome_rejects_run_victory():
+    """`"run_victory"` has no meaning for a single combat (no Acts, no game-clear epilogue)
+    - `instance_combat.py`'s callers must keep using the default combat-only valid set and
+    reject it, even though it's a valid Whole Run outcome.
+    """
+    try:
+        require_terminal_outcome("run_victory", context="test")
+    except RuntimeError as exc:
+        assert "without a valid outcome" in str(exc)
+    else:
+        raise AssertionError("run_victory must be rejected for combat-only contexts")
+
+
+def test_whole_run_terminal_outcome_accepts_run_victory_via_explicit_valid_set():
+    assert (
+        require_terminal_outcome(
+            "run_victory", context="test", valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES
+        )
+        == "run_victory"
+    )
 
 
 def test_whole_run_non_terminal_view_has_no_run_terminal_key():
