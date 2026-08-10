@@ -24,7 +24,7 @@ class MockTrainingClient:
         self._owns_process = server_process is None
         self.process = server_process or RLApiServerProcess(request_timeout_s=request_timeout_s)
         self._client_session_id = str(uuid.uuid4())
-        self._request_serial = itertools.count(1)
+        self._request_seq = 1
         self.instance_id: Optional[str] = None
         self._branch_serial = itertools.count(1)
 
@@ -42,19 +42,17 @@ class MockTrainingClient:
         return f"branch-{next(self._branch_serial):06d}"
 
     def _call(self, operation: str, *, request_id: Optional[str] = None, **fields: Any) -> dict:
-        # request_id must be exactly f"{client_session_id}:{request_seq}" for this
-        # session/sequence (ApiContract._new_request's own convention). A deliberately
-        # malformed override is rejected before SessionLedger, so it must not consume the
-        # client's sequence number; the next normal request must reuse that request_seq.
-        request_seq = next(self._request_serial)
+        request_seq = self._request_seq
         expected_request_id = f"{self._client_session_id}:{request_seq}"
-        if request_id and request_id != expected_request_id:
-            self._request_serial = itertools.count(request_seq)
+        request_id = request_id or expected_request_id
+        # Invalid overrides are rejected before SessionLedger and must not advance the local sequence.
+        if request_id == expected_request_id:
+            self._request_seq += 1
         payload = {
             "schema_version": SCHEMA_VERSION,
             "client_session_id": self._client_session_id,
             "request_seq": request_seq,
-            "request_id": request_id or expected_request_id,
+            "request_id": request_id,
             "operation": operation,
         }
         if self.instance_id is not None and "instance_id" not in fields:
