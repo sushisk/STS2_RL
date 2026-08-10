@@ -270,13 +270,13 @@ def _whole_run_config() -> dict:
     return {"instance_type": "whole_run", "seed": 1, "character_id": "IRONCLAD", "ascension": 0}
 
 
-def test_whole_run_root_run_terminal_view_exposes_outcome():
-    inst = WholeRunInstance("wr-root-terminal", _whole_run_config(), branch_worker_count=1)
+def _assert_whole_run_root_terminal_outcome(outcome: str) -> None:
+    inst = WholeRunInstance(f"wr-root-{outcome}", _whole_run_config(), branch_worker_count=1)
     try:
         terminal_view = _View(
             legal_actions_raw=[],
             boundary="run_terminal",
-            observation={"boundary": "run_terminal", "outcome": "victory", "state": {}},
+            observation={"boundary": "run_terminal", "outcome": outcome, "state": {}},
             room_context={},
             map_snapshot=None,
             room_id=None,
@@ -290,46 +290,20 @@ def test_whole_run_root_run_terminal_view_exposes_outcome():
         )
         dto = response["masked_emulator_dto"]
         assert dto.get("run_terminal") is True
-        assert dto.get("outcome") == "victory"
+        assert dto.get("outcome") == outcome
     finally:
         inst.close()
+
+
+def test_whole_run_root_run_terminal_view_exposes_outcome():
+    _assert_whole_run_root_terminal_outcome("victory")
 
 
 def test_whole_run_root_run_terminal_view_exposes_run_victory_outcome():
-    """`"run_victory"` (Emulator commit 72ac8df, 2026-08-10) is the whole-Run analogue of
-    clearing the game - deliberately distinct from combat-scoped `"victory"` (see
-    `API/terminal_outcome.py`'s module docstring). This must flow through the Whole Run
-    root decision path exactly like `"victory"`/`"defeat"` do above.
-    """
-    inst = WholeRunInstance("wr-root-run-victory", _whole_run_config(), branch_worker_count=1)
-    try:
-        terminal_view = _View(
-            legal_actions_raw=[],
-            boundary="run_terminal",
-            observation={"boundary": "run_terminal", "outcome": "run_victory", "state": {}},
-            room_context={},
-            map_snapshot=None,
-            room_id=None,
-            action_prefix=(),
-            choice_type="run_terminal",
-            chain_blocked=False,
-            event_rng_state=None,
-        )
-        response = inst._decision_response_fields(  # noqa: SLF001
-            "root", terminal_view, branch_log=[], history=HistoryBuilder()
-        )
-        dto = response["masked_emulator_dto"]
-        assert dto.get("run_terminal") is True
-        assert dto.get("outcome") == "run_victory"
-    finally:
-        inst.close()
+    _assert_whole_run_root_terminal_outcome("run_victory")
 
 
 def test_combat_terminal_outcome_rejects_run_victory():
-    """`"run_victory"` has no meaning for a single combat (no Acts, no game-clear epilogue)
-    - `instance_combat.py`'s callers must keep using the default combat-only valid set and
-    reject it, even though it's a valid Whole Run outcome.
-    """
     try:
         require_terminal_outcome("run_victory", context="test")
     except RuntimeError as exc:
