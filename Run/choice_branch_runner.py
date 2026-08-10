@@ -163,6 +163,10 @@ def search_for_room_type(
     non-Treasure candidates) using single-use probe sessions per candidate at each map,
     per `probe_room_type`'s own doc comment. Returns (None, None) if not found within
     `max_hops`.
+
+    Treasure candidates are skipped UNLESS `target_room_type` is itself "TreasureRoom" -
+    probing a Treasure room auto-resolves it (see choose_room's Treasure auto-claim), so
+    probing one while searching for some OTHER room type would burn it for nothing.
     """
     session = new_session()
     session.start_run(seed, character_id, ascension)
@@ -177,7 +181,7 @@ def search_for_room_type(
         if not rooms:
             return None, None
         for room in rooms:
-            if room["point_type"] == "Treasure":
+            if room["point_type"] == "Treasure" and target_room_type != "TreasureRoom":
                 continue
             if probe_room_type(map_snapshot, room["room_id"]) == target_room_type:
                 return map_snapshot, room["room_id"]
@@ -272,8 +276,18 @@ def _attempt_map_branch(effective_snapshot: str) -> BranchAttemptResult:
             and (holder_entered["room_type"] != sibling_entered["room_type"] or holder_state != sibling_state)
             or (holder_entered["room_type"] == sibling_entered["room_type"] and holder_state != sibling_state)
         ),
-        "holder_sibling_isolated": holder_state["current_room_type"] == holder_entered["room_type"]
-        and sibling_state["current_room_type"] == sibling_entered["room_type"],
+        # TreasureRoom auto-resolves and exits inside choose_room() itself (see the Treasure
+        # auto-claim design), so current_room_type has already moved on to whatever room the
+        # eager exit landed on - it's never spuriously "stuck" the way a real isolation bug
+        # would leave it, so it's exempt from this equality check.
+        "holder_sibling_isolated": (
+            holder_entered["room_type"] == "TreasureRoom"
+            or holder_state["current_room_type"] == holder_entered["room_type"]
+        )
+        and (
+            sibling_entered["room_type"] == "TreasureRoom"
+            or sibling_state["current_room_type"] == sibling_entered["room_type"]
+        ),
     }
 
     return BranchAttemptResult(

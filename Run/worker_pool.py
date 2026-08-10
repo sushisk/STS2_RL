@@ -468,7 +468,9 @@ def _explore_for_room_types(session, request: ExploreRequest) -> ExploreResult:
         rooms = session.get_map_rooms()
         matched_room = None
         for room in rooms:
-            if room["point_type"] == "Treasure":
+            # Probing a Treasure room auto-resolves it (choose_room's Treasure auto-claim), so
+            # only pay that cost when TreasureRoom is actually one of the types being searched for.
+            if room["point_type"] == "Treasure" and "TreasureRoom" not in remaining:
                 continue
             room_type = _probe_room_type_reusing_session(session, map_snapshot, room["room_id"])
             if room_type in remaining and room_type not in found:

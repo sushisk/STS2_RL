@@ -1,12 +1,14 @@
 """Drives a Whole Run across many rooms end to end, for Whole Run connectivity testing.
 
 Not a gameplay policy - `whole_run_session.pick_default_action` is a deterministic,
-policy-free action picker, and `pick_room` here prefers non-Treasure map nodes only
-because Treasure currently has no public resolve API (see the Whole Run API
-reference's "Treasure" section: no dedicated Boundary, no `choice_treasure_*`
-action, `SaveState()` has no accept branch for an unresolved TreasureRoom). This
-module exists to exercise Map/Combat/Combat Reward/Event/Shop/Rest connectivity and
-produce a full per-step log, not to play well.
+policy-free action picker, and `pick_room` here prefers non-Treasure map nodes so this
+driver spends its `min_rooms` budget exercising a wider mix of room kinds rather than
+repeatedly walking into Treasure. Treasure itself DOES have a resolve path now:
+`choose_room()` auto-claims gold/relic and eager-exits back to `map_select` inside the
+same call (see `Outputs/reports/treasure_room_fix_implementation_plan_final_20260810.md`
+in STS2_Emulator) - it no longer has "no public resolve API" as older revisions of this
+comment claimed. This module exists to exercise Map/Combat/Combat Reward/Event/Shop/Rest
+connectivity and produce a full per-step log, not to play well.
 """
 
 from __future__ import annotations
@@ -29,7 +31,12 @@ def snapshot_digest(snapshot_json: str) -> str:
 
 
 def pick_room(rooms: list[dict], exclude_room_ids: "set[int] | None" = None) -> "dict | None":
-    """Prefers a non-Treasure candidate not already excluded; None if nothing usable is left."""
+    """Prefers a non-Treasure candidate not already excluded; None if nothing usable is left.
+
+    This is a coverage preference, not a workaround - Treasure auto-resolves cleanly via
+    `choose_room()` (see the module docstring), it's just a single-outcome room type that
+    would otherwise dominate a driver looking for varied connectivity coverage.
+    """
     excluded = exclude_room_ids or set()
     pool = [r for r in rooms if r["room_id"] not in excluded]
     non_treasure = [r for r in pool if r["point_type"] != "Treasure"]
@@ -150,9 +157,20 @@ def drive_rooms(
                 }
             )
             obs = session.get_observation()
-            # Deliberately do NOT clear last_map_snapshot/tried_room_ids_at_current_map here:
-            # the just-entered room might turn out unsupported (Treasure) with zero legal
-            # actions, in which case the "unsupported_room_no_actions" branch below needs
+            if obs["boundary"] == MAP_SELECT:
+                # choose_room() auto-resolved the room it just entered (Treasure's
+                # auto-claim-then-eager-exit) and we're already sitting at the NEXT map
+                # fork - last_map_snapshot/tried_room_ids_at_current_map describe the OLD
+                # fork we just left, so keeping them around would make a later unsupported
+                # room incorrectly roll back past this Treasure resolution (and everything
+                # after it) via load_state(last_map_snapshot). Reset the same way a real
+                # Step success does below.
+                last_map_snapshot = None
+                tried_room_ids_at_current_map = set()
+                continue
+            # Otherwise, deliberately do NOT clear last_map_snapshot/tried_room_ids_at_current_map
+            # here: the just-entered room might turn out unsupported with zero legal actions,
+            # in which case the "unsupported_room_no_actions" branch below needs
             # last_map_snapshot to route around it. They are only cleared once a real Step
             # actually succeeds (below) - proof this map fork is no longer "in progress".
             continue
