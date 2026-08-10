@@ -6,7 +6,7 @@ driver spends its `min_rooms` budget exercising a wider mix of room kinds rather
 repeatedly walking into Treasure. Treasure itself DOES have a resolve path now:
 `choose_room()` auto-claims gold/relic and eager-exits back to `map_select` inside the
 same call (see `Outputs/reports/treasure_room_fix_implementation_plan_final_20260810.md`
-in STS2_Emulator) - it no longer has "no public resolve API" as older revisions of this
+in this repo) - it no longer has "no public resolve API" as older revisions of this
 comment claimed. This module exists to exercise Map/Combat/Combat Reward/Event/Shop/Rest
 connectivity and produce a full per-step log, not to play well.
 """
@@ -158,13 +158,11 @@ def drive_rooms(
             )
             obs = session.get_observation()
             if obs["boundary"] == MAP_SELECT:
-                # choose_room() auto-resolved the room it just entered (Treasure's
-                # auto-claim-then-eager-exit) and we're already sitting at the NEXT map
-                # fork - last_map_snapshot/tried_room_ids_at_current_map describe the OLD
-                # fork we just left, so keeping them around would make a later unsupported
-                # room incorrectly roll back past this Treasure resolution (and everything
-                # after it) via load_state(last_map_snapshot). Reset the same way a real
-                # Step success does below.
+                # choose_room() auto-resolved this room (Treasure's auto-claim + eager
+                # exit) and we're already at the NEXT map fork - last_map_snapshot/
+                # tried_room_ids_at_current_map describe the OLD fork, so keeping them
+                # would roll a later unsupported room back past this resolution. Reset
+                # now, same as a real Step success does below.
                 last_map_snapshot = None
                 tried_room_ids_at_current_map = set()
                 continue

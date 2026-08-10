@@ -243,6 +243,16 @@ class BranchAttemptResult:
         return bool(self.checks) and all(self.checks.values())
 
 
+def _room_settled(entered: dict, state: dict) -> bool:
+    """True if `state.current_room_type` matches the room actually entered.
+
+    TreasureRoom is exempt: it auto-resolves and exits inside `choose_room()` itself, so
+    `current_room_type` has already moved on to whatever room the eager exit landed on -
+    never spuriously "stuck" the way a real isolation bug would leave it.
+    """
+    return entered["room_type"] == "TreasureRoom" or state["current_room_type"] == entered["room_type"]
+
+
 def _attempt_map_branch(effective_snapshot: str) -> BranchAttemptResult:
     probe = new_session()
     probe.load_state(effective_snapshot)
@@ -276,18 +286,8 @@ def _attempt_map_branch(effective_snapshot: str) -> BranchAttemptResult:
             and (holder_entered["room_type"] != sibling_entered["room_type"] or holder_state != sibling_state)
             or (holder_entered["room_type"] == sibling_entered["room_type"] and holder_state != sibling_state)
         ),
-        # TreasureRoom auto-resolves and exits inside choose_room() itself (see the Treasure
-        # auto-claim design), so current_room_type has already moved on to whatever room the
-        # eager exit landed on - it's never spuriously "stuck" the way a real isolation bug
-        # would leave it, so it's exempt from this equality check.
-        "holder_sibling_isolated": (
-            holder_entered["room_type"] == "TreasureRoom"
-            or holder_state["current_room_type"] == holder_entered["room_type"]
-        )
-        and (
-            sibling_entered["room_type"] == "TreasureRoom"
-            or sibling_state["current_room_type"] == sibling_entered["room_type"]
-        ),
+        "holder_sibling_isolated": _room_settled(holder_entered, holder_state)
+        and _room_settled(sibling_entered, sibling_state),
     }
 
     return BranchAttemptResult(

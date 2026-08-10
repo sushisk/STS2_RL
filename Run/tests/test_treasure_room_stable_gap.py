@@ -1,24 +1,14 @@
 """Regression coverage for the TreasureRoom stable-boundary gap, now fixed.
 
 Before this fix, entering a TreasureRoom left the Whole Run session permanently stuck
-at `boundary == "stable"` with zero legal actions and `room_context["room_resolved"]
-is False`, with no client-visible way to make it progress - see this file's git
-history for the original repro (`test_treasure_room_leaves_session_stuck_with_no_legal_actions`
-et al., seeds 1348178664 and 106720923, both IRONCLAD ascension 0, found via
-STS2_Training self-play).
-
-Root cause and fix: see `Outputs/reports/treasure_room_fix_implementation_plan_final_20260810.md`
-in this repo, and its counterpart Emulator-side commits. Summary: `TreasureRoomRelicSynchronizer`/
-`OneOffSynchronizer.DoLocalTreasureRoomRewards()` were no-op stubs (excluded from the
-real build along with the rest of the multiplayer relic-picking/vote machinery that
-single player never needs), and `GameInstance.IsCurrentRoomResolved()` had no case for
-TreasureRoom - so nothing ever drove `choose_room(Treasure)` to completion or let
-`TryEagerExitResolvedRoom()` fall back to `map_select`. The fix reimplements both as a
-direct single-player auto-claim (same pattern as the existing `RestSiteSynchronizer`
-reimplementation): `choose_room()` now grants gold/relic and eager-exits back to
-`map_select` entirely inside the Emulator, with NO new Boundary or ActionType exposed
-(Treasure never had a "pick 1 of N relics" decision to expose in the first place - see
-section 2 of the plan doc). This suite asserts the resulting SUCCESS path.
+at `boundary == "stable"` with zero legal actions (seeds 1348178664/106720923, both
+IRONCLAD ascension 0 - see git history for the original repro). Root cause and fix:
+see `Outputs/reports/treasure_room_fix_implementation_plan_final_20260810.md` in this
+repo and its counterpart Emulator-side commits. Summary: `choose_room()` now auto-claims
+Treasure's gold/relic and eager-exits back to `map_select` entirely inside the Emulator
+(same pattern as the existing `RestSiteSynchronizer`), with NO new Boundary/ActionType
+exposed - Treasure never had a "pick 1 of N relics" decision to expose in the first
+place (plan doc section 2). This suite asserts the resulting SUCCESS path.
 
 Native assertion runner, no pytest dependency (matches this package's convention).
 Run: `python test_treasure_room_stable_gap.py`.
@@ -79,6 +69,23 @@ def _resolve_pending_decision(session, *, max_steps: int = 200) -> str:
     raise AssertionError("timed out resolving a post-Treasure pending decision")
 
 
+def _enter_treasure_room(session, room_id: int) -> str:
+    """Enters a Treasure candidate and resolves through to a map/terminal boundary.
+
+    Asserts the RoomEnterResult still reports "TreasureRoom" even though the room has
+    already been auto-resolved and exited by the time `choose_room()` returns (the
+    RoomType comes from a local var captured before the eager exit). Returns the
+    resulting boundary - normally MAP_SELECT, but see `_resolve_pending_decision` for
+    the CallingBell exception.
+    """
+    entered = session.choose_room(room_id)
+    assert entered["room_type"] == "TreasureRoom", entered["room_type"]
+    boundary = session.get_observation()["boundary"]
+    if boundary != MAP_SELECT:
+        boundary = _resolve_pending_decision(session)
+    return boundary
+
+
 def test_search_for_room_type_finds_treasure_room():
     """Discovery regression guard (see choice_branch_runner.search_for_room_type's own
     docstring): before this fix, an unconditional `point_type == "Treasure": continue`
@@ -101,19 +108,7 @@ def test_treasure_room_auto_claim_reaches_map_select():
         session.load_state(snapshot)
         before = session.get_run_state()
 
-        entered = session.choose_room(room_id)
-        # Regression guard: RoomEnterResult must still correctly report the room type
-        # that was entered even though it has ALREADY been auto-resolved and exited by
-        # the time choose_room() returns (see the plan doc's ChooseRoom() section - the
-        # RoomType comes from a local var captured before the eager exit).
-        assert entered["room_type"] == "TreasureRoom", entered["room_type"]
-
-        boundary = session.get_observation()["boundary"]
-        if boundary != MAP_SELECT:
-            # A CallingBell-style AfterObtained() pending decision is a legitimate,
-            # documented exception to "always map_select" - resolve it before asserting.
-            boundary = _resolve_pending_decision(session)
-
+        boundary = _enter_treasure_room(session, room_id)
         assert boundary == MAP_SELECT, f"seed={seed}: expected map_select, got {boundary!r}"
         assert session.get_map_rooms(), f"seed={seed}: expected non-empty map rooms after Treasure auto-claim"
 
@@ -150,12 +145,7 @@ def test_treasure_room_with_silver_crucible_grants_nothing_but_still_resolves():
     before = session.get_run_state()
     assert _SILVER_CRUCIBLE_RELIC_ID in before["relics"]
 
-    entered = session.choose_room(room_id)
-    assert entered["room_type"] == "TreasureRoom", entered["room_type"]
-
-    boundary = session.get_observation()["boundary"]
-    if boundary != MAP_SELECT:
-        boundary = _resolve_pending_decision(session)
+    boundary = _enter_treasure_room(session, room_id)
     assert boundary == MAP_SELECT, f"seed={seed}: expected map_select even with SilverCrucible, got {boundary!r}"
     assert session.get_map_rooms()
 
@@ -179,12 +169,7 @@ def test_second_treasure_visit_reinitializes():
 
     session = new_session()
     session.load_state(snapshot)
-    entered = session.choose_room(room_id)
-    assert entered["room_type"] == "TreasureRoom"
-    boundary = session.get_observation()["boundary"]
-    if boundary != MAP_SELECT:
-        boundary = _resolve_pending_decision(session)
-    assert boundary == MAP_SELECT
+    assert _enter_treasure_room(session, room_id) == MAP_SELECT
 
     # Best-effort walk (preferring non-Treasure, like the rest of this package's traversal
     # helpers) looking for a second Treasure room within the SAME session/GameInstance. A
@@ -225,11 +210,7 @@ def test_second_treasure_visit_reinitializes():
     # From here on, every failure IS a real regression - OnRoomExited() must have correctly
     # reset TreasureRoomRelicSynchronizer state for this second, independent auto-claim to work.
     before = session.get_run_state()
-    entered = session.choose_room(second_treasure["room_id"])
-    assert entered["room_type"] == "TreasureRoom"
-    boundary = session.get_observation()["boundary"]
-    if boundary != MAP_SELECT:
-        boundary = _resolve_pending_decision(session)
+    boundary = _enter_treasure_room(session, second_treasure["room_id"])
     assert boundary == MAP_SELECT, "expected map_select after second Treasure auto-claim"
     after = session.get_run_state()
     assert after["gold"] > before["gold"] or len(after["relics"]) > len(before["relics"]), (
@@ -271,11 +252,7 @@ def test_whole_run_instance_root_view_exposes_map_room_after_treasure():
     )
     try:
         inst._session.load_state(snapshot)
-        entered = inst._session.choose_room(room_id)
-        assert entered["room_type"] == "TreasureRoom"
-        boundary = inst._session.get_observation()["boundary"]
-        if boundary != MAP_SELECT:
-            boundary = _resolve_pending_decision(inst._session)
+        boundary = _enter_treasure_room(inst._session, room_id)
         assert boundary == MAP_SELECT, f"expected map_select after Treasure auto-claim, got {boundary!r}"
 
         decision = inst.get_decision(ROOT_BRANCH_ID)
