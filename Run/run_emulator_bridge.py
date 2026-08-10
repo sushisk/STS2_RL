@@ -104,6 +104,27 @@ def legal_actions_to_list(actions) -> list[dict]:
     return [legal_action_to_dict(a) for a in actions]
 
 
+def actor_observation_to_dict(actor) -> dict:
+    """`ActorObservation` (`Sts2Emulator.Dto.ActorObservation`) - a scalar CLR object with
+    no `Keys`/`Values` or `__iter__`, so `to_plain()` leaves it unconverted (see
+    `to_plain`'s own doc comment: it only recursively converts container-shaped values).
+    Needed explicitly wherever an `ActorObservation`/`ActorObservation[]` value must cross
+    a `multiprocessing.Queue` (`Run/worker_pool.py`) - pickling a live pythonnet object
+    fails there with `TypeError: cannot pickle 'ActorObservation' object`, silently
+    dropping the whole result message (see
+    `Outputs/reports/worker_pool_actor_observation_pickle_hang_investigation_20260811.md`).
+    """
+    return {
+        "id": str(actor.Id),
+        "name": str(actor.Name),
+        "hp": int(actor.Hp),
+        "max_hp": int(actor.MaxHp),
+        "block": int(actor.Block),
+        "energy": int(actor.Energy),
+        "intent": str(actor.Intent),
+    }
+
+
 def observation_to_dict(obs) -> dict:
     return {
         "seed": int(obs.Seed),
@@ -140,7 +161,7 @@ def transition_outcome_to_dict(transition) -> "dict | None":
         "victory": bool(transition.Victory),
         "final_player_hp": int(transition.FinalPlayerHp),
         "final_player_max_hp": int(transition.FinalPlayerMaxHp),
-        "final_enemies": to_plain(transition.FinalEnemies),
+        "final_enemies": [actor_observation_to_dict(e) for e in transition.FinalEnemies],
         "final_observation": observation_to_dict(transition.FinalObservation),
         "combat_session_id": (str(transition.CombatSessionId) if transition.CombatSessionId is not None else None),
     }
