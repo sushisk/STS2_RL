@@ -79,9 +79,12 @@ def snapshot_digest(snapshot_json: str) -> str:
 
 
 def new_session() -> WholeRunSession:
-    session = WholeRunSession()
-    session.enable_god_mode_for_testing()
-    return session
+    """Does NOT enable god mode - callers that want it (survivability for connectivity/
+    coverage testing, not realistic combat) must call
+    `session.enable_god_mode_for_testing()` themselves explicitly. A normal Whole Run
+    session must not be invincible by default (see
+    Outputs/reports/god_mode_default_removal_20260811.md)."""
+    return WholeRunSession()
 
 
 def inject_relic(snapshot_json: str, relic_id: str) -> str:
@@ -156,6 +159,7 @@ def search_for_room_type(
     character_id: str = "Ironclad",
     ascension: int = 0,
     max_hops: int = 15,
+    god_mode: bool = False,
 ) -> "tuple[str, int] | tuple[None, None]":
     """Finds a Map Boundary snapshot + room_id whose entered RoomType == target_room_type.
 
@@ -167,8 +171,18 @@ def search_for_room_type(
     Treasure candidates are skipped UNLESS `target_room_type` is itself "TreasureRoom" -
     probing a Treasure room auto-resolves it (see choose_room's Treasure auto-claim), so
     probing one while searching for some OTHER room type would burn it for nothing.
+
+    `god_mode=True` is for callers that only care about reliably REACHING a room type
+    (connectivity/coverage testing via the legacy `pick_default_action` filler policy,
+    not realistic combat) and would otherwise have the search die mid-navigation before
+    ever finding it - `new_session()` does not enable god mode by default (see
+    Outputs/reports/god_mode_default_removal_20260811.md). `GameInstance.SaveState`/
+    `LoadState` persist the flag, so every probe/downstream session that loads a snapshot
+    produced here inherits it automatically - no need to re-enable it at each call site.
     """
     session = new_session()
+    if god_mode:
+        session.enable_god_mode_for_testing()
     session.start_run(seed, character_id, ascension)
     obs = drive_to_map_or_terminal(session)
     if obs["boundary"] != MAP_SELECT:

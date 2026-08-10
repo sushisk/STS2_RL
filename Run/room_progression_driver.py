@@ -99,7 +99,10 @@ def drive_rooms(
     room_kinds_seen: set[str] = set()
 
     if not already_started:
-        session.enable_god_mode_for_testing()
+        # Does NOT enable god mode by default - a normal Whole Run must not be invincible.
+        # Callers that want survivability for connectivity/coverage testing must call
+        # session.enable_god_mode_for_testing() themselves before start_run (see
+        # Outputs/reports/god_mode_default_removal_20260811.md).
         session.start_run(seed, character_id, ascension)
 
     obs = session.get_observation()

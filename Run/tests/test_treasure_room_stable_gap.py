@@ -54,7 +54,9 @@ _SILVER_CRUCIBLE_RELIC_ID = "SILVER_CRUCIBLE"
 
 
 def _find_treasure_room(seed: int, *, max_hops: int = 15) -> "tuple[str, int] | tuple[None, None]":
-    return search_for_room_type("TreasureRoom", seed=seed, max_hops=max_hops)
+    # god_mode=True: this file is about TreasureRoom mechanics, not combat difficulty -
+    # navigation must not die to the naive legacy filler policy before ever reaching one.
+    return search_for_room_type("TreasureRoom", seed=seed, max_hops=max_hops, god_mode=True)
 
 
 def _resolve_pending_decision(session, *, max_steps: int = 200) -> str:
