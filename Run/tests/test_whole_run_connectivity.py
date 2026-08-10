@@ -90,9 +90,16 @@ def test_room_progression_driver_reaches_at_least_ten_rooms_seed18():
     summary = drive_rooms(session, min_rooms=10, max_steps=1500, seed=18)
     assert summary["rooms_entered"] >= 10
     assert "CombatRoom" in summary["room_kinds_seen"]
-    # Every unsupported room encountered must be Treasure - the one documented gap in
-    # the Whole Run API's action surface (no dedicated Boundary/ActionType).
-    assert all(r["room_type"] == "TreasureRoom" for r in summary["unsupported_rooms"])
+    # Treasure now auto-resolves inside choose_room() (see room_progression_driver's module
+    # docstring), so it must never land in unsupported_rooms again. NOT asserting
+    # `unsupported_rooms == []` outright: driving seed=18 far enough now (Treasure no longer
+    # dead-ends it early) surfaces a SEPARATE, pre-existing gap - an Act transition leaves
+    # CurrentRoom as a "MapRoom" stuck at boundary=="stable" with no legal actions, the same
+    # *class* of bug Treasure had (no IsCurrentRoomResolved() case for it) but for a different
+    # room type and out of scope for this fix. `all(...)` alone would be vacuously True for an
+    # empty list and silently stop catching a Treasure regression, so assert the negative
+    # instead - this is the real regression guard for what THIS fix changed.
+    assert not any(r["room_type"] == "TreasureRoom" for r in summary["unsupported_rooms"]), summary["unsupported_rooms"]
 
 
 def test_choice_branch_map_holder_sibling_determinism_and_isolation():
