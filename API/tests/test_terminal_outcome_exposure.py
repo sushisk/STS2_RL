@@ -377,7 +377,7 @@ def test_whole_run_emulate_action_wires_terminal_outcome_into_response_and_get_d
         branch_id="b1",
         rng_id=1,
         decision_point_id=decision_point_id,
-        action_id="0",
+        action_id="7",  # matches _whole_run_stub_instance's parent_view.legal_actions_raw
         simulation_options=None,
     )
 
@@ -398,7 +398,7 @@ def test_whole_run_emulate_action_rejects_missing_terminal_outcome_and_faults_br
             branch_id="b1",
             rng_id=1,
             decision_point_id=decision_point_id,
-            action_id="0",
+            action_id="7",  # matches _whole_run_stub_instance's parent_view.legal_actions_raw
             simulation_options=None,
         )
     except RuntimeError as exc:
