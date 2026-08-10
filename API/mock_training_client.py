@@ -43,15 +43,18 @@ class MockTrainingClient:
 
     def _call(self, operation: str, *, request_id: Optional[str] = None, **fields: Any) -> dict:
         # request_id must be exactly f"{client_session_id}:{request_seq}" for this
-        # session/sequence (ApiContract._new_request's own convention) - an explicit
-        # override is still honored for a caller that deliberately wants a malformed one
-        # (e.g. a negative/rejection test), but request_seq itself always advances.
+        # session/sequence (ApiContract._new_request's own convention). A deliberately
+        # malformed override is rejected before SessionLedger, so it must not consume the
+        # client's sequence number; the next normal request must reuse that request_seq.
         request_seq = next(self._request_serial)
+        expected_request_id = f"{self._client_session_id}:{request_seq}"
+        if request_id and request_id != expected_request_id:
+            self._request_serial = itertools.count(request_seq)
         payload = {
             "schema_version": SCHEMA_VERSION,
             "client_session_id": self._client_session_id,
             "request_seq": request_seq,
-            "request_id": request_id or f"{self._client_session_id}:{request_seq}",
+            "request_id": request_id or expected_request_id,
             "operation": operation,
         }
         if self.instance_id is not None and "instance_id" not in fields:
