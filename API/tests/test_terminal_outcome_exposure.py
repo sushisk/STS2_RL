@@ -20,7 +20,10 @@ from API.instance_combat import (  # noqa: E402
     _BranchBookkeeping as _CombatBranchBookkeeping,
 )
 from API.instance_whole_run import WholeRunInstance, _View  # noqa: E402
-from API.terminal_outcome import require_terminal_outcome  # noqa: E402
+from API.terminal_outcome import (  # noqa: E402
+    VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
+    require_terminal_outcome,
+)
 
 
 def _victory_combat_config() -> dict:
@@ -267,13 +270,13 @@ def _whole_run_config() -> dict:
     return {"instance_type": "whole_run", "seed": 1, "character_id": "IRONCLAD", "ascension": 0}
 
 
-def test_whole_run_root_run_terminal_view_exposes_outcome():
-    inst = WholeRunInstance("wr-root-terminal", _whole_run_config(), branch_worker_count=1)
+def _assert_whole_run_root_terminal_outcome(outcome: str) -> None:
+    inst = WholeRunInstance(f"wr-root-{outcome}", _whole_run_config(), branch_worker_count=1)
     try:
         terminal_view = _View(
             legal_actions_raw=[],
             boundary="run_terminal",
-            observation={"boundary": "run_terminal", "outcome": "victory", "state": {}},
+            observation={"boundary": "run_terminal", "outcome": outcome, "state": {}},
             room_context={},
             map_snapshot=None,
             room_id=None,
@@ -287,9 +290,35 @@ def test_whole_run_root_run_terminal_view_exposes_outcome():
         )
         dto = response["masked_emulator_dto"]
         assert dto.get("run_terminal") is True
-        assert dto.get("outcome") == "victory"
+        assert dto.get("outcome") == outcome
     finally:
         inst.close()
+
+
+def test_whole_run_root_run_terminal_view_exposes_outcome():
+    _assert_whole_run_root_terminal_outcome("victory")
+
+
+def test_whole_run_root_run_terminal_view_exposes_run_victory_outcome():
+    _assert_whole_run_root_terminal_outcome("run_victory")
+
+
+def test_combat_terminal_outcome_rejects_run_victory():
+    try:
+        require_terminal_outcome("run_victory", context="test")
+    except RuntimeError as exc:
+        assert "without a valid outcome" in str(exc)
+    else:
+        raise AssertionError("run_victory must be rejected for combat-only contexts")
+
+
+def test_whole_run_terminal_outcome_accepts_run_victory_via_explicit_valid_set():
+    assert (
+        require_terminal_outcome(
+            "run_victory", context="test", valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES
+        )
+        == "run_victory"
+    )
 
 
 def test_whole_run_non_terminal_view_has_no_run_terminal_key():

@@ -78,7 +78,7 @@ from API.dto import (
 from API.history_builder import HistoryBuilder
 from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
 from API.masking import build_masked_emulator_dto, mask_legal_actions
-from API.terminal_outcome import require_terminal_outcome
+from API.terminal_outcome import VALID_WHOLE_RUN_TERMINAL_OUTCOMES, require_terminal_outcome
 from API.validation import RequestRejected
 from API.whole_run_event_rng import EventRngHypothesisRegistry
 
@@ -305,7 +305,9 @@ class WholeRunInstance:
         if view.boundary == RUN_TERMINAL:
             extra["run_terminal"] = True
             extra["outcome"] = require_terminal_outcome(
-                view.observation.get("outcome"), context="whole-run root decision"
+                view.observation.get("outcome"),
+                context="whole-run root decision",
+                valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
             )
         masked = build_masked_emulator_dto(view.observation.get("state") or {}, extra=extra)
         return {
@@ -342,7 +344,9 @@ class WholeRunInstance:
                         {
                             "run_terminal": True,
                             "outcome": require_terminal_outcome(
-                                book.outcome, context=f"whole-run branch {branch_id!r}"
+                                book.outcome,
+                                context=f"whole-run branch {branch_id!r}",
+                                valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
                             ),
                         }
                     ),
@@ -513,7 +517,9 @@ class WholeRunInstance:
             # becomes None below and this Branch has no other way to recover it later.
             try:
                 terminal_outcome = require_terminal_outcome(
-                    new_observation.get("outcome"), context=f"whole-run branch {branch_id!r}"
+                    new_observation.get("outcome"),
+                    context=f"whole-run branch {branch_id!r}",
+                    valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
                 )
             except RuntimeError:
                 # The worker completed, but its terminal payload violated the producer
