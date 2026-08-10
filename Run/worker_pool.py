@@ -505,7 +505,8 @@ class _WorkerRuntime:
         self.worker_generation = worker_generation
         self.pid = os.getpid()
         self.session = WholeRunSession(Path(repo_root) if repo_root is not None else None)
-        self.session.enable_god_mode_for_testing()
+        # Does NOT enable god mode by default - a normal Whole Run Worker must not be
+        # invincible (see Outputs/reports/god_mode_default_removal_20260811.md).
         self.current_context_id: "str | None" = None
 
     def execute(self, request: WorkerExecutionRequest) -> BranchResult:

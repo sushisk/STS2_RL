@@ -86,7 +86,12 @@ def test_room_context_event_field_converts_to_plain_dict_not_clr_object():
 
 
 def test_room_progression_driver_reaches_at_least_ten_rooms_seed18():
+    # This is a connectivity/coverage check (can we mechanically reach 10 rooms via the
+    # naive legacy filler policy), not a combat-difficulty test - god mode must be
+    # requested explicitly (new_session()/drive_rooms() no longer enable it by default,
+    # see Outputs/reports/god_mode_default_removal_20260811.md).
     session = new_session()
+    session.enable_god_mode_for_testing()
     summary = drive_rooms(session, min_rooms=10, max_steps=1500, seed=18)
     assert summary["rooms_entered"] >= 10
     assert "CombatRoom" in summary["room_kinds_seen"]
