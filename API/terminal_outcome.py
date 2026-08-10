@@ -4,7 +4,7 @@ from collections.abc import Container
 from typing import Any
 
 VALID_TERMINAL_OUTCOMES = frozenset({"victory", "defeat"})
-# Preserve the pre-split name for callers that import the original vocabulary directly.
+# Keep the original exported name for compatibility; combat uses that same vocabulary.
 VALID_COMBAT_TERMINAL_OUTCOMES = VALID_TERMINAL_OUTCOMES
 # Whole-run completion uses a distinct victory token while sharing defeat semantics.
 VALID_WHOLE_RUN_TERMINAL_OUTCOMES = VALID_COMBAT_TERMINAL_OUTCOMES | {"run_victory"}
