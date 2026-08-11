@@ -1,4 +1,4 @@
-"""RL-side dispatcher for session-sequenced API DTO v0.6."""
+"""RL-side dispatcher for session-sequenced API DTO v0.7."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ from API.validation import RequestRejected, validate_request
 DEFAULT_MAX_SESSIONS = 4096
 
 _OPERATION_INSTANCE_TYPES: dict[str, frozenset[str]] = {
-    OP_EMULATE_ACTIONS: frozenset({INSTANCE_TYPE_COMBAT}),
+    OP_EMULATE_ACTIONS: frozenset({INSTANCE_TYPE_COMBAT, INSTANCE_TYPE_WHOLE_RUN}),
 }
 
 
@@ -243,7 +243,7 @@ class RLApiServer:
                 **self._kwargs.get(INSTANCE_TYPE_COMBAT, {}),
             )
         elif instance_type == INSTANCE_TYPE_WHOLE_RUN:
-            from API.instance_whole_run import WholeRunInstance
+            from API.instance_whole_run_beam import WholeRunInstance
 
             instance = WholeRunInstance(
                 instance_id,
