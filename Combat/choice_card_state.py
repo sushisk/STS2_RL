@@ -1,27 +1,28 @@
 """Search-state identity for Emulator pending card choices.
 
-This module is intentionally policy-free. It records the canonical semantic fields and
-decision-local option identity so search de-duplication cannot merge mechanically
-different unresolved choices.
+This module is intentionally policy-free. It records the complete raw semantic descriptor
+and decision-local option identity so search de-duplication cannot merge mechanically
+different unresolved choices, including mechanics introduced by a future Emulator.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-CHOICE_SEMANTIC_KEY_NAMES = (
-    "destinationZone",
-    "effect",
-    "modifier",
-    "operation",
-    "orderMatters",
-    "replacementAllowed",
-    "sourceZone",
-    "version",
-)
-
 
 def _state_key_value(value: Any) -> Any:
+    """Freeze plain Emulator data into a deterministic, hashable identity value."""
+    if isinstance(value, dict):
+        return tuple(
+            sorted(
+                ((str(key), _state_key_value(item)) for key, item in value.items()),
+                key=lambda pair: pair[0],
+            )
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_state_key_value(item) for item in value)
+    if isinstance(value, set):
+        return tuple(sorted((_state_key_value(item) for item in value), key=repr))
     if value is None or isinstance(value, (str, int, bool, float)):
         return value
     return repr(value)
@@ -30,23 +31,19 @@ def _state_key_value(value: Any) -> Any:
 def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
     """Return a conservative hashable key for one unresolved pending choice.
 
-    Unsupported future semantic versions/operations are intentionally retained as raw
-    approved scalar fields here. Public masking may map them to ``unknown`` for Training,
-    but internal search must not collapse two mechanics merely because this RL build does
-    not understand either one yet.
+    The complete raw semantic descriptor is retained internally. Public masking may map
+    unsupported future semantics to ``unknown`` for Training, but search identity must not
+    collapse two mechanics merely because this RL build does not understand their fields.
     """
     if not raw_pending_choice or not isinstance(raw_pending_choice, dict):
         return None
 
     raw_semantics = raw_pending_choice.get("choiceSemantics")
     if isinstance(raw_semantics, dict):
-        semantic_tuple = tuple(
-            (key, _state_key_value(raw_semantics.get(key)))
-            for key in CHOICE_SEMANTIC_KEY_NAMES
-        )
+        semantic_identity = _state_key_value(raw_semantics)
         order_matters = raw_semantics.get("orderMatters")
     else:
-        semantic_tuple = (("version", None), ("operation", None))
+        semantic_identity = (("version", None), ("operation", None))
         order_matters = None
 
     raw_selected_ids = raw_pending_choice.get("selectedOptionIds")
@@ -78,7 +75,7 @@ def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
         raw_pending_choice.get("minSelect"),
         raw_pending_choice.get("maxSelect"),
         raw_pending_choice.get("selectedCount"),
-        semantic_tuple,
+        semantic_identity,
         _state_key_value(raw_pending_choice.get("sourceEffectId")),
         selected_option_ids,
         options,
