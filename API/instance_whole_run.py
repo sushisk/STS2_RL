@@ -215,7 +215,6 @@ class WholeRunInstance:
     ) -> None:
         self.instance_id = instance_id
         self._session = WholeRunSession()
-        self._session.enable_god_mode_for_testing()
         self._session.start_run(
             instance_config.get("seed", 1), instance_config.get("character_id", "IRONCLAD"), instance_config.get("ascension", 0)
         )
