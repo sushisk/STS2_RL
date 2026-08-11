@@ -140,8 +140,11 @@ class RewardAutoProgressTests(unittest.TestCase):
                 },
                 {
                     "boundary": "reward_select",
+                    # Match the real Emulator shape for an empty-slot PotionReward:
+                    # TAKE is transport, while SKIP remains a visible policy choice.
                     "legal_actions": [
-                        {"action_id": 7, "action_type": "choice_reward_potion_take", "is_available": True}
+                        {"action_id": 7, "action_type": "choice_reward_potion_take", "is_available": True},
+                        {"action_id": 8, "action_type": "choice_reward_skip", "is_available": True},
                     ],
                 },
                 {"boundary": "rest_choice", "legal_actions": []},
@@ -178,7 +181,8 @@ class RewardAutoProgressTests(unittest.TestCase):
                 {
                     "boundary": "reward_select",
                     "legal_actions": [
-                        {"action_id": 7, "action_type": "choice_reward_potion_take", "is_available": True}
+                        {"action_id": 7, "action_type": "choice_reward_potion_take", "is_available": True},
+                        {"action_id": 8, "action_type": "choice_reward_skip", "is_available": True},
                     ],
                 },
                 {"boundary": "rest_choice", "legal_actions": []},
