@@ -131,13 +131,31 @@ the completed `start_instance` response as the positive integer
 
 The standard Combat configuration uses 64, but callers must not assume that value: the
 server may be configured with a smaller or larger capacity. Training caches the published
-limit for the active instance and rejects an `emulate_actions` request that exceeds it,
-so Beam can chunk a wide frontier deterministically before sending it. This capability is
-the configured maximum batch size, not a claim about the momentary number of free Branch
-slots; RL still performs the authoritative active-capacity admission check.
+limit for the active instance and rejects an `emulate_actions` request that exceeds it.
 
-The Beam integration target is therefore "one depth = one or more bounded batch
-requests", not an unconditional one-request-per-depth guarantee.
+For **Whole Run Combat Beam**, the same published number also represents the configured
+total active Branch capacity enforced by RL. It is therefore both:
+
+- the hard item-count ceiling for one `emulate_actions` request; and
+- the hard ceiling on live non-terminal Branches owned by the instance.
+
+It is **not** the number of currently free slots. Whole Run Training must account for the
+Branches it still keeps live and guarantee, before submitting a batch:
+
+```text
+current_live_non_root_branches + submitted_children <= max_emulate_actions_items
+```
+
+Live parent Branches and stable siblings retained while a continuation is unresolved both
+consume this capacity. Releasing a pruned Branch returns its slot. Merely chunking a wide
+frontier does not make an otherwise over-capacity depth safe, because children created by
+earlier chunks remain live while later chunks are submitted. Training must therefore
+prune/release live parents or waiting siblings, or reduce the submitted frontier, before
+sending the next request. RL remains the authoritative admission check.
+
+For ordinary Combat batching, the field continues to be the instance-specific request
+item ceiling. The additional live-set accounting rule above is required by the Whole Run
+branch lifecycle introduced by the paired Whole Run Beam integration.
 
 ## Admission and execution
 
@@ -250,5 +268,5 @@ The following are outside this contract change:
 - Beam frontier generation/scoring/pruning changes themselves.
 
 Beam integration is a follow-up change that should replace frontier-by-frontier single
-calls with bounded `emulate_actions([...])` chunks, targeting one Beam depth per one or
-more batch requests.
+calls with bounded `emulate_actions([...])` requests while respecting both the per-request
+item ceiling and, for Whole Run, the shared active Branch capacity.
