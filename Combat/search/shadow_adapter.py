@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from combat_state_snapshot import CombatStateSnapshot, canonical_json, restore_input_eligibility
-from live_combat_session import LiveCombatSession
+from live_combat_session import ActionExecutionError, LiveCombatSession
 from search.branch_worker_pool import BranchWorkerPool, LeaseRegistry
 from search.decision_context import SemanticAction
 from search.main_loop import SearchEvaluationFailure, SearchSuccess, build_main_decision_context, initialize_main_loop_state
@@ -386,6 +386,7 @@ def run_new_path(
     effective_config = config or SearchCoordinatorConfig(width=4, hypothesis_count=2, max_retries=0)
     coordinator_metrics = SearchCoordinatorMetrics()
     preserve_snapshot = _capture_current_process_snapshot(repo_root)
+    outcome_fault_detail: "str | None" = None
     try:
         session, state, loop_state, context = _build_shadow_context(snapshot, repo_root=repo_root)
         strategy = build_search_strategy(
@@ -406,13 +407,21 @@ def run_new_path(
         if isinstance(result, SearchSuccess) and result.planned_sequence:
             first = result.planned_sequence[0]
             resolved_action = first.semantic_action.resolve(state._cached_legal_actions or session.get_legal_actions())  # noqa: SLF001
-            outcome_state = session.step(
-                state,
-                resolved_action,
-                target_index=first.target_index,
-                target_enemy_index=first.target_enemy_index,
-            )
-            outcome = _outcome_metrics(state.engine_state, outcome_state)
+            # This step is purely to measure outcome telemetry for the comparison report - the
+            # search itself already succeeded above. A transient combat-session fault here (this
+            # module isn't part of the production path, see module docstring) shouldn't crash the
+            # whole comparison; degrade to no outcome instead, same as SearchEvaluationFailure below.
+            try:
+                outcome_state = session.step(
+                    state,
+                    resolved_action,
+                    target_index=first.target_index,
+                    target_enemy_index=first.target_enemy_index,
+                )
+            except ActionExecutionError as exc:
+                outcome_fault_detail = str(exc)
+            else:
+                outcome = _outcome_metrics(state.engine_state, outcome_state)
     finally:
         _restore_current_process_snapshot(preserve_snapshot, repo_root=repo_root)
 
@@ -476,7 +485,10 @@ def run_new_path(
         score=coordinator_metrics.best_aggregate_score,
         outcome=outcome,
         metrics=execution_metrics,
-        diagnostics={"expected_signature_present": first.expected_signature is not None},
+        diagnostics={
+            "expected_signature_present": first.expected_signature is not None,
+            "outcome_fault_detail": outcome_fault_detail,
+        },
     )
 
 

@@ -408,6 +408,20 @@ def _fault_result(
     )
 
 
+def _is_process_tainting_fault(diagnostics: dict[str, Any]) -> bool:
+    """Return true for faults that indicate this worker's CLR process may be tainted."""
+    if not diagnostics:
+        return False
+    text = "\n".join(
+        str(diagnostics.get(key, ""))
+        for key in ("exception_type", "message", "traceback")
+    )
+    return (
+        "NullReferenceException" in text
+        and ("EndCombatInternal" in text or "CheckWinCondition" in text)
+    )
+
+
 def _build_success_result(
     session,
     work_item: WorkItem,
@@ -748,6 +762,12 @@ class BranchWorkerPool:
                     fault_kind="task_timeout",
                 )
             if received_id == request_id:
+                if (
+                    result.status == BRANCH_STATUS_FAULT
+                    and result.worker_id is not None
+                    and _is_process_tainting_fault(result.diagnostics)
+                ):
+                    self.respawn_worker(result.worker_id, lease_registry=lease_registry)
                 return result
             # Stray/late result from an old (respawned-away) generation's in-flight
             # request - discard rather than raise, matching the instruction's
@@ -894,6 +914,12 @@ def dispatch_work_items(
             work_item = pending_real[request_id]
             results_by_work_id[work_item.work_id] = result
             remaining_request_ids.discard(request_id)
+            if (
+                result.status == BRANCH_STATUS_FAULT
+                and result.worker_id is not None
+                and _is_process_tainting_fault(result.diagnostics)
+            ):
+                worker_pool.respawn_worker(result.worker_id, lease_registry=lease_registry)
     else:
         results_by_work_id = fake_results_by_work_id
 
