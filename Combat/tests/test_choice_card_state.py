@@ -105,6 +105,60 @@ def test_battle_state_key_keeps_unknown_future_operations_distinct():
     assert battle_state_key(left) != battle_state_key(right)
 
 
+def test_battle_state_key_keeps_unknown_future_fields_distinct():
+    left = _state(operation="discard", selected_ids=[], order_matters=False)
+    right = copy.deepcopy(left)
+    left.engine_state["pendingChoice"]["choiceSemantics"] = {
+        "version": 2,
+        "operation": "future_move",
+        "orderMatters": False,
+        "futureFactor": "left",
+    }
+    right.engine_state["pendingChoice"]["choiceSemantics"] = {
+        "version": 2,
+        "operation": "future_move",
+        "orderMatters": False,
+        "futureFactor": "right",
+    }
+    assert battle_state_key(left) != battle_state_key(right)
+
+
+def test_battle_state_key_canonicalizes_future_semantic_mapping_order():
+    left = _state(operation="discard", selected_ids=[], order_matters=False)
+    right = copy.deepcopy(left)
+    left.engine_state["pendingChoice"]["choiceSemantics"] = {
+        "version": 2,
+        "operation": "future_move",
+        "futureFactor": {"a": 1, "b": True},
+        "orderMatters": False,
+    }
+    right.engine_state["pendingChoice"]["choiceSemantics"] = {
+        "orderMatters": False,
+        "futureFactor": {"b": True, "a": 1},
+        "operation": "future_move",
+        "version": 2,
+    }
+    assert battle_state_key(left) == battle_state_key(right)
+
+
+def test_battle_state_key_keeps_future_scalar_types_distinct():
+    left = _state(operation="discard", selected_ids=[], order_matters=False)
+    right = copy.deepcopy(left)
+    left.engine_state["pendingChoice"]["choiceSemantics"] = {
+        "version": 2,
+        "operation": "future_move",
+        "futureFactor": True,
+        "orderMatters": False,
+    }
+    right.engine_state["pendingChoice"]["choiceSemantics"] = {
+        "version": 2,
+        "operation": "future_move",
+        "futureFactor": 1,
+        "orderMatters": False,
+    }
+    assert battle_state_key(left) != battle_state_key(right)
+
+
 def _run_all() -> int:
     tests = [obj for name, obj in list(globals().items()) if name.startswith("test_") and callable(obj)]
     passed, failed = [], []
