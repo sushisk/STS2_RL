@@ -10,6 +10,7 @@ if str(RUN_DIR) not in sys.path:
 
 from legal_action_identity import legal_action_semantic_key
 from reward_auto_progress import drain_trivial_reward_frontier
+from worker_pool import ChoiceWorkItem, _bootstrap_reach
 
 
 class FakeSession:
@@ -17,6 +18,15 @@ class FakeSession:
         self.frames = list(frames)
         self.index = 0
         self.stepped = []
+        self.loaded = []
+        self.entered_rooms = []
+
+    def load_state(self, snapshot):
+        self.loaded.append(snapshot)
+
+    def choose_room(self, room_id):
+        self.entered_rooms.append(room_id)
+        return {"room_id": room_id}
 
     def get_observation(self):
         return {"boundary": self.frames[self.index]["boundary"], "state": self.frames[self.index].get("state", {})}
@@ -118,6 +128,80 @@ class RewardAutoProgressTests(unittest.TestCase):
             },
         }
         self.assertNotEqual(legal_action_semantic_key(slot0), legal_action_semantic_key(slot1))
+
+    def test_discover_prefix_records_hidden_take_after_visible_action(self):
+        session = FakeSession(
+            [
+                {
+                    "boundary": "event_choice",
+                    "legal_actions": [
+                        {"action_id": 5, "action_type": "choice_event_option", "label": "continue", "is_available": True}
+                    ],
+                },
+                {
+                    "boundary": "reward_select",
+                    "legal_actions": [
+                        {"action_id": 7, "action_type": "choice_reward_potion_take", "is_available": True}
+                    ],
+                },
+                {"boundary": "rest_choice", "legal_actions": []},
+            ]
+        )
+        work = ChoiceWorkItem(
+            work_id="discover",
+            context_id="ctx",
+            choice_type="rest",
+            map_snapshot="snapshot",
+            room_id=9,
+            action_prefix=[],
+            relic_injection=None,
+            target_boundary="rest_choice",
+            work_kind="sub_branch",
+            discover_prefix=True,
+        )
+
+        discovered = _bootstrap_reach(session, work)
+
+        self.assertEqual([5, 7], discovered)
+        self.assertEqual([5, 7], session.stepped)
+        self.assertEqual("rest_choice", session.get_observation()["boundary"])
+
+    def test_literal_replay_consumes_saved_hidden_take_once_without_auto_drain(self):
+        session = FakeSession(
+            [
+                {
+                    "boundary": "event_choice",
+                    "legal_actions": [
+                        {"action_id": 5, "action_type": "choice_event_option", "label": "continue", "is_available": True}
+                    ],
+                },
+                {
+                    "boundary": "reward_select",
+                    "legal_actions": [
+                        {"action_id": 7, "action_type": "choice_reward_potion_take", "is_available": True}
+                    ],
+                },
+                {"boundary": "rest_choice", "legal_actions": []},
+            ]
+        )
+        work = ChoiceWorkItem(
+            work_id="replay",
+            context_id="ctx",
+            choice_type="rest",
+            map_snapshot="snapshot",
+            room_id=9,
+            action_prefix=[5, 7],
+            relic_injection=None,
+            target_boundary="rest_choice",
+            work_kind="sub_branch",
+            discover_prefix=False,
+        )
+
+        discovered = _bootstrap_reach(session, work)
+
+        self.assertIsNone(discovered)
+        self.assertEqual([5, 7], session.stepped)
+        self.assertEqual("rest_choice", session.get_observation()["boundary"])
 
 
 if __name__ == "__main__":
