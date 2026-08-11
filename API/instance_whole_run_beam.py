@@ -31,6 +31,7 @@ from API.instance_whole_run import (
     require_terminal_outcome,
     wr_derive_context_id,
 )
+from API.masking import mask_public_fragment
 from API.validation import RequestRejected
 
 _COMBAT_BOUNDARIES = frozenset({STABLE, PENDING_CHOICE})
@@ -398,6 +399,11 @@ class WholeRunInstance(_BaseWholeRunInstance):
             book.status = STATUS_FAULTED
             raise RuntimeError("successful Whole Run branch result is missing a step")
 
+        transition = step.step_result.get("transition")
+        if transition is not None and not isinstance(transition, dict):
+            book.status = STATUS_FAULTED
+            raise RuntimeError("Whole Run branch transition must be a dictionary when present")
+
         new_observation = step.settled_observation
         book.history.observe_room_context(step.settled_room_context)
         if new_observation["boundary"] == RUN_TERMINAL:
@@ -412,6 +418,12 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 raise
             book.terminal = True
             self._decision_points.issue(spec.branch_id)
+            terminal_payload: dict[str, Any] = {
+                "run_terminal": True,
+                "outcome": book.outcome,
+            }
+            if transition is not None:
+                terminal_payload["transition"] = transition
             return {
                 "status": STATUS_COMPLETED,
                 "branch_id": spec.branch_id,
@@ -419,9 +431,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 "rng_id": spec.rng_id,
                 "decision_point_id": self._decision_points.current(spec.branch_id),
                 "branch_log": book.branch_log,
-                "masked_emulator_dto": build_masked_emulator_dto(
-                    {"run_terminal": True, "outcome": book.outcome}
-                ),
+                "masked_emulator_dto": build_masked_emulator_dto(terminal_payload),
             }
 
         try:
@@ -431,14 +441,24 @@ class WholeRunInstance(_BaseWholeRunInstance):
             raise
         book.view = new_view
         self._decision_points.issue(spec.branch_id)
+        decision_fields = self._decision_response_fields(
+            spec.branch_id,
+            new_view,
+            branch_log=book.branch_log,
+            history=book.history,
+        )
+        if transition is not None:
+            # Combat completion is a transient StepResult signal, not the settled Whole
+            # Run boundary. Publish it on this response only; storing it in `book.view`
+            # would incorrectly make later non-Combat decisions look like combat end.
+            # The fragment helper applies the same recursive hidden-data mask as the
+            # primary DTO builder before the transition is attached.
+            decision_fields["masked_emulator_dto"]["transition"] = mask_public_fragment(
+                transition
+            )
         return {
             "status": STATUS_COMPLETED,
-            **self._decision_response_fields(
-                spec.branch_id,
-                new_view,
-                branch_log=book.branch_log,
-                history=book.history,
-            ),
+            **decision_fields,
             "parent_branch_id": spec.parent_branch_id,
             "rng_id": spec.rng_id,
         }
