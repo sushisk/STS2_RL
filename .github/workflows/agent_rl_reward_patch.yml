@@ -1,0 +1,34 @@
+name: agent RL reward transport patch
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/reward-decision-architecture
+          fetch-depth: 0
+      - name: Apply patch
+        run: python .github/agent_rl_reward_patch.py
+      - name: Compile Python
+        run: python -m compileall -q API Run
+      - name: Reward transport unit tests
+        run: python Run/tests/test_reward_auto_progress.py
+      - name: Commit implementation
+        shell: bash
+        run: |
+          rm .github/agent_rl_reward_patch.py .github/workflows/agent_rl_reward_patch.yml
+          git config user.name 'OpenAI Agent'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add API/instance_whole_run.py Run/whole_run_session.py Run/worker_pool.py Run/choice_branch_runner.py Run/reward_auto_progress.py Run/legal_action_identity.py Run/tests/test_reward_auto_progress.py .github/agent_rl_reward_patch.py .github/workflows/agent_rl_reward_patch.yml
+          git commit -m 'transport trivial potion rewards in whole run'
+          git push origin HEAD:agent/reward-decision-architecture
