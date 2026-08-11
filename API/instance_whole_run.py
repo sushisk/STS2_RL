@@ -53,6 +53,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 import run_emulator_bridge as bridge
+from reward_auto_progress import drain_trivial_reward_frontier
 from whole_run_session import EVENT_CHOICE, MAP_SELECT, RUN_TERMINAL, WholeRunSession
 from worker_pool import (
     BranchResult,
@@ -139,27 +140,28 @@ class _View:
 
 
 def _build_child_view(parent_view: _View, chosen_action_id: int, branch_result: BranchResult) -> _View:
-    """Builds the `_View` a Branch reaches after `branch_result` resolves one Action from
-    `parent_view` - the single place Map-transition vs normal-Action-transition shape
-    differences (`legal_actions` source, `room_id`/`action_prefix` reset-vs-append) are
-    decided, done exactly once each (see `worker_pool.py`'s `_WorkerRuntime.execute`, map
-    branch, for why Map's `step_result` shape differs from every other choice type's).
-    """
+    """Build the Branch view from the SETTLED frontier, not the primary raw StepResult."""
     step = branch_result.step
-    new_boundary = step.step_result["observation"]["boundary"]
+    if step is None:
+        raise RuntimeError("successful branch result is missing ChoiceStepResult")
+
+    new_observation = step.settled_observation
+    new_boundary = new_observation["boundary"]
+    new_legal = step.settled_legal_actions
     if parent_view.choice_type == "map":
-        new_legal = step.step_result["room_enter_result"]["legal_actions"]
         new_room_id = chosen_action_id
-        new_action_prefix: tuple = ()
+        # choose_room is outside a room's action prefix; hidden actions immediately
+        # after entry are the FIRST actions of the new room prefix.
+        new_action_prefix = tuple(step.auto_action_ids)
     else:
-        new_legal = step.step_result["legal_actions"]
         new_room_id = parent_view.room_id
-        new_action_prefix = parent_view.action_prefix + (chosen_action_id,)
+        new_action_prefix = parent_view.action_prefix + (chosen_action_id,) + tuple(step.auto_action_ids)
+
     return _View(
         legal_actions_raw=new_legal,
         boundary=new_boundary,
-        observation=step.step_result["observation"],
-        room_context=step.step_result["room_context"],
+        observation=new_observation,
+        room_context=step.settled_room_context,
         map_snapshot=parent_view.map_snapshot,
         room_id=new_room_id,
         action_prefix=new_action_prefix,
@@ -238,6 +240,10 @@ class WholeRunInstance:
         self._bookkeeping: dict[str, _BranchBookkeeping] = {}
         self._closed = False
 
+        # StartRun itself normally reaches Neow/Event, but keep the same NEW-frontier
+        # rule here so any future start-of-run trivial PotionReward cannot leak to Training.
+        initial_auto = drain_trivial_reward_frontier(self._session)
+        self._action_prefix.extend(initial_auto.auto_action_ids)
         self._maybe_capture_map_snapshot()
         self._decision_points.issue(ROOT_BRANCH_ID)
 
@@ -368,10 +374,15 @@ class WholeRunInstance:
             if view.boundary == MAP_SELECT:
                 self._session.choose_room(chosen["action_id"])
                 self._room_id = chosen["action_id"]
-                self._action_prefix = []
+                auto = drain_trivial_reward_frontier(self._session)
+                # Map choice is represented by room_id, not action_prefix. Hidden actions
+                # after entry are the first raw actions inside the new room.
+                self._action_prefix = list(auto.auto_action_ids)
             else:
                 self._session.step(chosen["action_id"])
                 self._action_prefix.append(chosen["action_id"])
+                auto = drain_trivial_reward_frontier(self._session)
+                self._action_prefix.extend(auto.auto_action_ids)
         except Exception as exc:  # noqa: BLE001
             return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
 
@@ -506,9 +517,9 @@ class WholeRunInstance:
             }
 
         step = result.step
-        new_observation = step.step_result["observation"]
+        new_observation = step.settled_observation
         new_boundary = new_observation["boundary"]
-        new_room_context = step.step_result["room_context"]
+        new_room_context = step.settled_room_context
         book.history.observe_room_context(new_room_context)
         if new_boundary == RUN_TERMINAL:
             # observation_to_dict() (run_emulator_bridge.py) already carries the

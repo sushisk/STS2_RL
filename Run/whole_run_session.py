@@ -12,7 +12,7 @@ Emulator commit `dd8c800`, "Separate combat completion result from current Bound
 StepResult"): `run_terminal` (renamed from the old `terminal`; means the RUN itself is
 over - real defeat, or any concluded combat in legacy no-map mode, never combat's own
 end by itself), `pending_choice`, `event_choice`, `rest_choice`, `shop_choice`,
-`reward_select` (new - a pending card reward), `map_select` (via
+`reward_select` (a pending card or potion reward), `map_select` (via
 `get_map_rooms`/`choose_room`, not `step`), `stable`.
 
 A combat concluding is reported via `StepResult.Transition` (see
