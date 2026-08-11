@@ -13,19 +13,30 @@ from typing import Any
 def _state_key_value(value: Any) -> Any:
     """Freeze plain Emulator data into a deterministic, hashable identity value."""
     if isinstance(value, dict):
-        return tuple(
-            sorted(
-                ((str(key), _state_key_value(item)) for key, item in value.items()),
-                key=lambda pair: pair[0],
-            )
+        return (
+            "dict",
+            tuple(
+                sorted(
+                    ((str(key), _state_key_value(item)) for key, item in value.items()),
+                    key=lambda pair: pair[0],
+                )
+            ),
         )
     if isinstance(value, (list, tuple)):
-        return tuple(_state_key_value(item) for item in value)
+        return ("sequence", tuple(_state_key_value(item) for item in value))
     if isinstance(value, set):
-        return tuple(sorted((_state_key_value(item) for item in value), key=repr))
-    if value is None or isinstance(value, (str, int, bool, float)):
-        return value
-    return repr(value)
+        return ("set", tuple(sorted((_state_key_value(item) for item in value), key=repr)))
+    if value is None:
+        return ("none",)
+    if isinstance(value, bool):
+        return ("bool", value)
+    if isinstance(value, int):
+        return ("int", value)
+    if isinstance(value, float):
+        return ("float", value)
+    if isinstance(value, str):
+        return ("str", value)
+    return (type(value).__name__, repr(value))
 
 
 def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
@@ -43,7 +54,7 @@ def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
         semantic_identity = _state_key_value(raw_semantics)
         order_matters = raw_semantics.get("orderMatters")
     else:
-        semantic_identity = (("version", None), ("operation", None))
+        semantic_identity = _state_key_value({"version": None, "operation": None})
         order_matters = None
 
     raw_selected_ids = raw_pending_choice.get("selectedOptionIds")
