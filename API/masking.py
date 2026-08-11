@@ -154,6 +154,17 @@ def _scrub(node: Any) -> Any:
     return node
 
 
+def mask_public_fragment(value: Any) -> Any:
+    """Return a masked deep copy of a public DTO fragment.
+
+    Use this for response metadata such as ``transition`` that is attached outside the
+    primary Emulator state passed to ``build_masked_emulator_dto``. Keeping the copy and
+    recursive scrub in one helper prevents callers from accidentally appending an
+    unmasked nested fragment after the main DTO has already been built.
+    """
+    return _scrub(copy.deepcopy(value))
+
+
 def build_masked_emulator_dto(raw_state: dict, *, extra: "dict | None" = None) -> dict:
     """Return a masked copy of `raw_state` (a Combat `engine_state`/Whole Run
     `Observation.State`-shaped dict, or a full StepResult-shaped dict containing one)
@@ -165,9 +176,9 @@ def build_masked_emulator_dto(raw_state: dict, *, extra: "dict | None" = None) -
     is normalized to an empty list so stale cached actions can never cross the wire.
     Combat ``terminal`` and Whole Run ``run_terminal`` are mutually exclusive markers.
     """
-    masked = _scrub(copy.deepcopy(raw_state))
+    masked = mask_public_fragment(raw_state)
     if extra:
-        masked.update(_scrub(copy.deepcopy(extra)))
+        masked.update(mask_public_fragment(extra))
     combat_terminal = masked.get("terminal") is True
     run_terminal = masked.get("run_terminal") is True
     if combat_terminal and run_terminal:
@@ -192,7 +203,7 @@ def mask_legal_actions(legal_actions: list[dict]) -> list[dict]:
     """
     result = []
     for action in legal_actions:
-        scrubbed = _scrub(copy.deepcopy(action))
+        scrubbed = mask_public_fragment(action)
         if "action_id" in scrubbed:
             scrubbed["action_id"] = str(scrubbed["action_id"])
         result.append(scrubbed)
