@@ -22,6 +22,7 @@ from API.dto import (  # noqa: E402
 )
 from API.instance_whole_run_beam import WholeRunInstance, _is_combat_view  # noqa: E402
 from API.server import RLApiServer  # noqa: E402
+from API.validation import RequestRejected  # noqa: E402
 
 
 class _WholeRunStub:
@@ -218,6 +219,29 @@ def test_whole_run_single_combat_timeout_keeps_branch_fault_semantics() -> None:
     assert response["branch_id"] == "branch-1"
     assert response["fault_kind"] == FAULT_TASK_TIMEOUT
     assert response["error"] == "worker batch timed out"
+
+
+def test_unavailable_whole_run_combat_action_is_rejected_before_dispatch() -> None:
+    pool = _Pool()
+    instance = _combat_instance(pool)
+    view = instance._view_for("root")  # noqa: SLF001
+    view.legal_actions_raw[0]["is_available"] = False
+
+    try:
+        instance.emulate_action(
+            parent_branch_id="root",
+            branch_id="branch-1",
+            rng_id=1,
+            decision_point_id="decision-1",
+            action_id="1",
+            simulation_options=None,
+        )
+    except RequestRejected as exc:
+        assert "not currently available" in exc.error
+    else:
+        raise AssertionError("unavailable combat action must be rejected")
+
+    assert pool.calls == []
 
 
 def test_whole_run_combat_action_types_are_branchable() -> None:
