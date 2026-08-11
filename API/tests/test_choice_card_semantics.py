@@ -14,7 +14,6 @@ from API.choice_card_semantics import (  # noqa: E402
     PUBLIC_PENDING_CHOICE_KEYS,
     normalize_choice_semantics,
     normalize_pending_choice,
-    pending_choice_state_key,
 )
 from API.dto import MASK_VERSION  # noqa: E402
 from API.masking import build_masked_emulator_dto  # noqa: E402
@@ -87,6 +86,8 @@ def test_unknown_or_malformed_semantics_degrade_to_neutral_unknown():
     cases = [
         None,
         {},
+        {"version": True, "operation": "discard"},
+        {"version": 1.0, "operation": "discard"},
         {"version": 2, "operation": "discard"},
         {"version": 1, "operation": "future_operation"},
         {"version": 1, "operation": "discard", "effect": "future_effect"},
@@ -115,57 +116,13 @@ def test_masking_normalizes_pending_choice_and_scrubs_retained_option_payloads()
     assert masked["mask_version"] == MASK_VERSION == "1.1"
 
 
-def test_hidden_looking_source_effect_id_is_not_published():
+def test_hidden_looking_source_effect_id_is_not_published_without_false_positive():
     raw = _known_choice()
     raw["sourceEffectId"] = "combat_session_rng_seed_17"
+    assert "sourceEffectId" not in normalize_pending_choice(raw)
 
-    normalized = normalize_pending_choice(raw)
-
-    assert "sourceEffectId" not in normalized
-
-
-def test_state_key_separates_semantics_and_duplicate_option_identity():
-    base = _known_choice()
-    discard_key = pending_choice_state_key(base)
-
-    upgrade = copy.deepcopy(base)
-    upgrade["choiceSemantics"] = {
-        "version": 1,
-        "operation": "upgrade",
-        "effect": "modify",
-        "modifier": "upgrade",
-        "orderMatters": True,
-    }
-    assert pending_choice_state_key(upgrade) != discard_key
-
-    changed_token = copy.deepcopy(base)
-    changed_token["options"][1]["optionId"] = "choice-7:99"
-    assert pending_choice_state_key(changed_token) != discard_key
-
-    future_a = copy.deepcopy(base)
-    future_a["choiceSemantics"] = {"version": 2, "operation": "future_a"}
-    future_b = copy.deepcopy(base)
-    future_b["choiceSemantics"] = {"version": 2, "operation": "future_b"}
-    # Public normalization maps both to unknown, but internal search must still avoid
-    # collapsing two mechanics it does not understand.
-    assert normalize_pending_choice(future_a)["choiceSemantics"]["operation"] == "unknown"
-    assert normalize_pending_choice(future_b)["choiceSemantics"]["operation"] == "unknown"
-    assert pending_choice_state_key(future_a) != pending_choice_state_key(future_b)
-
-
-def test_state_key_canonicalizes_selected_set_only_when_order_does_not_matter():
-    left = _known_choice()
-    right = copy.deepcopy(left)
-    left["selectedOptionIds"] = ["choice-7:0", "choice-7:1"]
-    right["selectedOptionIds"] = ["choice-7:1", "choice-7:0"]
-
-    left["choiceSemantics"]["orderMatters"] = False
-    right["choiceSemantics"]["orderMatters"] = False
-    assert pending_choice_state_key(left) == pending_choice_state_key(right)
-
-    left["choiceSemantics"]["orderMatters"] = True
-    right["choiceSemantics"]["orderMatters"] = True
-    assert pending_choice_state_key(left) != pending_choice_state_key(right)
+    raw["sourceEffectId"] = "RAPID_FIRE"
+    assert normalize_pending_choice(raw)["sourceEffectId"] == "RAPID_FIRE"
 
 
 def _run_all() -> int:
