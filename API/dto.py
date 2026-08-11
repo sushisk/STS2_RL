@@ -12,8 +12,12 @@ from __future__ import annotations
 SCHEMA_VERSION = "0.7"
 SUPPORTED_SCHEMA_VERSIONS = frozenset({SCHEMA_VERSION})
 
+# This identifies the currently-integrated Emulator build. Choice-card semantics are
+# additive and safely normalize to unknown until the corresponding Emulator producer is
+# merged, so do not claim a future/nonexistent Emulator build here.
 DTO_VERSION = "emulator-fca2f06"
-MASK_VERSION = "1.0"
+# 1.1 adds explicit pendingChoice semantic/identity normalization and allowlisting.
+MASK_VERSION = "1.1"
 
 OP_START_INSTANCE = "start_instance"
 OP_GET_DECISION = "get_decision"
