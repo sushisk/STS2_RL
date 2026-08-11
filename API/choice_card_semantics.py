@@ -77,20 +77,9 @@ PUBLIC_CHOICE_SEMANTICS_KEYS = frozenset(
 )
 
 _OPAQUE_TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
-_SOURCE_EFFECT_HIDDEN_MARKERS = (
-    "rng",
-    "seed",
-    "snapshot",
-    "savestate",
-    "save_state",
-    "session",
-    "worker",
-    "pid",
-    "lease",
-    "cursor",
-    "generation",
-    "context_id",
-    "contextid",
+_SOURCE_EFFECT_HIDDEN_TOKEN_RE = re.compile(
+    r"(?:^|[._:/-])(?:rng|seed|snapshot|savestate|save_state|session|worker|pid|lease|cursor|generation|context_id|contextid)(?:$|[._:/-])",
+    re.IGNORECASE,
 )
 
 
@@ -115,8 +104,7 @@ def _valid_token(value: Any) -> bool:
 def _safe_source_effect_id(value: Any) -> "str | None":
     if not _valid_token(value):
         return None
-    lowered = value.lower()
-    if any(marker in lowered for marker in _SOURCE_EFFECT_HIDDEN_MARKERS):
+    if _SOURCE_EFFECT_HIDDEN_TOKEN_RE.search(value):
         return None
     return value
 
@@ -136,7 +124,12 @@ def normalize_choice_semantics(raw_semantics: Any) -> dict:
 
     version = raw_semantics.get("version")
     operation = raw_semantics.get("operation")
-    if version != CHOICE_SEMANTICS_VERSION or not isinstance(operation, str) or operation not in CHOICE_OPERATIONS:
+    if (
+        not _is_int(version)
+        or version != CHOICE_SEMANTICS_VERSION
+        or not isinstance(operation, str)
+        or operation not in CHOICE_OPERATIONS
+    ):
         return _unknown_semantics()
     if operation == "unknown":
         return _unknown_semantics()
