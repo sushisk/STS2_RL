@@ -33,6 +33,7 @@ from emulator_bridge import (
     to_plain,
 )
 from battle_result import BattleResult
+from choice_card_state import pending_choice_state_key
 from slot_name_inference import ensure_inferred_slot_names
 
 
@@ -190,27 +191,7 @@ def battle_state_key(battle_state: BattleState) -> tuple:
         )
 
     def pending_choice_tuple(pending_choice):
-        if not pending_choice:
-            return None
-        options = tuple(
-            (
-                option.get("id"),
-                option.get("upgraded"),
-                option.get("upgradeLevel"),
-                option.get("tinkerTimeType"),
-                option.get("tinkerTimeRider"),
-            )
-            for option in (pending_choice.get("options") or [])
-        )
-        return (
-            pending_choice.get("choiceType"),
-            pending_choice.get("scope"),
-            pending_choice.get("scenarioRestorable"),
-            pending_choice.get("minSelect"),
-            pending_choice.get("maxSelect"),
-            pending_choice.get("selectedCount"),
-            options,
-        )
+        return pending_choice_state_key(pending_choice)
 
     state = battle_state.engine_state
     return (
