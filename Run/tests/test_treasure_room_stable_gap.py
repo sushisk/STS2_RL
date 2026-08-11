@@ -29,17 +29,18 @@ from __future__ import annotations
 import sys
 import traceback
 from pathlib import Path
+from unittest.mock import patch
 
 _RUN_DIR = Path(__file__).resolve().parents[1]
 if str(_RUN_DIR) not in sys.path:
     sys.path.insert(0, str(_RUN_DIR))
 
-from choice_branch_runner import (
+import choice_branch_runner as _choice_branch_runner  # noqa: E402
+from choice_branch_runner import (  # noqa: E402
     MAP_SELECT,
     RUN_TERMINAL,
     inject_relic,
     new_session,
-    search_for_room_type,
 )
 
 # Seeds picked because a real STS2_Training self-play run independently reached a
@@ -53,10 +54,21 @@ _KNOWN_AFFECTED_SEEDS = (1348178664, 106720923)
 _SILVER_CRUCIBLE_RELIC_ID = "SILVER_CRUCIBLE"
 
 
+def _new_god_mode_test_session():
+    """Test-only session factory for coverage walks that are not testing combat difficulty."""
+    session = new_session()
+    session.enable_god_mode_for_testing()
+    return session
+
+
 def _find_treasure_room(seed: int, *, max_hops: int = 15) -> "tuple[str, int] | tuple[None, None]":
-    # god_mode=True: this file is about TreasureRoom mechanics, not combat difficulty -
-    # navigation must not die to the naive legacy filler policy before ever reaching one.
-    return search_for_room_type("TreasureRoom", seed=seed, max_hops=max_hops, god_mode=True)
+    # God Mode is intentionally confined to this test file. Production
+    # search_for_room_type() always creates normal sessions; patch its session factory
+    # only while this coverage helper walks toward the room under test.
+    with patch.object(_choice_branch_runner, "new_session", _new_god_mode_test_session):
+        return _choice_branch_runner.search_for_room_type(
+            "TreasureRoom", seed=seed, max_hops=max_hops
+        )
 
 
 def _resolve_pending_decision(session, *, max_steps: int = 200) -> str:
