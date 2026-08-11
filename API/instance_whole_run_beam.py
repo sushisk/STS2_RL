@@ -1,9 +1,8 @@
 """Whole Run instance with Combat-scoped branch replay for Training Beam Search.
 
-Active Event branching remains owned by ``API.instance_whole_run`` and keeps its RNG
-hypothesis semantics. Combat branching deterministically replays the latest map snapshot
-and exact room action prefix with no RNG override; ``rng_id`` is lineage metadata only.
-Other Whole Run boundaries remain non-branchable.
+Active Event branches keep the base instance's RNG-hypothesis semantics. Combat branches
+replay the latest map snapshot and room action prefix deterministically; ``rng_id`` is
+lineage metadata only. Other Whole Run boundaries remain non-branchable.
 """
 
 from __future__ import annotations
@@ -101,7 +100,8 @@ class WholeRunInstance(_BaseWholeRunInstance):
 
     def start_instance_response(self) -> dict:
         response = super().start_instance_response()
-        return {**response, "max_emulate_actions_items": self.max_branches}
+        response["max_emulate_actions_items"] = self.max_branches
+        return response
 
     def emulate_action(
         self,
@@ -113,7 +113,6 @@ class WholeRunInstance(_BaseWholeRunInstance):
         action_id: str,
         simulation_options: Optional[dict],
     ) -> dict:
-        # Active Event branching keeps the base implementation's RNG-plan lifecycle.
         if self._parent_boundary(parent_branch_id) == EVENT_CHOICE:
             return super().emulate_action(
                 parent_branch_id=parent_branch_id,
@@ -135,7 +134,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
         if self.active_branch_count() >= self.max_branches:
             raise RequestRejected(f"active Branch count would exceed max_branches={self.max_branches}")
 
-        work_item, book, branch_log = self._register_combat_branch(spec)
+        work_item, book = self._register_combat_branch(spec)
         try:
             result = self._pool.dispatch_choice_work_items([work_item], self._lease_registry)[0]
         except TimeoutError as exc:
@@ -148,14 +147,10 @@ class WholeRunInstance(_BaseWholeRunInstance):
         except Exception:
             book.status = STATUS_FAULTED
             raise
-        return self._finalize_combat_branch(spec, book, branch_log, result)
+        return self._finalize_combat_branch(spec, book, result)
 
     def emulate_actions(self, *, items: list, simulation_options: Optional[dict]) -> dict:
-        """Execute one Combat frontier as one WorkerPool batch.
-
-        Active Event RNG hypotheses continue to use singular ``emulate_action``. The
-        plural operation is Combat-only so one batch never mixes replay semantics.
-        """
+        """Execute one Combat frontier in a single WorkerPool dispatch."""
         self._validate_stop_condition(simulation_options)
         if not isinstance(items, list) or not items:
             raise RequestRejected("emulate_actions.items must be a non-empty list")
@@ -177,7 +172,6 @@ class WholeRunInstance(_BaseWholeRunInstance):
                     "emulate_actions items may only use parents that existed before the batch"
                 )
 
-        # Siblings share an immutable parent view, so resolve each distinct parent once.
         parent_views: dict[str, Any] = {}
         specs: list[_CombatBranchSpec] = []
         for item in items:
@@ -204,24 +198,24 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 f"{self.max_branches} (currently {active_count} active)"
             )
 
-        prepared: list[tuple[_CombatBranchSpec, Any, _BranchBookkeeping, list]] = []
+        prepared: list[tuple[_CombatBranchSpec, Any, _BranchBookkeeping]] = []
         try:
             for spec in specs:
-                work_item, book, branch_log = self._register_combat_branch(spec)
-                prepared.append((spec, work_item, book, branch_log))
+                work_item, book = self._register_combat_branch(spec)
+                prepared.append((spec, work_item, book))
         except Exception:
             self._best_effort_release_prepared(prepared)
             raise
 
         try:
             results = self._pool.dispatch_choice_work_items(
-                [work_item for _, work_item, _, _ in prepared],
+                [work_item for _, work_item, _ in prepared],
                 self._lease_registry,
             )
         except TimeoutError as exc:
             error = str(exc) or "Whole Run branch batch timed out"
             branch_results: dict[str, dict] = {}
-            for spec, _, book, _ in prepared:
+            for spec, _, book in prepared:
                 book.status = STATUS_FAULTED
                 branch_results[spec.branch_id] = _faulted_branch_result(
                     spec,
@@ -239,9 +233,9 @@ class WholeRunInstance(_BaseWholeRunInstance):
 
         branch_results: dict[str, dict] = {}
         try:
-            for (spec, _, book, branch_log), result in zip(prepared, results):
+            for (spec, _, book), result in zip(prepared, results):
                 branch_results[spec.branch_id] = self._finalize_combat_branch(
-                    spec, book, branch_log, result
+                    spec, book, result
                 )
         except Exception:
             self._best_effort_release_prepared(prepared)
@@ -251,9 +245,9 @@ class WholeRunInstance(_BaseWholeRunInstance):
 
     def _best_effort_release_prepared(
         self,
-        prepared: list[tuple[_CombatBranchSpec, Any, _BranchBookkeeping, list]],
+        prepared: list[tuple[_CombatBranchSpec, Any, _BranchBookkeeping]],
     ) -> None:
-        branch_ids = [spec.branch_id for spec, _, _, _ in prepared]
+        branch_ids = [spec.branch_id for spec, _, _ in prepared]
         if not branch_ids:
             return
         try:
@@ -317,7 +311,10 @@ class WholeRunInstance(_BaseWholeRunInstance):
 
         self._decision_points.validate(parent_branch_id, decision_point_id)
         index = parent_view.resolve_action_id(action_id)
-        chosen_action_id = parent_view.legal_actions_raw[index]["action_id"]
+        chosen_action = parent_view.legal_actions_raw[index]
+        if chosen_action.get("is_available") is False:
+            raise RequestRejected(f"action_id {action_id!r} is not currently available")
+        chosen_action_id = chosen_action["action_id"]
         return _CombatBranchSpec(
             parent_view=parent_view,
             parent_branch_id=parent_branch_id,
@@ -330,7 +327,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
 
     def _register_combat_branch(
         self, spec: _CombatBranchSpec
-    ) -> tuple[ChoiceWorkItem, _BranchBookkeeping, list]:
+    ) -> tuple[ChoiceWorkItem, _BranchBookkeeping]:
         self._branch_ids.register(spec.branch_id)
         parent_view = spec.parent_view
         context_id = wr_derive_context_id(
@@ -379,13 +376,12 @@ class WholeRunInstance(_BaseWholeRunInstance):
             spec.rng_id,
         )
         self._bookkeeping[spec.branch_id] = book
-        return work_item, book, branch_log
+        return work_item, book
 
     def _finalize_combat_branch(
         self,
         spec: _CombatBranchSpec,
         book: _BranchBookkeeping,
-        branch_log: list,
         result: Any,
     ) -> dict:
         if result.status != "success":
@@ -422,7 +418,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 "parent_branch_id": spec.parent_branch_id,
                 "rng_id": spec.rng_id,
                 "decision_point_id": self._decision_points.current(spec.branch_id),
-                "branch_log": branch_log,
+                "branch_log": book.branch_log,
                 "masked_emulator_dto": build_masked_emulator_dto(
                     {"run_terminal": True, "outcome": book.outcome}
                 ),
@@ -440,7 +436,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
             **self._decision_response_fields(
                 spec.branch_id,
                 new_view,
-                branch_log=branch_log,
+                branch_log=book.branch_log,
                 history=book.history,
             ),
             "parent_branch_id": spec.parent_branch_id,
