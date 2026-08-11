@@ -1,9 +1,9 @@
 """Whole Run instance with Combat-scoped branch replay for Training Beam Search.
 
 Active Event branching remains owned by ``API.instance_whole_run`` and keeps its RNG
-hypothesis semantics. Combat branching instead deterministically replays the latest map
-snapshot and exact room action prefix with no RNG override; ``rng_id`` is only lineage
-metadata in that path. Other Whole Run boundaries remain non-branchable.
+hypothesis semantics. Combat branching deterministically replays the latest map snapshot
+and exact room action prefix with no RNG override; ``rng_id`` is lineage metadata only.
+Other Whole Run boundaries remain non-branchable.
 """
 
 from __future__ import annotations
@@ -11,10 +11,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from whole_run_session import PENDING_CHOICE, STABLE
+
 from API.instance_whole_run import (
     EVENT_CHOICE,
     FAULT_EMULATOR_ERROR,
     FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
+    FAULT_TASK_TIMEOUT,
     ROOT_BRANCH_ID,
     RUN_TERMINAL,
     STATUS_COMPLETED,
@@ -31,6 +34,7 @@ from API.instance_whole_run import (
 )
 from API.validation import RequestRejected
 
+_COMBAT_BOUNDARIES = frozenset({STABLE, PENDING_CHOICE})
 _COMBAT_ACTION_TYPES = frozenset(
     {
         "system",
@@ -45,6 +49,9 @@ _COMBAT_ACTION_TYPES = frozenset(
 
 
 def _is_combat_view(view: object) -> bool:
+    if getattr(view, "boundary", None) not in _COMBAT_BOUNDARIES:
+        return False
+
     legal_actions = getattr(view, "legal_actions_raw", None)
     if not isinstance(legal_actions, list):
         return False
@@ -73,6 +80,22 @@ class _CombatBranchSpec:
     chosen_action_id: Any
 
 
+def _faulted_branch_result(
+    spec: _CombatBranchSpec,
+    *,
+    error: str,
+    fault_kind: str,
+) -> dict:
+    return {
+        "status": STATUS_FAULTED,
+        "branch_id": spec.branch_id,
+        "parent_branch_id": spec.parent_branch_id,
+        "rng_id": spec.rng_id,
+        "error": error or "branch execution faulted",
+        "fault_kind": fault_kind or FAULT_EMULATOR_ERROR,
+    }
+
+
 class WholeRunInstance(_BaseWholeRunInstance):
     """Whole Run API instance with batched branching at Combat decisions."""
 
@@ -90,8 +113,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
         action_id: str,
         simulation_options: Optional[dict],
     ) -> dict:
-        # Avoid resolving the full parent view twice when delegating Active Event work
-        # to the base implementation.
+        # Active Event branching keeps the base implementation's RNG-plan lifecycle.
         if self._parent_boundary(parent_branch_id) == EVENT_CHOICE:
             return super().emulate_action(
                 parent_branch_id=parent_branch_id,
@@ -116,6 +138,13 @@ class WholeRunInstance(_BaseWholeRunInstance):
         work_item, book, branch_log = self._register_combat_branch(spec)
         try:
             result = self._pool.dispatch_choice_work_items([work_item], self._lease_registry)[0]
+        except TimeoutError as exc:
+            book.status = STATUS_FAULTED
+            return _faulted_branch_result(
+                spec,
+                error=str(exc) or "Whole Run branch execution timed out",
+                fault_kind=FAULT_TASK_TIMEOUT,
+            )
         except Exception:
             book.status = STATUS_FAULTED
             raise
@@ -125,8 +154,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
         """Execute one Combat frontier as one WorkerPool batch.
 
         Active Event RNG hypotheses continue to use singular ``emulate_action``. The
-        plural operation is intentionally Combat-only so the batch has one replay
-        semantic and can be dispatched concurrently without mixing RNG-plan lifecycles.
+        plural operation is Combat-only so one batch never mixes replay semantics.
         """
         self._validate_stop_condition(simulation_options)
         if not isinstance(items, list) or not items:
@@ -149,8 +177,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
                     "emulate_actions items may only use parents that existed before the batch"
                 )
 
-        # Siblings share the same immutable parent view. Resolving it once also avoids
-        # repeated root-history observation during batch preflight.
+        # Siblings share an immutable parent view, so resolve each distinct parent once.
         parent_views: dict[str, Any] = {}
         specs: list[_CombatBranchSpec] = []
         for item in items:
@@ -182,29 +209,57 @@ class WholeRunInstance(_BaseWholeRunInstance):
             for spec in specs:
                 work_item, book, branch_log = self._register_combat_branch(spec)
                 prepared.append((spec, work_item, book, branch_log))
+        except Exception:
+            self._best_effort_release_prepared(prepared)
+            raise
 
+        try:
             results = self._pool.dispatch_choice_work_items(
                 [work_item for _, work_item, _, _ in prepared],
                 self._lease_registry,
             )
-            if len(results) != len(prepared):
-                raise RuntimeError("WholeRunWorkerPool returned an incomplete batch")
-
+        except TimeoutError as exc:
+            error = str(exc) or "Whole Run branch batch timed out"
             branch_results: dict[str, dict] = {}
+            for spec, _, book, _ in prepared:
+                book.status = STATUS_FAULTED
+                branch_results[spec.branch_id] = _faulted_branch_result(
+                    spec,
+                    error=error,
+                    fault_kind=FAULT_TASK_TIMEOUT,
+                )
+            return {"status": STATUS_COMPLETED, "branch_results": branch_results}
+        except Exception:
+            self._best_effort_release_prepared(prepared)
+            raise
+
+        if len(results) != len(prepared):
+            self._best_effort_release_prepared(prepared)
+            raise RuntimeError("WholeRunWorkerPool returned an incomplete batch")
+
+        branch_results: dict[str, dict] = {}
+        try:
             for (spec, _, book, branch_log), result in zip(prepared, results):
                 branch_results[spec.branch_id] = self._finalize_combat_branch(
                     spec, book, branch_log, result
                 )
         except Exception:
-            branch_ids = [spec.branch_id for spec, _, _, _ in prepared]
-            if branch_ids:
-                try:
-                    self.release_branches(branch_ids)
-                except Exception:
-                    pass
+            self._best_effort_release_prepared(prepared)
             raise
 
         return {"status": STATUS_COMPLETED, "branch_results": branch_results}
+
+    def _best_effort_release_prepared(
+        self,
+        prepared: list[tuple[_CombatBranchSpec, Any, _BranchBookkeeping, list]],
+    ) -> None:
+        branch_ids = [spec.branch_id for spec, _, _, _ in prepared]
+        if not branch_ids:
+            return
+        try:
+            self.release_branches(branch_ids)
+        except Exception:
+            pass
 
     def _parent_boundary(self, parent_branch_id: str) -> str | None:
         if parent_branch_id == ROOT_BRANCH_ID:
@@ -336,14 +391,11 @@ class WholeRunInstance(_BaseWholeRunInstance):
         if result.status != "success":
             book.status = STATUS_FAULTED
             diagnostics = result.diagnostics or {}
-            return {
-                "status": STATUS_FAULTED,
-                "branch_id": spec.branch_id,
-                "parent_branch_id": spec.parent_branch_id,
-                "rng_id": spec.rng_id,
-                "error": diagnostics.get("message", "branch execution faulted"),
-                "fault_kind": diagnostics.get("fault_kind", FAULT_EMULATOR_ERROR),
-            }
+            return _faulted_branch_result(
+                spec,
+                error=diagnostics.get("message") or "branch execution faulted",
+                fault_kind=diagnostics.get("fault_kind") or FAULT_EMULATOR_ERROR,
+            )
 
         step = result.step
         if step is None:
