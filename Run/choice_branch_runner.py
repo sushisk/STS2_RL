@@ -30,6 +30,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from legal_action_identity import legal_action_semantic_key
+from reward_auto_progress import drain_trivial_reward_frontier
 from room_progression_driver import pick_room
 from whole_run_session import (
     EVENT_CHOICE,
@@ -104,6 +105,7 @@ def semantic_key_set(actions: list[dict]) -> set:
 
 
 def drive_to_map_or_terminal(session: WholeRunSession, *, max_steps: int = 800) -> dict:
+    drain_trivial_reward_frontier(session)
     obs = session.get_observation()
     steps = 0
     while obs["boundary"] not in (MAP_SELECT, RUN_TERMINAL) and steps < max_steps:
@@ -111,8 +113,9 @@ def drive_to_map_or_terminal(session: WholeRunSession, *, max_steps: int = 800) 
         if not actions:
             break
         action = pick_default_action(actions)
-        result = session.step(action["action_id"])
-        obs = result["observation"]
+        session.step(action["action_id"])
+        drain_trivial_reward_frontier(session)
+        obs = session.get_observation()
         steps += 1
     return obs
 
@@ -197,6 +200,8 @@ def reach_choice_boundary(
     """
     entered = session.choose_room(room_id)
     prefix: list[int] = []
+    initial_auto = drain_trivial_reward_frontier(session)
+    prefix.extend(initial_auto.auto_action_ids)
     obs = session.get_observation()
     if obs["boundary"] == target_boundary:
         return prefix, entered
@@ -205,9 +210,11 @@ def reach_choice_boundary(
         if not actions:
             return prefix, entered
         action = pick_default_action(actions)
-        result = session.step(action["action_id"])
+        session.step(action["action_id"])
         prefix.append(action["action_id"])
-        obs = result["observation"]
+        auto = drain_trivial_reward_frontier(session)
+        prefix.extend(auto.auto_action_ids)
+        obs = session.get_observation()
         if obs["boundary"] in (target_boundary, RUN_TERMINAL):
             return prefix, entered
     return prefix, entered
