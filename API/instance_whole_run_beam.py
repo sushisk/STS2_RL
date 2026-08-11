@@ -144,16 +144,22 @@ class WholeRunInstance(_BaseWholeRunInstance):
         branch_results: dict[str, dict] = {}
         try:
             for item in items:
-                result = self.emulate_action(
-                    parent_branch_id=item["parent_branch_id"],
-                    branch_id=item["branch_id"],
-                    rng_id=item["rng_id"],
-                    decision_point_id=item["decision_point_id"],
-                    action_id=item["action_id"],
-                    simulation_options=simulation_options,
-                )
-                created.append(item["branch_id"])
-                branch_results[item["branch_id"]] = result
+                branch_id = item["branch_id"]
+                try:
+                    result = self.emulate_action(
+                        parent_branch_id=item["parent_branch_id"],
+                        branch_id=branch_id,
+                        rng_id=item["rng_id"],
+                        decision_point_id=item["decision_point_id"],
+                        action_id=item["action_id"],
+                        simulation_options=simulation_options,
+                    )
+                except Exception:
+                    if branch_id in self._bookkeeping and branch_id not in created:
+                        created.append(branch_id)
+                    raise
+                created.append(branch_id)
+                branch_results[branch_id] = result
         except Exception:
             if created:
                 try:
@@ -230,12 +236,12 @@ class WholeRunInstance(_BaseWholeRunInstance):
                     f"{parent_rng_id!r} (its own lineage rng_id), got {rng_id!r}"
                 )
         self._decision_points.validate(parent_branch_id, decision_point_id)
+        index = parent_view.resolve_action_id(action_id)
+        chosen = parent_view.legal_actions_raw[index]
         if self._branch_ids.is_known(branch_id):
             raise RequestRejected(f"branch_id {branch_id!r} already used (branch IDs are never reusable)")
         self._branch_ids.register(branch_id)
 
-        index = parent_view.resolve_action_id(action_id)
-        chosen = parent_view.legal_actions_raw[index]
         context_id = wr_derive_context_id(
             map_snapshot=parent_view.map_snapshot,
             room_id=parent_view.room_id,
@@ -291,6 +297,9 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 "error": str(exc),
                 "fault_kind": FAULT_TASK_TIMEOUT,
             }
+        except Exception:
+            book.status = STATUS_FAULTED
+            raise
         result = results[0]
         if result.status != "success":
             book.status = STATUS_FAULTED
@@ -310,11 +319,15 @@ class WholeRunInstance(_BaseWholeRunInstance):
         new_room_context = step.settled_room_context
         book.history.observe_room_context(new_room_context)
         if new_boundary == RUN_TERMINAL:
-            terminal_outcome = require_terminal_outcome(
-                new_observation.get("outcome"),
-                context=f"whole-run branch {branch_id!r}",
-                valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
-            )
+            try:
+                terminal_outcome = require_terminal_outcome(
+                    new_observation.get("outcome"),
+                    context=f"whole-run branch {branch_id!r}",
+                    valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
+                )
+            except RuntimeError:
+                book.status = STATUS_FAULTED
+                raise
             book.outcome = terminal_outcome
             book.terminal = True
             self._decision_points.issue(branch_id)
@@ -330,7 +343,11 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 ),
             }
 
-        new_view = _build_child_view(parent_view, chosen["action_id"], result)
+        try:
+            new_view = _build_child_view(parent_view, chosen["action_id"], result)
+        except Exception:
+            book.status = STATUS_FAULTED
+            raise
         book.view = new_view
         self._decision_points.issue(branch_id)
         return {
