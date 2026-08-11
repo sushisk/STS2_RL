@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from API.dto import (
     INSTANCE_TYPE_WHOLE_RUN,
     OP_EMULATE_ACTIONS,
@@ -9,6 +11,7 @@ from API.dto import (
     STATUS_COMPLETED,
     request_id_for,
 )
+from API.instance_whole_run_beam import _is_combat_view
 from API.server import RLApiServer
 
 
@@ -21,6 +24,10 @@ class _WholeRunStub:
     def emulate_actions(self, **kwargs):
         self.calls.append(kwargs)
         return {"status": STATUS_COMPLETED, "branch_results": {}}
+
+
+def _view(*actions: dict) -> SimpleNamespace:
+    return SimpleNamespace(legal_actions_raw=list(actions))
 
 
 def test_emulate_actions_against_whole_run_is_dispatched() -> None:
@@ -58,3 +65,39 @@ def test_emulate_actions_against_whole_run_is_dispatched() -> None:
     assert response["operation"] == OP_EMULATE_ACTIONS
     assert response["instance_id"] == instance_id
     assert stub.calls == [{"items": items, "simulation_options": None}]
+
+
+def test_whole_run_combat_action_types_are_branchable() -> None:
+    assert _is_combat_view(
+        _view(
+            {"action_id": 1, "action_type": "card", "is_available": True},
+            {"action_id": 2, "action_type": "system", "is_available": True},
+        )
+    )
+    assert _is_combat_view(
+        _view(
+            {"action_id": 3, "action_type": "choice_target", "is_available": True},
+            {"action_id": 4, "action_type": "choice_skip", "is_available": True},
+        )
+    )
+
+
+def test_whole_run_non_combat_action_types_stay_out_of_scope() -> None:
+    assert not _is_combat_view(
+        _view({"action_id": 1, "action_type": "choice_reward_card", "is_available": True})
+    )
+    assert not _is_combat_view(
+        _view(
+            {"action_id": 1, "action_type": "card", "is_available": True},
+            {"action_id": 2, "action_type": "map_room", "is_available": True},
+        )
+    )
+
+
+def test_unavailable_non_combat_action_does_not_block_combat_scope() -> None:
+    assert _is_combat_view(
+        _view(
+            {"action_id": 1, "action_type": "card", "is_available": True},
+            {"action_id": 2, "action_type": "map_room", "is_available": False},
+        )
+    )
