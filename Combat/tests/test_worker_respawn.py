@@ -30,6 +30,7 @@ from search.branch_worker_pool import (  # noqa: E402
     Lease,
     LeaseRegistry,
     WorkerExecutionRequest,
+    _is_process_tainting_fault,
 )
 from search.decision_context import (  # noqa: E402
     DecisionContext,
@@ -238,6 +239,31 @@ def test_execute_timeout_surfaces_as_fault_result_and_respawns_hung_worker():
         assert pool.is_worker_alive(0)
     finally:
         pool.close()
+
+
+def test_process_tainting_fault_detection_is_limited_to_combat_lifecycle_nullref():
+    diagnostics = {
+        "fault_kind": "worker_exception",
+        "exception_type": "ActionExecutionError",
+        "message": (
+            "Action execution faulted: original_exception_type=System.NullReferenceException "
+            "original_exception_message=Object reference not set to an instance of an object."
+        ),
+        "traceback": (
+            "System.NullReferenceException: Object reference not set to an instance of an object.\n"
+            "   at MegaCrit.Sts2.Core.Combat.CombatManager.EndCombatInternal()\n"
+            "   at MegaCrit.Sts2.Core.Combat.CombatManager.CheckWinCondition()"
+        ),
+    }
+    assert _is_process_tainting_fault(diagnostics)
+
+    ordinary_fault = {
+        "fault_kind": "worker_exception",
+        "exception_type": "ActionExecutionError",
+        "message": "RewardsSet error while resolving an expected game-logic fault",
+        "traceback": "live_combat_session.ActionExecutionError: RewardsSet is unavailable",
+    }
+    assert not _is_process_tainting_fault(ordinary_fault)
 
 
 def test_sibling_can_still_bootstrap_independently_after_a_neighbor_respawn():
