@@ -71,21 +71,53 @@ def test_battle_state_key_distinguishes_duplicate_card_option_identity():
     assert battle_state_key(left) != battle_state_key(right)
 
 
-def test_battle_state_key_canonicalizes_selected_set_only_when_order_is_irrelevant():
-    left = _state(
+def test_battle_state_key_refuses_cross_choice_dedup_after_selection_payload_is_lost():
+    left = _state(operation="discard", selected_ids=["opt-1"], order_matters=False)
+    right = copy.deepcopy(left)
+
+    # Match the current Emulator producer after selecting option-0: the selected card's
+    # payload is gone, while the same remaining option and selected decision-local id can
+    # occur in a different choice instance. The two observations must not collapse merely
+    # because their visible pendingChoice payloads are identical.
+    left.engine_state["pendingChoice"]["options"] = [
+        {"id": "Z", "upgraded": False, "optionId": "opt-2"}
+    ]
+    right.engine_state["pendingChoice"]["options"] = [
+        {"id": "Z", "upgraded": False, "optionId": "opt-2"}
+    ]
+
+    assert left.engine_state["pendingChoice"] == right.engine_state["pendingChoice"]
+    assert battle_state_key(left) != battle_state_key(right)
+
+
+def test_battle_state_key_canonicalizes_selected_set_only_within_same_choice_instance():
+    state = _state(
         operation="discard",
         selected_ids=["opt-1", "opt-2"],
         order_matters=False,
     )
-    right = _state(
-        operation="discard",
-        selected_ids=["opt-2", "opt-1"],
-        order_matters=False,
-    )
+
+    left_key = battle_state_key(state)
+    state.engine_state["pendingChoice"]["selectedOptionIds"] = ["opt-2", "opt-1"]
+    right_key = battle_state_key(state)
+    assert left_key == right_key
+
+    state.engine_state["pendingChoice"]["choiceSemantics"]["orderMatters"] = True
+    ordered_right_key = battle_state_key(state)
+    state.engine_state["pendingChoice"]["selectedOptionIds"] = ["opt-1", "opt-2"]
+    ordered_left_key = battle_state_key(state)
+    assert ordered_left_key != ordered_right_key
+
+
+def test_battle_state_key_uses_producer_choice_instance_id_when_available():
+    left = _state(operation="discard", selected_ids=["opt-1"], order_matters=False)
+    right = copy.deepcopy(left)
+    left.engine_state["pendingChoice"]["choiceInstanceId"] = "choice-123"
+    right.engine_state["pendingChoice"]["choiceInstanceId"] = "choice-123"
+
     assert battle_state_key(left) == battle_state_key(right)
 
-    left.engine_state["pendingChoice"]["choiceSemantics"]["orderMatters"] = True
-    right.engine_state["pendingChoice"]["choiceSemantics"]["orderMatters"] = True
+    right.engine_state["pendingChoice"]["choiceInstanceId"] = "choice-456"
     assert battle_state_key(left) != battle_state_key(right)
 
 
