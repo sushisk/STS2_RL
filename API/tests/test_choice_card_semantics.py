@@ -38,19 +38,19 @@ def _known_choice() -> dict:
             "replacementAllowed": False,
             "unapprovedSemanticField": "must-not-leak",
         },
-        "sourceEffectId": "CARD_EFFECT.DISCARD",
+        "sourceEffectId": "card:SURVIVOR",
         "selectedOptionIds": ["choice-7:0"],
         "options": [
             {
                 "id": "STRIKE",
                 "upgraded": False,
-                "optionId": "choice-7:0",
+                "optionId": "choice-7:1",
                 "seed": 999,
             },
             {
                 "id": "STRIKE",
                 "upgraded": True,
-                "optionId": "choice-7:1",
+                "optionId": "choice-7:2",
             },
         ],
         "unapprovedPendingField": {"looksHarmless": True},
@@ -74,11 +74,11 @@ def test_known_v1_semantics_are_normalized_with_explicit_allowlists():
         "orderMatters": True,
         "replacementAllowed": False,
     }
-    assert normalized["sourceEffectId"] == "CARD_EFFECT.DISCARD"
+    assert normalized["sourceEffectId"] == "card:SURVIVOR"
     assert normalized["selectedOptionIds"] == ["choice-7:0"]
     assert [option["optionId"] for option in normalized["options"]] == [
-        "choice-7:0",
         "choice-7:1",
+        "choice-7:2",
     ]
 
 
@@ -111,18 +111,60 @@ def test_masking_normalizes_pending_choice_and_scrubs_retained_option_payloads()
     assert "unapprovedPendingField" not in pending
     assert "unapprovedSemanticField" not in pending["choiceSemantics"]
     assert "seed" not in pending["options"][0]
-    assert pending["options"][0]["optionId"] == "choice-7:0"
+    assert pending["options"][0]["optionId"] == "choice-7:1"
     assert pending["selectedOptionIds"] == ["choice-7:0"]
     assert masked["mask_version"] == MASK_VERSION == "1.1"
 
 
-def test_hidden_looking_source_effect_id_is_not_published_without_false_positive():
-    raw = _known_choice()
-    raw["sourceEffectId"] = "combat_session_rng_seed_17"
-    assert "sourceEffectId" not in normalize_pending_choice(raw)
+def test_invalid_choice_identity_degrades_known_semantics_to_unknown():
+    cases = []
 
-    raw["sourceEffectId"] = "RAPID_FIRE"
-    assert normalize_pending_choice(raw)["sourceEffectId"] == "RAPID_FIRE"
+    malformed_selected = _known_choice()
+    malformed_selected["selectedOptionIds"] = ["bad token"]
+    cases.append(malformed_selected)
+
+    count_mismatch = _known_choice()
+    count_mismatch["selectedCount"] = 2
+    cases.append(count_mismatch)
+
+    duplicate_selected = _known_choice()
+    duplicate_selected["selectedCount"] = 2
+    duplicate_selected["selectedOptionIds"] = ["choice-7:0", "choice-7:0"]
+    cases.append(duplicate_selected)
+
+    overlap = _known_choice()
+    overlap["options"][0]["optionId"] = "choice-7:0"
+    cases.append(overlap)
+
+    malformed_remaining = _known_choice()
+    malformed_remaining["options"][0]["optionId"] = "bad token"
+    cases.append(malformed_remaining)
+
+    duplicate_remaining = _known_choice()
+    duplicate_remaining["options"][1]["optionId"] = "choice-7:1"
+    cases.append(duplicate_remaining)
+
+    for raw in cases:
+        normalized = normalize_pending_choice(raw)
+        assert normalized["choiceSemantics"] == {"version": 1, "operation": "unknown"}
+        assert "sourceEffectId" not in normalized
+
+
+def test_source_effect_id_requires_an_explicit_public_namespace():
+    for hidden_or_unapproved in (
+        "combat_session_rng_seed_17",
+        "sessionId:abc",
+        "workerId-123",
+        "pid123",
+        "CARD_EFFECT.DISCARD",
+    ):
+        raw = _known_choice()
+        raw["sourceEffectId"] = hidden_or_unapproved
+        assert "sourceEffectId" not in normalize_pending_choice(raw)
+
+    raw = _known_choice()
+    raw["sourceEffectId"] = "card:SURVIVOR"
+    assert normalize_pending_choice(raw)["sourceEffectId"] == "card:SURVIVOR"
 
 
 def _run_all() -> int:
