@@ -77,10 +77,9 @@ PUBLIC_CHOICE_SEMANTICS_KEYS = frozenset(
 )
 
 _OPAQUE_TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
-_SOURCE_EFFECT_HIDDEN_TOKEN_RE = re.compile(
-    r"(?:^|[._:/-])(?:rng|seed|snapshot|savestate|save_state|session|worker|pid|lease|cursor|generation|context_id|contextid)(?:$|[._:/-])",
-    re.IGNORECASE,
-)
+# Public source-effect namespaces are explicit. New producer namespaces must be reviewed
+# and added here rather than relying on negative matching of internal-looking names.
+_PUBLIC_SOURCE_EFFECT_PREFIXES = ("card:",)
 
 
 def _unknown_semantics() -> dict:
@@ -104,7 +103,7 @@ def _valid_token(value: Any) -> bool:
 def _safe_source_effect_id(value: Any) -> "str | None":
     if not _valid_token(value):
         return None
-    if _SOURCE_EFFECT_HIDDEN_TOKEN_RE.search(value):
+    if not any(value.startswith(prefix) and len(value) > len(prefix) for prefix in _PUBLIC_SOURCE_EFFECT_PREFIXES):
         return None
     return value
 
@@ -169,6 +168,11 @@ def normalize_pending_choice(raw_pending_choice: Any) -> dict:
     Existing option/card objects are retained for backwards compatibility, but every
     pending-choice-level field outside ``PUBLIC_PENDING_CHOICE_KEYS`` is dropped. The
     masking layer still recursively scrubs option/card objects for hidden key names.
+
+    Canonical identity is all-or-nothing for known semantics. Malformed/duplicate IDs,
+    selected-count mismatch, or overlap between selected and remaining option IDs causes
+    semantics to degrade to ``unknown`` rather than publishing a partially repaired
+    identity with mechanic meaning still attached.
     """
     if not isinstance(raw_pending_choice, dict):
         return {}
@@ -189,26 +193,56 @@ def normalize_pending_choice(raw_pending_choice: Any) -> dict:
             result[key] = value
 
     semantics = normalize_choice_semantics(raw_pending_choice.get("choiceSemantics"))
+
+    identity_valid = True
+    selected_ids: list[str] = []
+    raw_selected_ids = raw_pending_choice.get("selectedOptionIds")
+    if isinstance(raw_selected_ids, list):
+        for value in raw_selected_ids:
+            if not _valid_token(value):
+                identity_valid = False
+                continue
+            selected_ids.append(value)
+        result["selectedOptionIds"] = selected_ids
+    else:
+        identity_valid = False
+
+    options: list[Any] = []
+    option_ids: list[str] = []
+    raw_options = raw_pending_choice.get("options")
+    if isinstance(raw_options, list):
+        for raw_option in raw_options:
+            if not isinstance(raw_option, dict):
+                identity_valid = False
+                continue
+            option = copy.deepcopy(raw_option)
+            option_id = option.get("optionId")
+            if not _valid_token(option_id):
+                identity_valid = False
+                option.pop("optionId", None)
+            else:
+                option_ids.append(option_id)
+            options.append(option)
+        result["options"] = options
+    else:
+        identity_valid = False
+
+    selected_count = result.get("selectedCount")
+    if selected_count is None or selected_count != len(selected_ids):
+        identity_valid = False
+    if len(set(selected_ids)) != len(selected_ids):
+        identity_valid = False
+    if len(set(option_ids)) != len(option_ids):
+        identity_valid = False
+    if not set(selected_ids).isdisjoint(option_ids):
+        identity_valid = False
+
+    if not identity_valid and semantics["operation"] != "unknown":
+        semantics = _unknown_semantics()
     result["choiceSemantics"] = semantics
 
     source_effect_id = _safe_source_effect_id(raw_pending_choice.get("sourceEffectId"))
     if source_effect_id is not None and semantics["operation"] != "unknown":
         result["sourceEffectId"] = source_effect_id
-
-    raw_selected_ids = raw_pending_choice.get("selectedOptionIds")
-    if isinstance(raw_selected_ids, list):
-        result["selectedOptionIds"] = [value for value in raw_selected_ids if _valid_token(value)]
-
-    raw_options = raw_pending_choice.get("options")
-    if isinstance(raw_options, list):
-        options: list[Any] = []
-        for raw_option in raw_options:
-            if not isinstance(raw_option, dict):
-                continue
-            option = copy.deepcopy(raw_option)
-            if "optionId" in option and not _valid_token(option.get("optionId")):
-                option.pop("optionId", None)
-            options.append(option)
-        result["options"] = options
 
     return result
