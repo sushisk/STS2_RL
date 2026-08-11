@@ -49,13 +49,16 @@ def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
         semantic_tuple = (("version", None), ("operation", None))
         order_matters = None
 
-    selected_option_ids = tuple(
-        _state_key_value(value)
-        for value in (raw_pending_choice.get("selectedOptionIds") or [])
-    )
+    raw_selected_ids = raw_pending_choice.get("selectedOptionIds")
+    if not isinstance(raw_selected_ids, (list, tuple)):
+        raw_selected_ids = ()
+    selected_option_ids = tuple(_state_key_value(value) for value in raw_selected_ids)
     if order_matters is False:
         selected_option_ids = tuple(sorted(selected_option_ids, key=repr))
 
+    raw_options = raw_pending_choice.get("options")
+    if not isinstance(raw_options, (list, tuple)):
+        raw_options = ()
     options = tuple(
         (
             _state_key_value(option.get("optionId")),
@@ -65,7 +68,7 @@ def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
             option.get("tinkerTimeType"),
             option.get("tinkerTimeRider"),
         )
-        for option in (raw_pending_choice.get("options") or [])
+        for option in raw_options
         if isinstance(option, dict)
     )
     return (
