@@ -1,24 +1,20 @@
-"""Whole Run instance with Combat-scoped batch branching for Training Beam Search.
+"""Whole Run instance with Combat-scoped branch replay for Training Beam Search.
 
-The base WholeRunInstance deliberately supports RNG hypotheses only at active Event
-boundaries.  Combat Beam Search needs a different capability: replay the exact current
-run state from the latest map snapshot/action prefix and branch on Combat actions without
-inventing a new RNG hypothesis.  In that mode ``rng_id`` remains a lineage identifier;
-no RNG override is applied.
-
-Non-Combat Whole Run boundaries (map/reward/shop/rest/etc.) remain non-branchable here.
-Active Event branching continues to use the base implementation unchanged.
+Active Event branching remains owned by ``API.instance_whole_run`` and keeps its RNG
+hypothesis semantics. Combat branching instead deterministically replays the latest map
+snapshot and exact room action prefix with no RNG override; ``rng_id`` is only lineage
+metadata in that path. Other Whole Run boundaries remain non-branchable.
 """
 
 from __future__ import annotations
 
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, Optional
 
 from API.instance_whole_run import (
     EVENT_CHOICE,
     FAULT_EMULATOR_ERROR,
     FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
-    FAULT_TASK_TIMEOUT,
     ROOT_BRANCH_ID,
     RUN_TERMINAL,
     STATUS_COMPLETED,
@@ -52,6 +48,7 @@ def _is_combat_view(view: object) -> bool:
     legal_actions = getattr(view, "legal_actions_raw", None)
     if not isinstance(legal_actions, list):
         return False
+
     action_types: set[str] = set()
     for action in legal_actions:
         if not isinstance(action, dict):
@@ -65,8 +62,19 @@ def _is_combat_view(view: object) -> bool:
     return bool(action_types) and action_types <= _COMBAT_ACTION_TYPES
 
 
+@dataclass(frozen=True)
+class _CombatBranchSpec:
+    parent_view: Any
+    parent_branch_id: str
+    branch_id: str
+    rng_id: int
+    decision_point_id: str
+    action_id: str
+    chosen_action_id: Any
+
+
 class WholeRunInstance(_BaseWholeRunInstance):
-    """Whole Run API instance that exposes batched branching at Combat decisions."""
+    """Whole Run API instance with batched branching at Combat decisions."""
 
     def start_instance_response(self) -> dict:
         response = super().start_instance_response()
@@ -82,8 +90,9 @@ class WholeRunInstance(_BaseWholeRunInstance):
         action_id: str,
         simulation_options: Optional[dict],
     ) -> dict:
-        parent_view = self._view_for(parent_branch_id)
-        if parent_view.boundary == EVENT_CHOICE:
+        # Avoid resolving the full parent view twice when delegating Active Event work
+        # to the base implementation.
+        if self._parent_boundary(parent_branch_id) == EVENT_CHOICE:
             return super().emulate_action(
                 parent_branch_id=parent_branch_id,
                 branch_id=branch_id,
@@ -92,27 +101,34 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 action_id=action_id,
                 simulation_options=simulation_options,
             )
-        if not _is_combat_view(parent_view):
-            raise RequestRejected(
-                "Branch simulation is unavailable at this Whole Run boundary.",
-                fault_kind=FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
-            )
-        return self._emulate_combat_action(
-            parent_view=parent_view,
+
+        self._validate_stop_condition(simulation_options)
+        spec = self._validate_combat_branch(
             parent_branch_id=parent_branch_id,
             branch_id=branch_id,
             rng_id=rng_id,
             decision_point_id=decision_point_id,
             action_id=action_id,
-            simulation_options=simulation_options,
         )
+        if self.active_branch_count() >= self.max_branches:
+            raise RequestRejected(f"active Branch count would exceed max_branches={self.max_branches}")
+
+        work_item, book, branch_log = self._register_combat_branch(spec)
+        try:
+            result = self._pool.dispatch_choice_work_items([work_item], self._lease_registry)[0]
+        except Exception:
+            book.status = STATUS_FAULTED
+            raise
+        return self._finalize_combat_branch(spec, book, branch_log, result)
 
     def emulate_actions(self, *, items: list, simulation_options: Optional[dict]) -> dict:
-        stop_condition = (simulation_options or {}).get("stop_condition")
-        if stop_condition not in (None, "next_decision"):
-            raise RequestRejected(
-                f"stop_condition {stop_condition!r} is not supported for whole_run instances"
-            )
+        """Execute one Combat frontier as one WorkerPool batch.
+
+        Active Event RNG hypotheses continue to use singular ``emulate_action``. The
+        plural operation is intentionally Combat-only so the batch has one replay
+        semantic and can be dispatched concurrently without mixing RNG-plan lifecycles.
+        """
+        self._validate_stop_condition(simulation_options)
         if not isinstance(items, list) or not items:
             raise RequestRejected("emulate_actions.items must be a non-empty list")
         if len(items) > self.max_branches:
@@ -132,55 +148,96 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 raise RequestRejected(
                     "emulate_actions items may only use parents that existed before the batch"
                 )
-            self._preflight_emulate_item(item)
 
-        if self.active_branch_count() + len(items) > self.max_branches:
-            raise RequestRejected(
-                f"submitting {len(items)} Branch(es) would exceed max_branches="
-                f"{self.max_branches} (currently {self.active_branch_count()} active)"
+        # Siblings share the same immutable parent view. Resolving it once also avoids
+        # repeated root-history observation during batch preflight.
+        parent_views: dict[str, Any] = {}
+        specs: list[_CombatBranchSpec] = []
+        for item in items:
+            parent_branch_id = item["parent_branch_id"]
+            parent_view = parent_views.get(parent_branch_id)
+            if parent_view is None:
+                parent_view = self._view_for(parent_branch_id)
+                parent_views[parent_branch_id] = parent_view
+            specs.append(
+                self._validate_combat_branch(
+                    parent_branch_id=parent_branch_id,
+                    branch_id=item["branch_id"],
+                    rng_id=item["rng_id"],
+                    decision_point_id=item["decision_point_id"],
+                    action_id=item["action_id"],
+                    parent_view=parent_view,
+                )
             )
 
-        created: list[str] = []
-        branch_results: dict[str, dict] = {}
+        active_count = self.active_branch_count()
+        if active_count + len(specs) > self.max_branches:
+            raise RequestRejected(
+                f"submitting {len(specs)} Branch(es) would exceed max_branches="
+                f"{self.max_branches} (currently {active_count} active)"
+            )
+
+        prepared: list[tuple[_CombatBranchSpec, Any, _BranchBookkeeping, list]] = []
         try:
-            for item in items:
-                branch_id = item["branch_id"]
-                try:
-                    result = self.emulate_action(
-                        parent_branch_id=item["parent_branch_id"],
-                        branch_id=branch_id,
-                        rng_id=item["rng_id"],
-                        decision_point_id=item["decision_point_id"],
-                        action_id=item["action_id"],
-                        simulation_options=simulation_options,
-                    )
-                except Exception:
-                    if branch_id in self._bookkeeping and branch_id not in created:
-                        created.append(branch_id)
-                    raise
-                created.append(branch_id)
-                branch_results[branch_id] = result
+            for spec in specs:
+                work_item, book, branch_log = self._register_combat_branch(spec)
+                prepared.append((spec, work_item, book, branch_log))
+
+            results = self._pool.dispatch_choice_work_items(
+                [work_item for _, work_item, _, _ in prepared],
+                self._lease_registry,
+            )
+            if len(results) != len(prepared):
+                raise RuntimeError("WholeRunWorkerPool returned an incomplete batch")
+
+            branch_results: dict[str, dict] = {}
+            for (spec, _, book, branch_log), result in zip(prepared, results):
+                branch_results[spec.branch_id] = self._finalize_combat_branch(
+                    spec, book, branch_log, result
+                )
         except Exception:
-            if created:
+            branch_ids = [spec.branch_id for spec, _, _, _ in prepared]
+            if branch_ids:
                 try:
-                    self.release_branches(created)
+                    self.release_branches(branch_ids)
                 except Exception:
-                    # Preserve the original batch failure. Root commit/instance close still
-                    # invalidates all speculative Whole Run branches as a final safeguard.
                     pass
             raise
+
         return {"status": STATUS_COMPLETED, "branch_results": branch_results}
 
-    def _preflight_emulate_item(self, item: dict) -> None:
-        parent_branch_id = item["parent_branch_id"]
-        branch_id = item["branch_id"]
-        rng_id = item["rng_id"]
-        decision_point_id = item["decision_point_id"]
-        action_id = item["action_id"]
+    def _parent_boundary(self, parent_branch_id: str) -> str | None:
+        if parent_branch_id == ROOT_BRANCH_ID:
+            boundary = self._session.get_observation().get("boundary")
+            return boundary if isinstance(boundary, str) else None
+        book = self._bookkeeping.get(parent_branch_id)
+        if book is None or book.view is None:
+            return None
+        return book.view.boundary
 
+    @staticmethod
+    def _validate_stop_condition(simulation_options: Optional[dict]) -> None:
+        stop_condition = (simulation_options or {}).get("stop_condition")
+        if stop_condition not in (None, "next_decision"):
+            raise RequestRejected(
+                f"stop_condition {stop_condition!r} is not supported for whole_run instances"
+            )
+
+    def _validate_combat_branch(
+        self,
+        *,
+        parent_branch_id: str,
+        branch_id: str,
+        rng_id: int,
+        decision_point_id: str,
+        action_id: str,
+        parent_view: Any | None = None,
+    ) -> _CombatBranchSpec:
         if self._branch_ids.is_known(branch_id):
             raise RequestRejected(f"branch_id {branch_id!r} already used (branch IDs are never reusable)")
-        parent_view = self._view_for(parent_branch_id)
+
+        if parent_view is None:
+            parent_view = self._view_for(parent_branch_id)
         if parent_view.boundary == RUN_TERMINAL:
             raise RequestRejected(
                 f"parent_branch_id {parent_branch_id!r} has reached run_terminal; cannot branch further"
@@ -190,7 +247,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 f"parent_branch_id {parent_branch_id!r} has not reached a map_select boundary yet; "
                 "emulate_action is unavailable until the first Map Decision is reached"
             )
-        if parent_view.boundary != EVENT_CHOICE and not _is_combat_view(parent_view):
+        if not _is_combat_view(parent_view):
             raise RequestRejected(
                 "Branch simulation is unavailable at this Whole Run boundary.",
                 fault_kind=FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
@@ -202,46 +259,25 @@ class WholeRunInstance(_BaseWholeRunInstance):
                     f"non-root parent_branch_id {parent_branch_id!r} requires rng_id="
                     f"{parent_rng_id!r} (its own lineage rng_id), got {rng_id!r}"
                 )
-        self._decision_points.validate(parent_branch_id, decision_point_id)
-        parent_view.resolve_action_id(action_id)
 
-    def _emulate_combat_action(
-        self,
-        *,
-        parent_view,
-        parent_branch_id: str,
-        branch_id: str,
-        rng_id: int,
-        decision_point_id: str,
-        action_id: str,
-        simulation_options: Optional[dict],
-    ) -> dict:
-        stop_condition = (simulation_options or {}).get("stop_condition")
-        if stop_condition not in (None, "next_decision"):
-            raise RequestRejected(
-                f"stop_condition {stop_condition!r} is not supported for whole_run instances"
-            )
-        if self.active_branch_count() >= self.max_branches:
-            raise RequestRejected(f"active Branch count would exceed max_branches={self.max_branches}")
-        if parent_view.map_snapshot is None:
-            raise RequestRejected(
-                f"parent_branch_id {parent_branch_id!r} has not reached a map_select boundary yet; "
-                "emulate_action is unavailable until the first Map Decision is reached"
-            )
-        if parent_branch_id != ROOT_BRANCH_ID:
-            parent_rng_id = self._bookkeeping[parent_branch_id].rng_id
-            if rng_id != parent_rng_id:
-                raise RequestRejected(
-                    f"non-root parent_branch_id {parent_branch_id!r} requires rng_id="
-                    f"{parent_rng_id!r} (its own lineage rng_id), got {rng_id!r}"
-                )
         self._decision_points.validate(parent_branch_id, decision_point_id)
         index = parent_view.resolve_action_id(action_id)
-        chosen = parent_view.legal_actions_raw[index]
-        if self._branch_ids.is_known(branch_id):
-            raise RequestRejected(f"branch_id {branch_id!r} already used (branch IDs are never reusable)")
-        self._branch_ids.register(branch_id)
+        chosen_action_id = parent_view.legal_actions_raw[index]["action_id"]
+        return _CombatBranchSpec(
+            parent_view=parent_view,
+            parent_branch_id=parent_branch_id,
+            branch_id=branch_id,
+            rng_id=rng_id,
+            decision_point_id=decision_point_id,
+            action_id=action_id,
+            chosen_action_id=chosen_action_id,
+        )
 
+    def _register_combat_branch(
+        self, spec: _CombatBranchSpec
+    ) -> tuple[ChoiceWorkItem, _BranchBookkeeping, list]:
+        self._branch_ids.register(spec.branch_id)
+        parent_view = spec.parent_view
         context_id = wr_derive_context_id(
             map_snapshot=parent_view.map_snapshot,
             room_id=parent_view.room_id,
@@ -250,7 +286,7 @@ class WholeRunInstance(_BaseWholeRunInstance):
             relic_injection=None,
         )
         work_item = ChoiceWorkItem(
-            work_id=f"{branch_id}-{rng_id}",
+            work_id=f"{spec.branch_id}-{spec.rng_id}",
             context_id=context_id,
             choice_type=parent_view.choice_type,
             map_snapshot=parent_view.map_snapshot,
@@ -259,84 +295,81 @@ class WholeRunInstance(_BaseWholeRunInstance):
             relic_injection=None,
             target_boundary=parent_view.boundary,
             work_kind=WORK_KIND_SUB_BRANCH,
-            resolve_action_id=chosen["action_id"],
+            resolve_action_id=spec.chosen_action_id,
             event_rng_plan=None,
         )
 
         parent_history = (
             self._root_history
-            if parent_branch_id == ROOT_BRANCH_ID
-            else self._bookkeeping[parent_branch_id].history
+            if spec.parent_branch_id == ROOT_BRANCH_ID
+            else self._bookkeeping[spec.parent_branch_id].history
         )
         parent_log = (
             list(self._root_branch_log)
-            if parent_branch_id == ROOT_BRANCH_ID
-            else list(self._bookkeeping[parent_branch_id].branch_log)
+            if spec.parent_branch_id == ROOT_BRANCH_ID
+            else list(self._bookkeeping[spec.parent_branch_id].branch_log)
         )
-        depth = len(parent_log)
         branch_log = parent_log + [
             {
-                "depth": depth,
-                "decision_point_id": decision_point_id,
-                "action_id": action_id,
-                "rng_id": rng_id,
+                "depth": len(parent_log),
+                "decision_point_id": spec.decision_point_id,
+                "action_id": spec.action_id,
+                "rng_id": spec.rng_id,
             }
         ]
-        book = _BranchBookkeeping(parent_branch_id, branch_log, parent_history.fork(), rng_id)
-        self._bookkeeping[branch_id] = book
+        book = _BranchBookkeeping(
+            spec.parent_branch_id,
+            branch_log,
+            parent_history.fork(),
+            spec.rng_id,
+        )
+        self._bookkeeping[spec.branch_id] = book
+        return work_item, book, branch_log
 
-        try:
-            results = self._pool.dispatch_choice_work_items([work_item], self._lease_registry)
-        except TimeoutError as exc:
-            book.status = STATUS_FAULTED
-            return {
-                "status": STATUS_FAULTED,
-                "branch_id": branch_id,
-                "parent_branch_id": parent_branch_id,
-                "rng_id": rng_id,
-                "error": str(exc),
-                "fault_kind": FAULT_TASK_TIMEOUT,
-            }
-        except Exception:
-            book.status = STATUS_FAULTED
-            raise
-        result = results[0]
+    def _finalize_combat_branch(
+        self,
+        spec: _CombatBranchSpec,
+        book: _BranchBookkeeping,
+        branch_log: list,
+        result: Any,
+    ) -> dict:
         if result.status != "success":
             book.status = STATUS_FAULTED
             diagnostics = result.diagnostics or {}
             return {
                 "status": STATUS_FAULTED,
-                "branch_id": branch_id,
-                "parent_branch_id": parent_branch_id,
-                "rng_id": rng_id,
+                "branch_id": spec.branch_id,
+                "parent_branch_id": spec.parent_branch_id,
+                "rng_id": spec.rng_id,
                 "error": diagnostics.get("message", "branch execution faulted"),
                 "fault_kind": diagnostics.get("fault_kind", FAULT_EMULATOR_ERROR),
             }
 
         step = result.step
+        if step is None:
+            book.status = STATUS_FAULTED
+            raise RuntimeError("successful Whole Run branch result is missing a step")
+
         new_observation = step.settled_observation
-        new_boundary = new_observation["boundary"]
-        new_room_context = step.settled_room_context
-        book.history.observe_room_context(new_room_context)
-        if new_boundary == RUN_TERMINAL:
+        book.history.observe_room_context(step.settled_room_context)
+        if new_observation["boundary"] == RUN_TERMINAL:
             try:
-                terminal_outcome = require_terminal_outcome(
+                book.outcome = require_terminal_outcome(
                     new_observation.get("outcome"),
-                    context=f"whole-run branch {branch_id!r}",
+                    context=f"whole-run branch {spec.branch_id!r}",
                     valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
                 )
             except RuntimeError:
                 book.status = STATUS_FAULTED
                 raise
-            book.outcome = terminal_outcome
             book.terminal = True
-            self._decision_points.issue(branch_id)
+            self._decision_points.issue(spec.branch_id)
             return {
                 "status": STATUS_COMPLETED,
-                "branch_id": branch_id,
-                "parent_branch_id": parent_branch_id,
-                "rng_id": rng_id,
-                "decision_point_id": self._decision_points.current(branch_id),
+                "branch_id": spec.branch_id,
+                "parent_branch_id": spec.parent_branch_id,
+                "rng_id": spec.rng_id,
+                "decision_point_id": self._decision_points.current(spec.branch_id),
                 "branch_log": branch_log,
                 "masked_emulator_dto": build_masked_emulator_dto(
                     {"run_terminal": True, "outcome": book.outcome}
@@ -344,20 +377,20 @@ class WholeRunInstance(_BaseWholeRunInstance):
             }
 
         try:
-            new_view = _build_child_view(parent_view, chosen["action_id"], result)
+            new_view = _build_child_view(spec.parent_view, spec.chosen_action_id, result)
         except Exception:
             book.status = STATUS_FAULTED
             raise
         book.view = new_view
-        self._decision_points.issue(branch_id)
+        self._decision_points.issue(spec.branch_id)
         return {
             "status": STATUS_COMPLETED,
             **self._decision_response_fields(
-                branch_id,
+                spec.branch_id,
                 new_view,
                 branch_log=branch_log,
                 history=book.history,
             ),
-            "parent_branch_id": parent_branch_id,
-            "rng_id": rng_id,
+            "parent_branch_id": spec.parent_branch_id,
+            "rng_id": spec.rng_id,
         }
