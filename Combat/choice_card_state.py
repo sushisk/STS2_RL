@@ -1,0 +1,115 @@
+"""Search-state identity for Emulator pending card choices.
+
+This module is intentionally policy-free. It records the complete raw semantic descriptor
+and decision-local option identity so search de-duplication cannot merge mechanically
+different unresolved choices, including mechanics introduced by a future Emulator.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+
+def _state_key_value(value: Any) -> Any:
+    """Freeze plain Emulator data into a deterministic, hashable identity value."""
+    if isinstance(value, dict):
+        return (
+            "dict",
+            tuple(
+                sorted(
+                    ((str(key), _state_key_value(item)) for key, item in value.items()),
+                    key=lambda pair: pair[0],
+                )
+            ),
+        )
+    if isinstance(value, (list, tuple)):
+        return ("sequence", tuple(_state_key_value(item) for item in value))
+    if isinstance(value, set):
+        return ("set", tuple(sorted((_state_key_value(item) for item in value), key=repr)))
+    if value is None:
+        return ("none",)
+    if isinstance(value, bool):
+        return ("bool", value)
+    if isinstance(value, int):
+        return ("int", value)
+    if isinstance(value, float):
+        return ("float", value)
+    if isinstance(value, str):
+        return ("str", value)
+    return (type(value).__name__, repr(value))
+
+
+def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
+    """Return a conservative hashable key for one unresolved pending choice.
+
+    The complete raw semantic descriptor is retained internally. Public masking may map
+    unsupported future semantics to ``unknown`` for Training, but search identity must not
+    collapse two mechanics merely because this RL build does not understand their fields.
+
+    Emulator's current choice-card producer removes a selected option from ``options``
+    while retaining only its decision-local ``optionId`` in ``selectedOptionIds``. Those
+    ids are reused by later choice instances, so after the first pick the remaining public
+    payload is insufficient to prove that two independently observed choices selected the
+    same card. Until the producer supplies a stable ``choiceInstanceId`` or selected-option
+    payload, distinct pending-choice objects therefore get a process-local namespace. This
+    deliberately gives up some de-duplication for partially selected choices rather than
+    risk merging mechanically different states. A future producer-provided
+    ``choiceInstanceId`` is used directly when present.
+    """
+    if not raw_pending_choice or not isinstance(raw_pending_choice, dict):
+        return None
+
+    raw_semantics = raw_pending_choice.get("choiceSemantics")
+    if isinstance(raw_semantics, dict):
+        semantic_identity = _state_key_value(raw_semantics)
+        order_matters = raw_semantics.get("orderMatters")
+    else:
+        semantic_identity = _state_key_value({"version": None, "operation": None})
+        order_matters = None
+
+    raw_selected_ids = raw_pending_choice.get("selectedOptionIds")
+    if not isinstance(raw_selected_ids, (list, tuple)):
+        raw_selected_ids = ()
+    selected_option_ids = tuple(_state_key_value(value) for value in raw_selected_ids)
+    if order_matters is False:
+        selected_option_ids = tuple(sorted(selected_option_ids, key=repr))
+
+    selected_choice_namespace = None
+    if selected_option_ids:
+        choice_instance_id = raw_pending_choice.get("choiceInstanceId")
+        selected_choice_namespace = (
+            "producer_choice_instance",
+            _state_key_value(choice_instance_id),
+        ) if choice_instance_id is not None else (
+            "local_pending_choice_object",
+            id(raw_pending_choice),
+        )
+
+    raw_options = raw_pending_choice.get("options")
+    if not isinstance(raw_options, (list, tuple)):
+        raw_options = ()
+    options = tuple(
+        (
+            _state_key_value(option.get("optionId")),
+            option.get("id"),
+            option.get("upgraded"),
+            option.get("upgradeLevel"),
+            option.get("tinkerTimeType"),
+            option.get("tinkerTimeRider"),
+        )
+        for option in raw_options
+        if isinstance(option, dict)
+    )
+    return (
+        raw_pending_choice.get("choiceType"),
+        raw_pending_choice.get("scope"),
+        raw_pending_choice.get("scenarioRestorable"),
+        raw_pending_choice.get("minSelect"),
+        raw_pending_choice.get("maxSelect"),
+        raw_pending_choice.get("selectedCount"),
+        semantic_identity,
+        _state_key_value(raw_pending_choice.get("sourceEffectId")),
+        selected_choice_namespace,
+        selected_option_ids,
+        options,
+    )

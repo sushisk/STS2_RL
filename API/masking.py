@@ -14,6 +14,10 @@ one recursive "no forbidden key anywhere" audit (see `API/tests/test_mask_audit.
 that exercises the exact same name list this builder uses, so builder and auditor can
 never silently drift apart.
 
+`pendingChoice` is the exception to the broad name-driven rule: choice-card semantic and
+identity fields are security/behavior-sensitive, so they are normalized through an
+explicit public allowlist before the recursive scrub continues.
+
 Applies identically to Combat and Whole Run state dicts (contract: "CombatとWhole Runで
 同じ公開規則を使用してください") - callers never need a domain-specific mask function.
 """
@@ -24,6 +28,7 @@ import copy
 from collections import Counter
 from typing import Any
 
+from API.choice_card_semantics import normalize_pending_choice
 from API.dto import DTO_VERSION, MASK_VERSION
 
 # Any dict key whose lowercased name CONTAINS one of these substrings is removed
@@ -72,7 +77,7 @@ _FORBIDDEN_KEY_SUBSTRINGS: tuple[str, ...] = (
 # `emulator_bridge.py`/`run_emulator_bridge.py`'s established camelCase dict shape).
 _MULTISET_PILE_KEYS = frozenset({"drawPile", "discardPile", "exhaustPile"})
 
-# Deleted outright (mask version 1.0 rule), not reduced to a Multiset.
+# Deleted outright, not reduced to a Multiset.
 _DELETE_KEYS = frozenset({"playPile"})
 
 # Emulator-specific Combat Reward (contract: "Emulator固有Combat Rewardを除去") - the
@@ -124,6 +129,13 @@ def _scrub(node: Any) -> Any:
                 continue
             if key in _MULTISET_PILE_KEYS:
                 scrubbed[key] = _multiset_of(value)
+                continue
+            if key == "pendingChoice":
+                # Unlike ordinary state fields, pending-choice semantics/identity are
+                # never exposed merely because their key name looks harmless. Normalize
+                # the whole object to the explicit public contract first, then run the
+                # normal recursive scrub over retained option/card payloads as well.
+                scrubbed[key] = _scrub(normalize_pending_choice(value))
                 continue
             if key.lower() in _METRICS_EXTRAS_INFO_KEY_NAMES and isinstance(value, dict):
                 scrubbed[key] = {k: _scrub(v) for k, v in value.items() if k in _ALLOWLISTED_METRICS_EXTRAS_INFO_KEYS}
