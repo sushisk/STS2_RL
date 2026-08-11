@@ -5,6 +5,7 @@ on:
     branches:
       - main
 
+disabled: false
 permissions:
   contents: write
 
@@ -149,9 +150,9 @@ jobs:
       - name: Commit validated fix
         shell: bash
         run: |
-          rm .github/workflows/agent_fix_review_hidden_take.yml .github/workflows/agent_fix_review_hidden_take_pr.yml
+          rm .github/workflows/agent_fix_review_hidden_take_pr.yml
           git config user.name 'OpenAI Agent'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add Run/worker_pool.py Run/choice_branch_runner.py Run/tests/test_reward_auto_progress.py .github/workflows/agent_fix_review_hidden_take.yml .github/workflows/agent_fix_review_hidden_take_pr.yml
+          git add Run/worker_pool.py Run/choice_branch_runner.py .github/workflows/agent_fix_review_hidden_take_pr.yml
           git commit -m 'fix hidden potion take during prefix discovery'
           git push origin HEAD:agent/reward-decision-architecture
