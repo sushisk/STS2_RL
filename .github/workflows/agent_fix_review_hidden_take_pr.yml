@@ -1,0 +1,157 @@
+name: agent hidden TAKE review PR validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/reward-decision-architecture
+          fetch-depth: 0
+      - name: Apply review fix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          worker = Path('Run/worker_pool.py')
+          text = worker.read_text()
+          old = '''    discovered: list[int] = []
+    obs = session.get_observation()
+    for _ in range(400):
+        if obs["boundary"] in (work_item.target_boundary, RUN_TERMINAL):
+            return discovered
+        actions = session.get_legal_actions()
+        if not actions:
+            return discovered
+        action = pick_default_action(actions)
+        result = session.step(action["action_id"])
+        discovered.append(action["action_id"])
+        obs = result["observation"]
+    return discovered
+'''
+          new = '''    discovered: list[int] = []
+    initial_auto = drain_trivial_reward_frontier(session)
+    discovered.extend(initial_auto.auto_action_ids)
+    obs = session.get_observation()
+    for _ in range(400):
+        if obs["boundary"] in (work_item.target_boundary, RUN_TERMINAL):
+            return discovered
+        actions = session.get_legal_actions()
+        if not actions:
+            return discovered
+        action = pick_default_action(actions)
+        session.step(action["action_id"])
+        discovered.append(action["action_id"])
+        auto = drain_trivial_reward_frontier(session)
+        discovered.extend(auto.auto_action_ids)
+        obs = session.get_observation()
+    return discovered
+'''
+          if text.count(old) != 1:
+              raise SystemExit(f'worker discovery block matches={text.count(old)}')
+          worker.write_text(text.replace(old, new, 1))
+
+          runner = Path('Run/choice_branch_runner.py')
+          text = runner.read_text()
+          marker = 'from legal_action_identity import legal_action_semantic_key\n'
+          if text.count(marker) != 1:
+              raise SystemExit('choice runner import marker mismatch')
+          text = text.replace(marker, marker + 'from reward_auto_progress import drain_trivial_reward_frontier\n', 1)
+
+          old = '''def drive_to_map_or_terminal(session: WholeRunSession, *, max_steps: int = 800) -> dict:
+    obs = session.get_observation()
+    steps = 0
+    while obs["boundary"] not in (MAP_SELECT, RUN_TERMINAL) and steps < max_steps:
+        actions = session.get_legal_actions()
+        if not actions:
+            break
+        action = pick_default_action(actions)
+        result = session.step(action["action_id"])
+        obs = result["observation"]
+        steps += 1
+    return obs
+'''
+          new = '''def drive_to_map_or_terminal(session: WholeRunSession, *, max_steps: int = 800) -> dict:
+    drain_trivial_reward_frontier(session)
+    obs = session.get_observation()
+    steps = 0
+    while obs["boundary"] not in (MAP_SELECT, RUN_TERMINAL) and steps < max_steps:
+        actions = session.get_legal_actions()
+        if not actions:
+            break
+        action = pick_default_action(actions)
+        session.step(action["action_id"])
+        drain_trivial_reward_frontier(session)
+        obs = session.get_observation()
+        steps += 1
+    return obs
+'''
+          if text.count(old) != 1:
+              raise SystemExit(f'drive helper matches={text.count(old)}')
+          text = text.replace(old, new, 1)
+
+          old = '''    entered = session.choose_room(room_id)
+    prefix: list[int] = []
+    obs = session.get_observation()
+    if obs["boundary"] == target_boundary:
+        return prefix, entered
+    for _ in range(max_steps):
+        actions = session.get_legal_actions()
+        if not actions:
+            return prefix, entered
+        action = pick_default_action(actions)
+        result = session.step(action["action_id"])
+        prefix.append(action["action_id"])
+        obs = result["observation"]
+        if obs["boundary"] in (target_boundary, RUN_TERMINAL):
+            return prefix, entered
+    return prefix, entered
+'''
+          new = '''    entered = session.choose_room(room_id)
+    prefix: list[int] = []
+    initial_auto = drain_trivial_reward_frontier(session)
+    prefix.extend(initial_auto.auto_action_ids)
+    obs = session.get_observation()
+    if obs["boundary"] == target_boundary:
+        return prefix, entered
+    for _ in range(max_steps):
+        actions = session.get_legal_actions()
+        if not actions:
+            return prefix, entered
+        action = pick_default_action(actions)
+        session.step(action["action_id"])
+        prefix.append(action["action_id"])
+        auto = drain_trivial_reward_frontier(session)
+        prefix.extend(auto.auto_action_ids)
+        obs = session.get_observation()
+        if obs["boundary"] in (target_boundary, RUN_TERMINAL):
+            return prefix, entered
+    return prefix, entered
+'''
+          if text.count(old) != 1:
+              raise SystemExit(f'reach helper matches={text.count(old)}')
+          runner.write_text(text.replace(old, new, 1))
+          PY
+      - name: Compile
+        run: python -m compileall -q API Run
+      - name: Reward transport tests
+        run: python Run/tests/test_reward_auto_progress.py
+      - name: Commit validated fix
+        shell: bash
+        run: |
+          rm .github/workflows/agent_fix_review_hidden_take.yml .github/workflows/agent_fix_review_hidden_take_pr.yml
+          git config user.name 'OpenAI Agent'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Run/worker_pool.py Run/choice_branch_runner.py Run/tests/test_reward_auto_progress.py .github/workflows/agent_fix_review_hidden_take.yml .github/workflows/agent_fix_review_hidden_take_pr.yml
+          git commit -m 'fix hidden potion take during prefix discovery'
+          git push origin HEAD:agent/reward-decision-architecture
