@@ -68,6 +68,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+from legal_action_identity import legal_action_semantic_key_text
+from reward_auto_progress import drain_trivial_reward_frontier
+
 WORK_KIND_CONTINUATION = "continuation"  # route to the worker already holding the Lease (Holder)
 WORK_KIND_SUB_BRANCH = "sub_branch"  # bootstrap fresh on a different, unleased worker (sibling)
 WORK_KIND_VALUES = frozenset({WORK_KIND_CONTINUATION, WORK_KIND_SUB_BRANCH})
@@ -269,10 +272,16 @@ class ChoiceReachResult:
 
 @dataclass(frozen=True)
 class ChoiceStepResult:
-    """What a worker reports after resolving a Choice with one action."""
+    """Visible-action result plus the settled frontier after RL-only auto transport."""
 
+    # Raw primary result of the Training-visible action. Keep this for transition/info
+    # semantics even when hidden auto actions are consumed afterward.
     step_result: dict
     run_state: dict
+    settled_observation: dict
+    settled_legal_actions: list[dict]
+    settled_room_context: dict
+    auto_action_ids: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -576,7 +585,7 @@ class _WorkerRuntime:
                             "boundary": reach.boundary,
                             "choice_scope": reach.choice_scope,
                             "legal_keys": sorted(
-                                f"{a['action_type']}|{a['label']}" for a in reach.legal_actions
+                                legal_action_semantic_key_text(action) for action in reach.legal_actions
                             ),
                         }
                     ),
@@ -594,11 +603,9 @@ class _WorkerRuntime:
                 )
 
             if work_item.choice_type == "map":
-                # Map's "Step" is ChooseRoom(roomId), not Step(actionId) - resolve_action_id
-                # carries the chosen room_id in this case. Normalized into the same
-                # {"observation", "room_context", "transition", "info"} shape every other
-                # choice type's step_result dict has, so downstream comparison code needs
-                # no Map-specific branch.
+                # Map's visible action is ChooseRoom(roomId). Preserve its raw result, then
+                # treat the entered room as a NEW frontier where trivial reward transport
+                # is allowed. The resulting hidden suffix belongs to the new room prefix.
                 entered = self.session.choose_room(work_item.resolve_action_id)
                 step_result = {
                     "action_id": work_item.resolve_action_id,
@@ -610,6 +617,16 @@ class _WorkerRuntime:
                 }
             else:
                 step_result = self.session.step(work_item.resolve_action_id)
+
+            auto = drain_trivial_reward_frontier(self.session)
+            settled_observation = self.session.get_observation()
+            settled_legal_actions = (
+                _map_rooms_as_legal_actions(self.session)
+                if settled_observation["boundary"] == "map_select"
+                else self.session.get_legal_actions()
+            )
+            settled_room_context = self.session.get_room_context()
+
             self.current_context_id = None
             return BranchResult(
                 status=BRANCH_STATUS_SUCCESS,
@@ -619,7 +636,14 @@ class _WorkerRuntime:
                 worker_generation=self.worker_generation,
                 pid=self.pid,
                 reach=reach,
-                step=ChoiceStepResult(step_result=step_result, run_state=self.session.get_run_state()),
+                step=ChoiceStepResult(
+                    step_result=step_result,
+                    run_state=self.session.get_run_state(),
+                    settled_observation=settled_observation,
+                    settled_legal_actions=settled_legal_actions,
+                    settled_room_context=settled_room_context,
+                    auto_action_ids=auto.auto_action_ids,
+                ),
             )
         except BaseException as exc:  # noqa: BLE001 - worker must normalize faults, never crash silently.
             self.current_context_id = None

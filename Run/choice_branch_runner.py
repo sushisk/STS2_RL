@@ -29,6 +29,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from legal_action_identity import legal_action_semantic_key
 from room_progression_driver import pick_room
 from whole_run_session import (
     EVENT_CHOICE,
@@ -96,21 +97,6 @@ def inject_relic(snapshot_json: str, relic_id: str) -> str:
     )
     return json.dumps(data)
 
-
-def legal_action_semantic_key(action: dict) -> tuple:
-    """A Semantic Key for one LegalAction: action_type, Label, plus whichever identifying
-    parameters it carries (cardId/potionId/eventId/choiceId/enemyIndex/cost) - enough to
-    tell two structurally-different offered choices apart without depending on the
-    engine's own opaque per-call `action_id` (which is only an index into the CURRENT
-    LegalActions array and is not itself part of the choice's identity). Label is
-    included because some choice types carry NO distinguishing Parameters at all - Rest's
-    `choice_rest_option` is `Label: option.OptionId`/`Parameters: なし` per the Whole Run
-    API reference, so Label is the only signal that HEAL and SMITH are different choices.
-    """
-    params = action.get("parameters") or {}
-    key_param_names = ("cardId", "potionId", "eventId", "choiceId", "enemyIndex", "cost", "optionId")
-    key_params = tuple(sorted((k, params[k]) for k in key_param_names if k in params))
-    return (action["action_type"], action.get("label"), key_params)
 
 
 def semantic_key_set(actions: list[dict]) -> set:
