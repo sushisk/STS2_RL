@@ -45,6 +45,16 @@ def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
     The complete raw semantic descriptor is retained internally. Public masking may map
     unsupported future semantics to ``unknown`` for Training, but search identity must not
     collapse two mechanics merely because this RL build does not understand their fields.
+
+    Emulator's current choice-card producer removes a selected option from ``options``
+    while retaining only its decision-local ``optionId`` in ``selectedOptionIds``. Those
+    ids are reused by later choice instances, so after the first pick the remaining public
+    payload is insufficient to prove that two independently observed choices selected the
+    same card. Until the producer supplies a stable ``choiceInstanceId`` or selected-option
+    payload, distinct pending-choice objects therefore get a process-local namespace. This
+    deliberately gives up some de-duplication for partially selected choices rather than
+    risk merging mechanically different states. A future producer-provided
+    ``choiceInstanceId`` is used directly when present.
     """
     if not raw_pending_choice or not isinstance(raw_pending_choice, dict):
         return None
@@ -63,6 +73,17 @@ def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
     selected_option_ids = tuple(_state_key_value(value) for value in raw_selected_ids)
     if order_matters is False:
         selected_option_ids = tuple(sorted(selected_option_ids, key=repr))
+
+    selected_choice_namespace = None
+    if selected_option_ids:
+        choice_instance_id = raw_pending_choice.get("choiceInstanceId")
+        selected_choice_namespace = (
+            "producer_choice_instance",
+            _state_key_value(choice_instance_id),
+        ) if choice_instance_id is not None else (
+            "local_pending_choice_object",
+            id(raw_pending_choice),
+        )
 
     raw_options = raw_pending_choice.get("options")
     if not isinstance(raw_options, (list, tuple)):
@@ -88,6 +109,7 @@ def pending_choice_state_key(raw_pending_choice: Any) -> "tuple | None":
         raw_pending_choice.get("selectedCount"),
         semantic_identity,
         _state_key_value(raw_pending_choice.get("sourceEffectId")),
+        selected_choice_namespace,
         selected_option_ids,
         options,
     )
