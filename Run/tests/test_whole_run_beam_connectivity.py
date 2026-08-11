@@ -23,6 +23,7 @@ for _path in (_REPO_ROOT, _RUN_DIR):
         sys.path.insert(0, str(_path))
 
 from API.instance_whole_run_beam import WholeRunInstance  # noqa: E402
+from whole_run_session import MAP_SELECT, pick_default_action  # noqa: E402
 
 _COMBAT_BOUNDARIES = frozenset({"stable", "pending_choice"})
 _COMBAT_ACTION_TYPES = frozenset(
@@ -85,9 +86,15 @@ def _advance_root_to_combat(instance: WholeRunInstance) -> dict[str, Any]:
 
         actions = _available_actions(dto)
         assert actions, f"root stalled before Combat at boundary={dto.get('boundary')!r}"
+        if dto.get("boundary") == MAP_SELECT:
+            chosen_action_id = str(actions[0]["action_id"])
+        else:
+            # Mirror the existing real-Emulator connectivity driver so seed=1 follows
+            # the same known-good filler path until a Combat decision is exposed.
+            chosen_action_id = str(pick_default_action([dict(action) for action in actions])["action_id"])
         response = instance.commit_action(
             response["decision_point_id"],
-            str(actions[0]["action_id"]),
+            chosen_action_id,
         )
         assert response.get("status") == "completed", response
 
