@@ -8,6 +8,7 @@ RUN_DIR = Path(__file__).resolve().parents[1]
 if str(RUN_DIR) not in sys.path:
     sys.path.insert(0, str(RUN_DIR))
 
+from legal_action_identity import legal_action_semantic_key
 from reward_auto_progress import drain_trivial_reward_frontier
 
 
@@ -92,6 +93,31 @@ class RewardAutoProgressTests(unittest.TestCase):
         )
         with self.assertRaises(RuntimeError):
             drain_trivial_reward_frontier(session)
+
+    def test_potion_replacement_slots_have_distinct_semantic_identity(self):
+        common = {
+            "action_type": "choice_reward_potion_replace",
+            "label": "FAIRY_POTION:replace",
+        }
+        slot0 = {
+            **common,
+            "action_id": 11,
+            "parameters": {
+                "potionId": "FAIRY_POTION",
+                "potionSlot": 0,
+                "replacedPotionId": "FIRE_POTION",
+            },
+        }
+        slot1 = {
+            **common,
+            "action_id": 12,
+            "parameters": {
+                "potionId": "FAIRY_POTION",
+                "potionSlot": 1,
+                "replacedPotionId": "BLOCK_POTION",
+            },
+        }
+        self.assertNotEqual(legal_action_semantic_key(slot0), legal_action_semantic_key(slot1))
 
 
 if __name__ == "__main__":
