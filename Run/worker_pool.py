@@ -415,6 +415,8 @@ def _bootstrap_reach(session, work_item: ChoiceWorkItem) -> "list[int] | None":
         return None
 
     discovered: list[int] = []
+    initial_auto = drain_trivial_reward_frontier(session)
+    discovered.extend(initial_auto.auto_action_ids)
     obs = session.get_observation()
     for _ in range(400):
         if obs["boundary"] in (work_item.target_boundary, RUN_TERMINAL):
@@ -423,9 +425,11 @@ def _bootstrap_reach(session, work_item: ChoiceWorkItem) -> "list[int] | None":
         if not actions:
             return discovered
         action = pick_default_action(actions)
-        result = session.step(action["action_id"])
+        session.step(action["action_id"])
         discovered.append(action["action_id"])
-        obs = result["observation"]
+        auto = drain_trivial_reward_frontier(session)
+        discovered.extend(auto.auto_action_ids)
+        obs = session.get_observation()
     return discovered
 
 
