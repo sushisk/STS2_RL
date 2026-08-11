@@ -72,14 +72,31 @@ class _BranchIds:
 
 
 class _DecisionPoints:
+    def __init__(self) -> None:
+        self._current = {"root": "decision-1"}
+        self._counter = 1
+
     def validate(self, branch_id: str, decision_point_id: str) -> None:
         assert branch_id == "root"
         assert decision_point_id == "decision-1"
+
+    def issue(self, branch_id: str) -> None:
+        self._counter += 1
+        self._current[branch_id] = f"decision-{self._counter}"
+
+    def current(self, branch_id: str) -> str:
+        return self._current[branch_id]
 
 
 class _History:
     def fork(self):
         return self
+
+    def observe_room_context(self, room_context) -> None:
+        del room_context
+
+    def to_public_list(self) -> list:
+        return []
 
 
 class _Pool:
@@ -93,6 +110,44 @@ class _Pool:
             SimpleNamespace(
                 status="fault",
                 diagnostics={"message": "expected test fault", "fault_kind": "emulator_error"},
+            )
+            for _ in work_items
+        ]
+
+
+class _CombatCompletionPool:
+    def dispatch_choice_work_items(self, work_items, lease_registry):
+        del lease_registry
+        return [
+            SimpleNamespace(
+                status="success",
+                diagnostics={},
+                step=SimpleNamespace(
+                    step_result={
+                        "transition": {
+                            "kind": "combat_completed",
+                            "victory": True,
+                            "combat_session_id": "hidden-combat-session",
+                            "final_observation": {
+                                "seed": 123456,
+                                "state": {"hp": 42, "maxHp": 80},
+                            },
+                        }
+                    },
+                    settled_observation={
+                        "boundary": "reward_select",
+                        "state": {"hp": 42, "maxHp": 80},
+                    },
+                    settled_room_context={"boundary": "reward_select"},
+                    settled_legal_actions=[
+                        {
+                            "action_id": 10,
+                            "action_type": "choice_reward_card",
+                            "is_available": True,
+                        }
+                    ],
+                    auto_action_ids=(),
+                ),
             )
             for _ in work_items
         ]
@@ -219,6 +274,28 @@ def test_whole_run_single_combat_timeout_keeps_branch_fault_semantics() -> None:
     assert response["branch_id"] == "branch-1"
     assert response["fault_kind"] == FAULT_TASK_TIMEOUT
     assert response["error"] == "worker batch timed out"
+
+
+def test_whole_run_combat_completion_transition_is_preserved_and_masked() -> None:
+    instance = _combat_instance(_CombatCompletionPool())
+
+    response = instance.emulate_action(
+        parent_branch_id="root",
+        branch_id="branch-1",
+        rng_id=1,
+        decision_point_id="decision-1",
+        action_id="1",
+        simulation_options=None,
+    )
+
+    dto = response["masked_emulator_dto"]
+    assert response["status"] == STATUS_COMPLETED
+    assert dto["boundary"] == "reward_select"
+    assert dto["transition"]["kind"] == "combat_completed"
+    assert dto["transition"]["victory"] is True
+    assert "combat_session_id" not in dto["transition"]
+    assert "seed" not in dto["transition"]["final_observation"]
+    assert dto["legal_actions"][0]["action_type"] == "choice_reward_card"
 
 
 def test_unavailable_whole_run_combat_action_is_rejected_before_dispatch() -> None:
