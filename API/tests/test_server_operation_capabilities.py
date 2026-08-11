@@ -2,17 +2,24 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from types import SimpleNamespace
 
-from API.dto import (
+_ROOT = Path(__file__).resolve().parents[2]
+for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+from API.dto import (  # noqa: E402
     INSTANCE_TYPE_WHOLE_RUN,
     OP_EMULATE_ACTIONS,
     SCHEMA_VERSION,
     STATUS_COMPLETED,
     request_id_for,
 )
-from API.instance_whole_run_beam import _is_combat_view
-from API.server import RLApiServer
+from API.instance_whole_run_beam import _is_combat_view  # noqa: E402
+from API.server import RLApiServer  # noqa: E402
 
 
 class _WholeRunStub:
