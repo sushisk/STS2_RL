@@ -1,8 +1,8 @@
 """Real-Emulator connectivity regression for Whole Run Combat Beam branching.
 
 This intentionally does not mock ``WholeRunSession`` or ``WholeRunWorkerPool``. It
-walks a real run to the first Combat decision, then creates a child and a grandchild
-through ``API.instance_whole_run_beam.WholeRunInstance.emulate_actions``.
+walks a real run to the first Combat decision, dispatches multiple real sibling Branches
+in one ``emulate_actions`` call, then creates a grandchild from the preferred sibling.
 
 Run directly from the repository root or this directory::
 
@@ -129,7 +129,49 @@ def _emulate_one_depth(
     return result
 
 
-def test_real_emulator_whole_run_beam_supports_two_depths() -> None:
+def _emulate_root_siblings(
+    instance: WholeRunInstance,
+    root: Mapping[str, Any],
+) -> tuple[dict[str, Any], list[str]]:
+    dto = root.get("masked_emulator_dto")
+    assert isinstance(dto, Mapping) and _is_combat_decision(dto), root
+    actions = _available_actions(dto)
+    preferred_id = _pick_nonterminal_friendly_action(dto)
+    secondary = next(
+        (action for action in actions if str(action["action_id"]) != preferred_id),
+        None,
+    )
+    assert secondary is not None, "expected at least two available real Combat actions"
+
+    items = [
+        {
+            "parent_branch_id": root["branch_id"],
+            "branch_id": "real-beam-d1-primary",
+            "rng_id": 1,
+            "decision_point_id": root["decision_point_id"],
+            "action_id": preferred_id,
+        },
+        {
+            "parent_branch_id": root["branch_id"],
+            "branch_id": "real-beam-d1-sibling",
+            "rng_id": 2,
+            "decision_point_id": root["decision_point_id"],
+            "action_id": str(secondary["action_id"]),
+        },
+    ]
+    response = instance.emulate_actions(
+        items=items,
+        simulation_options={"stop_condition": "next_decision"},
+    )
+    assert response.get("status") == "completed", response
+    results = response.get("branch_results") or {}
+    assert set(results) == {"real-beam-d1-primary", "real-beam-d1-sibling"}, response
+    for branch_id in results:
+        assert results[branch_id].get("status") == "completed", results[branch_id]
+    return results["real-beam-d1-primary"], list(results)
+
+
+def test_real_emulator_whole_run_beam_supports_sibling_batch_and_two_depths() -> None:
     instance = WholeRunInstance(
         "real-whole-run-beam-connectivity",
         {"seed": 1, "character_id": "Ironclad", "ascension": 0},
@@ -140,14 +182,14 @@ def test_real_emulator_whole_run_beam_supports_two_depths() -> None:
     created: list[str] = []
     try:
         root = _advance_root_to_combat(instance)
-        first = _emulate_one_depth(instance, root, branch_id="real-beam-d1", rng_id=1)
-        created.append("real-beam-d1")
+        first, siblings = _emulate_root_siblings(instance, root)
+        created.extend(siblings)
 
         first_dto = first.get("masked_emulator_dto")
         assert isinstance(first_dto, Mapping), first
         assert _is_combat_decision(first_dto), (
-            "the first real branch unexpectedly left Combat; the preferred system action "
-            "should leave a follow-up Combat decision",
+            "the preferred real sibling unexpectedly left Combat; the selected system-like "
+            "action should leave a follow-up Combat decision",
             first,
         )
 
@@ -159,7 +201,7 @@ def test_real_emulator_whole_run_beam_supports_two_depths() -> None:
         )
         created.append("real-beam-d2")
 
-        assert second["parent_branch_id"] == "real-beam-d1"
+        assert second["parent_branch_id"] == "real-beam-d1-primary"
         assert second["rng_id"] == first["rng_id"]
         assert len(second.get("branch_log") or []) >= 2
     finally:
@@ -169,5 +211,5 @@ def test_real_emulator_whole_run_beam_supports_two_depths() -> None:
 
 
 if __name__ == "__main__":
-    test_real_emulator_whole_run_beam_supports_two_depths()
-    print("PASS test_real_emulator_whole_run_beam_supports_two_depths")
+    test_real_emulator_whole_run_beam_supports_sibling_batch_and_two_depths()
+    print("PASS test_real_emulator_whole_run_beam_supports_sibling_batch_and_two_depths")
