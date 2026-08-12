@@ -77,9 +77,18 @@
       "required": ["card_id"],
       "properties": {
         "card_id": {"type": "string"},
-        "is_upgraded": {"type": "boolean", "default": false, "description": "Requesting true for a non-upgradable card (most Status/Curse cards, or a card already at MaxUpgradeLevel) throws ArgumentException - do not set true speculatively; only set it from a source that actually recorded upgrade state (e.g. a real run's current_upgrade_level > 0)."},
+        "is_upgraded": {"type": "boolean", "default": false, "description": "Convenience shorthand for upgrade_level=1; ignored when upgrade_level is set nonzero. Requesting true for a non-upgradable card (most Status/Curse cards, or a card already at MaxUpgradeLevel) throws ArgumentException - do not set true speculatively; only set it from a source that actually recorded upgrade state (e.g. a real run's current_upgrade_level > 0)."},
+        "upgrade_level": {"type": "integer", "default": 0, "description": "How many times to upgrade this card instance (some cards' MaxUpgradeLevel exceeds 1). 0 (default) falls back to is_upgraded. Requesting a level a card can't reach throws ArgumentException."},
         "tinker_time_type": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeType."},
-        "tinker_time_rider": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeRider."}
+        "tinker_time_rider": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeRider."},
+        "enchantment": {
+          "type": ["object", "null"],
+          "description": "Optional per-instance Enchantment, mirrored from Observation card.enchantment. Requesting one that can't apply to this card throws.",
+          "properties": {
+            "id": {"type": "string"},
+            "amount": {"type": "integer", "default": 1}
+          }
+        }
       }
     },
     "power_stack": {

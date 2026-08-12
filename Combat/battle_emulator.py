@@ -256,12 +256,21 @@ def _card_instance_from_payload(types, card: dict) -> Any:
     instance = CardInstanceScenario()
     instance.CardId = card["card_id"] if "card_id" in card else card["id"]
     instance.IsUpgraded = bool(card.get("is_upgraded", card.get("upgraded", False)))
+    upgrade_level = card.get("upgrade_level", card.get("upgradeLevel"))
+    if upgrade_level is not None:
+        instance.UpgradeLevel = int(upgrade_level)
     tinker_time_type = card.get("tinker_time_type", card.get("tinkerTimeType"))
     tinker_time_rider = card.get("tinker_time_rider", card.get("tinkerTimeRider"))
     if tinker_time_type not in (None, ""):
         instance.TinkerTimeType = tinker_time_type
     if tinker_time_rider not in (None, ""):
         instance.TinkerTimeRider = tinker_time_rider
+    enchantment = card.get("enchantment")
+    if enchantment:
+        instance.EnchantmentId = enchantment.get("id", enchantment.get("enchantment_id"))
+        amount = enchantment.get("amount")
+        if amount is not None:
+            instance.EnchantmentAmount = int(amount)
     return instance
 
 
@@ -388,16 +397,19 @@ def is_scenario_restorable_pending_choice(state: dict) -> bool:
 
 def _card_instances_from_engine_cards(types, cards) -> Any:
     """Like _card_instances(), but source cards are engine-observation card dicts
-    ({"id","type","rarity","cost","targetType","upgraded","upgradeLevel", ...} - see
-    BuildCardListDict) rather than a scenario spec's {"card_id","is_upgraded"} dicts."""
+    ({"id","type","rarity","cost","targetType","upgraded","upgradeLevel","enchantment",
+    ...} - see BuildCardListDict) rather than a scenario spec's {"card_id",
+    "is_upgraded"} dicts."""
     return _card_instances(
         types,
         [
             {
                 "card_id": c["id"],
                 "is_upgraded": c.get("upgraded", False),
+                "upgradeLevel": c.get("upgradeLevel"),
                 "tinkerTimeType": c.get("tinkerTimeType"),
                 "tinkerTimeRider": c.get("tinkerTimeRider"),
+                "enchantment": c.get("enchantment"),
             }
             for c in (cards or [])
         ],

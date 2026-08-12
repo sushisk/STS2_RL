@@ -18,8 +18,10 @@ SUPPORTED_SCHEMA_VERSIONS = frozenset({SCHEMA_VERSION})
 DTO_VERSION = "emulator-fca2f06"
 # 1.1 adds explicit pendingChoice semantic/identity normalization and allowlisting.
 # 1.2 changes drawPile/discardPile/exhaustPile from a {card_id: count} multiset to a
-# list of {"id", "upgraded", "count"} records - upgraded state was previously
-# collapsed away by keying the count on card_id alone (see masking.py::_multiset_of).
+# list of per-distinct-instance records (id/type/rarity/cost/targetType/upgraded/
+# upgradeLevel/tinkerTimeType/tinkerTimeRider/enchantment/count) - upgrade and
+# enchantment state were previously collapsed away by keying the count on card_id
+# alone (see masking.py::_multiset_of/_card_identity_key).
 MASK_VERSION = "1.2"
 
 OP_START_INSTANCE = "start_instance"

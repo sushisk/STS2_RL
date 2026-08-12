@@ -95,37 +95,74 @@ _ALLOWLISTED_METRICS_EXTRAS_INFO_KEYS: frozenset[str] = frozenset()
 _METRICS_EXTRAS_INFO_KEY_NAMES = frozenset({"metrics", "extras", "info"})
 
 
-def _card_id_of(card_entry: Any) -> "str | None":
-    if isinstance(card_entry, dict):
-        return card_entry.get("id") or card_entry.get("cardId") or card_entry.get("card_id")
-    return None
+def _card_identity_key(entry: dict) -> tuple:
+    """Everything that makes two card instances the same for multiset purposes.
+
+    Deliberately excludes `type`/`rarity`/`cost`/`targetType`: those are derived,
+    momentary-computed display fields (`cost` in particular reflects live
+    CostModifiers), not per-instance identity - two cards with the same identity key
+    are expected to share them, but this is not re-verified per instance.
+    """
+    enchantment = entry.get("enchantment") or {}
+    return (
+        entry.get("id"),
+        int(entry.get("upgradeLevel", 0) or 0),
+        entry.get("tinkerTimeType"),
+        entry.get("tinkerTimeRider"),
+        enchantment.get("id"),
+        enchantment.get("amount"),
+        enchantment.get("status"),
+    )
+
+
+def _sort_key(identity_key: tuple) -> tuple:
+    return tuple("" if part is None else part for part in identity_key)
 
 
 def _multiset_of(pile: Any) -> list:
-    """Reduce a pile to per-(card_id, upgraded) counts, discarding order only.
+    """Reduce a pile to per-distinct-card-instance counts, discarding order only.
 
     Order is genuinely Hidden Information (contract: "順序を除去してMultiset化"), but a
-    card's upgraded state is not - the player always knows exactly which of their own
-    cards are upgraded. Keying the count only by `card_id` (pre mask_version 1.2)
-    silently collapsed e.g. two plain "BASH" and one "BASH+" into a single count=3
-    entry with no way to tell them apart, which was an under-delivery of the "Multiset
-    of piles" contract rather than an intentional part of it. `upgradeLevel`/tinker-time
-    fields beyond the boolean upgraded flag are still not preserved here - only
-    `hand` (never reduced to a multiset) carries those.
+    card's upgrade/enchantment state is not - the player always knows exactly which of
+    their own cards are upgraded/enchanted. Keying the count only by `card_id` (pre
+    mask_version 1.2) silently collapsed e.g. two plain "BASH" and one "BASH+" into a
+    single count=3 entry with no way to tell them apart, which was an under-delivery of
+    the "Multiset of piles" contract rather than an intentional part of it.
+
+    Each returned record carries the same fields `BuildCardDict` exposes for `hand`
+    (id/type/rarity/cost/targetType/upgraded/upgradeLevel/tinkerTimeType/
+    tinkerTimeRider/enchantment - see `_card_identity_key` for which of these are
+    identity vs. derived-display-only) plus `count`.
     """
     if not isinstance(pile, list):
         return []
     counts: Counter = Counter()
+    representatives: dict[tuple, dict] = {}
     for entry in pile:
-        card_id = _card_id_of(entry)
-        if card_id is None:
+        if not isinstance(entry, dict) or entry.get("id") is None:
             continue
-        upgraded = bool(entry.get("upgraded", False)) if isinstance(entry, dict) else False
-        counts[(card_id, upgraded)] += 1
-    return [
-        {"id": card_id, "upgraded": upgraded, "count": count}
-        for (card_id, upgraded), count in sorted(counts.items())
-    ]
+        key = _card_identity_key(entry)
+        counts[key] += 1
+        representatives.setdefault(key, entry)
+    result = []
+    for key in sorted(counts, key=_sort_key):
+        entry = representatives[key]
+        result.append(
+            {
+                "id": entry.get("id"),
+                "type": entry.get("type"),
+                "rarity": entry.get("rarity"),
+                "cost": entry.get("cost"),
+                "targetType": entry.get("targetType"),
+                "upgraded": bool(entry.get("upgraded", False)),
+                "upgradeLevel": int(entry.get("upgradeLevel", 0) or 0),
+                "tinkerTimeType": entry.get("tinkerTimeType"),
+                "tinkerTimeRider": entry.get("tinkerTimeRider"),
+                "enchantment": entry.get("enchantment"),
+                "count": counts[key],
+            }
+        )
+    return result
 
 
 def _is_forbidden_key(key: str) -> bool:

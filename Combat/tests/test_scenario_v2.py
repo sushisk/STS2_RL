@@ -473,6 +473,83 @@ def test_upgraded_and_unupgraded_mixed():
     # confirm the upgrade flag itself round-trips per-instance, not pile-wide.
 
 
+def test_upgrade_level_field_matches_is_upgraded_shorthand():
+    """UpgradeLevel=1 must produce the same result as the legacy is_upgraded=True
+    shorthand (no card in this content build currently exceeds MaxUpgradeLevel=1, so
+    this only exercises level 1 - the loop-based CardCmd.Upgrade application in
+    GameInstance.CreateScenarioCard is otherwise unverified above level 1 by this repo)."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [
+            {"card_id": "STRIKE_IRONCLAD", "upgrade_level": 1},
+            {"card_id": "STRIKE_IRONCLAD", "is_upgraded": True},
+        ],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    state = emu.initialize(spec)
+    hand = state.engine_state["hand"]
+    assert [c["upgraded"] for c in hand] == [True, True], hand
+    assert [c["upgradeLevel"] for c in hand] == [1, 1], hand
+
+
+def test_enchantment_applies_and_is_observable():
+    """Sharp (attack-only, +damage) round-trips through initialize() and is exposed on
+    the engine-observation card dict."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [
+            {"card_id": "STRIKE_IRONCLAD", "enchantment": {"id": "SHARP", "amount": 3}},
+        ],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    state = emu.initialize(spec)
+    hand = state.engine_state["hand"]
+    assert len(hand) == 1, hand
+    enchantment = hand[0]["enchantment"]
+    assert enchantment is not None and enchantment["id"] == "SHARP" and enchantment["amount"] == 3, hand
+
+
+def test_enchantment_survives_apply_action_restore():
+    """Enchantment must not be silently dropped by build_scenario_from_state() restore
+    (the same class of bug test_upgrade_and_potions_survive_apply_action_restore
+    pins for upgrade state/potions)."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [{"card_id": "STRIKE_IRONCLAD", "enchantment": {"id": "SHARP", "amount": 3}}],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    state = emu.initialize(spec)
+    legal = emu.enumerate_legal_actions(state)
+    end_turn = next(a for a in legal if a["action_type"] == "system")
+    state2 = emu.apply_action(state, end_turn)
+    hand2 = state2.engine_state["hand"]
+    strikes = [c for c in hand2 if c["id"] == "STRIKE_IRONCLAD"]
+    assert strikes and strikes[0]["enchantment"] is not None and strikes[0]["enchantment"]["id"] == "SHARP", hand2
+
+
+def test_enchantment_rejected_for_incompatible_card_type():
+    """Sharp is attack-only (EnchantmentModel.CanEnchantCardType); requesting it for a
+    Skill must raise, not silently no-op."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [{"card_id": "DEFEND_IRONCLAD", "enchantment": {"id": "SHARP", "amount": 1}}],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    _assert_raises_not_aggregate(lambda: emu.initialize(spec), "enchant_incompatible_card_type")
+
+
 def test_potions_present():
     """ポーションありScenario"""
     emu = BattleEmulator()
