@@ -8,13 +8,14 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from API.dto import SCHEMA_VERSION
 from API.identifiers import BranchIdRegistry, DecisionPointRegistry, SessionLedger
 from API.validation import RequestRejected, validate_request
 
 
 def _request(operation: str, *, seq: int = 1, include_instance_id: bool = True, **fields) -> dict:
     payload = {
-        "schema_version": "0.7",
+        "schema_version": SCHEMA_VERSION,
         "client_session_id": "session-a",
         "request_seq": seq,
         "request_id": f"session-a:{seq}",
@@ -32,6 +33,13 @@ def _assert_rejected(payload: dict) -> None:
     except RequestRejected:
         return
     raise AssertionError("expected RequestRejected")
+
+
+def test_wire_schema_is_v08_hard_cutover() -> None:
+    assert SCHEMA_VERSION == "0.8"
+    legacy = _request("close_instance")
+    legacy["schema_version"] = "0.7"
+    _assert_rejected(legacy)
 
 
 def test_start_instance_required_fields() -> None:
