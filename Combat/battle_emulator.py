@@ -281,7 +281,10 @@ def _card_instance_from_payload(types, card: dict) -> Any:
         instance.TinkerTimeRider = tinker_time_rider
     enchantment = card.get("enchantment")
     if enchantment:
-        instance.EnchantmentId = enchantment.get("id", enchantment.get("enchantment_id"))
+        enchantment_id = enchantment.get("id", enchantment.get("enchantment_id"))
+        if not enchantment_id:
+            raise ValueError("enchantment.id is required when enchantment is present")
+        instance.EnchantmentId = enchantment_id
         amount = enchantment.get("amount")
         if amount is not None:
             instance.EnchantmentAmount = int(amount)
@@ -364,8 +367,10 @@ def _pending_choice_scenario(types, pending_choice) -> Any:
             {
                 "card_id": c["id"] if "id" in c else c["card_id"],
                 "is_upgraded": c.get("upgraded", c.get("is_upgraded", False)),
+                "upgradeLevel": c.get("upgradeLevel", c.get("upgrade_level")),
                 "tinkerTimeType": c.get("tinkerTimeType", c.get("tinker_time_type")),
                 "tinkerTimeRider": c.get("tinkerTimeRider", c.get("tinker_time_rider")),
+                "enchantment": c.get("enchantment"),
             }
             for c in (pending_choice.get("options") or [])
         ],
