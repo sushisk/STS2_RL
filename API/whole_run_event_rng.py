@@ -88,16 +88,35 @@ class EventRngHypothesisRegistry:
     _branch_refs_by_key: dict[tuple, set[str]] = field(default_factory=dict)
     _generation_counts: dict[tuple, int] = field(default_factory=dict)
 
-    def get_or_create(self, key: tuple, base_state: dict, rng_id: int) -> dict:
+    def prepare_state(self, key: tuple, base_state: dict, rng_id: int) -> dict:
+        """Return the state a Branch would use without mutating registry ownership."""
         entry = self._entries.get(key)
         if entry is not None:
             return entry.state
+        return derive_event_rng_hypothesis(base_state, rng_id)
 
-        state = derive_event_rng_hypothesis(base_state, rng_id)
+    def _ensure_entry(self, key: tuple, state: dict) -> _HypothesisEntry:
+        entry = self._entries.get(key)
+        if entry is not None:
+            if entry.state != state:
+                raise RuntimeError("prepared Event RNG state no longer matches live hypothesis")
+            return entry
         generation = self._generation_counts.get(key, 0) + 1
         self._generation_counts[key] = generation
-        self._entries[key] = _HypothesisEntry(state=state, generation=generation)
-        return state
+        entry = _HypothesisEntry(state=state, generation=generation)
+        self._entries[key] = entry
+        return entry
+
+    def commit_branch(self, key: tuple, state: dict, branch_id: str) -> None:
+        """Atomically publish a prepared hypothesis reference for one Branch."""
+        self._ensure_entry(key, state)
+        self.register_branch(key, branch_id)
+
+    def get_or_create(self, key: tuple, base_state: dict, rng_id: int) -> dict:
+        # Kept for existing callers/tests. New Branch preparation should prefer the
+        # mutation-free prepare_state() + commit_branch() transaction.
+        state = self.prepare_state(key, base_state, rng_id)
+        return self._ensure_entry(key, state).state
 
     def register_branch(self, key: tuple, branch_id: str) -> None:
         refs = self._branch_refs_by_key.setdefault(key, set())
