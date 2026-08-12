@@ -359,3 +359,9 @@ def test_event_commit_failure_rolls_back_earlier_batch_commits() -> None:
     assert not inst._event_rng_registry.is_live(
         (ROOT_BRANCH_ID, decision_point_id, 2)
     )
+    assert inst._event_rng_registry.generation_of(
+        (ROOT_BRANCH_ID, decision_point_id, 1)
+    ) == 0
+    assert inst._event_rng_registry.generation_of(
+        (ROOT_BRANCH_ID, decision_point_id, 2)
+    ) == 0
