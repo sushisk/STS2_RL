@@ -205,7 +205,15 @@ class WholeRunInstance:
         max_branches: int = 64,
     ) -> None:
         self.instance_id = instance_id
+        self._god_mode = bool(instance_config.get("god_mode", False))
         self._session = WholeRunSession()
+        if self._god_mode:
+            # Explicit, per-instance opt-in only - see Outputs/reports/
+            # god_mode_data_collection_proposal_20260812.md. GodModeEnabled round-trips
+            # through save_state()/load_state(), so every Branch Worker spawned from a
+            # Map snapshot captured after this call inherits it automatically; no other
+            # call site is needed.
+            self._session.enable_god_mode_for_testing()
         self._session.start_run(
             instance_config.get("seed", 1),
             instance_config.get("character_id", "IRONCLAD"),
