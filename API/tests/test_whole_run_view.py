@@ -36,6 +36,9 @@ def _dummy_work_item(choice_type: str, target_boundary: str) -> ChoiceWorkItem:
 
 
 def _success_result(step_result: dict, *, choice_type: str, target_boundary: str) -> BranchResult:
+    settled_legal_actions = step_result.get("legal_actions")
+    if settled_legal_actions is None:
+        settled_legal_actions = step_result.get("room_enter_result", {}).get("legal_actions", [])
     return BranchResult(
         status="success",
         work_item=_dummy_work_item(choice_type, target_boundary),
@@ -43,7 +46,13 @@ def _success_result(step_result: dict, *, choice_type: str, target_boundary: str
         worker_slot=0,
         worker_generation=1,
         pid=123,
-        step=ChoiceStepResult(step_result=step_result, run_state={}),
+        step=ChoiceStepResult(
+            step_result=step_result,
+            run_state={},
+            settled_observation=step_result["observation"],
+            settled_legal_actions=settled_legal_actions,
+            settled_room_context=step_result["room_context"],
+        ),
     )
 
 

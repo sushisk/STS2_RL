@@ -341,6 +341,12 @@ class _FakeEventRngRegistry:
     def get_or_create(self, key: tuple, state: dict, rng_id: int) -> dict:
         return dict(state)
 
+    def prepare_state(self, key: tuple, state: dict, rng_id: int) -> dict:
+        return dict(state)
+
+    def commit_branch(self, key: tuple, state: dict, branch_id: str) -> None:
+        self.registered.append((key, branch_id))
+
     def register_branch(self, key: tuple, branch_id: str) -> None:
         self.registered.append((key, branch_id))
 
@@ -363,7 +369,13 @@ class _FakeWholeRunPool:
                             "outcome": self.outcome,
                         },
                         "room_context": {},
-                    }
+                    },
+                    settled_observation={
+                        "boundary": "run_terminal",
+                        "outcome": self.outcome,
+                    },
+                    settled_legal_actions=[],
+                    settled_room_context={},
                 ),
             )
         ]
