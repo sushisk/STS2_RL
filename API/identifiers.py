@@ -87,6 +87,17 @@ class BranchIdRegistry:
             )
         self._ever_used.add(branch_id)
 
+    def rollback_registration(self, branch_id: str) -> None:
+        """Undo a registration that never became a public Branch.
+
+        This is intentionally narrower than a normal release. Once a Branch has been
+        committed to instance bookkeeping its ID remains permanently non-reusable; this
+        helper exists only for transaction rollback when commit itself raises before the
+        Branch becomes observable.
+        """
+        if branch_id != ROOT_BRANCH_ID:
+            self._ever_used.discard(branch_id)
+
     def is_known(self, branch_id: str) -> bool:
         return branch_id in self._ever_used
 
