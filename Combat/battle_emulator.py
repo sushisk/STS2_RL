@@ -582,6 +582,10 @@ def build_scenario_from_spec(spec: dict):
             enemy.FrogKnightHasBeetleCharged = bool(e["frog_knight_has_beetle_charged"])
         if e.get("waterfall_giant_current_pressure_gun_damage") is not None:
             enemy.WaterfallGiantCurrentPressureGunDamage = int(e["waterfall_giant_current_pressure_gun_damage"])
+        if e.get("forced_move") is not None:
+            enemy.ForcedMove = e["forced_move"]
+        if e.get("state_log") is not None:
+            enemy.StateLog = str_list(e["state_log"])
         enemy.Powers = _power_stacks(types, e.get("powers"))
         enemies.Add(enemy)
     scenario.Enemies = enemies

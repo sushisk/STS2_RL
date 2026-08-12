@@ -128,6 +128,8 @@
         "max_hp": {"type": ["integer", "null"], "description": "Null = reuse hp as max (100% health)."},
         "block": {"type": ["integer", "null"]},
         "slot_name": {"type": ["string", "null"], "description": "Set for the handful of slot-dependent monsters (Exoskeleton/Myte/PhantasmalGardener/Wriggler) to avoid a silent 'UNSET_MOVE' placeholder intent."},
+        "forced_move": {"type": ["string", "null"], "description": "Forces this enemy's first move to the named move-state id instead of a normal RNG-driven roll. See EnemyScenario.ForcedMove."},
+        "state_log": {"type": "array", "items": {"type": "string"}, "description": "This enemy's past move history (oldest first), for monsters whose move graph has a history-dependent weighted branch. See EnemyScenario.StateLog."},
         "powers": {"type": "array", "items": {"$ref": "#/definitions/power_stack"}}
       }
     },

@@ -550,6 +550,34 @@ def test_enchantment_rejected_for_incompatible_card_type():
     _assert_raises_not_aggregate(lambda: emu.initialize(spec), "enchant_incompatible_card_type")
 
 
+def test_aeonglass_increasing_intensity_upgrades_wither_via_real_engine():
+    """AEONGLASS's INCREASING_INTENSITY_MOVE must escalate Wither cards through the
+    real CardModel.CurrentUpgradeLevel/OnUpgrade system (CardCmd.Upgrade), not a
+    private disconnected counter - forced via the new EnemyScenario.ForcedMove
+    plumbing (battle_emulator.build_scenario_from_spec's "forced_move" enemy key)."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [{"card_id": "WITHER", "upgrade_level": 0}],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "AEONGLASS", "hp": 512, "forced_move": "INCREASING_INTENSITY_MOVE"}],
+    }
+    state = emu.initialize(spec)
+    wither_before = next(c for c in state.engine_state["hand"] if c["id"] == "WITHER")
+    assert wither_before["upgraded"] is False and wither_before["upgradeLevel"] == 0, wither_before
+    enemy = state.engine_state["enemies"][0]
+    assert enemy["intent"]["stateId"] == "INCREASING_INTENSITY_MOVE", enemy
+
+    legal = emu.enumerate_legal_actions(state)
+    end_turn = next(a for a in legal if a["action_type"] == "system")
+    state2 = emu.apply_action(state, end_turn)
+
+    wither_after = next(c for c in state2.engine_state["hand"] if c["id"] == "WITHER")
+    assert wither_after["upgraded"] is True, wither_after
+    assert wither_after["upgradeLevel"] == 1, wither_after
+
+
 def test_potions_present():
     """ポーションありScenario"""
     emu = BattleEmulator()
