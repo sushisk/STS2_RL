@@ -205,7 +205,10 @@ class WholeRunInstance:
         max_branches: int = 64,
     ) -> None:
         self.instance_id = instance_id
-        self._god_mode = bool(instance_config.get("god_mode", False))
+        god_mode = instance_config.get("god_mode", False)
+        if not isinstance(god_mode, bool):
+            raise RequestRejected("instance_config.god_mode must be of type bool")
+        self._god_mode = god_mode
         self._session = WholeRunSession()
         if self._god_mode:
             # Explicit, per-instance opt-in only - see Outputs/reports/
