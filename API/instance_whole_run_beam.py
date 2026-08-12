@@ -147,9 +147,10 @@ class WholeRunInstance(_BaseWholeRunInstance):
         """Execute one homogeneous Event or Combat frontier in one WorkerPool dispatch.
 
         Validation and preparation are mutation-free. Branch IDs, Event RNG references,
-        and bookkeeping are committed only after every item has prepared successfully;
-        a commit failure rolls back all earlier commits before the request can become
-        observable. Worker dispatch happens only after the complete batch is committed.
+        bookkeeping, and Event RNG generation counters are committed only after every
+        item has prepared successfully. A commit failure rolls back all of those changes
+        before the request can become observable. Worker dispatch happens only after the
+        complete batch is committed.
         """
         self._validate_stop_condition(simulation_options)
         if not isinstance(items, list) or not items:
@@ -225,14 +226,28 @@ class WholeRunInstance(_BaseWholeRunInstance):
             work_item, book = preparer(spec)
             prepared.append((spec, work_item, book))
 
+        generation_snapshot = (
+            self._event_rng_registry.snapshot_generations(
+                book.event_rng_plan.hypothesis_key
+                for _, _, book in prepared
+                if book.event_rng_plan is not None
+            )
+            if event_batch
+            else {}
+        )
+
         committed: list[tuple[_BranchSpec, Any, _BranchBookkeeping]] = []
         try:
             for spec, work_item, book in prepared:
                 self._commit_prepared_branch(spec, book)
                 committed.append((spec, work_item, book))
         except Exception:
-            for spec, _, book in reversed(committed):
-                self._rollback_prepared_branch(spec, book)
+            try:
+                for spec, _, book in reversed(committed):
+                    self._rollback_prepared_branch(spec, book)
+            finally:
+                if generation_snapshot:
+                    self._event_rng_registry.restore_generations(generation_snapshot)
             raise
 
         return self._dispatch_prepared_batch(prepared, finalizer)
