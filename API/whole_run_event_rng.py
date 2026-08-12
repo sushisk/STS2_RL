@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Iterable, Mapping
 
 _STREAM_KEYS = (
     "event_rng",
@@ -111,6 +111,29 @@ class EventRngHypothesisRegistry:
         """Atomically publish a prepared hypothesis reference for one Branch."""
         self._ensure_entry(key, state)
         self.register_branch(key, branch_id)
+
+    def snapshot_generations(self, keys: Iterable[tuple]) -> dict[tuple, int]:
+        """Capture generation counters touched by a not-yet-visible batch commit.
+
+        Generation normally records a completed live-entry lifecycle and therefore must
+        survive ordinary release/recreate cycles. A coordinator transaction that fails
+        before dispatch is different: none of its provisional commits became visible to
+        the request, so rollback must restore these counters as well as live references.
+        """
+        return {key: self._generation_counts.get(key, 0) for key in set(keys)}
+
+    def restore_generations(self, snapshot: Mapping[tuple, int]) -> None:
+        """Restore counters captured by ``snapshot_generations`` after transaction rollback."""
+        for key, generation in snapshot.items():
+            if not isinstance(generation, int) or isinstance(generation, bool) or generation < 0:
+                raise ValueError("Event RNG generation snapshot contains an invalid counter")
+            current = self._generation_counts.get(key, 0)
+            if current < generation:
+                raise RuntimeError("Event RNG generation cannot be restored forward")
+            if generation == 0:
+                self._generation_counts.pop(key, None)
+            else:
+                self._generation_counts[key] = generation
 
     def get_or_create(self, key: tuple, base_state: dict, rng_id: int) -> dict:
         # Kept for existing callers/tests. New Branch preparation should prefer the
