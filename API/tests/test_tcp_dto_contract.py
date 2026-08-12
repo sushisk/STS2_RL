@@ -7,6 +7,7 @@ import types
 import unittest
 from unittest.mock import patch
 
+from API.dto import SCHEMA_VERSION
 from API.server import RLApiServer
 from API.tcp_server import AsyncioTcpServer
 
@@ -41,13 +42,13 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
         )
         hello = await self._round_trip(self._hello())
         self.assertEqual(hello["server_epoch"], "epoch-contract")
-        self.assertEqual(hello["schema_version"], "0.7")
+        self.assertEqual(hello["schema_version"], SCHEMA_VERSION)
 
     @staticmethod
     def _hello() -> dict:
         return {
             "transport_operation": "hello",
-            "schema_version": "0.7",
+            "schema_version": SCHEMA_VERSION,
             "client_session_id": "session-a",
         }
 
@@ -71,7 +72,7 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
     @staticmethod
     def _request(seq: int, operation: str, **fields) -> dict:
         return {
-            "schema_version": "0.7",
+            "schema_version": SCHEMA_VERSION,
             "client_session_id": "session-a",
             "request_seq": seq,
             "request_id": f"session-a:{seq}",
@@ -87,7 +88,7 @@ class TcpDtoContractTest(unittest.IsolatedAsyncioTestCase):
         )
         response = await self._round_trip(request)
 
-        self.assertEqual(response["schema_version"], "0.7")
+        self.assertEqual(response["schema_version"], SCHEMA_VERSION)
         self.assertEqual(response["server_epoch"], "epoch-contract")
         self.assertEqual(response["client_session_id"], request["client_session_id"])
         self.assertEqual(response["request_seq"], request["request_seq"])
