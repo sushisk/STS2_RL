@@ -17,7 +17,10 @@ SUPPORTED_SCHEMA_VERSIONS = frozenset({SCHEMA_VERSION})
 # merged, so do not claim a future/nonexistent Emulator build here.
 DTO_VERSION = "emulator-fca2f06"
 # 1.1 adds explicit pendingChoice semantic/identity normalization and allowlisting.
-MASK_VERSION = "1.1"
+# 1.2 changes drawPile/discardPile/exhaustPile from a {card_id: count} multiset to a
+# list of {"id", "upgraded", "count"} records - upgraded state was previously
+# collapsed away by keying the count on card_id alone (see masking.py::_multiset_of).
+MASK_VERSION = "1.2"
 
 OP_START_INSTANCE = "start_instance"
 OP_GET_DECISION = "get_decision"

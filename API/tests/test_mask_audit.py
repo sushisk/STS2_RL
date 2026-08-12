@@ -57,7 +57,7 @@ def _build_raw_state() -> dict:
                 "parameters": {"cardId": "DEFEND", "target": "enemy"},
             },
         ],
-        "drawPile": [{"id": "STRIKE"}, {"id": "DEFEND"}, {"id": "STRIKE"}],
+        "drawPile": [{"id": "STRIKE"}, {"id": "DEFEND"}, {"id": "STRIKE", "upgraded": True}],
         "discardPile": [{"id": "BASH"}, {"id": "BASH"}, {"id": "DEFEND"}],
         "exhaustPile": [{"id": "WOUND"}, {"id": "WOUND"}, {"id": "WOUND"}],
         "playPile": [{"id": "BLOCK"}],
@@ -125,19 +125,29 @@ def test_masked_emulator_dto_scrubs_forbidden_keys_everywhere_and_does_not_mutat
     final_observation = masked["transition"]["final_observation"]
     assert "snapshotBlob" not in final_observation
     assert "seed" not in final_observation
-    assert isinstance(final_observation["drawPile"], dict)
-    assert final_observation["drawPile"] == {"DEFEND": 1, "STRIKE": 2}
+    assert isinstance(final_observation["drawPile"], list)
+    assert final_observation["drawPile"] == [
+        {"id": "DEFEND", "upgraded": False, "count": 1},
+        {"id": "STRIKE", "upgraded": False, "count": 2},
+    ]
 
 
 def test_piles_reward_and_public_fields_are_masked_as_documented():
     masked = build_masked_emulator_dto(_build_raw_state())
 
-    assert masked["drawPile"] == {"DEFEND": 1, "STRIKE": 2}
-    assert masked["discardPile"] == {"BASH": 2, "DEFEND": 1}
-    assert masked["exhaustPile"] == {"WOUND": 3}
-    assert isinstance(masked["drawPile"], dict)
-    assert isinstance(masked["discardPile"], dict)
-    assert isinstance(masked["exhaustPile"], dict)
+    assert masked["drawPile"] == [
+        {"id": "DEFEND", "upgraded": False, "count": 1},
+        {"id": "STRIKE", "upgraded": False, "count": 1},
+        {"id": "STRIKE", "upgraded": True, "count": 1},
+    ]
+    assert masked["discardPile"] == [
+        {"id": "BASH", "upgraded": False, "count": 2},
+        {"id": "DEFEND", "upgraded": False, "count": 1},
+    ]
+    assert masked["exhaustPile"] == [{"id": "WOUND", "upgraded": False, "count": 3}]
+    assert isinstance(masked["drawPile"], list)
+    assert isinstance(masked["discardPile"], list)
+    assert isinstance(masked["exhaustPile"], list)
 
     assert "playPile" not in masked
     assert "reward" not in masked

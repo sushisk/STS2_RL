@@ -101,15 +101,31 @@ def _card_id_of(card_entry: Any) -> "str | None":
     return None
 
 
-def _multiset_of(pile: Any) -> dict:
+def _multiset_of(pile: Any) -> list:
+    """Reduce a pile to per-(card_id, upgraded) counts, discarding order only.
+
+    Order is genuinely Hidden Information (contract: "順序を除去してMultiset化"), but a
+    card's upgraded state is not - the player always knows exactly which of their own
+    cards are upgraded. Keying the count only by `card_id` (pre mask_version 1.2)
+    silently collapsed e.g. two plain "BASH" and one "BASH+" into a single count=3
+    entry with no way to tell them apart, which was an under-delivery of the "Multiset
+    of piles" contract rather than an intentional part of it. `upgradeLevel`/tinker-time
+    fields beyond the boolean upgraded flag are still not preserved here - only
+    `hand` (never reduced to a multiset) carries those.
+    """
     if not isinstance(pile, list):
-        return {}
+        return []
     counts: Counter = Counter()
     for entry in pile:
         card_id = _card_id_of(entry)
-        if card_id is not None:
-            counts[card_id] += 1
-    return dict(sorted(counts.items()))
+        if card_id is None:
+            continue
+        upgraded = bool(entry.get("upgraded", False)) if isinstance(entry, dict) else False
+        counts[(card_id, upgraded)] += 1
+    return [
+        {"id": card_id, "upgraded": upgraded, "count": count}
+        for (card_id, upgraded), count in sorted(counts.items())
+    ]
 
 
 def _is_forbidden_key(key: str) -> bool:
