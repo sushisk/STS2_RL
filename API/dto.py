@@ -1,27 +1,28 @@
-"""Wire-level DTO constants for the RL/Training TCP contract v0.7.
+"""Wire-level DTO constants for the RL/Training TCP contract v0.8.
 
-v0.7 retains v0.6's session-sequenced, single in-flight protocol and adds the plural
-``emulate_actions`` batch operation. Every API request belongs to one
-``client_session_id`` and carries a positive, strictly increasing ``request_seq``.
-``request_id`` remains on the wire for tracing and exact replay, and is deterministically
-derived from those two fields.
+v0.8 is a lockstep hard cutover from v0.7. It retains the session-sequenced,
+single in-flight transport and ``emulate_actions`` batch operation, while making
+``masked_emulator_dto`` mask_version 1.2 part of the paired wire contract. In
+particular, draw/discard/exhaust pile multisets are per-card-identity record arrays
+rather than the v0.7-era ``{card_id: count}`` object shape, so mixed v0.7/v0.8
+Training/RL deployments are intentionally rejected by schema version.
 """
 
 from __future__ import annotations
 
-SCHEMA_VERSION = "0.7"
+SCHEMA_VERSION = "0.8"
 SUPPORTED_SCHEMA_VERSIONS = frozenset({SCHEMA_VERSION})
 
 # This identifies the currently-integrated Emulator build. Choice-card semantics are
 # additive and safely normalize to unknown until the corresponding Emulator producer is
 # merged, so do not claim a future/nonexistent Emulator build here.
 DTO_VERSION = "emulator-fca2f06"
-# 1.1 adds explicit pendingChoice semantic/identity normalization and allowlisting.
-# 1.2 changes drawPile/discardPile/exhaustPile from a {card_id: count} multiset to a
-# list of per-distinct-instance records (id/type/rarity/cost/targetType/upgraded/
-# upgradeLevel/tinkerTimeType/tinkerTimeRider/enchantment/count) - upgrade and
-# enchantment state were previously collapsed away by keying the count on card_id
-# alone (see masking.py::_multiset_of/_card_identity_key).
+# Wire DTO v0.8 requires mask_version 1.2. 1.2 changes
+# drawPile/discardPile/exhaustPile from a {card_id: count} multiset to a list of
+# per-distinct-instance records (id/type/rarity/cost/targetType/upgraded/upgradeLevel/
+# tinkerTimeType/tinkerTimeRider/enchantment/count). Upgrade and enchantment state were
+# previously collapsed away by keying the count on card_id alone
+# (see masking.py::_multiset_of/_card_identity_key).
 MASK_VERSION = "1.2"
 
 OP_START_INSTANCE = "start_instance"
