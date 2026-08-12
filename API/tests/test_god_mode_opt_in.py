@@ -21,6 +21,7 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
         sys.path.insert(0, str(_p))
 
 from API.instance_whole_run import WholeRunInstance  # noqa: E402
+from API.validation import RequestRejected  # noqa: E402
 
 
 def _config(*, god_mode: bool | None = None) -> dict:
@@ -74,6 +75,13 @@ class GodModeOptInTest(unittest.TestCase):
             self.assertFalse(_god_mode_enabled(inst))
         finally:
             inst.close()
+
+    def test_non_bool_god_mode_is_rejected_without_truthy_coercion(self) -> None:
+        config = _config()
+        config["god_mode"] = "false"
+
+        with self.assertRaises(RequestRejected):
+            WholeRunInstance("wr-god-mode-invalid", config, branch_worker_count=2)
 
 
 if __name__ == "__main__":
