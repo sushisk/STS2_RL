@@ -63,6 +63,47 @@ def test_battle_state_key_distinguishes_card_cost_and_potion_slots():
     assert key_before != key_after, (key_before, key_after)
 
 
+def test_battle_state_key_distinguishes_enchantment():
+    """Two otherwise-identical states differing only by a card's enchantment (e.g.
+    Sharp's extra damage) must never hash the same - a search tree collapsing them
+    into one node would silently discard a genuinely different future."""
+    base_state = {
+        "seed": 1,
+        "hp": 80,
+        "maxHp": 80,
+        "block": 20,
+        "energy": 0,
+        "stars": 0,
+        "potions": [None, None, None],
+        "hand": [{"id": "STRIKE_IRONCLAD", "type": "Attack", "rarity": "Basic", "cost": 1, "targetType": "AnyPlayer", "upgraded": False, "upgradeLevel": 0, "tinkerTimeType": None, "tinkerTimeRider": None, "enchantment": None}],
+        "drawPile": [],
+        "discardPile": [],
+        "exhaustPile": [],
+        "playPile": [],
+        "playerPowers": [],
+        "orbSlots": 0,
+        "orbs": [],
+        "pendingChoice": None,
+        "enemies": [{"id": "DEVOTED_SCULPTOR", "hp": 157, "maxHp": 172, "block": 0, "isAlive": True, "intent": {"stateId": "FORBIDDEN_INCANTATION_MOVE"}, "powers": [], "slotName": None, "stateLog": []}],
+        "relics": [{"id": "ANCHOR"}],
+    }
+    key_unenchanted = battle_state_key(type("StubState", (), {"engine_state": base_state, "turn": 1, "shuffle_rng_seed": None})())
+
+    enchanted_state = {
+        **base_state,
+        "hand": [{**base_state["hand"][0], "enchantment": {"id": "SHARP", "amount": 3, "status": "Active"}}],
+    }
+    key_enchanted = battle_state_key(type("StubState", (), {"engine_state": enchanted_state, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_unenchanted != key_enchanted, (key_unenchanted, key_enchanted)
+
+    different_amount_state = {
+        **base_state,
+        "hand": [{**base_state["hand"][0], "enchantment": {"id": "SHARP", "amount": 5, "status": "Active"}}],
+    }
+    key_different_amount = battle_state_key(type("StubState", (), {"engine_state": different_amount_state, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_enchanted != key_different_amount, (key_enchanted, key_different_amount)
+
+
 def test_state_has_living_enemies_and_terminal_coercion():
     state = {
         "hp": 18,

@@ -120,7 +120,20 @@ def battle_state_key(battle_state: BattleState) -> tuple:
     merging two states that could actually diverge. Powers (player and per-enemy) are
     order-INsensitive (sorted by id) since their list order is incidental engine/dict
     iteration order, not a gameplay-meaningful sequence like a pile's draw order is.
+
+    Each card's signature also includes its enchantment (id/amount/status) - two cards
+    that differ only by enchantment have genuinely different in-combat behavior (e.g.
+    Sharp's extra damage), so must never be collapsed into the same key.
     """
+
+    def enchantment_signature(enchantment):
+        if not enchantment:
+            return None
+        return (
+            enchantment.get("id"),
+            enchantment.get("amount"),
+            enchantment.get("status"),
+        )
 
     def card_signature(card):
         if not card:
@@ -134,6 +147,7 @@ def battle_state_key(battle_state: BattleState) -> tuple:
             card.get("upgradeLevel"),
             card.get("tinkerTimeType"),
             card.get("tinkerTimeRider"),
+            enchantment_signature(card.get("enchantment")),
         )
 
     def card_tuple(cards):
