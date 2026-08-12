@@ -1,9 +1,18 @@
-"""Regression guard: God Mode activation must remain test-only.
+"""Regression guard: God Mode activation must remain scoped to tests and to the one
+explicit, reviewed data-collection opt-in.
 
 Runtime modules may expose the narrow WholeRunSession test-support wrapper, but no
 non-test code is allowed to call that wrapper or the underlying CLR
-EnableGodModeForTesting API. This catches the class of leak that caused STS2_RL#29,
-where API/instance_whole_run.py enabled God Mode for every real Whole Run instance.
+EnableGodModeForTesting API, except the one named exception below. This catches the
+class of leak that caused STS2_RL#29, where API/instance_whole_run.py enabled God Mode
+unconditionally for every real Whole Run instance.
+
+The one exception - `WholeRunInstance.__init__` calling
+`self._session.enable_god_mode_for_testing()` - is the opposite of that incident: an
+explicit, per-instance `instance_config["god_mode"]` opt-in (default off), added for the
+god-mode data-collection proposal (Outputs/reports/
+god_mode_data_collection_proposal_20260812.md). It is allowlisted by exact
+file/class/function so any *other* call site anywhere else still trips this guard.
 """
 
 from __future__ import annotations
@@ -16,14 +25,21 @@ from pathlib import Path
 _ROOT = Path(__file__).resolve().parents[2]
 _RUNTIME_ROOTS = (_ROOT / "API", _ROOT / "Run", _ROOT / "Combat")
 _ALLOWED_TEST_SUPPORT = (_ROOT / "Run" / "whole_run_session.py").resolve()
+_ALLOWED_DATA_COLLECTION_OPT_IN = (_ROOT / "API" / "instance_whole_run.py").resolve()
 _GOD_MODE_CALLS = {"EnableGodModeForTesting", "enable_god_mode_for_testing"}
 
 
 class _GodModeCallVisitor(ast.NodeVisitor):
     def __init__(self, path: Path) -> None:
         self.path = path.resolve()
+        self.class_stack: list[str] = []
         self.function_stack: list[str] = []
         self.hits: list[tuple[int, str]] = []
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        self.class_stack.append(node.name)
+        self.generic_visit(node)
+        self.class_stack.pop()
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         self.function_stack.append(node.name)
@@ -47,7 +63,13 @@ class _GodModeCallVisitor(ast.NodeVisitor):
                 and self.function_stack[-1] == "enable_god_mode_for_testing"
                 and func.attr == "EnableGodModeForTesting"
             )
-            if not allowed_wrapper_impl:
+            allowed_data_collection_opt_in = (
+                self.path == _ALLOWED_DATA_COLLECTION_OPT_IN
+                and self.class_stack[-1:] == ["WholeRunInstance"]
+                and self.function_stack[-1:] == ["__init__"]
+                and func.attr == "enable_god_mode_for_testing"
+            )
+            if not (allowed_wrapper_impl or allowed_data_collection_opt_in):
                 self.hits.append((node.lineno, func.attr))
         self.generic_visit(node)
 

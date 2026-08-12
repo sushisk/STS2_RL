@@ -49,6 +49,13 @@ def test_start_instance_required_fields() -> None:
     )
     _assert_rejected(missing_type)
 
+    invalid_god_mode = _request(
+        "start_instance",
+        include_instance_id=False,
+        instance_config={"instance_type": "whole_run", "god_mode": "false"},
+    )
+    _assert_rejected(invalid_god_mode)
+
 
 def test_session_identity_fields_are_required_and_correlated() -> None:
     valid = _request("close_instance")

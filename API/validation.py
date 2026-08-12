@@ -139,6 +139,8 @@ def validate_request(payload: Any) -> dict:
         instance_config = _require(payload, "instance_config", dict)
         if "instance_type" not in instance_config:
             raise RequestRejected("instance_config.instance_type is required")
+        if "god_mode" in instance_config and not isinstance(instance_config["god_mode"], bool):
+            raise RequestRejected("instance_config.god_mode must be of type bool")
     elif operation == OP_GET_DECISION:
         _require(payload, "branch_id", str)
     elif operation == OP_COMMIT_ACTION:
