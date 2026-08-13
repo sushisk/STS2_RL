@@ -197,6 +197,69 @@ def test_compute_public_multiset_includes_card_generated_entry_with_card_id():
     assert got["BASH"] == 1, got
 
 
+def test_compute_public_multiset_overcounts_after_card_transformed_away():
+    """Known bug: sushisk/STS2_Emulator#8, sushisk/STS2_RL#43.
+
+    CardCmd.Transform (real Emulator code) records a CardGeneratedEntry for the
+    replacement card but nothing at all for the original - CombatHistory has no
+    CardRemoved/CardTransformed entry type. Playing PRIMAL_FORCE (transforms every
+    transformable Attack in hand into GIANT_ROCK) makes compute_public_multiset() believe
+    the transformed-away STRIKE_IRONCLAD cards are still hidden in the DrawPile, which then
+    makes belief-hypothesis derivation fail once a hypothesis is actually built from that
+    wrong multiset - exactly what broke real Oracle collection (STS2_Training PR #58/#59
+    local validation) against a harvested scenario containing PRIMAL_FORCE.
+
+    This pins TODAY's (buggy) failure. Once Emulator#8 lands and this module is updated to
+    subtract a CardTransformedEntry, rewrite this test to assert success instead (no
+    phantom cards, derive_substituted_snapshot succeeds).
+    """
+    session = LiveCombatSession()
+    spec = _simple_spec(
+        hand=["PRIMAL_FORCE", "STRIKE_IRONCLAD", "STRIKE_IRONCLAD"],
+        draw_pile=[],
+        discard_pile=[],
+    )
+    state = session.start_combat(spec)
+    combat_start_deck_multiset = {"PRIMAL_FORCE": 1, "STRIKE_IRONCLAD": 2}
+
+    primal_force = next(
+        a
+        for a in state._cached_legal_actions  # noqa: SLF001
+        if a["action_type"] == "card" and a["parameters"].get("cardId") == "PRIMAL_FORCE"
+    )
+    session.step(state, primal_force)
+    snapshot = session.capture_snapshot()
+
+    # Confirm the fixture genuinely exercises the transform-away bug: both STRIKE_IRONCLAD
+    # instances must be gone from every real (non-hidden) pile, not just moved around.
+    all_visible_ids = (
+        _pile_card_ids(snapshot.Player.Hand)
+        + _pile_card_ids(snapshot.Player.DiscardPile)
+        + _pile_card_ids(snapshot.Player.ExhaustPile)
+        + _pile_card_ids(snapshot.Player.PlayPile)
+        + _pile_card_ids(snapshot.Player.DrawPile)
+    )
+    assert "STRIKE_IRONCLAD" not in all_visible_ids, all_visible_ids
+    assert all_visible_ids.count("GIANT_ROCK") == 2, all_visible_ids
+
+    public_multiset = compute_public_multiset(snapshot, combat_start_deck_multiset=combat_start_deck_multiset)
+
+    # BUG: the transformed-away cards are believed still-hidden in the DrawPile.
+    assert public_multiset.get("STRIKE_IRONCLAD") == 2, public_multiset
+
+    hypotheses = generate_belief_hypotheses(public_multiset, count=1, rng_seed_source=_rng)
+    try:
+        derive_substituted_snapshot(snapshot, hypotheses[0])
+    except ValueError as exc:
+        assert "does not match root snapshot" in str(exc), exc
+    else:
+        raise AssertionError(
+            "expected derive_substituted_snapshot to fail on a phantom-card hypothesis - "
+            "if this now passes, Emulator#8/RL#43 may already be fixed; update this test "
+            "to assert successful, phantom-free restoration instead"
+        )
+
+
 def test_consume_check_passthrough_mode_independent_and_true_rng_ok():
     context, _pipeline = _context_and_pipeline(width=2)
     end_turn = {"action_type": "system", "parameters": {}}
