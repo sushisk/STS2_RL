@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import sys
 import uuid
 from collections.abc import Callable
@@ -256,6 +257,9 @@ async def run_rl_server(
     host: str = DEFAULT_HOST,
     port: int = DEFAULT_PORT,
     max_message_bytes: int = DEFAULT_MAX_MESSAGE_BYTES,
+    combat_worker_pool_backend: str | None = None,
+    combat_worker_count: int | None = None,
+    combat_max_branches: int | None = None,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     for subdirectory in ("Combat", "Run"):
@@ -268,7 +272,13 @@ async def run_rl_server(
 
     from API.server import RLApiServer
 
-    dispatcher = RLApiServer()
+    dispatcher = RLApiServer(
+        instance_factory_kwargs=_combat_instance_factory_kwargs(
+            worker_pool_backend=combat_worker_pool_backend,
+            worker_count=combat_worker_count,
+            max_branches=combat_max_branches,
+        )
+    )
     server = AsyncioTcpServer(
         dispatcher.handle_request,
         server_epoch=dispatcher.server_epoch,
@@ -288,11 +298,69 @@ async def run_rl_server(
         dispatcher.close_all()
 
 
+def _positive_int_from_env(name: str) -> int | None:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return None
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be a positive integer") from exc
+    if value <= 0:
+        raise ValueError(f"{name} must be a positive integer")
+    return value
+
+
+def _combat_instance_factory_kwargs(
+    *,
+    worker_pool_backend: str | None = None,
+    worker_count: int | None = None,
+    max_branches: int | None = None,
+) -> dict | None:
+    backend = worker_pool_backend or os.environ.get("STS2_COMBAT_BRANCH_POOL")
+    resolved_worker_count = worker_count
+    backend_key = (backend or "").strip().lower()
+    alc_selected = backend_key in {"alc", "assemblyloadcontext", "assembly_load_context", "isolated"}
+    if resolved_worker_count is None and alc_selected:
+        resolved_worker_count = _positive_int_from_env("STS2_COMBAT_ALC_WORKERS")
+    resolved_max_branches = max_branches
+    if resolved_max_branches is None:
+        resolved_max_branches = _positive_int_from_env("STS2_COMBAT_MAX_BRANCHES")
+
+    combat_kwargs: dict[str, Any] = {}
+    if backend is not None and backend.strip():
+        combat_kwargs["worker_pool_backend"] = backend
+    if resolved_worker_count is not None:
+        combat_kwargs["worker_count"] = resolved_worker_count
+    if resolved_max_branches is not None:
+        combat_kwargs["max_branches"] = resolved_max_branches
+    if not combat_kwargs:
+        return None
+    return {"combat": combat_kwargs}
+
+
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--max-message-bytes", type=int, default=DEFAULT_MAX_MESSAGE_BYTES)
+    parser.add_argument(
+        "--combat-worker-pool-backend",
+        default=None,
+        help="Combat branch pool backend; defaults to STS2_COMBAT_BRANCH_POOL or multiprocessing.",
+    )
+    parser.add_argument(
+        "--combat-worker-count",
+        type=int,
+        default=None,
+        help="Combat branch worker_count; defaults to STS2_COMBAT_ALC_WORKERS for ALC or backend default.",
+    )
+    parser.add_argument(
+        "--combat-max-branches",
+        type=int,
+        default=None,
+        help="Combat max_branches rejection cap; defaults to STS2_COMBAT_MAX_BRANCHES or 64.",
+    )
     return parser.parse_args(argv)
 
 
@@ -304,6 +372,9 @@ def main(argv: list[str] | None = None) -> None:
                 host=args.host,
                 port=args.port,
                 max_message_bytes=args.max_message_bytes,
+                combat_worker_pool_backend=args.combat_worker_pool_backend,
+                combat_worker_count=args.combat_worker_count,
+                combat_max_branches=args.combat_max_branches,
             )
         )
     except KeyboardInterrupt:
