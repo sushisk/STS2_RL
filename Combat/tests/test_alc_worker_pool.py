@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import sys
 import traceback
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 _COMBAT_DIR = Path(__file__).resolve().parents[1]
@@ -18,11 +19,13 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env", _COMBAT_DIR /
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from API.instance_combat import CombatInstance  # noqa: E402
+import emulator_bridge  # noqa: E402
 from search.alc_worker_pool import AlcBranchWorkerPool  # noqa: E402
 from search.branch_worker_pool import (  # noqa: E402
     BRANCH_STATUS_SUCCESS,
     EXECUTION_MODE_BOOTSTRAP_STEP,
     LeaseRegistry,
+    WorkerExecutionRequest,
     WorkItem,
     derive_context_id,
     dispatch_work_items,
@@ -61,6 +64,70 @@ def test_alc_pool_bootstrap_steps_sibling_branches_on_independent_sessions():
     assert {r.worker_id for r in results} == {0, 1}
     assert all(r.result_signature.boundary in {BOUNDARY_STABLE, BOUNDARY_TERMINAL} for r in results)
     assert len({r.result_signature.combat_session_id for r in results}) == 2
+
+
+def test_alc_pool_parallel_execute_keeps_results_on_their_own_isolated_sessions():
+    """Drives raw pool.execute() from concurrent Python threads.
+
+    The shared/default-ALC GameInstance guard is a proxy: after the main-thread context
+    is built, this test replaces emulator_bridge._shared_instance with a sentinel. ALC
+    worker execution should use IsolatedGameSession objects only, so the sentinel must
+    remain untouched while every result comes back with its own combat_session_id.
+    """
+
+    context, pipeline = _context_and_pipeline(
+        enemy_hp=999,
+        width=4,
+        hand=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "STRIKE_IRONCLAD", "DEFEND_IRONCLAD"],
+    )
+    context_id = derive_context_id(context)
+    candidates = [pipeline.continuation_candidate, *pipeline.sub_branch_candidates[:3]]
+    work_items = [
+        WorkItem.from_candidate_ref(
+            context,
+            candidate,
+            work_kind="continuation" if index == 0 else "sub_branch",
+            context_id=context_id,
+            work_id=f"alc-parallel-{index}",
+        )
+        for index, candidate in enumerate(candidates)
+    ]
+
+    sentinel = object()
+    old_shared_instance = emulator_bridge._shared_instance  # noqa: SLF001
+    emulator_bridge._shared_instance = sentinel  # noqa: SLF001
+    try:
+        with AlcBranchWorkerPool(worker_count=4, request_timeout_s=120.0) as pool:
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = [
+                    executor.submit(
+                        pool.execute,
+                        worker_id,
+                        WorkerExecutionRequest(work_item, EXECUTION_MODE_BOOTSTRAP_STEP),
+                    )
+                    for worker_id, work_item in enumerate(work_items)
+                ]
+                results = [future.result() for future in as_completed(futures)]
+    finally:
+        assert emulator_bridge._shared_instance is sentinel  # noqa: SLF001
+        emulator_bridge._shared_instance = old_shared_instance  # noqa: SLF001
+
+    assert len(results) == 4
+    assert {r.status for r in results} == {BRANCH_STATUS_SUCCESS}, [r.diagnostics for r in results]
+    assert {r.work_item.work_id for r in results} == {item.work_id for item in work_items}
+    assert {r.worker_id for r in results} == {0, 1, 2, 3}
+    assert len({r.result_signature.combat_session_id for r in results}) == 4
+
+
+def test_alc_pool_repeated_respawn_exceeding_threshold_raises():
+    with AlcBranchWorkerPool(worker_count=1, request_timeout_s=120.0, max_respawns_per_worker=1) as pool:
+        pool.respawn_worker(0)
+        try:
+            pool.respawn_worker(0)
+        except RuntimeError as exc:
+            assert "ALC worker 0 exceeded max respawns" in str(exc)
+        else:
+            raise AssertionError("second respawn should exceed max_respawns_per_worker=1")
 
 
 def test_combat_instance_can_opt_into_alc_pool():

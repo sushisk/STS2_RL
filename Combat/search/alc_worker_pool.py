@@ -18,8 +18,10 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import logging
 import queue
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
@@ -34,6 +36,7 @@ from emulator_bridge import (
 )
 from live_combat_session import LiveCombatSession
 from search.branch_worker_pool import (
+    BRANCH_STATUS_FAULT,
     BranchResult,
     LeaseRegistry,
     WorkerExecutionRequest,
@@ -44,6 +47,7 @@ from search.branch_worker_pool import (
 )
 
 
+logger = logging.getLogger(__name__)
 _isolation_types: dict[str, Any] | None = None
 
 
@@ -205,14 +209,23 @@ class AlcBranchWorkerPool:
         worker_count: int = 2,
         repo_root: Optional[Path | str] = None,
         request_timeout_s: float = 120.0,
+        max_respawns_per_worker: int = 3,
     ) -> None:
         if worker_count <= 0:
             raise ValueError("worker_count must be positive")
+        if max_respawns_per_worker < 0:
+            raise ValueError("max_respawns_per_worker must be non-negative")
         self.worker_count = worker_count
         self.repo_root = Path(repo_root).resolve() if repo_root is not None else DEFAULT_REPO_ROOT
         self.request_timeout_s = request_timeout_s
+        self.max_respawns_per_worker = max_respawns_per_worker
         self._result_queue: queue.Queue = queue.Queue()
         self._workers: dict[int, _ThreadWorkerHandle] = {}
+        self._abandoned: list[_ThreadWorkerHandle] = []
+        self._respawn_counts: dict[int, int] = {worker_id: 0 for worker_id in range(worker_count)}
+        self._request_condition = threading.Condition()
+        self._ready_results: dict[int, BranchResult] = {}
+        self._active_request_ids: set[int] = set()
         self._next_bootstrap_index = 0
         self._next_request_id = 0
         self._closed = False
@@ -267,7 +280,21 @@ class AlcBranchWorkerPool:
             raise RuntimeError("AlcBranchWorkerPool is closed")
         handle = self._workers[worker_id]
         old_generation = handle.worker_generation
+        respawn_count = self._respawn_counts.get(worker_id, 0) + 1
+        if respawn_count > self.max_respawns_per_worker:
+            raise RuntimeError(
+                f"ALC worker {worker_id} exceeded max respawns "
+                f"({respawn_count}>{self.max_respawns_per_worker})"
+            )
+        self._respawn_counts[worker_id] = respawn_count
+        logger.warning(
+            "Respawning ALC branch worker worker_id=%s respawn_count=%s old_generation=%s",
+            worker_id,
+            respawn_count,
+            old_generation,
+        )
         handle.in_queue.put(None)
+        self._abandoned.append(handle)
         factory = ensure_isolation_loaded(self.repo_root)["IsolatedGameSessionFactory"]
         isolated_session = factory.Create(str(_emulator_output_dir(self.repo_root)), f"STS2_RL.ALCWorker.{worker_id}.gen{old_generation + 1}")
         self._spawn_worker(worker_id, generation=old_generation + 1, isolated_session=isolated_session)
@@ -282,6 +309,20 @@ class AlcBranchWorkerPool:
             handle.in_queue.put(None)
         for handle in self._workers.values():
             handle.thread.join(timeout=10)
+            if handle.thread.is_alive():
+                logger.warning(
+                    "ALC branch worker did not stop during close worker_id=%s generation=%s",
+                    handle.worker_id,
+                    handle.worker_generation,
+                )
+        for handle in self._abandoned:
+            handle.thread.join(timeout=10)
+            if handle.thread.is_alive():
+                logger.warning(
+                    "Abandoned ALC branch worker is still running after close join worker_id=%s generation=%s",
+                    handle.worker_id,
+                    handle.worker_generation,
+                )
 
     def __enter__(self) -> "AlcBranchWorkerPool":
         return self
@@ -292,8 +333,10 @@ class AlcBranchWorkerPool:
     def _submit(self, worker_id: int, request: WorkerExecutionRequest) -> int:
         if self._closed:
             raise RuntimeError("AlcBranchWorkerPool is closed")
-        self._next_request_id += 1
-        request_id = self._next_request_id
+        with self._request_condition:
+            self._next_request_id += 1
+            request_id = self._next_request_id
+            self._active_request_ids.add(request_id)
         self._workers[worker_id].in_queue.put((request_id, request))
         return request_id
 
@@ -306,10 +349,25 @@ class AlcBranchWorkerPool:
     ) -> BranchResult:
         stale_generation = self._workers[worker_id].worker_generation
         request_id = self._submit(worker_id, request)
+        deadline = time.monotonic() + self.request_timeout_s
         while True:
+            with self._request_condition:
+                result = self._ready_results.pop(request_id, None)
+                if result is not None:
+                    self._active_request_ids.discard(request_id)
+                    if result.status == BRANCH_STATUS_FAULT and result.worker_id is not None and _is_process_tainting_fault(result.diagnostics):
+                        self.respawn_worker(result.worker_id, lease_registry=lease_registry)
+                    return result
             try:
-                received_id, result = self._result_queue.get(timeout=self.request_timeout_s)
+                remaining_s = deadline - time.monotonic()
+                if remaining_s <= 0:
+                    raise queue.Empty
+                received_id, result = self._result_queue.get(timeout=min(remaining_s, 0.1))
             except queue.Empty:
+                with self._request_condition:
+                    if request_id in self._active_request_ids and time.monotonic() < deadline:
+                        continue
+                    self._active_request_ids.discard(request_id)
                 self.respawn_worker(worker_id, lease_registry=lease_registry)
                 return _fault_result(
                     request.work_item,
@@ -320,10 +378,38 @@ class AlcBranchWorkerPool:
                     fault_kind="task_timeout",
                 )
             if received_id != request_id:
+                with self._request_condition:
+                    if received_id in self._active_request_ids:
+                        self._ready_results[received_id] = result
+                        self._request_condition.notify_all()
+                    else:
+                        self.log_stale_result(received_id, result, expected_request_ids={request_id})
                 continue
-            if result.status == "fault" and result.worker_id is not None and _is_process_tainting_fault(result.diagnostics):
+            with self._request_condition:
+                self._active_request_ids.discard(request_id)
+            if result.status == BRANCH_STATUS_FAULT and result.worker_id is not None and _is_process_tainting_fault(result.diagnostics):
                 self.respawn_worker(result.worker_id, lease_registry=lease_registry)
             return result
 
     def dispatch_work_items(self, work_items, lease_registry: LeaseRegistry) -> list[BranchResult]:
         return dispatch_work_items(work_items, lease_registry, worker_pool=self)
+
+    def mark_request_finished(self, request_id: int) -> None:
+        with self._request_condition:
+            self._active_request_ids.discard(request_id)
+            self._ready_results.pop(request_id, None)
+
+    def log_stale_result(
+        self,
+        request_id: int,
+        result: BranchResult,
+        *,
+        expected_request_ids: Optional[set[int]] = None,
+    ) -> None:
+        logger.warning(
+            "Discarding stale ALC branch worker result request_id=%s worker_id=%s generation=%s expected_request_ids=%s",
+            request_id,
+            result.worker_id,
+            result.worker_generation,
+            sorted(expected_request_ids) if expected_request_ids is not None else None,
+        )
