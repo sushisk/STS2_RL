@@ -77,6 +77,17 @@ def _sort_key(identity_key: tuple) -> tuple:
     return tuple(f"{type(part).__name__}:{part!r}" for part in identity_key)
 
 
+def _public_enchantment(enchantment: Any) -> dict | None:
+    """Return only the public enchantment fields allowed by the masked DTO contract."""
+    if not isinstance(enchantment, dict):
+        return None
+    return {
+        "id": enchantment.get("id"),
+        "amount": enchantment.get("amount"),
+        "status": enchantment.get("status"),
+    }
+
+
 def _multiset_of(pile: Any) -> list:
     """Reduce a pile to per-distinct-public-card-state counts, discarding order only."""
     if not isinstance(pile, list):
@@ -103,7 +114,7 @@ def _multiset_of(pile: Any) -> list:
                 "upgradeLevel": int(entry.get("upgradeLevel", 0) or 0),
                 "tinkerTimeType": entry.get("tinkerTimeType"),
                 "tinkerTimeRider": entry.get("tinkerTimeRider"),
-                "enchantment": entry.get("enchantment"),
+                "enchantment": _public_enchantment(entry.get("enchantment")),
                 "count": counts[key],
             }
         )
