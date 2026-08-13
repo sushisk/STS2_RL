@@ -178,6 +178,33 @@ def battle_state_key(battle_state: BattleState) -> tuple:
             for p in (potions or [])
         )
 
+    def stable_saved_property_value(value):
+        if isinstance(value, dict):
+            return tuple(
+                sorted(
+                    (key, stable_saved_property_value(nested))
+                    for key, nested in value.items()
+                )
+            )
+        if isinstance(value, list):
+            return tuple(stable_saved_property_value(item) for item in value)
+        return value
+
+    def relic_tuple(relics):
+        return tuple(
+            (
+                r.get("id"),
+                r.get("displayAmount"),
+                tuple(
+                    sorted(
+                        (key, stable_saved_property_value(value))
+                        for key, value in (r.get("savedProperties") or {}).items()
+                    )
+                ),
+            )
+            for r in (relics or [])
+        )
+
     def enemy_tuple(enemies):
         return tuple(
             (
@@ -226,7 +253,7 @@ def battle_state_key(battle_state: BattleState) -> tuple:
         orb_tuple(state.get("orbs")),
         pending_choice_tuple(state.get("pendingChoice")),
         enemy_tuple(state.get("enemies")),
-        tuple(r.get("id") for r in (state.get("relics") or [])),
+        relic_tuple(state.get("relics")),
         state.get("seed"),
         battle_state.shuffle_rng_seed,
     )
@@ -628,9 +655,12 @@ def build_scenario_from_spec(spec: dict):
         for r in (spec.get("relic_stacks") or [])
         if r.get("id", r.get("relic_id", r.get("relicId")))
     }
+    overlap = set(spec.get("relics") or []) & structured_relic_ids
+    if overlap:
+        raise ValueError(f"relics and relic_stacks overlap: {sorted(overlap)}")
     plain_relics, relic_stacks = _relic_stacks(
         types,
-        [{"id": relic_id} for relic_id in (spec.get("relics") or []) if relic_id not in structured_relic_ids]
+        [{"id": relic_id} for relic_id in (spec.get("relics") or [])]
         + (spec.get("relic_stacks") or []),
     )
     scenario.Relics = str_list(plain_relics)

@@ -104,6 +104,49 @@ def test_battle_state_key_distinguishes_enchantment():
     assert key_enchanted != key_different_amount, (key_enchanted, key_different_amount)
 
 
+def test_battle_state_key_distinguishes_relic_saved_properties():
+    base_state = {
+        "seed": 1,
+        "hp": 80,
+        "maxHp": 80,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "potions": [],
+        "hand": [],
+        "drawPile": [],
+        "discardPile": [],
+        "exhaustPile": [],
+        "playPile": [],
+        "playerPowers": [],
+        "orbSlots": 0,
+        "orbs": [],
+        "pendingChoice": None,
+        "enemies": [],
+        "relics": [{"id": "NUNCHAKU", "displayAmount": 3, "savedProperties": {"AttacksPlayed": 3}}],
+    }
+    changed_state = {
+        **base_state,
+        "relics": [{"id": "NUNCHAKU", "displayAmount": 4, "savedProperties": {"AttacksPlayed": 4}}],
+    }
+    list_value_state = {
+        **base_state,
+        "relics": [{"id": "TEST_RELIC", "displayAmount": 0, "savedProperties": {"Cards": [{"id": "STRIKE_IRONCLAD"}, {"id": "BASH"}]}}],
+    }
+    same_list_value_different_dict_order = {
+        **base_state,
+        "relics": [{"displayAmount": 0, "savedProperties": {"Cards": [{"id": "STRIKE_IRONCLAD"}, {"id": "BASH"}]}, "id": "TEST_RELIC"}],
+    }
+
+    key_base = battle_state_key(type("StubState", (), {"engine_state": base_state, "turn": 1, "shuffle_rng_seed": None})())
+    key_changed = battle_state_key(type("StubState", (), {"engine_state": changed_state, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_base != key_changed, (key_base, key_changed)
+
+    key_list_value = battle_state_key(type("StubState", (), {"engine_state": list_value_state, "turn": 1, "shuffle_rng_seed": None})())
+    key_same_list_value = battle_state_key(type("StubState", (), {"engine_state": same_list_value_different_dict_order, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_list_value == key_same_list_value, (key_list_value, key_same_list_value)
+
+
 def test_state_has_living_enemies_and_terminal_coercion():
     state = {
         "hp": 18,
@@ -941,11 +984,26 @@ def test_relic_internal_counter_survives_fresh_scenario_reconstruction():
     reconstructed_spec = {
         **_three_strike_nunchaku_spec(),
         "hand": [],
-        "relics": ["NUNCHAKU"],
+        "relics": [],
         "relic_stacks": [{"relic_id": "NUNCHAKU", "saved_properties": relic["savedProperties"]}],
     }
     reconstructed = emu.initialize(reconstructed_spec)
     assert _nunchaku_display_amount(reconstructed.engine_state) == 3, reconstructed.engine_state["relics"]
+
+
+def test_relics_and_relic_stacks_overlap_raises():
+    emu = BattleEmulator()
+    spec = {
+        **_three_strike_nunchaku_spec(),
+        "relics": ["NUNCHAKU"],
+        "relic_stacks": [{"relic_id": "NUNCHAKU", "saved_properties": {"AttacksPlayed": 3}}],
+    }
+    try:
+        emu.initialize(spec)
+    except ValueError as exc:
+        assert str(exc) == "relics and relic_stacks overlap: ['NUNCHAKU']", str(exc)
+        return
+    raise AssertionError("expected relics and relic_stacks overlap to raise")
 
 
 def test_relic_internal_counter_accumulates_across_apply_action_restore_steps():
