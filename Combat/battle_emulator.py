@@ -120,7 +120,20 @@ def battle_state_key(battle_state: BattleState) -> tuple:
     merging two states that could actually diverge. Powers (player and per-enemy) are
     order-INsensitive (sorted by id) since their list order is incidental engine/dict
     iteration order, not a gameplay-meaningful sequence like a pile's draw order is.
+
+    Each card's signature also includes its enchantment (id/amount/status) - two cards
+    that differ only by enchantment have genuinely different in-combat behavior (e.g.
+    Sharp's extra damage), so must never be collapsed into the same key.
     """
+
+    def enchantment_signature(enchantment):
+        if not enchantment:
+            return None
+        return (
+            enchantment.get("id"),
+            enchantment.get("amount"),
+            enchantment.get("status"),
+        )
 
     def card_signature(card):
         if not card:
@@ -134,6 +147,7 @@ def battle_state_key(battle_state: BattleState) -> tuple:
             card.get("upgradeLevel"),
             card.get("tinkerTimeType"),
             card.get("tinkerTimeRider"),
+            enchantment_signature(card.get("enchantment")),
         )
 
     def card_tuple(cards):
@@ -256,12 +270,27 @@ def _card_instance_from_payload(types, card: dict) -> Any:
     instance = CardInstanceScenario()
     instance.CardId = card["card_id"] if "card_id" in card else card["id"]
     instance.IsUpgraded = bool(card.get("is_upgraded", card.get("upgraded", False)))
+    upgrade_level = card.get("upgrade_level", card.get("upgradeLevel"))
+    if upgrade_level is not None:
+        instance.UpgradeLevel = int(upgrade_level)
     tinker_time_type = card.get("tinker_time_type", card.get("tinkerTimeType"))
     tinker_time_rider = card.get("tinker_time_rider", card.get("tinkerTimeRider"))
     if tinker_time_type not in (None, ""):
         instance.TinkerTimeType = tinker_time_type
     if tinker_time_rider not in (None, ""):
         instance.TinkerTimeRider = tinker_time_rider
+    enchantment = card.get("enchantment")
+    if enchantment:
+        enchantment_id = enchantment.get("id", enchantment.get("enchantment_id"))
+        if not enchantment_id:
+            raise ValueError("enchantment.id is required when enchantment is present")
+        instance.EnchantmentId = enchantment_id
+        amount = enchantment.get("amount")
+        if amount is not None:
+            instance.EnchantmentAmount = int(amount)
+        status = enchantment.get("status")
+        if status is not None:
+            instance.EnchantmentStatus = str(status)
     return instance
 
 
@@ -341,8 +370,10 @@ def _pending_choice_scenario(types, pending_choice) -> Any:
             {
                 "card_id": c["id"] if "id" in c else c["card_id"],
                 "is_upgraded": c.get("upgraded", c.get("is_upgraded", False)),
+                "upgradeLevel": c.get("upgradeLevel", c.get("upgrade_level")),
                 "tinkerTimeType": c.get("tinkerTimeType", c.get("tinker_time_type")),
                 "tinkerTimeRider": c.get("tinkerTimeRider", c.get("tinker_time_rider")),
+                "enchantment": c.get("enchantment"),
             }
             for c in (pending_choice.get("options") or [])
         ],
@@ -388,16 +419,19 @@ def is_scenario_restorable_pending_choice(state: dict) -> bool:
 
 def _card_instances_from_engine_cards(types, cards) -> Any:
     """Like _card_instances(), but source cards are engine-observation card dicts
-    ({"id","type","rarity","cost","targetType","upgraded","upgradeLevel", ...} - see
-    BuildCardListDict) rather than a scenario spec's {"card_id","is_upgraded"} dicts."""
+    ({"id","type","rarity","cost","targetType","upgraded","upgradeLevel","enchantment",
+    ...} - see BuildCardListDict) rather than a scenario spec's {"card_id",
+    "is_upgraded"} dicts."""
     return _card_instances(
         types,
         [
             {
                 "card_id": c["id"],
                 "is_upgraded": c.get("upgraded", False),
+                "upgradeLevel": c.get("upgradeLevel"),
                 "tinkerTimeType": c.get("tinkerTimeType"),
                 "tinkerTimeRider": c.get("tinkerTimeRider"),
+                "enchantment": c.get("enchantment"),
             }
             for c in (cards or [])
         ],
@@ -570,6 +604,10 @@ def build_scenario_from_spec(spec: dict):
             enemy.FrogKnightHasBeetleCharged = bool(e["frog_knight_has_beetle_charged"])
         if e.get("waterfall_giant_current_pressure_gun_damage") is not None:
             enemy.WaterfallGiantCurrentPressureGunDamage = int(e["waterfall_giant_current_pressure_gun_damage"])
+        if e.get("forced_move") is not None:
+            enemy.ForcedMove = e["forced_move"]
+        if e.get("state_log") is not None:
+            enemy.StateLog = str_list(e["state_log"])
         enemy.Powers = _power_stacks(types, e.get("powers"))
         enemies.Add(enemy)
     scenario.Enemies = enemies

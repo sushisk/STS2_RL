@@ -113,7 +113,7 @@ def test_masking_normalizes_pending_choice_and_scrubs_retained_option_payloads()
     assert "seed" not in pending["options"][0]
     assert pending["options"][0]["optionId"] == "choice-7:1"
     assert pending["selectedOptionIds"] == ["choice-7:0"]
-    assert masked["mask_version"] == MASK_VERSION == "1.1"
+    assert masked["mask_version"] == MASK_VERSION == "1.2"
 
 
 def test_invalid_choice_identity_degrades_known_semantics_to_unknown():

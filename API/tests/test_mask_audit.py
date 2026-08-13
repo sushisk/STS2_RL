@@ -39,6 +39,35 @@ def _find_forbidden_keys(node, forbidden_substrings) -> list[str]:
     return hits
 
 
+def _multiset_record(
+    card_id: str,
+    count: int,
+    *,
+    type_: str | None = None,
+    rarity: str | None = None,
+    cost: int | None = None,
+    target_type: str | None = None,
+    upgraded: bool = False,
+    upgrade_level: int = 0,
+    tinker_time_type: str | None = None,
+    tinker_time_rider: str | None = None,
+    enchantment: dict | None = None,
+) -> dict:
+    return {
+        "id": card_id,
+        "type": type_,
+        "rarity": rarity,
+        "cost": cost,
+        "targetType": target_type,
+        "upgraded": upgraded,
+        "upgradeLevel": upgrade_level,
+        "tinkerTimeType": tinker_time_type,
+        "tinkerTimeRider": tinker_time_rider,
+        "enchantment": enchantment,
+        "count": count,
+    }
+
+
 def _build_raw_state() -> dict:
     return {
         "someField": 1,
@@ -57,7 +86,20 @@ def _build_raw_state() -> dict:
                 "parameters": {"cardId": "DEFEND", "target": "enemy"},
             },
         ],
-        "drawPile": [{"id": "STRIKE"}, {"id": "DEFEND"}, {"id": "STRIKE"}],
+        "drawPile": [
+            {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 1, "targetType": "AnyEnemy"},
+            {"id": "DEFEND", "type": "Skill", "rarity": "Basic", "cost": 1, "targetType": "Self"},
+            {
+                "id": "STRIKE",
+                "type": "Attack",
+                "rarity": "Basic",
+                "cost": 1,
+                "targetType": "AnyEnemy",
+                "upgraded": True,
+                "upgradeLevel": 1,
+                "enchantment": {"id": "SHARP", "amount": 1, "status": "Normal"},
+            },
+        ],
         "discardPile": [{"id": "BASH"}, {"id": "BASH"}, {"id": "DEFEND"}],
         "exhaustPile": [{"id": "WOUND"}, {"id": "WOUND"}, {"id": "WOUND"}],
         "playPile": [{"id": "BLOCK"}],
@@ -125,19 +167,39 @@ def test_masked_emulator_dto_scrubs_forbidden_keys_everywhere_and_does_not_mutat
     final_observation = masked["transition"]["final_observation"]
     assert "snapshotBlob" not in final_observation
     assert "seed" not in final_observation
-    assert isinstance(final_observation["drawPile"], dict)
-    assert final_observation["drawPile"] == {"DEFEND": 1, "STRIKE": 2}
+    assert isinstance(final_observation["drawPile"], list)
+    assert final_observation["drawPile"] == [
+        _multiset_record("DEFEND", 1),
+        _multiset_record("STRIKE", 2),
+    ]
 
 
 def test_piles_reward_and_public_fields_are_masked_as_documented():
     masked = build_masked_emulator_dto(_build_raw_state())
 
-    assert masked["drawPile"] == {"DEFEND": 1, "STRIKE": 2}
-    assert masked["discardPile"] == {"BASH": 2, "DEFEND": 1}
-    assert masked["exhaustPile"] == {"WOUND": 3}
-    assert isinstance(masked["drawPile"], dict)
-    assert isinstance(masked["discardPile"], dict)
-    assert isinstance(masked["exhaustPile"], dict)
+    assert masked["drawPile"] == [
+        _multiset_record("DEFEND", 1, type_="Skill", rarity="Basic", cost=1, target_type="Self"),
+        _multiset_record("STRIKE", 1, type_="Attack", rarity="Basic", cost=1, target_type="AnyEnemy"),
+        _multiset_record(
+            "STRIKE",
+            1,
+            type_="Attack",
+            rarity="Basic",
+            cost=1,
+            target_type="AnyEnemy",
+            upgraded=True,
+            upgrade_level=1,
+            enchantment={"id": "SHARP", "amount": 1, "status": "Normal"},
+        ),
+    ]
+    assert masked["discardPile"] == [
+        _multiset_record("BASH", 2),
+        _multiset_record("DEFEND", 1),
+    ]
+    assert masked["exhaustPile"] == [_multiset_record("WOUND", 3)]
+    assert isinstance(masked["drawPile"], list)
+    assert isinstance(masked["discardPile"], list)
+    assert isinstance(masked["exhaustPile"], list)
 
     assert "playPile" not in masked
     assert "reward" not in masked
@@ -224,3 +286,44 @@ def _run_all() -> int:
 
 if __name__ == "__main__":
     sys.exit(_run_all())
+
+
+def test_pile_multiset_does_not_collapse_different_public_cost():
+    masked = build_masked_emulator_dto({"drawPile": [
+        {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 0, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},
+        {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 1, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},
+    ]})
+    assert len(masked["drawPile"]) == 2
+    assert sorted(record["cost"] for record in masked["drawPile"]) == [0, 1]
+    assert all(record["count"] == 1 for record in masked["drawPile"])
+
+
+def test_pile_multiset_enchantment_uses_public_allowlist():
+    raw = {
+        "drawPile": [
+            {
+                "id": "STRIKE",
+                "type": "Attack",
+                "rarity": "Basic",
+                "cost": 1,
+                "targetType": "AnyEnemy",
+                "upgraded": True,
+                "upgradeLevel": 1,
+                "enchantment": {
+                    "id": "SHARP",
+                    "amount": 1,
+                    "status": "Normal",
+                    "seed": 123,
+                },
+            }
+        ]
+    }
+
+    masked = build_masked_emulator_dto(raw)
+
+    assert masked["drawPile"][0]["enchantment"] == {
+        "id": "SHARP",
+        "amount": 1,
+        "status": "Normal",
+    }
+    assert _find_forbidden_keys(masked, _FORBIDDEN_KEY_SUBSTRINGS) == []

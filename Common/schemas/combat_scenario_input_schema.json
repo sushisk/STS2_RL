@@ -77,9 +77,20 @@
       "required": ["card_id"],
       "properties": {
         "card_id": {"type": "string"},
-        "is_upgraded": {"type": "boolean", "default": false, "description": "Requesting true for a non-upgradable card (most Status/Curse cards, or a card already at MaxUpgradeLevel) throws ArgumentException - do not set true speculatively; only set it from a source that actually recorded upgrade state (e.g. a real run's current_upgrade_level > 0)."},
+        "is_upgraded": {"type": "boolean", "default": false, "description": "Convenience shorthand for upgrade_level=1; ignored when upgrade_level is set nonzero. Requesting true for a non-upgradable card (most Status/Curse cards, or a card already at MaxUpgradeLevel) throws ArgumentException - do not set true speculatively; only set it from a source that actually recorded upgrade state (e.g. a real run's current_upgrade_level > 0)."},
+        "upgrade_level": {"type": "integer", "minimum": 0, "default": 0, "description": "How many times to upgrade this card instance (some cards' MaxUpgradeLevel exceeds 1). an explicitly supplied 0 means unupgraded and takes precedence over is_upgraded; omitting upgrade_level preserves the legacy is_upgraded fallback. The currently supported game build only exposes forward upgrades through repeated CardCmd.Upgrade calls, so negative values are rejected by this schema today rather than being silently ignored; revisit this bound if a future game version introduces meaningful negative upgrade levels. Requesting a non-negative level a card can't reach throws ArgumentException."},
         "tinker_time_type": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeType."},
-        "tinker_time_rider": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeRider."}
+        "tinker_time_rider": {"type": ["string", "null"], "description": "Optional MAD_SCIENCE-specific per-instance state mirrored from Observation card.tinkerTimeRider."},
+        "enchantment": {
+          "type": ["object", "null"],
+          "description": "Optional per-instance Enchantment, mirrored from Observation card.enchantment. Requesting one that can't apply to this card throws.",
+          "required": ["id"],
+          "properties": {
+            "id": {"type": "string"},
+            "amount": {"type": "integer", "default": 1},
+            "status": {"type": ["string", "null"], "description": "Exact EnchantmentModel.Status mirrored from Observation card.enchantment.status; restoration must round-trip it exactly."}
+          }
+        }
       }
     },
     "power_stack": {
@@ -119,6 +130,8 @@
         "max_hp": {"type": ["integer", "null"], "description": "Null = reuse hp as max (100% health)."},
         "block": {"type": ["integer", "null"]},
         "slot_name": {"type": ["string", "null"], "description": "Set for the handful of slot-dependent monsters (Exoskeleton/Myte/PhantasmalGardener/Wriggler) to avoid a silent 'UNSET_MOVE' placeholder intent."},
+        "forced_move": {"type": ["string", "null"], "description": "Forces this enemy's first move to the named move-state id instead of a normal RNG-driven roll. See EnemyScenario.ForcedMove."},
+        "state_log": {"type": "array", "items": {"type": "string"}, "description": "This enemy's past move history (oldest first), for monsters whose move graph has a history-dependent weighted branch. See EnemyScenario.StateLog."},
         "powers": {"type": "array", "items": {"$ref": "#/definitions/power_stack"}}
       }
     },

@@ -63,6 +63,47 @@ def test_battle_state_key_distinguishes_card_cost_and_potion_slots():
     assert key_before != key_after, (key_before, key_after)
 
 
+def test_battle_state_key_distinguishes_enchantment():
+    """Two otherwise-identical states differing only by a card's enchantment (e.g.
+    Sharp's extra damage) must never hash the same - a search tree collapsing them
+    into one node would silently discard a genuinely different future."""
+    base_state = {
+        "seed": 1,
+        "hp": 80,
+        "maxHp": 80,
+        "block": 20,
+        "energy": 0,
+        "stars": 0,
+        "potions": [None, None, None],
+        "hand": [{"id": "STRIKE_IRONCLAD", "type": "Attack", "rarity": "Basic", "cost": 1, "targetType": "AnyPlayer", "upgraded": False, "upgradeLevel": 0, "tinkerTimeType": None, "tinkerTimeRider": None, "enchantment": None}],
+        "drawPile": [],
+        "discardPile": [],
+        "exhaustPile": [],
+        "playPile": [],
+        "playerPowers": [],
+        "orbSlots": 0,
+        "orbs": [],
+        "pendingChoice": None,
+        "enemies": [{"id": "DEVOTED_SCULPTOR", "hp": 157, "maxHp": 172, "block": 0, "isAlive": True, "intent": {"stateId": "FORBIDDEN_INCANTATION_MOVE"}, "powers": [], "slotName": None, "stateLog": []}],
+        "relics": [{"id": "ANCHOR"}],
+    }
+    key_unenchanted = battle_state_key(type("StubState", (), {"engine_state": base_state, "turn": 1, "shuffle_rng_seed": None})())
+
+    enchanted_state = {
+        **base_state,
+        "hand": [{**base_state["hand"][0], "enchantment": {"id": "SHARP", "amount": 3, "status": "Active"}}],
+    }
+    key_enchanted = battle_state_key(type("StubState", (), {"engine_state": enchanted_state, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_unenchanted != key_enchanted, (key_unenchanted, key_enchanted)
+
+    different_amount_state = {
+        **base_state,
+        "hand": [{**base_state["hand"][0], "enchantment": {"id": "SHARP", "amount": 5, "status": "Active"}}],
+    }
+    key_different_amount = battle_state_key(type("StubState", (), {"engine_state": different_amount_state, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_enchanted != key_different_amount, (key_enchanted, key_different_amount)
+
+
 def test_state_has_living_enemies_and_terminal_coercion():
     state = {
         "hp": 18,
@@ -471,6 +512,111 @@ def test_upgraded_and_unupgraded_mixed():
     assert [c["upgraded"] for c in hand] == [True, False, True], hand
     # unupgraded Strike costs less energy/damage difference isn't checked here - just
     # confirm the upgrade flag itself round-trips per-instance, not pile-wide.
+
+
+def test_upgrade_level_field_matches_is_upgraded_shorthand():
+    """UpgradeLevel=1 must produce the same result as the legacy is_upgraded=True
+    shorthand (no card in this content build currently exceeds MaxUpgradeLevel=1, so
+    this only exercises level 1 - the loop-based CardCmd.Upgrade application in
+    GameInstance.CreateScenarioCard is otherwise unverified above level 1 by this repo)."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [
+            {"card_id": "STRIKE_IRONCLAD", "upgrade_level": 1},
+            {"card_id": "STRIKE_IRONCLAD", "is_upgraded": True},
+        ],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    state = emu.initialize(spec)
+    hand = state.engine_state["hand"]
+    assert [c["upgraded"] for c in hand] == [True, True], hand
+    assert [c["upgradeLevel"] for c in hand] == [1, 1], hand
+
+
+def test_enchantment_applies_and_is_observable():
+    """Sharp (attack-only, +damage) round-trips through initialize() and is exposed on
+    the engine-observation card dict."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [
+            {"card_id": "STRIKE_IRONCLAD", "enchantment": {"id": "SHARP", "amount": 3}},
+        ],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    state = emu.initialize(spec)
+    hand = state.engine_state["hand"]
+    assert len(hand) == 1, hand
+    enchantment = hand[0]["enchantment"]
+    assert enchantment is not None and enchantment["id"] == "SHARP" and enchantment["amount"] == 3, hand
+
+
+def test_enchantment_survives_apply_action_restore():
+    """Enchantment must not be silently dropped by build_scenario_from_state() restore
+    (the same class of bug test_upgrade_and_potions_survive_apply_action_restore
+    pins for upgrade state/potions)."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [{"card_id": "STRIKE_IRONCLAD", "enchantment": {"id": "SHARP", "amount": 3}}],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    state = emu.initialize(spec)
+    legal = emu.enumerate_legal_actions(state)
+    end_turn = next(a for a in legal if a["action_type"] == "system")
+    state2 = emu.apply_action(state, end_turn)
+    hand2 = state2.engine_state["hand"]
+    strikes = [c for c in hand2 if c["id"] == "STRIKE_IRONCLAD"]
+    assert strikes and strikes[0]["enchantment"] is not None and strikes[0]["enchantment"]["id"] == "SHARP", hand2
+
+
+def test_enchantment_rejected_for_incompatible_card_type():
+    """Sharp is attack-only (EnchantmentModel.CanEnchantCardType); requesting it for a
+    Skill must raise, not silently no-op."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [{"card_id": "DEFEND_IRONCLAD", "enchantment": {"id": "SHARP", "amount": 1}}],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+    _assert_raises_not_aggregate(lambda: emu.initialize(spec), "enchant_incompatible_card_type")
+
+
+def test_aeonglass_increasing_intensity_upgrades_wither_via_real_engine():
+    """AEONGLASS's INCREASING_INTENSITY_MOVE must escalate Wither cards through the
+    real CardModel.CurrentUpgradeLevel/OnUpgrade system (CardCmd.Upgrade), not a
+    private disconnected counter - forced via the new EnemyScenario.ForcedMove
+    plumbing (battle_emulator.build_scenario_from_spec's "forced_move" enemy key)."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [{"card_id": "WITHER", "upgrade_level": 0}],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": [], "seed": 1,
+        "enemies": [{"monster_id": "AEONGLASS", "hp": 512, "forced_move": "INCREASING_INTENSITY_MOVE"}],
+    }
+    state = emu.initialize(spec)
+    wither_before = next(c for c in state.engine_state["hand"] if c["id"] == "WITHER")
+    assert wither_before["upgraded"] is False and wither_before["upgradeLevel"] == 0, wither_before
+    enemy = state.engine_state["enemies"][0]
+    assert enemy["intent"]["stateId"] == "INCREASING_INTENSITY_MOVE", enemy
+
+    legal = emu.enumerate_legal_actions(state)
+    end_turn = next(a for a in legal if a["action_type"] == "system")
+    state2 = emu.apply_action(state, end_turn)
+
+    wither_after = next(c for c in state2.engine_state["hand"] if c["id"] == "WITHER")
+    assert wither_after["upgraded"] is True, wither_after
+    assert wither_after["upgradeLevel"] == 1, wither_after
 
 
 def test_potions_present():

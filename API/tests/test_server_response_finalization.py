@@ -5,6 +5,7 @@ import types
 import unittest
 from unittest.mock import patch
 
+from API.dto import SCHEMA_VERSION
 from API.server import RLApiServer
 
 
@@ -64,7 +65,7 @@ class ServerResponseFinalizationTest(unittest.TestCase):
     @staticmethod
     def _request(seq: int, operation: str, **fields) -> dict:
         return {
-            "schema_version": "0.7",
+            "schema_version": SCHEMA_VERSION,
             "client_session_id": "session-a",
             "request_seq": seq,
             "request_id": f"session-a:{seq}",
@@ -88,7 +89,7 @@ class ServerResponseFinalizationTest(unittest.TestCase):
         response, _ = self._start(server)
 
         self.assertEqual(response["instance_id"], "inst-000001")
-        self.assertEqual(response["schema_version"], "0.7")
+        self.assertEqual(response["schema_version"], SCHEMA_VERSION)
         self.assertEqual(response["server_epoch"], "epoch-real")
         self.assertEqual(response["client_session_id"], "session-a")
         self.assertEqual(response["request_seq"], 1)
@@ -125,7 +126,7 @@ class ServerResponseFinalizationTest(unittest.TestCase):
         )
 
         self.assertEqual(response["instance_id"], start["instance_id"])
-        self.assertEqual(response["schema_version"], "0.7")
+        self.assertEqual(response["schema_version"], SCHEMA_VERSION)
         self.assertEqual(response["server_epoch"], "epoch-real")
         self.assertEqual(response["client_session_id"], "session-a")
         self.assertEqual(response["request_seq"], 2)

@@ -5,6 +5,7 @@ import types
 import unittest
 from unittest.mock import patch
 
+from API.dto import SCHEMA_VERSION
 from API.identifiers import SessionLedger
 from API.server import RLApiServer
 from API.validation import RequestRejected
@@ -57,7 +58,7 @@ class SessionSequencingTest(unittest.TestCase):
     @staticmethod
     def _request(session: str, seq: int, operation: str, **fields) -> dict:
         return {
-            "schema_version": "0.7",
+            "schema_version": SCHEMA_VERSION,
             "client_session_id": session,
             "request_seq": seq,
             "request_id": f"{session}:{seq}",

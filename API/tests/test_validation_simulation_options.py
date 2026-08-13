@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 
+from API.dto import SCHEMA_VERSION
 from API.validation import RequestRejected, validate_request
 
 
@@ -9,7 +10,7 @@ class SimulationOptionsValidationTest(unittest.TestCase):
     @staticmethod
     def _request(options: dict) -> dict:
         return {
-            "schema_version": "0.7",
+            "schema_version": SCHEMA_VERSION,
             "client_session_id": "session-a",
             "request_seq": 1,
             "request_id": "session-a:1",
