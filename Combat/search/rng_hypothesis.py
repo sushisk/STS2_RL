@@ -172,8 +172,9 @@ def compute_public_multiset(
     Open caveat preserved from the contract: this assumes generated combat cards are
     represented by ``CombatHistory`` ``CardGeneratedEntry`` records with enough card-id
     information, or with an instance id that can be resolved from currently visible
-    non-draw piles. If the Emulator has an unrecorded generation path, this function
-    cannot silently guarantee full coverage.
+    non-draw piles, and that transformed-away originals are represented by
+    ``CombatHistory.InferredCardRemovals``. If the Emulator has an unrecorded generation
+    or removal path, this function cannot silently guarantee full coverage.
     """
     counts = Counter({str(k): int(v) for k, v in combat_start_deck_multiset.items() if int(v) != 0})
     player = snapshot.Player
@@ -188,6 +189,8 @@ def compute_public_multiset(
             raise ValueError("CardGeneratedEntry did not expose a resolvable generated CardId")
         counts[card_id] += 1
 
+    inferred_removals = Counter(str(removal.CardId) for removal in snapshot.CombatHistory.InferredCardRemovals)
+    _subtract_counts(counts, inferred_removals)
     _subtract_counts(counts, _card_counts(visible_cards))
     return dict(sorted(counts.items()))
 
