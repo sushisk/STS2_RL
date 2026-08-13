@@ -16,35 +16,29 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-
           p = Path('Combat/battle_emulator.py')
           s = p.read_text()
           old = '''        amount = enchantment.get("amount")\n        if amount is not None:\n            instance.EnchantmentAmount = int(amount)\n    return instance'''
           new = '''        amount = enchantment.get("amount")\n        if amount is not None:\n            instance.EnchantmentAmount = int(amount)\n        status = enchantment.get("status")\n        if status is not None:\n            instance.EnchantmentStatus = str(status)\n    return instance'''
-          if s.count(old) != 1:
-              raise SystemExit(f'battle_emulator match count={s.count(old)}')
+          if s.count(old) != 1: raise SystemExit(f'battle match={s.count(old)}')
           p.write_text(s.replace(old, new))
 
           p = Path('Common/schemas/combat_scenario_input_schema.json')
           s = p.read_text()
           old = '''            "id": {"type": "string"},\n            "amount": {"type": "integer", "default": 1}\n'''
-          new = '''            "id": {"type": "string"},\n            "amount": {"type": "integer", "default": 1},\n            "status": {"type": ["string", "null"], "description": "Exact EnchantmentModel.Status mirrored from Observation card.enchantment.status. When present it must round-trip exactly; restoration rejects a mismatch instead of silently dropping it."}\n'''
-          if s.count(old) != 1:
-              raise SystemExit(f'schema enchantment match count={s.count(old)}')
+          new = '''            "id": {"type": "string"},\n            "amount": {"type": "integer", "default": 1},\n            "status": {"type": ["string", "null"], "description": "Exact EnchantmentModel.Status mirrored from Observation card.enchantment.status; restoration must round-trip it exactly."}\n'''
+          if s.count(old) != 1: raise SystemExit(f'schema match={s.count(old)}')
           s = s.replace(old, new)
-          s = s.replace('"0 (default) falls back to is_upgraded.', '"An explicitly supplied 0 means unupgraded and takes precedence over is_upgraded; omitting upgrade_level preserves the legacy is_upgraded fallback.')
+          s = s.replace('0 (default) falls back to is_upgraded.', 'an explicitly supplied 0 means unupgraded and takes precedence over is_upgraded; omitting upgrade_level preserves the legacy is_upgraded fallback.')
           p.write_text(s)
 
           p = Path('API/tests/test_mask_audit.py')
           s = p.read_text()
-          test = '''\n\ndef test_pile_multiset_does_not_collapse_different_public_cost():\n    masked = build_masked_emulator_dto({\n        "drawPile": [\n            {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 0, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},\n            {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 1, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},\n        ]\n    })\n    assert len(masked["drawPile"]) == 2\n    assert sorted(record["cost"] for record in masked["drawPile"]) == [0, 1]\n    assert all(record["count"] == 1 for record in masked["drawPile"])\n'''
-          if 'test_pile_multiset_does_not_collapse_different_public_cost' not in s:
-              s += test
+          marker = 'test_pile_multiset_does_not_collapse_different_public_cost'
+          if marker not in s:
+              s += '''\n\ndef test_pile_multiset_does_not_collapse_different_public_cost():\n    masked = build_masked_emulator_dto({"drawPile": [\n        {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 0, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},\n        {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 1, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},\n    ]})\n    assert len(masked["drawPile"]) == 2\n    assert sorted(record["cost"] for record in masked["drawPile"]) == [0, 1]\n    assert all(record["count"] == 1 for record in masked["drawPile"])\n'''
           p.write_text(s)
-      - name: Run focused tests
-        run: python -m pytest -q API/tests/test_mask_audit.py Combat/tests/test_scenario_v2.py
       - name: Remove helper workflow and commit
-        if: success()
         run: |
           rm .github/workflows/apply-dto-review-fixes.yml
           git config user.name github-actions[bot]
