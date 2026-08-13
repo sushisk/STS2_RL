@@ -907,6 +907,62 @@ def test_exoskeleton_duplicate_slot_name_rejected():
     _assert_raises_not_aggregate(lambda: emu.initialize(spec), "duplicate SlotName")
 
 
+def _nunchaku_display_amount(engine_state: dict) -> int | None:
+    relic = next(r for r in engine_state.get("relics") or [] if r["id"] == "NUNCHAKU")
+    return relic.get("displayAmount")
+
+
+def _three_strike_nunchaku_spec() -> dict:
+    return {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand": ["STRIKE_IRONCLAD", "STRIKE_IRONCLAD", "STRIKE_IRONCLAD"],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": ["NUNCHAKU"], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+
+
+def test_relic_internal_counter_survives_fresh_scenario_reconstruction():
+    """Relic savedProperties captured from an observation must restore into RelicStacks.
+
+    Nunchaku tracks AttacksPlayed as private [SavedProperty] state; reconstructing a
+    fresh scenario from a real observed relic payload should preserve displayAmount=3.
+    """
+    emu = BattleEmulator()
+    state = emu.initialize(_three_strike_nunchaku_spec())
+    for _ in range(3):
+        legal = emu.enumerate_legal_actions(state)
+        strike = next(a for a in legal if a["action_type"] == "card")
+        state = emu.apply_action(state, strike, target_index=0)
+
+    relic = next(r for r in state.engine_state["relics"] if r["id"] == "NUNCHAKU")
+    assert relic.get("savedProperties", {}).get("AttacksPlayed") == 3, relic
+
+    reconstructed_spec = {
+        **_three_strike_nunchaku_spec(),
+        "hand": [],
+        "relics": ["NUNCHAKU"],
+        "relic_stacks": [{"relic_id": "NUNCHAKU", "saved_properties": relic["savedProperties"]}],
+    }
+    reconstructed = emu.initialize(reconstructed_spec)
+    assert _nunchaku_display_amount(reconstructed.engine_state) == 3, reconstructed.engine_state["relics"]
+
+
+def test_relic_internal_counter_accumulates_across_apply_action_restore_steps():
+    """BattleEmulator.apply_action() restores from observation state on every step.
+
+    Relic savedProperties must therefore round-trip through build_scenario_from_state()
+    so Nunchaku's attack counter accumulates across separate simulated actions.
+    """
+    emu = BattleEmulator()
+    state = emu.initialize(_three_strike_nunchaku_spec())
+    for _ in range(3):
+        legal = emu.enumerate_legal_actions(state)
+        strike = next(a for a in legal if a["action_type"] == "card")
+        state = emu.apply_action(state, strike, target_index=0)
+    assert _nunchaku_display_amount(state.engine_state) == 3, state.engine_state["relics"]
+
+
 def test_legacy_plain_string_scenario_regression():
     """旧Scenarioの回帰 (plain hand/draw_pile strings, no *Cards/potions fields)"""
     emu = BattleEmulator()

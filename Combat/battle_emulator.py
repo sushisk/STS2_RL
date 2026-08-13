@@ -265,6 +265,40 @@ def _power_stacks(types, powers) -> Any:
     return stacks
 
 
+def _relic_stacks(types, relics) -> tuple[list[str], Any]:
+    RelicStack = types["RelicStack"]
+    stacks = types["List"][RelicStack]()
+    plain_relics = []
+    for relic in relics or []:
+        if isinstance(relic, str):
+            plain_relics.append(relic)
+            continue
+        relic_id = relic.get("id", relic.get("relic_id", relic.get("relicId")))
+        saved_properties = relic.get(
+            "savedProperties",
+            relic.get("saved_properties", relic.get("SavedProperties")),
+        ) or {}
+        if saved_properties:
+            stack = RelicStack()
+            stack.RelicId = relic_id
+            props = types["Dictionary"][types["String"], types["Object"]]()
+            for key, value in saved_properties.items():
+                props[str(key)] = _saved_property_value(types, value)
+            stack.SavedProperties = props
+            stacks.Add(stack)
+        else:
+            plain_relics.append(relic_id)
+    return plain_relics, stacks
+
+
+def _saved_property_value(types, value):
+    if isinstance(value, bool):
+        return types["Boolean"](value)
+    if isinstance(value, int):
+        return types["Int32"](value)
+    return value
+
+
 def _card_instance_from_payload(types, card: dict) -> Any:
     CardInstanceScenario = types["CardInstanceScenario"]
     instance = CardInstanceScenario()
@@ -489,7 +523,9 @@ def build_scenario_from_state(engine_state: dict, shuffle_rng_seed: "int | None"
         scenario.StepIndex = int(engine_state["stepIndex"])
     if engine_state.get("block") is not None:
         scenario.PlayerBlock = int(engine_state["block"])
-    scenario.Relics = str_list([r["id"] for r in (engine_state.get("relics") or [])])
+    plain_relics, relic_stacks = _relic_stacks(types, engine_state.get("relics"))
+    scenario.Relics = str_list(plain_relics)
+    scenario.RelicStacks = relic_stacks
     if shuffle_rng_seed is not None:
         scenario.ShuffleRngSeed = shuffle_rng_seed
 
@@ -587,7 +623,18 @@ def build_scenario_from_spec(spec: dict):
         scenario.StepIndex = int(spec["stepIndex"])
     if spec.get("shuffle_rng_seed") is not None:
         scenario.ShuffleRngSeed = spec["shuffle_rng_seed"]
-    scenario.Relics = str_list(spec.get("relics", []))
+    structured_relic_ids = {
+        r.get("id", r.get("relic_id", r.get("relicId")))
+        for r in (spec.get("relic_stacks") or [])
+        if r.get("id", r.get("relic_id", r.get("relicId")))
+    }
+    plain_relics, relic_stacks = _relic_stacks(
+        types,
+        [{"id": relic_id} for relic_id in (spec.get("relics") or []) if relic_id not in structured_relic_ids]
+        + (spec.get("relic_stacks") or []),
+    )
+    scenario.Relics = str_list(plain_relics)
+    scenario.RelicStacks = relic_stacks
 
     enemies = types["List"][EnemyScenario]()
     for e in spec["enemies"]:

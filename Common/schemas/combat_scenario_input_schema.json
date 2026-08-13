@@ -55,6 +55,11 @@
       "items": {"type": "string"},
       "description": "Granted via the real RelicCmd.Obtain, so AfterObtained() fires for real for every relic here. For relics whose AfterObtained() includes a genuine interactive card-choice pickup ritual (e.g. LEAD_PAPERWEIGHT, CLAWS - 24 total, see Sts2Emulator.Api.Internal.RealEngine.AutoSkipCardSelector's doc comment for the full list), that prompt is now automatically auto-declined rather than hanging (fixed in the 2026-07-20 15:49 build - see Combat/evaluation/reports/emulator_hang/ for the investigation that found this before the fix landed). Every other part of such a relic's AfterObtained() (unconditional side effects) still runs in full."
     },
+    "relic_stacks": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/relic_stack"},
+      "description": "Structured form for relics with saved internal state. Do not also list the same relic id in relics; the emulator rejects overlap between CombatScenario.Relics and CombatScenario.RelicStacks."
+    },
     "energy": {"type": ["integer", "null"]},
     "stars": {
       "type": ["integer", "null"],
@@ -99,6 +104,14 @@
         "power_id": {"type": "string"},
         "amount": {"type": "integer"},
         "dynamic_vars": {"type": "object", "description": "exact-match (case-sensitive) internal DynamicVar overrides; unknown keys throw."}
+      }
+    },
+    "relic_stack": {
+      "type": "object",
+      "required": ["relic_id", "saved_properties"],
+      "properties": {
+        "relic_id": {"type": "string"},
+        "saved_properties": {"type": "object", "description": "Exact-match [SavedProperty] overrides mirrored from Observation relic.savedProperties; unknown or non-saved keys throw."}
       }
     },
     "orb_instance": {
