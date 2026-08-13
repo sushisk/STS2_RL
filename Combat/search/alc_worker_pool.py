@@ -380,8 +380,10 @@ class AlcBranchWorkerPool:
             if received_id != request_id:
                 with self._request_condition:
                     if received_id in self._active_request_ids:
+                        # Handoff is via each caller's own <=0.1s poll of _ready_results
+                        # below, not a wait()/notify() rendezvous - no waiter blocks on
+                        # this condition, so there is nothing to wake.
                         self._ready_results[received_id] = result
-                        self._request_condition.notify_all()
                     else:
                         self.log_stale_result(received_id, result, expected_request_ids={request_id})
                 continue
