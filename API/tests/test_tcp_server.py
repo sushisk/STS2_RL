@@ -2,11 +2,53 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import threading
 import unittest
+from unittest.mock import patch
 
 from API.dto import SCHEMA_VERSION
-from API.tcp_server import AsyncioTcpServer
+from API.tcp_server import AsyncioTcpServer, _combat_instance_factory_kwargs
+
+
+class TcpCombatFactoryKwargsTest(unittest.TestCase):
+    def test_combat_factory_kwargs_resolve_cli_values(self) -> None:
+        kwargs = _combat_instance_factory_kwargs(
+            worker_pool_backend="alc",
+            worker_count=8,
+            max_branches=32,
+        )
+        self.assertEqual(
+            kwargs,
+            {
+                "combat": {
+                    "worker_pool_backend": "alc",
+                    "worker_count": 8,
+                    "max_branches": 32,
+                }
+            },
+        )
+
+    def test_combat_factory_kwargs_resolve_env_values(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "STS2_COMBAT_BRANCH_POOL": "alc",
+                "STS2_COMBAT_ALC_WORKERS": "8",
+                "STS2_COMBAT_MAX_BRANCHES": "32",
+            },
+            clear=False,
+        ):
+            self.assertEqual(
+                _combat_instance_factory_kwargs(),
+                {
+                    "combat": {
+                        "worker_pool_backend": "alc",
+                        "worker_count": 8,
+                        "max_branches": 32,
+                    }
+                },
+            )
 
 
 class AsyncioTcpServerTest(unittest.IsolatedAsyncioTestCase):

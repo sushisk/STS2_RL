@@ -59,6 +59,9 @@ from API.terminal_outcome import require_terminal_outcome
 from API.validation import RequestRejected
 
 
+DEFAULT_ALC_WORKER_COUNT = 8
+
+
 def _semantic_action_for(action: dict) -> SemanticAction:
     params = action.get("parameters") or {}
     return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
@@ -516,6 +519,19 @@ def _translate_branch_status(internal_status: str) -> str:
     return {"queued": STATUS_QUEUED, "running": STATUS_RUNNING, "completed": STATUS_COMPLETED, "cancelled": STATUS_CANCELLED, "faulted": STATUS_FAULTED, "released": STATUS_RELEASED}.get(internal_status, internal_status)
 
 
+def _alc_worker_count_from_env() -> int | None:
+    raw = os.environ.get("STS2_COMBAT_ALC_WORKERS")
+    if raw is None or raw.strip() == "":
+        return None
+    try:
+        worker_count = int(raw)
+    except ValueError as exc:
+        raise ValueError("STS2_COMBAT_ALC_WORKERS must be a positive integer") from exc
+    if worker_count <= 0:
+        raise ValueError("STS2_COMBAT_ALC_WORKERS must be a positive integer")
+    return worker_count
+
+
 def _make_branch_pool(*, worker_count: int | None, request_timeout_s: float, worker_pool_backend: str | None, max_branches: int):
     backend = (worker_pool_backend or os.environ.get("STS2_COMBAT_BRANCH_POOL") or "multiprocessing").strip().lower()
     if backend in {"multiprocessing", "process", "processes", "mp", "branch_worker_pool"}:
@@ -526,6 +542,6 @@ def _make_branch_pool(*, worker_count: int | None, request_timeout_s: float, wor
         from search.alc_worker_pool import AlcBranchWorkerPool
 
         if worker_count is None:
-            worker_count = max_branches
+            worker_count = _alc_worker_count_from_env() or DEFAULT_ALC_WORKER_COUNT
         return AlcBranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
     raise ValueError(f"unknown combat branch worker pool backend {backend!r}")

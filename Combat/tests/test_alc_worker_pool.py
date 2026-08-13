@@ -20,7 +20,7 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env", _COMBAT_DIR /
         sys.path.insert(0, str(_p))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from API.instance_combat import CombatInstance  # noqa: E402
+from API.instance_combat import DEFAULT_ALC_WORKER_COUNT, CombatInstance  # noqa: E402
 import emulator_bridge  # noqa: E402
 from search.alc_worker_pool import AlcBranchWorkerPool  # noqa: E402
 from search.branch_manager import BranchManager  # noqa: E402
@@ -236,8 +236,23 @@ def test_combat_instance_can_opt_into_alc_pool():
         inst.close()
 
 
-def test_combat_instance_alc_default_worker_count_tracks_max_branches():
+def test_combat_instance_alc_default_worker_count_is_bounded():
     inst = CombatInstance("alc-capacity", {"instance_type": "combat", **_simple_spec(enemy_hp=20)}, worker_pool_backend="alc", max_branches=6)
+    try:
+        assert isinstance(inst._pool, AlcBranchWorkerPool)  # noqa: SLF001
+        assert inst._pool.worker_count == DEFAULT_ALC_WORKER_COUNT  # noqa: SLF001
+    finally:
+        inst.close()
+
+
+def test_combat_instance_alc_explicit_worker_count_can_match_max_branches():
+    inst = CombatInstance(
+        "alc-explicit-capacity",
+        {"instance_type": "combat", **_simple_spec(enemy_hp=20)},
+        worker_count=6,
+        worker_pool_backend="alc",
+        max_branches=6,
+    )
     try:
         assert isinstance(inst._pool, AlcBranchWorkerPool)  # noqa: SLF001
         assert inst._pool.worker_count == 6  # noqa: SLF001
