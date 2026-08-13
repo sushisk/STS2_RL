@@ -288,6 +288,9 @@ def _card_instance_from_payload(types, card: dict) -> Any:
         amount = enchantment.get("amount")
         if amount is not None:
             instance.EnchantmentAmount = int(amount)
+        status = enchantment.get("status")
+        if status is not None:
+            instance.EnchantmentStatus = str(status)
     return instance
 
 

@@ -286,3 +286,13 @@ def _run_all() -> int:
 
 if __name__ == "__main__":
     sys.exit(_run_all())
+
+
+def test_pile_multiset_does_not_collapse_different_public_cost():
+    masked = build_masked_emulator_dto({"drawPile": [
+        {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 0, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},
+        {"id": "STRIKE", "type": "Attack", "rarity": "Basic", "cost": 1, "targetType": "AnyEnemy", "upgraded": False, "upgradeLevel": 0},
+    ]})
+    assert len(masked["drawPile"]) == 2
+    assert sorted(record["cost"] for record in masked["drawPile"]) == [0, 1]
+    assert all(record["count"] == 1 for record in masked["drawPile"])
