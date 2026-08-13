@@ -6,6 +6,8 @@ cd C:\\STS2_RL\\Combat\\tests && python test_alc_worker_pool.py
 
 from __future__ import annotations
 
+import dataclasses
+import queue
 import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,17 +23,96 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from API.instance_combat import CombatInstance  # noqa: E402
 import emulator_bridge  # noqa: E402
 from search.alc_worker_pool import AlcBranchWorkerPool  # noqa: E402
+from search.branch_manager import BranchManager  # noqa: E402
 from search.branch_worker_pool import (  # noqa: E402
     BRANCH_STATUS_SUCCESS,
     EXECUTION_MODE_BOOTSTRAP_STEP,
+    EXECUTION_MODE_HOLDER_STEP,
+    BranchResult,
+    Lease,
     LeaseRegistry,
     WorkerExecutionRequest,
     WorkItem,
+    decision_result_digest,
     derive_context_id,
     dispatch_work_items,
 )
-from search.decision_context import BOUNDARY_STABLE, BOUNDARY_TERMINAL  # noqa: E402
+from search.decision_context import BOUNDARY_PENDING, BOUNDARY_STABLE, BOUNDARY_TERMINAL  # noqa: E402
 from test_branch_worker_pool import _context_and_pipeline, _simple_spec  # noqa: E402
+
+
+class _ImmediateCapacityPool:
+    def __init__(self, worker_count: int, pipeline) -> None:
+        self.worker_count = worker_count
+        self.worker_ids = list(range(worker_count))
+        self.worker_generations = {worker_id: 1 for worker_id in self.worker_ids}
+        self.request_timeout_s = 1.0
+        self._next_request_id = 0
+        self._result_queue = queue.Queue()
+        self.modes: list[str] = []
+        self.pipeline = pipeline
+
+    def _submit(self, worker_id: int, request: WorkerExecutionRequest) -> int:
+        self._next_request_id += 1
+        request_id = self._next_request_id
+        self.modes.append(request.execution_mode)
+        work_item = request.work_item
+        if work_item.work_kind == "sub_branch":
+            pending_sig = dataclasses.replace(
+                work_item.decision_context.current_context_signature,
+                boundary=BOUNDARY_PENDING,
+                choice_scope="TopLevel",
+                choice_kind="CapacityMeasurement",
+                candidate_semantic_keys=((("system", work_item.work_id, None), 1),),
+            )
+            pending_context = dataclasses.replace(
+                work_item.decision_context,
+                current_context_signature=pending_sig,
+                search_hypothesis_id=work_item.search_hypothesis_id,
+            )
+            lease = Lease(
+                worker_id=worker_id,
+                worker_generation=1,
+                context_id=f"pending-{work_item.work_id}",
+                search_hypothesis_id=work_item.search_hypothesis_id,
+                state_epoch=1,
+                combat_session_id=pending_sig.combat_session_id,
+                step_index=pending_sig.step_index,
+                decision_result_digest=decision_result_digest(pending_sig),
+            )
+            result = BranchResult(
+                status=BRANCH_STATUS_SUCCESS,
+                work_item=work_item,
+                execution_mode=request.execution_mode,
+                worker_id=worker_id,
+                worker_generation=1,
+                result_signature=pending_sig,
+                pending_decision_context=pending_context,
+                pending_pipeline_result=self.pipeline,
+                established_lease=lease,
+            )
+        else:
+            stable_sig = dataclasses.replace(
+                work_item.decision_context.current_context_signature,
+                boundary=BOUNDARY_STABLE,
+                choice_scope=None,
+                choice_kind=None,
+                candidate_semantic_keys=None,
+            )
+            result = BranchResult(
+                status=BRANCH_STATUS_SUCCESS,
+                work_item=work_item,
+                execution_mode=request.execution_mode,
+                worker_id=worker_id,
+                worker_generation=1,
+                result_signature=stable_sig,
+                child_snapshot=object(),
+            )
+        self._result_queue.put((request_id, result))
+        return request_id
+
+    def respawn_worker(self, worker_id: int, lease_registry=None) -> None:
+        raise AssertionError(f"unexpected respawn of worker {worker_id}")
 
 
 def test_alc_pool_creation_creates_one_live_thread_per_session():
@@ -153,6 +234,69 @@ def test_combat_instance_can_opt_into_alc_pool():
         assert branch["status"] == "completed", branch
     finally:
         inst.close()
+
+
+def test_combat_instance_alc_default_worker_count_tracks_max_branches():
+    inst = CombatInstance("alc-capacity", {"instance_type": "combat", **_simple_spec(enemy_hp=20)}, worker_pool_backend="alc", max_branches=6)
+    try:
+        assert isinstance(inst._pool, AlcBranchWorkerPool)  # noqa: SLF001
+        assert inst._pool.worker_count == 6  # noqa: SLF001
+    finally:
+        inst.close()
+
+
+def test_branch_holder_capacity_measurement_improves_with_wider_pool():
+    def _measure(worker_count: int, width: int = 8) -> dict[str, int]:
+        context, pipeline = _context_and_pipeline(enemy_hp=999, width=width, hand=["DEFEND_IRONCLAD"] * width)
+        root_context_id = derive_context_id(context)
+        sub_items = [
+            WorkItem.from_candidate_ref(
+                context,
+                candidate,
+                work_kind="sub_branch",
+                context_id=root_context_id,
+                work_id=f"sub-{index}",
+            )
+            for index, candidate in enumerate(pipeline.sub_branch_candidates[:width])
+        ]
+        pool = _ImmediateCapacityPool(worker_count, pipeline)
+        registry = LeaseRegistry()
+        manager = BranchManager(pool, registry, max_branches=width)
+        branch_ids = manager.submit(sub_items)
+        first_results = manager.poll(timeout=1.0, branch_ids=branch_ids)
+
+        continuation_items = []
+        for branch_id in branch_ids:
+            result = first_results[branch_id]
+            assert result.established_lease is not None
+            continuation_candidate = dataclasses.replace(
+                pipeline.continuation_candidate,
+                current_context_signature=result.pending_decision_context.current_context_signature,
+            )
+            continuation_items.append(
+                WorkItem.from_candidate_ref(
+                    result.pending_decision_context,
+                    continuation_candidate,
+                    work_kind="continuation",
+                    context_id=result.established_lease.context_id,
+                    work_id=f"cont-{branch_id}",
+                )
+            )
+        continuation_ids = manager.submit_many([(item, branch_id) for item, branch_id in zip(continuation_items, branch_ids, strict=True)])
+        manager.poll(timeout=1.0, branch_ids=continuation_ids)
+        return {
+            EXECUTION_MODE_BOOTSTRAP_STEP: pool.modes.count(EXECUTION_MODE_BOOTSTRAP_STEP),
+            EXECUTION_MODE_HOLDER_STEP: pool.modes.count(EXECUTION_MODE_HOLDER_STEP),
+        }
+
+    narrow = _measure(worker_count=2)
+    wide = _measure(worker_count=8)
+    print(f"capacity measurement narrow={narrow} wide={wide}")
+
+    assert narrow == {EXECUTION_MODE_BOOTSTRAP_STEP: 14, EXECUTION_MODE_HOLDER_STEP: 0}
+    assert wide == {EXECUTION_MODE_BOOTSTRAP_STEP: 7, EXECUTION_MODE_HOLDER_STEP: 7}
+    assert wide[EXECUTION_MODE_HOLDER_STEP] > narrow[EXECUTION_MODE_HOLDER_STEP]
+    assert wide[EXECUTION_MODE_BOOTSTRAP_STEP] < narrow[EXECUTION_MODE_BOOTSTRAP_STEP]
 
 
 def _run_all() -> int:
