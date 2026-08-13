@@ -386,13 +386,40 @@ class CombatHistoryEntrySnapshot:
 
 
 @dataclass
+class InferredCardRemovalSnapshot:
+    StepIndex: int
+    CardInstanceId: str
+    CardId: str
+    FromPile: str
+    Reason: str
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "InferredCardRemovalSnapshot":
+        _require(d, ["StepIndex", "CardInstanceId", "CardId", "FromPile", "Reason"], "InferredCardRemovalSnapshot")
+        return cls(
+            StepIndex=int(d["StepIndex"]),
+            CardInstanceId=str(d["CardInstanceId"]),
+            CardId=str(d["CardId"]),
+            FromPile=str(d["FromPile"]),
+            Reason=str(d["Reason"]),
+        )
+
+
+@dataclass
 class CombatHistorySnapshot:
     Entries: list  # list[CombatHistoryEntrySnapshot]
+    InferredCardRemovals: list = field(default_factory=list)  # list[InferredCardRemovalSnapshot]
 
     @classmethod
     def from_dict(cls, d: dict) -> "CombatHistorySnapshot":
         _require(d, ["Entries"], "CombatHistorySnapshot")
-        return cls(Entries=[CombatHistoryEntrySnapshot.from_dict(e) for e in d["Entries"]])
+        return cls(
+            Entries=[CombatHistoryEntrySnapshot.from_dict(e) for e in d["Entries"]],
+            InferredCardRemovals=[
+                InferredCardRemovalSnapshot.from_dict(r)
+                for r in d.get("InferredCardRemovals", [])
+            ],
+        )
 
 
 @dataclass
