@@ -31,81 +31,38 @@ from typing import Any
 from API.choice_card_semantics import normalize_pending_choice
 from API.dto import DTO_VERSION, MASK_VERSION
 
-# Any dict key whose lowercased name CONTAINS one of these substrings is removed
-# entirely, anywhere in the tree. Deliberately broad/conservative (Part A: "不必要な
-# RL独自DTOへのコピーは避けるが、Hidden Information/RL内部情報は必ず除去する").
 _FORBIDDEN_KEY_SUBSTRINGS: tuple[str, ...] = (
-    "snapshot",
-    "savestate",
-    "save_state",
-    "replay",
-    "lease",
-    "worker",
-    "pid",
-    "generation",
-    "combatsessionid",
-    "combat_session_id",
-    "sessionid",
-    "session_id",
-    "context_id",
-    "contextid",
-    "rngstate",
-    "rng_state",
-    "runrng",
-    "run_rng",
-    "seed",
-    "hypothesis",
-    "shuffle",
-    "cursor",
-    "eventqueue",
-    "event_queue",
-    "encounterqueue",
-    "encounter_queue",
-    "futureevents",
-    "future_events",
-    "upcomingencounters",
-    "upcoming_encounters",
-    "bossqueue",
-    "boss_queue",
-    "ancientqueue",
-    "ancient_queue",
+    "snapshot", "savestate", "save_state", "replay", "lease", "worker", "pid",
+    "generation", "combatsessionid", "combat_session_id", "sessionid", "session_id",
+    "context_id", "contextid", "rngstate", "rng_state", "runrng", "run_rng", "seed",
+    "hypothesis", "shuffle", "cursor", "eventqueue", "event_queue", "encounterqueue",
+    "encounter_queue", "futureevents", "future_events", "upcomingencounters",
+    "upcoming_encounters", "bossqueue", "boss_queue", "ancientqueue", "ancient_queue",
     "unknown_fields",
 )
 
-# Piles that must be reduced from an ordered list-of-cards to a card_id -> count
-# Multiset. Matched by exact key name (case-sensitive - these come from
-# `emulator_bridge.py`/`run_emulator_bridge.py`'s established camelCase dict shape).
 _MULTISET_PILE_KEYS = frozenset({"drawPile", "discardPile", "exhaustPile"})
-
-# Deleted outright, not reduced to a Multiset.
 _DELETE_KEYS = frozenset({"playPile"})
-
-# Emulator-specific Combat Reward (contract: "Emulator固有Combat Rewardを除去") - the
-# Combat-only 1.0/-1.0 terminal reward signal flagged as a design question in the Part A
-# audit §4; excluded from the public DTO until Training explicitly asks for its own
-# reward shaping to live in this field.
 _DELETE_KEYS |= {"reward"}
-
-# Metrics/Extras/Info are allowlist-controlled (contract: "allowlist外のMetrics/Extras/
-# Infoを除去"). No keys are approved yet (Part A §4: unverified free-form content) - so
-# today's allowlist is empty, meaning these three fields are stripped to `{}` wherever
-# they appear. Extend this set only once Training/Emulator confirm specific sub-keys are
-# safe.
 _ALLOWLISTED_METRICS_EXTRAS_INFO_KEYS: frozenset[str] = frozenset()
 _METRICS_EXTRAS_INFO_KEY_NAMES = frozenset({"metrics", "extras", "info"})
 
 
 def _card_identity_key(entry: dict) -> tuple:
-    """Everything that makes two card instances the same for multiset purposes.
+    """All public fields emitted for one card, excluding only the multiset count itself.
 
-    Deliberately excludes `type`/`rarity`/`cost`/`targetType`: those are derived,
-    momentary-computed display fields (`cost` in particular reflects live
-    CostModifiers), not per-instance identity - two cards with the same identity key
-    are expected to share them, but this is not re-verified per instance.
+    Pile masking is allowed to remove order, not observable card state. Including every
+    emitted public field here prevents a representative record from silently swallowing
+    differences in live/derived fields such as ``cost``.
     """
     enchantment = entry.get("enchantment") or {}
     return (
         entry.get("id"),
+        entry.get("type"),
+        entry.get("rarity"),
+        entry.get("cost"),
+        entry.get("targetType"),
+        bool(entry.get("upgraded", False)),
         int(entry.get("upgradeLevel", 0) or 0),
         entry.get("tinkerTimeType"),
         entry.get("tinkerTimeRider"),
@@ -116,24 +73,12 @@ def _card_identity_key(entry: dict) -> tuple:
 
 
 def _sort_key(identity_key: tuple) -> tuple:
-    return tuple("" if part is None else part for part in identity_key)
+    """Stable heterogeneous sort that never compares unlike Python scalar types."""
+    return tuple(f"{type(part).__name__}:{part!r}" for part in identity_key)
 
 
 def _multiset_of(pile: Any) -> list:
-    """Reduce a pile to per-distinct-card-instance counts, discarding order only.
-
-    Order is genuinely Hidden Information (contract: "順序を除去してMultiset化"), but a
-    card's upgrade/enchantment state is not - the player always knows exactly which of
-    their own cards are upgraded/enchanted. Keying the count only by `card_id` (pre
-    mask_version 1.2) silently collapsed e.g. two plain "BASH" and one "BASH+" into a
-    single count=3 entry with no way to tell them apart, which was an under-delivery of
-    the "Multiset of piles" contract rather than an intentional part of it.
-
-    Each returned record carries the same fields `BuildCardDict` exposes for `hand`
-    (id/type/rarity/cost/targetType/upgraded/upgradeLevel/tinkerTimeType/
-    tinkerTimeRider/enchantment - see `_card_identity_key` for which of these are
-    identity vs. derived-display-only) plus `count`.
-    """
+    """Reduce a pile to per-distinct-public-card-state counts, discarding order only."""
     if not isinstance(pile, list):
         return []
     counts: Counter = Counter()
@@ -184,23 +129,12 @@ def _scrub(node: Any) -> Any:
                 scrubbed[key] = _multiset_of(value)
                 continue
             if key == "pendingChoice":
-                # Unlike ordinary state fields, pending-choice semantics/identity are
-                # never exposed merely because their key name looks harmless. Normalize
-                # the whole object to the explicit public contract first, then run the
-                # normal recursive scrub over retained option/card payloads as well.
                 scrubbed[key] = _scrub(normalize_pending_choice(value))
                 continue
             if key.lower() in _METRICS_EXTRAS_INFO_KEY_NAMES and isinstance(value, dict):
                 scrubbed[key] = {k: _scrub(v) for k, v in value.items() if k in _ALLOWLISTED_METRICS_EXTRAS_INFO_KEYS}
                 continue
             scrubbed[key] = _scrub(value)
-        # Recursively re-apply the same rule to Transition.FinalObservation
-        # (contract: "Transition.FinalObservationにも再帰的に同じマスクを適用") - by the
-        # time we get here `transition` has already been scrubbed structurally above;
-        # this just ensures `final_observation`'s own nested content went through
-        # exactly the same rules as a top-level Observation would (it already did, since
-        # `_scrub` is already fully recursive - this branch exists only as a documented,
-        # explicitly-tested guarantee, not extra logic).
         return scrubbed
     if isinstance(node, list):
         return [_scrub(item) for item in node]
@@ -208,36 +142,19 @@ def _scrub(node: Any) -> Any:
 
 
 def mask_public_fragment(value: Any) -> Any:
-    """Return a masked deep copy of a public DTO fragment.
-
-    Use this for response metadata such as ``transition`` that is attached outside the
-    primary Emulator state passed to ``build_masked_emulator_dto``. Keeping the copy and
-    recursive scrub in one helper prevents callers from accidentally appending an
-    unmasked nested fragment after the main DTO has already been built.
-    """
+    """Return a masked deep copy of a public DTO fragment."""
     return _scrub(copy.deepcopy(value))
 
 
 def build_masked_emulator_dto(raw_state: dict, *, extra: "dict | None" = None) -> dict:
-    """Return a masked copy of `raw_state` (a Combat `engine_state`/Whole Run
-    `Observation.State`-shaped dict, or a full StepResult-shaped dict containing one)
-    plus `dto_version`/`mask_version` stamps. `raw_state` is never mutated.
-
-    Terminal observations have no legal continuation. Combat terminal payloads always
-    publish an explicit empty ``legal_actions`` list. Whole Run terminal Branch shortcuts
-    may omit the field, but whenever ``legal_actions`` is present at ``run_terminal`` it
-    is normalized to an empty list so stale cached actions can never cross the wire.
-    Combat ``terminal`` and Whole Run ``run_terminal`` are mutually exclusive markers.
-    """
+    """Return a masked copy of raw Emulator state plus DTO/mask version stamps."""
     masked = mask_public_fragment(raw_state)
     if extra:
         masked.update(mask_public_fragment(extra))
     combat_terminal = masked.get("terminal") is True
     run_terminal = masked.get("run_terminal") is True
     if combat_terminal and run_terminal:
-        raise RuntimeError(
-            "masked_emulator_dto cannot be both terminal and run_terminal"
-        )
+        raise RuntimeError("masked_emulator_dto cannot be both terminal and run_terminal")
     if combat_terminal:
         masked["legal_actions"] = []
     elif run_terminal and "legal_actions" in masked:
@@ -248,12 +165,7 @@ def build_masked_emulator_dto(raw_state: dict, *, extra: "dict | None" = None) -
 
 
 def mask_legal_actions(legal_actions: list[dict]) -> list[dict]:
-    """Legal Actions are published as-is (contract §3: "そのまま公開する情報" includes
-    Legal Actions) except that `action_id` is re-stamped as an opaque string (contract
-    §3 `action_id`: "TrainingはAction内容を再構築せず、IDをそのまま返す" - a string is a
-    safer opaque-token representation than a bare int that invites arithmetic/ordering
-    assumptions).
-    """
+    """Publish legal actions after the same recursive safety scrub."""
     result = []
     for action in legal_actions:
         scrubbed = mask_public_fragment(action)
