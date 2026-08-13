@@ -498,12 +498,16 @@ def _build_success_result(
 
 
 class _WorkerRuntime:
-    def __init__(self, worker_id: int, worker_generation: int, repo_root: Optional[str]) -> None:
+    def __init__(self, worker_id: int, worker_generation: int, repo_root: Optional[str], session_factory: Optional[Callable[[], Any]] = None) -> None:
         from live_combat_session import LiveCombatSession
 
         self.worker_id = worker_id
         self.worker_generation = worker_generation
-        self.session = LiveCombatSession(repo_root=Path(repo_root) if repo_root is not None else None)
+        self.session = (
+            session_factory()
+            if session_factory is not None
+            else LiveCombatSession(repo_root=Path(repo_root) if repo_root is not None else None)
+        )
         self.current_state = None
         self.current_context_id: Optional[str] = None
         self.current_hypothesis_id: Optional[str] = None
