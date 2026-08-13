@@ -296,3 +296,34 @@ def test_pile_multiset_does_not_collapse_different_public_cost():
     assert len(masked["drawPile"]) == 2
     assert sorted(record["cost"] for record in masked["drawPile"]) == [0, 1]
     assert all(record["count"] == 1 for record in masked["drawPile"])
+
+
+def test_pile_multiset_enchantment_uses_public_allowlist():
+    raw = {
+        "drawPile": [
+            {
+                "id": "STRIKE",
+                "type": "Attack",
+                "rarity": "Basic",
+                "cost": 1,
+                "targetType": "AnyEnemy",
+                "upgraded": True,
+                "upgradeLevel": 1,
+                "enchantment": {
+                    "id": "SHARP",
+                    "amount": 1,
+                    "status": "Normal",
+                    "seed": 123,
+                },
+            }
+        ]
+    }
+
+    masked = build_masked_emulator_dto(raw)
+
+    assert masked["drawPile"][0]["enchantment"] == {
+        "id": "SHARP",
+        "amount": 1,
+        "status": "Normal",
+    }
+    assert _find_forbidden_keys(masked, _FORBIDDEN_KEY_SUBSTRINGS) == []
