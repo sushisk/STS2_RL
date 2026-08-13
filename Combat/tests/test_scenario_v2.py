@@ -29,6 +29,7 @@ from run_trajectory_batch import load_fixed_50  # noqa: E402
 from legacy.state_evaluator import DEFAULT_WEIGHTS, StateEvaluator  # noqa: E402
 from slot_name_inference import ensure_inferred_slot_names  # noqa: E402
 from mad_science_restore import mad_science_state_from_event_choices, mad_science_state_from_props  # noqa: E402
+from live_combat_session import LiveCombatSession  # noqa: E402
 
 
 def test_battle_state_key_distinguishes_card_cost_and_potion_slots():
@@ -286,6 +287,108 @@ def test_upgrade_and_potions_survive_apply_action_restore():
     # And actually playing it must not raise "Illegal action" from the engine.
     potion_action = next(a for a in legal2 if a["action_type"] == "potion")
     emu.apply_action(state2, potion_action)
+
+
+def test_relic_internal_counter_is_lost_on_fresh_scenario_reconstruction():
+    """Known gap (part of the same "hard mid-combat state reconstruction" theme as
+    sushisk/STS2_Emulator#8/STS2_RL#43/#44): unlike PlayerPowers, which supports
+    PowerStack.DynamicVars to restore a power's own internal counter (e.g.
+    WitheringPresencePower's CardsLeft), CombatScenario.Relics is just a plain relic-id
+    list granted fresh via RelicCmd.Obtain - there is no structured equivalent for a
+    relic's own internal state.
+
+    Nunchaku is a concrete instance: its public stackCount is always 1, but it separately
+    tracks a private [SavedProperty] AttacksPlayed counter (attacks played since its last
+    energy-grant trigger, surfaced read-only via displayAmount). A scenario authored from
+    a real mid-combat state (e.g. by scenario_harvest.py) where 3 of the next 10 attacks
+    have already been played has no field to carry that "3" across - reconstructing via
+    CombatScenario always starts the relic fresh at 0, unlike the card-instance case
+    (upgrade_level/enchantment) already fixed earlier this session.
+
+    The ground-truth "3" is produced via LiveCombatSession.step() directly (real gameplay,
+    no restore in the loop - see the companion test below for what happens when the
+    restore-based BattleEmulator.apply_action() path is used instead, a related but
+    distinct and more severe bug). Then reconstruction goes through
+    BattleEmulator.initialize() with only a plain relics list, exactly what
+    scenario_harvest.py can express, and the counter is confirmed lost - not yet fixed,
+    unlike upgrade_level/enchantment."""
+    session = LiveCombatSession()
+    source_spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand": ["STRIKE_IRONCLAD"] * 3, "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": ["NUNCHAKU"], "potions": [],
+        "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 999}],
+    }
+    source_state = session.start_combat(source_spec)
+    for _ in range(3):
+        strike = next(
+            a for a in source_state._cached_legal_actions  # noqa: SLF001
+            if a["action_type"] == "card" and a["parameters"].get("cardId") == "STRIKE_IRONCLAD"
+        )
+        source_state = session.step(source_state, strike)
+    source_nunchaku = next(r for r in source_state.engine_state["relics"] if r["id"] == "NUNCHAKU")
+    assert source_nunchaku["displayAmount"] == 3, source_nunchaku
+
+    # Training's only available carrier for "this combat already has NUNCHAKU" is the
+    # plain relic-id list - reconstruct exactly that way, same as scenario_harvest.py would.
+    emu = BattleEmulator()
+    reconstructed_spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand": [], "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": ["NUNCHAKU"], "potions": [],
+        "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 999}],
+    }
+    reconstructed_state = emu.initialize(reconstructed_spec)
+    reconstructed_nunchaku = next(
+        r for r in reconstructed_state.engine_state["relics"] if r["id"] == "NUNCHAKU"
+    )
+
+    # BUG (known, not yet fixed): the internal counter did not survive reconstruction.
+    assert reconstructed_nunchaku["displayAmount"] == 0, reconstructed_nunchaku
+    assert reconstructed_nunchaku["displayAmount"] != source_nunchaku["displayAmount"]
+
+
+def test_relic_internal_counter_is_lost_on_every_apply_action_restore_step():
+    """More severe sibling of the test above, found while writing it: this isn't only a
+    "Training authors a fresh scenario" problem. BattleEmulator.apply_action() restores via
+    build_scenario_from_state() on every single call (see
+    test_upgrade_and_potions_survive_apply_action_restore's docstring - this is the path
+    every simulated step in beam search/lookahead/HeuristicAgent scoring uses, not just
+    real committed steps), and build_scenario_from_state() has the exact same
+    relics-are-a-plain-id-list limitation (battle_emulator.py: `scenario.Relics =
+    str_list([r["id"] for r in engine_state.get("relics")])` - id only).
+
+    So a relic like Nunchaku never correctly accumulates its internal counter across
+    simulated steps at all: each apply_action() silently resets it to 0 before executing
+    that one step, and only that step's own contribution survives into the next
+    engine_state. After 3 real Strikes played one apply_action() at a time, the counter
+    ends at 1 (only the last restore-then-play's own increment), not 3 - proven by
+    contrast with the companion test above, where the same 3 Strikes via
+    LiveCombatSession.step() (no restore in the loop) correctly reach 3."""
+    emu = BattleEmulator()
+    spec = {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand_cards": [{"card_id": "STRIKE_IRONCLAD"}] * 3,
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": ["NUNCHAKU"], "potions": [],
+        "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 999}],
+    }
+    state = emu.initialize(spec)
+    for _ in range(3):
+        legal = emu.enumerate_legal_actions(state)
+        strike = next(
+            a for a in legal
+            if a["action_type"] == "card" and a["parameters"].get("cardId") == "STRIKE_IRONCLAD"
+        )
+        state = emu.apply_action(state, strike)
+    nunchaku = next(r for r in state.engine_state["relics"] if r["id"] == "NUNCHAKU")
+
+    # BUG (known, not yet fixed): 3 real attacks played, but the restore-every-step path
+    # only ever sees "1 attack played since the last restore" at a time.
+    assert nunchaku["displayAmount"] == 1, nunchaku
 
 
 def test_stars_survive_apply_action_restore():
