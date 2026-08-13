@@ -498,12 +498,16 @@ def _build_success_result(
 
 
 class _WorkerRuntime:
-    def __init__(self, worker_id: int, worker_generation: int, repo_root: Optional[str]) -> None:
+    def __init__(self, worker_id: int, worker_generation: int, repo_root: Optional[str], session_factory: Optional[Callable[[], Any]] = None) -> None:
         from live_combat_session import LiveCombatSession
 
         self.worker_id = worker_id
         self.worker_generation = worker_generation
-        self.session = LiveCombatSession(repo_root=Path(repo_root) if repo_root is not None else None)
+        self.session = (
+            session_factory()
+            if session_factory is not None
+            else LiveCombatSession(repo_root=Path(repo_root) if repo_root is not None else None)
+        )
         self.current_state = None
         self.current_context_id: Optional[str] = None
         self.current_hypothesis_id: Optional[str] = None
@@ -905,14 +909,23 @@ def dispatch_work_items(
                             TimeoutError(f"timed out waiting for worker request {rid}"),
                             fault_kind="task_timeout",
                         )
+                        mark_request_finished = getattr(worker_pool, "mark_request_finished", None)
+                        if mark_request_finished is not None:
+                            mark_request_finished(rid)
                         remaining_request_ids.discard(rid)
                 continue
             if request_id not in remaining_request_ids:
                 # Stray/late result: either a genuine duplicate, or a response from a
                 # worker generation we already gave up on and respawned away. Discard.
+                log_stale_result = getattr(worker_pool, "log_stale_result", None)
+                if log_stale_result is not None:
+                    log_stale_result(request_id, result, expected_request_ids=set(remaining_request_ids))
                 continue
             work_item = pending_real[request_id]
             results_by_work_id[work_item.work_id] = result
+            mark_request_finished = getattr(worker_pool, "mark_request_finished", None)
+            if mark_request_finished is not None:
+                mark_request_finished(request_id)
             remaining_request_ids.discard(request_id)
             if (
                 result.status == BRANCH_STATUS_FAULT

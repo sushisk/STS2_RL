@@ -20,6 +20,7 @@ intermediate actions Training never specified, which is out of scope for a singl
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -120,7 +121,16 @@ class _AdmittedItem:
 class CombatInstance:
     instance_type = "combat"
 
-    def __init__(self, instance_id: str, instance_config: dict, *, worker_count: int = 2, request_timeout_s: float = 60.0, max_branches: int = 64) -> None:
+    def __init__(
+        self,
+        instance_id: str,
+        instance_config: dict,
+        *,
+        worker_count: int = 2,
+        request_timeout_s: float = 60.0,
+        max_branches: int = 64,
+        worker_pool_backend: str | None = None,
+    ) -> None:
         self.instance_id = instance_id
         scenario_spec = {k: v for k, v in instance_config.items() if k != "instance_type"}
         self._session = LiveCombatSession()
@@ -131,7 +141,11 @@ class CombatInstance:
             + scenario_spec.get("discard_pile", []).count(card_id)
             for card_id in set(scenario_spec.get("hand", []) + scenario_spec.get("draw_pile", []) + scenario_spec.get("discard_pile", []))
         }
-        self._pool = BranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
+        self._pool = _make_branch_pool(
+            worker_count=worker_count,
+            request_timeout_s=request_timeout_s,
+            worker_pool_backend=worker_pool_backend,
+        )
         self._lease_registry = LeaseRegistry()
         self._branch_manager = BranchManager(self._pool, self._lease_registry, max_branches=max_branches)
         self._branch_ids = BranchIdRegistry()
@@ -499,3 +513,14 @@ class CombatInstance:
 
 def _translate_branch_status(internal_status: str) -> str:
     return {"queued": STATUS_QUEUED, "running": STATUS_RUNNING, "completed": STATUS_COMPLETED, "cancelled": STATUS_CANCELLED, "faulted": STATUS_FAULTED, "released": STATUS_RELEASED}.get(internal_status, internal_status)
+
+
+def _make_branch_pool(*, worker_count: int, request_timeout_s: float, worker_pool_backend: str | None):
+    backend = (worker_pool_backend or os.environ.get("STS2_COMBAT_BRANCH_POOL") or "multiprocessing").strip().lower()
+    if backend in {"multiprocessing", "process", "processes", "mp", "branch_worker_pool"}:
+        return BranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
+    if backend in {"alc", "assemblyloadcontext", "assembly_load_context", "isolated"}:
+        from search.alc_worker_pool import AlcBranchWorkerPool
+
+        return AlcBranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
+    raise ValueError(f"unknown combat branch worker pool backend {backend!r}")
