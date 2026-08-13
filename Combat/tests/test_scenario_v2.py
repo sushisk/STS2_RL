@@ -104,6 +104,49 @@ def test_battle_state_key_distinguishes_enchantment():
     assert key_enchanted != key_different_amount, (key_enchanted, key_different_amount)
 
 
+def test_battle_state_key_distinguishes_relic_saved_properties():
+    base_state = {
+        "seed": 1,
+        "hp": 80,
+        "maxHp": 80,
+        "block": 0,
+        "energy": 3,
+        "stars": 0,
+        "potions": [],
+        "hand": [],
+        "drawPile": [],
+        "discardPile": [],
+        "exhaustPile": [],
+        "playPile": [],
+        "playerPowers": [],
+        "orbSlots": 0,
+        "orbs": [],
+        "pendingChoice": None,
+        "enemies": [],
+        "relics": [{"id": "NUNCHAKU", "displayAmount": 3, "savedProperties": {"AttacksPlayed": 3}}],
+    }
+    changed_state = {
+        **base_state,
+        "relics": [{"id": "NUNCHAKU", "displayAmount": 4, "savedProperties": {"AttacksPlayed": 4}}],
+    }
+    list_value_state = {
+        **base_state,
+        "relics": [{"id": "TEST_RELIC", "displayAmount": 0, "savedProperties": {"Cards": [{"id": "STRIKE_IRONCLAD"}, {"id": "BASH"}]}}],
+    }
+    same_list_value_different_dict_order = {
+        **base_state,
+        "relics": [{"displayAmount": 0, "savedProperties": {"Cards": [{"id": "STRIKE_IRONCLAD"}, {"id": "BASH"}]}, "id": "TEST_RELIC"}],
+    }
+
+    key_base = battle_state_key(type("StubState", (), {"engine_state": base_state, "turn": 1, "shuffle_rng_seed": None})())
+    key_changed = battle_state_key(type("StubState", (), {"engine_state": changed_state, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_base != key_changed, (key_base, key_changed)
+
+    key_list_value = battle_state_key(type("StubState", (), {"engine_state": list_value_state, "turn": 1, "shuffle_rng_seed": None})())
+    key_same_list_value = battle_state_key(type("StubState", (), {"engine_state": same_list_value_different_dict_order, "turn": 1, "shuffle_rng_seed": None})())
+    assert key_list_value == key_same_list_value, (key_list_value, key_same_list_value)
+
+
 def test_state_has_living_enemies_and_terminal_coercion():
     state = {
         "hp": 18,
@@ -905,6 +948,77 @@ def test_exoskeleton_duplicate_slot_name_rejected():
         ],
     }
     _assert_raises_not_aggregate(lambda: emu.initialize(spec), "duplicate SlotName")
+
+
+def _nunchaku_display_amount(engine_state: dict) -> int | None:
+    relic = next(r for r in engine_state.get("relics") or [] if r["id"] == "NUNCHAKU")
+    return relic.get("displayAmount")
+
+
+def _three_strike_nunchaku_spec() -> dict:
+    return {
+        "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
+        "hand": ["STRIKE_IRONCLAD", "STRIKE_IRONCLAD", "STRIKE_IRONCLAD"],
+        "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "player_powers": [], "relics": ["NUNCHAKU"], "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
+
+
+def test_relic_internal_counter_survives_fresh_scenario_reconstruction():
+    """Relic savedProperties captured from an observation must restore into RelicStacks.
+
+    Nunchaku tracks AttacksPlayed as private [SavedProperty] state; reconstructing a
+    fresh scenario from a real observed relic payload should preserve displayAmount=3.
+    """
+    emu = BattleEmulator()
+    state = emu.initialize(_three_strike_nunchaku_spec())
+    for _ in range(3):
+        legal = emu.enumerate_legal_actions(state)
+        strike = next(a for a in legal if a["action_type"] == "card")
+        state = emu.apply_action(state, strike, target_index=0)
+
+    relic = next(r for r in state.engine_state["relics"] if r["id"] == "NUNCHAKU")
+    assert relic.get("savedProperties", {}).get("AttacksPlayed") == 3, relic
+
+    reconstructed_spec = {
+        **_three_strike_nunchaku_spec(),
+        "hand": [],
+        "relics": [],
+        "relic_stacks": [{"relic_id": "NUNCHAKU", "saved_properties": relic["savedProperties"]}],
+    }
+    reconstructed = emu.initialize(reconstructed_spec)
+    assert _nunchaku_display_amount(reconstructed.engine_state) == 3, reconstructed.engine_state["relics"]
+
+
+def test_relics_and_relic_stacks_overlap_raises():
+    emu = BattleEmulator()
+    spec = {
+        **_three_strike_nunchaku_spec(),
+        "relics": ["NUNCHAKU"],
+        "relic_stacks": [{"relic_id": "NUNCHAKU", "saved_properties": {"AttacksPlayed": 3}}],
+    }
+    try:
+        emu.initialize(spec)
+    except ValueError as exc:
+        assert str(exc) == "relics and relic_stacks overlap: ['NUNCHAKU']", str(exc)
+        return
+    raise AssertionError("expected relics and relic_stacks overlap to raise")
+
+
+def test_relic_internal_counter_accumulates_across_apply_action_restore_steps():
+    """BattleEmulator.apply_action() restores from observation state on every step.
+
+    Relic savedProperties must therefore round-trip through build_scenario_from_state()
+    so Nunchaku's attack counter accumulates across separate simulated actions.
+    """
+    emu = BattleEmulator()
+    state = emu.initialize(_three_strike_nunchaku_spec())
+    for _ in range(3):
+        legal = emu.enumerate_legal_actions(state)
+        strike = next(a for a in legal if a["action_type"] == "card")
+        state = emu.apply_action(state, strike, target_index=0)
+    assert _nunchaku_display_amount(state.engine_state) == 3, state.engine_state["relics"]
 
 
 def test_legacy_plain_string_scenario_regression():
