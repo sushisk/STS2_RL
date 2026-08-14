@@ -48,6 +48,7 @@ from search.branch_worker_pool import (
     _fault_result,
     _route_work_item,
     _work_item_for_ipc,
+    restore_result_for_caller_work_item,
 )
 
 BRANCH_STATE_QUEUED = "queued"
@@ -385,6 +386,12 @@ class BranchManager:
                 record = self._records[branch_id]
 
                 if record.state not in (BRANCH_STATE_CANCELLED, BRANCH_STATE_RELEASED):
+                    # isinstance-guarded (not a bare call) so lightweight test doubles that
+                    # stand in for a worker result (e.g. types.SimpleNamespace, which lacks
+                    # the full BranchResult contract this restores) pass through unchanged;
+                    # every real BranchResult - success or fault - always has work_item.
+                    if isinstance(result, BranchResult):
+                        result = restore_result_for_caller_work_item(record.work_item, result)
                     self._finish(record, result)
                     results[branch_id] = result
                 _dispatch_available()

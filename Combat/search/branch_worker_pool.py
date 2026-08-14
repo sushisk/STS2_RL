@@ -834,6 +834,34 @@ def _route_work_item(
 ExecuteRequest = Callable[[int, WorkerExecutionRequest], BranchResult]
 
 
+def restore_result_for_caller_work_item(work_item: WorkItem, result: BranchResult) -> BranchResult:
+    """Rebind ``result`` to the caller's own (pre-IPC) ``work_item``.
+
+    A worker may have executed an IPC-serialized copy of ``work_item``
+    (``_work_item_for_ipc``, needed for multiprocessing workers) rather than the
+    caller's own object, in which case ``result.work_item`` is that copy and, for a
+    Pending boundary, ``result.pending_decision_context.root_snapshot`` is JSON text
+    rather than the caller-owned root (a parsed ``CombatStateSnapshot``, or a
+    ``CombatStartReplayRoot`` at combat start - neither ever IPC-serialized as text)
+    (Stable/Terminal results are unaffected: their ``child_snapshot`` always comes
+    fresh from ``session.capture_snapshot()``, never from the WorkItem). Restoring
+    both to the caller's own ``work_item``/its own root keeps the returned
+    ``BranchResult`` identical regardless of which worker backend executed it, and
+    keeps ``derive_context_id()`` on the returned Pending context consistent with
+    ``result.established_lease.context_id`` (computed inside the worker from the
+    IPC-serialized form, before this correction runs).
+    """
+    if result.work_item is work_item:
+        return result
+    pending_context = result.pending_decision_context
+    if pending_context is not None:
+        pending_context = dataclasses.replace(
+            pending_context,
+            root_snapshot=work_item.decision_context.root_snapshot,
+        )
+    return dataclasses.replace(result, work_item=work_item, pending_decision_context=pending_context)
+
+
 def dispatch_work_items(
     work_items: list[WorkItem],
     lease_registry: LeaseRegistry,
@@ -945,15 +973,7 @@ def dispatch_work_items(
 
     results: list[BranchResult] = []
     for work_item in work_items:
-        result = results_by_work_id[work_item.work_id]
-        if result.work_item is not work_item:
-            pending_context = result.pending_decision_context
-            if pending_context is not None:
-                pending_context = dataclasses.replace(
-                    pending_context,
-                    root_snapshot=work_item.decision_context.root_snapshot,
-                )
-            result = dataclasses.replace(result, work_item=work_item, pending_decision_context=pending_context)
+        result = restore_result_for_caller_work_item(work_item, results_by_work_id[work_item.work_id])
         lease_registry.invalidate(work_item.context_id, work_item.search_hypothesis_id)
         if result.status == BRANCH_STATUS_SUCCESS and result.established_lease is not None:
             lease_registry.set(result.established_lease)
