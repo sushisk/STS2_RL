@@ -86,6 +86,30 @@ def test_combat_sparse_action_id_resolves_to_its_position():
     assert view.legal_actions_raw[view.resolve_action_id("4")]["action_id"] == 4
 
 
+def test_combat_duplicate_action_id_is_rejected_as_ambiguous():
+    view = _DecisionView(
+        legal_actions_raw=[
+            {
+                "action_id": action_id,
+                "action_type": "test",
+                "label": str(action_id),
+                "is_available": True,
+                "parameters": {},
+            }
+            for action_id in [3, 3]
+        ],
+        decision_context=None,
+        boundary="test",
+    )
+
+    try:
+        view.resolve_action_id("3")
+    except RequestRejected as exc:
+        assert "ambiguous" in str(exc)
+    else:
+        raise AssertionError("duplicate current combat action_id must not resolve silently")
+
+
 def test_unknown_action_id_is_rejected():
     view = _view([0, 3])
 
