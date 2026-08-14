@@ -203,6 +203,17 @@ class _ThreadWorkerHandle:
 class AlcBranchWorkerPool:
     """Persistent Branch Worker Pool backed by ALC-isolated sessions and threads."""
 
+    # Workers are daemon threads in this same OS process/interpreter, so a WorkItem
+    # (including its root_snapshot object) can be handed to a worker by direct
+    # reference - no pickling/queue-safety boundary to cross, unlike
+    # BranchWorkerPool's separate-OS-process workers. Skipping the IPC JSON
+    # round-trip here avoids both its cost (a full snapshot serialize per branch)
+    # and a correctness hazard: BOUNDARY_PENDING results thread root_snapshot
+    # through unchanged into the next DecisionContext without re-parsing it, so a
+    # JSON-string root_snapshot forced through here would leak into later belief
+    # tracking code that expects a parsed CombatStateSnapshot.
+    requires_ipc_serialization = False
+
     def __init__(
         self,
         *,

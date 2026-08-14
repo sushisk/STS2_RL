@@ -639,6 +639,13 @@ class WorkerDiedError(RuntimeError):
 class BranchWorkerPool:
     """Persistent Branch Worker Pool with worker-affinity Holder dispatch."""
 
+    # Workers are separate OS processes reached via multiprocessing.Queue, which
+    # requires WorkItem.decision_context.root_snapshot to be pickle/queue-safe -
+    # a CLR-wrapped CombatStateSnapshot generally is not, hence the IPC JSON
+    # serialization in _work_item_for_ipc(). See AlcBranchWorkerPool for the
+    # same-process counterpart, where this conversion is unnecessary overhead.
+    requires_ipc_serialization = True
+
     def __init__(
         self,
         *,

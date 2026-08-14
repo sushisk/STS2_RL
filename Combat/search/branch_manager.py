@@ -281,7 +281,11 @@ class BranchManager:
                                 f"routing selected busy worker {worker_id} for Branch {branch_id}"
                             )
 
-                        ipc_work_item = _work_item_for_ipc(work_item)
+                        ipc_work_item = (
+                            _work_item_for_ipc(work_item)
+                            if getattr(self._pool, "requires_ipc_serialization", True)
+                            else work_item
+                        )
                         ipc_request = request.__class__(
                             ipc_work_item,
                             request.execution_mode,
