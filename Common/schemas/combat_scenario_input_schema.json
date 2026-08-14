@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "sts2_rl:combat_scenario_input_schema:v2",
   "title": "CombatScenario input (the Python scenario spec dict)",
-  "description": "Shape of the Python dict STS2_RL/Combat/battle_emulator.py:build_scenario_from_spec() converts into a C# Sts2Emulator.Dto.CombatScenario for GameInstance.ResetFromScenario(). v2 (this file) adds HandCards/DrawPileCards/DiscardPileCards/ExhaustPileCards (per-card upgrade state), Potions (potion belt), PlayerHp/PlayerMaxHp independently-nullable fields, and Stars. v1 (bare Hand/DrawPile/etc. string lists, no Potions/Stars, HP always both-specified) is still accepted and still produced by callers that have no per-card upgrade/potion/HP/Stars data to offer - see 'v1_compat' notes below. Source of truth: Sts2Emulator/Dto/CombatScenario.cs, CardInstanceScenario.cs, PotionScenario.cs.",
+  "description": "Shape of the Python dict STS2_RL/Combat/battle_emulator.py:build_scenario_from_spec() converts into a C# Sts2Emulator.Dto.CombatScenario for GameInstance.ResetFromScenario(). v2 (this file) adds HandCards/DrawPileCards/DiscardPileCards/ExhaustPileCards (per-card upgrade state), Potions (potion belt), PlayerHp/PlayerMaxHp independently-nullable fields, and Stars. v1 (bare Hand/DrawPile/etc. string lists, no Potions/Stars, HP always both-specified) is still accepted and still produced by callers that have no per-card upgrade/potion/HP/Stars data to offer - see 'v1_compat' notes below. Also adds 'deck'/'deck_cards' - an alternative to 'hand'/'draw_pile'/'discard_pile'/'exhaust_pile' (and their *_cards forms): declares only the persistent deck composition and lets the natural combat-start sequence deal Hand/DrawPile itself. Mutually exclusive with the four exact piles - the emulator's own ArgumentException (not this schema) is authoritative for that. Source of truth: Sts2Emulator/Dto/CombatScenario.cs, CardInstanceScenario.cs, PotionScenario.cs.",
   "type": "object",
   "required": ["character_id", "hand", "draw_pile", "discard_pile", "exhaust_pile", "relics", "seed", "enemies"],
   "properties": {
@@ -16,6 +16,8 @@
       "description": "Maps to CombatScenario.PlayerMaxHp. Same null/independent-nullability semantics as player_hp - see that field's description."
     },
     "player_block": {"type": ["integer", "null"], "description": "Maps to CombatScenario.PlayerBlock. Optional."},
+    "deck": {"type": "array", "items": {"type": "string"}, "description": "Plain card id strings for the player's full persistent deck. Order has no meaning. Mutually exclusive with hand/draw_pile/discard_pile/exhaust_pile and their *_cards forms - specifying both throws ArgumentException. When used, the natural combat-start sequence deals Hand/DrawPile itself using its own seeded RNG, instead of an exact caller-specified split."},
+    "deck_cards": {"type": "array", "items": {"$ref": "#/definitions/card_instance"}, "description": "v2 structured form of 'deck' - use when per-card upgrade state is known."},
     "hand": {"type": "array", "items": {"type": "string"}, "description": "v1 form - plain card id strings, every card created unupgraded. Ignored by the emulator if hand_cards is also non-empty (specifying both non-empty throws) - use hand_cards instead when upgrade state is known."},
     "draw_pile": {"type": "array", "items": {"type": "string"}, "description": "v1 form - see 'hand'. Index 0 is top-of-pile / next drawn."},
     "discard_pile": {"type": "array", "items": {"type": "string"}, "description": "v1 form - see 'hand'."},

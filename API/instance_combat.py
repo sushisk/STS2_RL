@@ -155,8 +155,14 @@ class CombatInstance:
         # CombatScenario treats them as mutually exclusive alternatives for the same
         # pile (see Sts2Emulator.Dto.CombatScenario's doc comment), so both must be
         # read here or a scenario using only the structured form looks deckless.
+        # `deck`/`deck_cards` (the deck-composition-only start mode - see
+        # CombatScenario.Deck's doc comment) is included in this same loop rather than
+        # branched on separately: it is mutually exclusive with the four exact piles
+        # above (enforced by the Emulator), so exactly one side of this loop ever
+        # contributes non-empty ids for a given scenario, and the existing per-pile
+        # plain/structured merge already generalizes to it unchanged.
         combat_start_deck_ids: list[str] = []
-        for pile_name in ("hand", "draw_pile", "discard_pile", "exhaust_pile"):
+        for pile_name in ("hand", "draw_pile", "discard_pile", "exhaust_pile", "deck"):
             combat_start_deck_ids.extend(scenario_spec.get(pile_name) or [])
             for entry in scenario_spec.get(f"{pile_name}_cards") or []:
                 card_id = entry.get("card_id") if isinstance(entry, dict) else None

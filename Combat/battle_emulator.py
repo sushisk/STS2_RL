@@ -604,12 +604,15 @@ def build_scenario_from_spec(spec: dict):
     CombatScenario.PlayerHp/PlayerMaxHp's doc comments) - do not default a missing value
     to some guessed number here.
 
-    hand/draw_pile/discard_pile/exhaust_pile (plain id-string lists, no upgrade info) and
-    hand_cards/draw_pile_cards/discard_pile_cards/exhaust_pile_cards (structured
-    {"card_id","is_upgraded"} lists) are both accepted per pile; supplying both non-empty
-    for the same pile is intentionally NOT validated here - it is passed through as-is so
-    the emulator's own ArgumentException (the authoritative validation) fires, rather than
-    this wrapper silently picking a precedence the caller didn't ask for.
+    deck/hand/draw_pile/discard_pile/exhaust_pile (plain id-string lists, no upgrade info)
+    and deck_cards/hand_cards/draw_pile_cards/discard_pile_cards/exhaust_pile_cards
+    (structured {"card_id","is_upgraded"} lists) are both accepted per pile; supplying
+    both non-empty for the same pile is intentionally NOT validated here - it is passed
+    through as-is so the emulator's own ArgumentException (the authoritative validation)
+    fires, rather than this wrapper silently picking a precedence the caller didn't ask
+    for. The same applies to deck/deck_cards vs. the four exact piles: declaring both is
+    passed through untouched, so the emulator's own mutual-exclusivity ArgumentException
+    (see CombatScenario.Deck's doc comment) is what actually rejects it.
     """
     ensure_inferred_slot_names(spec)
     types = ensure_loaded()
@@ -624,10 +627,12 @@ def build_scenario_from_spec(spec: dict):
         scenario.PlayerMaxHp = int(spec["player_max_hp"])
     if spec.get("player_block") is not None:
         scenario.PlayerBlock = int(spec["player_block"])
+    scenario.Deck = str_list(spec.get("deck", []))
     scenario.Hand = str_list(spec.get("hand", []))
     scenario.DrawPile = str_list(spec.get("draw_pile", []))
     scenario.DiscardPile = str_list(spec.get("discard_pile", []))
     scenario.ExhaustPile = str_list(spec.get("exhaust_pile", []))
+    scenario.DeckCards = _card_instances(types, spec.get("deck_cards"))
     scenario.HandCards = _card_instances(types, spec.get("hand_cards"))
     scenario.DrawPileCards = _card_instances(types, spec.get("draw_pile_cards"))
     scenario.DiscardPileCards = _card_instances(types, spec.get("discard_pile_cards"))
