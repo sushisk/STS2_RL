@@ -217,6 +217,16 @@ def compute_public_multiset_for_combat_start(
         for card in scenario_spec.get(pile_name) or []:
             card_id = card if isinstance(card, str) else (card.get("card_id") or card.get("id"))
             visible_ids.append(str(card_id))
+        # Each pile also accepts a structured per-instance alternative (e.g. `hand_cards`,
+        # needed for upgrade_level/enchantment) that CombatScenario treats as mutually
+        # exclusive with the plain list above for the same pile - both must be read here
+        # or a scenario using only the structured form looks like it has fewer visible
+        # cards than it really does, and the derived "hidden DrawPile" composition ends up
+        # including cards that are really sitting in a visible pile.
+        for card in scenario_spec.get(f"{pile_name}_cards") or []:
+            card_id = card.get("card_id") if isinstance(card, dict) else None
+            if card_id:
+                visible_ids.append(str(card_id))
     _subtract_counts(counts, Counter(visible_ids))
     return dict(sorted(counts.items()))
 

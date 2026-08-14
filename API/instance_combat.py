@@ -21,6 +21,7 @@ intermediate actions Training never specified, which is out of scope for a singl
 from __future__ import annotations
 
 import os
+from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -138,12 +139,19 @@ class CombatInstance:
         scenario_spec = {k: v for k, v in instance_config.items() if k != "instance_type"}
         self._session = LiveCombatSession()
         self._root_state = self._session.start_combat(scenario_spec)
-        self._combat_start_deck_multiset = {
-            card_id: scenario_spec.get("hand", []).count(card_id)
-            + scenario_spec.get("draw_pile", []).count(card_id)
-            + scenario_spec.get("discard_pile", []).count(card_id)
-            for card_id in set(scenario_spec.get("hand", []) + scenario_spec.get("draw_pile", []) + scenario_spec.get("discard_pile", []))
-        }
+        # Each pile accepts either a plain card-id list (`hand`) or a structured
+        # per-instance list (`hand_cards`, needed for upgrade_level/enchantment) -
+        # CombatScenario treats them as mutually exclusive alternatives for the same
+        # pile (see Sts2Emulator.Dto.CombatScenario's doc comment), so both must be
+        # read here or a scenario using only the structured form looks deckless.
+        combat_start_deck_ids: list[str] = []
+        for pile_name in ("hand", "draw_pile", "discard_pile", "exhaust_pile"):
+            combat_start_deck_ids.extend(scenario_spec.get(pile_name) or [])
+            for entry in scenario_spec.get(f"{pile_name}_cards") or []:
+                card_id = entry.get("card_id") if isinstance(entry, dict) else None
+                if card_id:
+                    combat_start_deck_ids.append(str(card_id))
+        self._combat_start_deck_multiset = dict(Counter(combat_start_deck_ids))
         self._pool = _make_branch_pool(
             worker_count=worker_count,
             request_timeout_s=request_timeout_s,
