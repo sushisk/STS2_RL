@@ -20,6 +20,7 @@ intermediate actions Training never specified, which is out of scope for a singl
 
 from __future__ import annotations
 
+import os
 from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -57,6 +58,9 @@ from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothes
 from API.masking import build_masked_emulator_dto, mask_legal_actions
 from API.terminal_outcome import require_terminal_outcome
 from API.validation import RequestRejected
+
+
+DEFAULT_ALC_WORKER_COUNT = 8
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
@@ -121,7 +125,16 @@ class _AdmittedItem:
 class CombatInstance:
     instance_type = "combat"
 
-    def __init__(self, instance_id: str, instance_config: dict, *, worker_count: int = 2, request_timeout_s: float = 60.0, max_branches: int = 64) -> None:
+    def __init__(
+        self,
+        instance_id: str,
+        instance_config: dict,
+        *,
+        worker_count: int | None = None,
+        request_timeout_s: float = 60.0,
+        max_branches: int = 64,
+        worker_pool_backend: str | None = None,
+    ) -> None:
         self.instance_id = instance_id
         scenario_spec = {k: v for k, v in instance_config.items() if k != "instance_type"}
         self._session = LiveCombatSession()
@@ -139,7 +152,12 @@ class CombatInstance:
                 if card_id:
                     combat_start_deck_ids.append(str(card_id))
         self._combat_start_deck_multiset = dict(Counter(combat_start_deck_ids))
-        self._pool = BranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
+        self._pool = _make_branch_pool(
+            worker_count=worker_count,
+            request_timeout_s=request_timeout_s,
+            worker_pool_backend=worker_pool_backend,
+            max_branches=max_branches,
+        )
         self._lease_registry = LeaseRegistry()
         self._branch_manager = BranchManager(self._pool, self._lease_registry, max_branches=max_branches)
         self._branch_ids = BranchIdRegistry()
@@ -507,3 +525,31 @@ class CombatInstance:
 
 def _translate_branch_status(internal_status: str) -> str:
     return {"queued": STATUS_QUEUED, "running": STATUS_RUNNING, "completed": STATUS_COMPLETED, "cancelled": STATUS_CANCELLED, "faulted": STATUS_FAULTED, "released": STATUS_RELEASED}.get(internal_status, internal_status)
+
+
+def _alc_worker_count_from_env() -> int | None:
+    raw = os.environ.get("STS2_COMBAT_ALC_WORKERS")
+    if raw is None or raw.strip() == "":
+        return None
+    try:
+        worker_count = int(raw)
+    except ValueError as exc:
+        raise ValueError("STS2_COMBAT_ALC_WORKERS must be a positive integer") from exc
+    if worker_count <= 0:
+        raise ValueError("STS2_COMBAT_ALC_WORKERS must be a positive integer")
+    return worker_count
+
+
+def _make_branch_pool(*, worker_count: int | None, request_timeout_s: float, worker_pool_backend: str | None, max_branches: int):
+    backend = (worker_pool_backend or os.environ.get("STS2_COMBAT_BRANCH_POOL") or "multiprocessing").strip().lower()
+    if backend in {"multiprocessing", "process", "processes", "mp", "branch_worker_pool"}:
+        if worker_count is None:
+            worker_count = 2
+        return BranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
+    if backend in {"alc", "assemblyloadcontext", "assembly_load_context", "isolated"}:
+        from search.alc_worker_pool import AlcBranchWorkerPool
+
+        if worker_count is None:
+            worker_count = _alc_worker_count_from_env() or DEFAULT_ALC_WORKER_COUNT
+        return AlcBranchWorkerPool(worker_count=worker_count, request_timeout_s=request_timeout_s)
+    raise ValueError(f"unknown combat branch worker pool backend {backend!r}")

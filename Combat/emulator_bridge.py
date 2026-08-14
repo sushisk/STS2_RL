@@ -68,10 +68,11 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
         PendingChoiceScenario,
         PotionScenario,
         PowerStack,
+        RelicStack,
     )
     from Sts2Emulator.Dto.Snapshot import CombatStateSnapshot as ClrCombatStateSnapshot  # noqa: E402
-    from System.Collections.Generic import List  # noqa: E402
-    from System import Decimal, String  # noqa: E402
+    from System.Collections.Generic import Dictionary, List  # noqa: E402
+    from System import Boolean, Decimal, Int32, Object, String  # noqa: E402
     from System.Text.Json import JsonSerializer  # noqa: E402
 
     _types = {
@@ -86,11 +87,16 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
         "OrbScenario": OrbScenario,
         "PendingChoiceScenario": PendingChoiceScenario,
         "PowerStack": PowerStack,
+        "RelicStack": RelicStack,
         "CardInstanceScenario": CardInstanceScenario,
         "PotionScenario": PotionScenario,
         "ClrCombatStateSnapshot": ClrCombatStateSnapshot,
+        "Dictionary": Dictionary,
         "List": List,
+        "Boolean": Boolean,
         "Decimal": Decimal,
+        "Int32": Int32,
+        "Object": Object,
         "String": String,
         "JsonSerializer": JsonSerializer,
     }

@@ -197,6 +197,43 @@ def test_compute_public_multiset_includes_card_generated_entry_with_card_id():
     assert got["BASH"] == 1, got
 
 
+def test_compute_public_multiset_subtracts_inferred_transform_removals_from_real_primal_force():
+    session = LiveCombatSession()
+    spec = _simple_spec(
+        hand=["PRIMAL_FORCE", "STRIKE_IRONCLAD", "STRIKE_IRONCLAD"],
+        draw_pile=["DEFEND_IRONCLAD", "BASH"],
+        enemy_hp=999,
+    )
+    state = session.start_combat(spec)
+    primal_force = next(
+        action
+        for action in state._cached_legal_actions  # noqa: SLF001
+        if action["action_type"] == "card" and action["parameters"].get("cardId") == "PRIMAL_FORCE"
+    )
+
+    session.step(state, primal_force)
+    snapshot = session.capture_snapshot()
+    got = compute_public_multiset(
+        snapshot,
+        combat_start_deck_multiset={
+            "PRIMAL_FORCE": 1,
+            "STRIKE_IRONCLAD": 2,
+            "DEFEND_IRONCLAD": 1,
+            "BASH": 1,
+        },
+    )
+
+    removals = snapshot.CombatHistory.InferredCardRemovals
+    assert Counter(removal.CardId for removal in removals) == Counter({"STRIKE_IRONCLAD": 2}), removals
+    assert got == Counter(card.CardId for card in snapshot.Player.DrawPile), got
+    assert "STRIKE_IRONCLAD" not in got, got
+
+    hypotheses = generate_belief_hypotheses(got, count=2, rng_seed_source=_rng)
+    for hypothesis in hypotheses:
+        derived = derive_substituted_snapshot(snapshot, hypothesis)
+        assert Counter(card.CardId for card in derived.Player.DrawPile) == got
+
+
 def test_consume_check_passthrough_mode_independent_and_true_rng_ok():
     context, _pipeline = _context_and_pipeline(width=2)
     end_turn = {"action_type": "system", "parameters": {}}
