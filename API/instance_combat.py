@@ -61,6 +61,7 @@ from API.validation import RequestRejected
 
 
 DEFAULT_ALC_WORKER_COUNT = 8
+_AMBIGUOUS_ACTION_INDEX = -1
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
@@ -89,12 +90,22 @@ class _DecisionView:
         self.legal_actions_raw = legal_actions_raw
         self.decision_context = decision_context
         self.boundary = boundary
-        self.public_id_by_index = {str(i): i for i in range(len(legal_actions_raw))}
+        public_id_by_index = {}
+        for i, action in enumerate(legal_actions_raw):
+            public_action_id = str(action.get("action_id", i))
+            if public_action_id in public_id_by_index:
+                public_id_by_index[public_action_id] = _AMBIGUOUS_ACTION_INDEX
+            else:
+                public_id_by_index[public_action_id] = i
+        self.public_id_by_index = public_id_by_index
 
     def resolve_action_id(self, public_action_id: str) -> int:
         if public_action_id not in self.public_id_by_index:
             raise RequestRejected(f"action_id {public_action_id!r} is not among current legal actions")
-        return self.public_id_by_index[public_action_id]
+        index = self.public_id_by_index[public_action_id]
+        if index == _AMBIGUOUS_ACTION_INDEX:
+            raise RequestRejected(f"action_id {public_action_id!r} is ambiguous among current legal actions")
+        return index
 
 
 class _BranchBookkeeping:

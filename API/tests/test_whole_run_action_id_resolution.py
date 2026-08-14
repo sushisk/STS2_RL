@@ -17,6 +17,7 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
         sys.path.insert(0, str(_p))
 
 from API.instance_whole_run import _View  # noqa: E402
+from API.instance_combat import _DecisionView  # noqa: E402
 from API.validation import RequestRejected  # noqa: E402
 
 
@@ -63,6 +64,50 @@ def test_sparse_map_room_id_resolves_by_id_not_ordinal():
 
     assert view.resolve_action_id("42") == 1
     assert view.legal_actions_raw[view.resolve_action_id("42")]["action_id"] == 42
+
+
+def test_combat_sparse_action_id_resolves_to_its_position():
+    view = _DecisionView(
+        legal_actions_raw=[
+            {
+                "action_id": action_id,
+                "action_type": "test",
+                "label": str(action_id),
+                "is_available": True,
+                "parameters": {},
+            }
+            for action_id in [0, 1, 2, 4]
+        ],
+        decision_context=None,
+        boundary="test",
+    )
+
+    assert view.resolve_action_id("4") == 3
+    assert view.legal_actions_raw[view.resolve_action_id("4")]["action_id"] == 4
+
+
+def test_combat_duplicate_action_id_is_rejected_as_ambiguous():
+    view = _DecisionView(
+        legal_actions_raw=[
+            {
+                "action_id": action_id,
+                "action_type": "test",
+                "label": str(action_id),
+                "is_available": True,
+                "parameters": {},
+            }
+            for action_id in [3, 3]
+        ],
+        decision_context=None,
+        boundary="test",
+    )
+
+    try:
+        view.resolve_action_id("3")
+    except RequestRejected as exc:
+        assert "ambiguous" in str(exc)
+    else:
+        raise AssertionError("duplicate current combat action_id must not resolve silently")
 
 
 def test_unknown_action_id_is_rejected():
