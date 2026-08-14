@@ -103,6 +103,14 @@ class HypothesisGridCell:
     derived_snapshot: CombatStateSnapshot
 
 
+@dataclass(frozen=True)
+class CombatStartDerivedReplayRoot:
+    """One Genesis Search Hypothesis and its derived Combat Start Replay Root."""
+
+    hypothesis: SearchHypothesisId
+    derived_replay_root: CombatStartReplayRoot
+
+
 def _rng_to_dict(rng: SerializableRngSnapshot) -> dict[str, int]:
     return {
         "Counter": int(rng.Counter),
@@ -127,19 +135,7 @@ def _rng_from_like(value: Any) -> SerializableRngSnapshot:
     )
 
 
-def _card_counts(cards: list[CardInstanceSnapshot]) -> Counter[str]:
-    return Counter(str(card.CardId) for card in cards)
-
-
-def _subtract_counts(base: Counter[str], subtract: Counter[str]) -> None:
-    for card_id, count in subtract.items():
-        base[card_id] -= count
-        if base[card_id] == 0:
-            del base[card_id]
-        elif base[card_id] < 0:
-            raise ValueError(f"PUBLIC_MULTISET underflow for {card_id!r}: subtracted too many visible cards")
-
-
+# Currently unused by compute_public_multiset, but intentionally retained for future card-count-aware Relic/Power logic.
 def _generated_card_id(entry: Any, visible_instance_ids: dict[str, str]) -> Optional[str]:
     fields = entry.Fields or {}
     for key in ("cardId", "CardId", "generatedCardId", "GeneratedCardId"):
@@ -157,77 +153,10 @@ def _generated_card_id(entry: Any, visible_instance_ids: dict[str, str]) -> Opti
     return None
 
 
-def compute_public_multiset(
-    snapshot: CombatStateSnapshot,
-    *,
-    combat_start_deck_multiset: dict[str, int],
-) -> dict[str, int]:
-    """Compute the public card-id multiset for the current hidden DrawPile.
-
-    The caller must cache ``combat_start_deck_multiset`` once at combat start and thread
-    it through later Search Coordinator calls. This intentionally does not use the naive
-    ``Deck - other piles`` formula: the snapshot ``Deck`` is persistent deck data, while
-    combat-generated cards may never appear there.
-
-    Open caveat preserved from the contract: this assumes generated combat cards are
-    represented by ``CombatHistory`` ``CardGeneratedEntry`` records with enough card-id
-    information, or with an instance id that can be resolved from currently visible
-    non-draw piles, and that transformed-away originals are represented by
-    ``CombatHistory.InferredCardRemovals``. If the Emulator has an unrecorded generation
-    or removal path, this function cannot silently guarantee full coverage.
-    """
-    counts = Counter({str(k): int(v) for k, v in combat_start_deck_multiset.items() if int(v) != 0})
-    player = snapshot.Player
-    visible_cards = [*player.Hand, *player.DiscardPile, *player.ExhaustPile, *player.PlayPile]
-    visible_instance_ids = {str(card.InstanceId): str(card.CardId) for card in visible_cards}
-
-    for entry in snapshot.CombatHistory.Entries:
-        if str(entry.EntryType) != "CardGeneratedEntry":
-            continue
-        card_id = _generated_card_id(entry, visible_instance_ids)
-        if card_id is None:
-            raise ValueError("CardGeneratedEntry did not expose a resolvable generated CardId")
-        counts[card_id] += 1
-
-    inferred_removals = Counter(str(removal.CardId) for removal in snapshot.CombatHistory.InferredCardRemovals)
-    _subtract_counts(counts, inferred_removals)
-    _subtract_counts(counts, _card_counts(visible_cards))
-    return dict(sorted(counts.items()))
-
-
-def compute_public_multiset_for_combat_start(
-    scenario_spec: dict,
-    *,
-    combat_start_deck_multiset: dict[str, int],
-) -> dict[str, int]:
-    """Genesis counterpart to ``compute_public_multiset()`` for a Start-of-Combat
-    Pending, where there is no captured ``CombatStateSnapshot`` to read at all (see
-    ``CombatStartReplayRoot``).
-
-    At this exact point (immediately out of ``ResetFromScenario``/``start_combat()``,
-    before a single Step has ever executed) nothing has been drawn, discarded, exhausted,
-    or generated yet - the hidden DrawPile's public composition is simply the declared
-    starting deck minus whatever the Scenario itself already declares as visible
-    (Hand/DiscardPile/ExhaustPile/PlayPile - all already-known, not hidden). There is no
-    ``CombatHistory`` to consult for ``CardGeneratedEntry`` rows for the same reason.
-    """
-    counts = Counter({str(k): int(v) for k, v in combat_start_deck_multiset.items() if int(v) != 0})
-    visible_ids: list[str] = []
-    for pile_name in ("hand", "discard_pile", "exhaust_pile", "play_pile"):
-        for card in scenario_spec.get(pile_name) or []:
-            card_id = card if isinstance(card, str) else (card.get("card_id") or card.get("id"))
-            visible_ids.append(str(card_id))
-        # Each pile also accepts a structured per-instance alternative (e.g. `hand_cards`,
-        # needed for upgrade_level/enchantment) that CombatScenario treats as mutually
-        # exclusive with the plain list above for the same pile - both must be read here
-        # or a scenario using only the structured form looks like it has fewer visible
-        # cards than it really does, and the derived "hidden DrawPile" composition ends up
-        # including cards that are really sitting in a visible pile.
-        for card in scenario_spec.get(f"{pile_name}_cards") or []:
-            card_id = card.get("card_id") if isinstance(card, dict) else None
-            if card_id:
-                visible_ids.append(str(card_id))
-    _subtract_counts(counts, Counter(visible_ids))
+def compute_public_multiset(snapshot: CombatStateSnapshot) -> dict[str, int]:
+    """Compute the public card-id multiset for the current hidden DrawPile by reading
+    Player.DrawPile directly - composition only, the actual order is discarded here."""
+    counts = Counter(str(card.CardId) for card in snapshot.Player.DrawPile)
     return dict(sorted(counts.items()))
 
 
@@ -306,6 +235,47 @@ def _shuffle_seed_from_rng(rng: SerializableRngSnapshot, hypothesis_index: int) 
         ensure_ascii=True,
     )
     return int.from_bytes(hashlib.sha256(payload.encode("utf-8")).digest()[:8], "big")
+
+
+def _combat_start_seed_from_root(root_seed: int, hypothesis_index: int) -> int:
+    """Derive a per-hypothesis Seed override, masked into ``CombatScenario.Seed``'s
+    accepted range (a C# ``int``, i.e. signed 32-bit: 0..2**31-1 here since seeds in
+    this codebase are conventionally non-negative) - the raw SHA-256 digest can exceed
+    that range and overflow at the Emulator boundary otherwise."""
+    payload = json.dumps(
+        {"root_seed": int(root_seed), "hypothesis_index": int(hypothesis_index)},
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    digest = int.from_bytes(hashlib.sha256(payload.encode("utf-8")).digest()[:8], "big")
+    return digest & 0x7FFFFFFF
+
+
+def derive_combat_start_replay_roots(
+    combat_start_replay_root: CombatStartReplayRoot,
+    *,
+    count: int,
+) -> list[CombatStartDerivedReplayRoot]:
+    if count < 0:
+        raise ValueError("count must be non-negative")
+    root_seed = int(combat_start_replay_root.scenario_spec.get("seed", 1))
+    roots: list[CombatStartDerivedReplayRoot] = []
+    for index in range(count):
+        spec = dict(combat_start_replay_root.scenario_spec)
+        spec["seed"] = _combat_start_seed_from_root(root_seed, index)
+        hypothesis = SearchHypothesisId(
+            rng=SerializableRngSnapshot(Counter=spec["seed"], State0=0, State1=0, State2=0, State3=0),
+            ordered_draw_pile_card_ids=(),
+            hypothesis_index=index,
+        )
+        roots.append(
+            CombatStartDerivedReplayRoot(
+                hypothesis=hypothesis,
+                derived_replay_root=CombatStartReplayRoot(scenario_spec=spec),
+            )
+        )
+    return roots
 
 
 def _canonical_cards_from_multiset(public_multiset: dict[str, int]) -> list[str]:
@@ -433,57 +403,6 @@ def build_grid(
     return cells
 
 
-def derive_substituted_replay_root(
-    combat_start_replay_root: CombatStartReplayRoot,
-    hypothesis: SearchHypothesisId,
-) -> CombatStartReplayRoot:
-    """Genesis counterpart to ``derive_substituted_snapshot()`` for a Start-of-Combat
-    Pending's Combat Start Replay Root.
-
-    Unlike the Snapshot case, ``CombatScenario`` has no per-stream ``Rng.RunRng``
-    substitution point to target - ``CombatScenario.Seed`` (``build_scenario_from_spec()``)
-    is a single top-level value that seeds the WHOLE RNG tree, not just Shuffle in
-    isolation. This substitutes only the one field a search candidate's evaluation
-    actually reads: ``scenario_spec["draw_pile"]``, replaced with the hypothesis's own
-    believed ordering of the SAME public multiset - Main's true declared draw_pile order
-    is never read by this function or passed to any candidate/evaluator."""
-    spec = dict(combat_start_replay_root.scenario_spec)
-    spec["draw_pile"] = list(hypothesis.ordered_draw_pile_card_ids)
-    return CombatStartReplayRoot(scenario_spec=spec)
-
-
-@dataclass(frozen=True)
-class CombatStartHypothesisGridCell:
-    """Genesis counterpart to ``HypothesisGridCell`` - carries a derived Combat Start
-    Replay Root instead of a derived Snapshot."""
-
-    root_action: Any
-    hypothesis: SearchHypothesisId
-    search_hypothesis_id: str
-    derived_replay_root: CombatStartReplayRoot
-
-
-def build_grid_for_combat_start(
-    root_actions: list[Any],
-    hypotheses: list[SearchHypothesisId],
-    combat_start_replay_root: CombatStartReplayRoot,
-) -> list[CombatStartHypothesisGridCell]:
-    """Genesis counterpart to ``build_grid()`` for a Start-of-Combat Pending's Combat
-    Start Replay Root."""
-    cells: list[CombatStartHypothesisGridCell] = []
-    for root_action in root_actions:
-        for hypothesis in hypotheses:
-            cells.append(
-                CombatStartHypothesisGridCell(
-                    root_action=root_action,
-                    hypothesis=hypothesis,
-                    search_hypothesis_id=hypothesis.to_slot_value(),
-                    derived_replay_root=derive_substituted_replay_root(combat_start_replay_root, hypothesis),
-                )
-            )
-    return cells
-
-
 def with_search_hypothesis(
     decision_context: DecisionContext,
     hypothesis: Optional[SearchHypothesisId],
@@ -509,11 +428,7 @@ def apply_hypothesis_to_context(
     (multi-Hypothesis grid expansion vs one requested Hypothesis) - only this two-step
     derive+replace dance is shared.
     """
-    is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
-    derived_root = (
-        derive_substituted_replay_root(decision_context.root_snapshot, hypothesis)
-        if is_combat_start
-        else derive_substituted_snapshot(decision_context.root_snapshot, hypothesis)
-    )
-    context = dataclasses.replace(decision_context, root_snapshot=derived_root)
+    if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
+        raise TypeError("Genesis hypotheses must use derive_combat_start_replay_roots()")
+    context = dataclasses.replace(decision_context, root_snapshot=derive_substituted_snapshot(decision_context.root_snapshot, hypothesis))
     return with_search_hypothesis(context, hypothesis)

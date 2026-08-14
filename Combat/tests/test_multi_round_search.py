@@ -204,7 +204,6 @@ def test_real_worker_hypothesis_boundary_terminates_without_prev_child_continuat
                 beam_width=1,
                 max_rounds=3,
             ),
-            combat_start_deck_multiset={"WHIRLWIND": 1},
             lease_registry=LeaseRegistry(),
         )
         result = strategy(context)
@@ -241,7 +240,6 @@ def test_beam_pruning_keeps_only_top_width_for_next_round():
         strategy = build_beam_search_strategy(
             object(),
             config=BeamSearchConfig(coordinator=SearchCoordinatorConfig(width=3, max_retries=0), beam_width=2, max_rounds=2),
-            combat_start_deck_multiset={},
             lease_registry=LeaseRegistry(),
             snapshot_state_loader=_loader,
         )
@@ -277,7 +275,6 @@ def test_hypothesis_required_round_terminates_chain_as_completed_candidate():
                 beam_width=1,
                 max_rounds=3,
             ),
-            combat_start_deck_multiset={"STRIKE_IRONCLAD": 1, "DEFEND_IRONCLAD": 1},
             lease_registry=LeaseRegistry(),
         )
         result = strategy(context)
@@ -324,7 +321,6 @@ def test_terminal_mid_chain_is_completed_and_considered_final():
         strategy = build_beam_search_strategy(
             object(),
             config=BeamSearchConfig(coordinator=SearchCoordinatorConfig(width=1, max_retries=0), beam_width=1, max_rounds=3),
-            combat_start_deck_multiset={},
             lease_registry=LeaseRegistry(),
         )
         result = strategy(context)
@@ -371,7 +367,6 @@ def test_real_pending_mid_chain_continues_with_holder_and_sibling_replay():
                     beam_width=1,
                     max_rounds=2,
                 ),
-                combat_start_deck_multiset={},
                 lease_registry=LeaseRegistry(),
             )
             result = strategy(context)
@@ -393,7 +388,6 @@ def test_zero_viable_candidates_on_first_round_returns_failure():
     strategy = build_beam_search_strategy(
         object(),
         config=BeamSearchConfig(coordinator=SearchCoordinatorConfig(width=0), beam_width=1, max_rounds=2),
-        combat_start_deck_multiset={},
         lease_registry=LeaseRegistry(),
         snapshot_state_loader=lambda _snapshot: context.current_decision_result,
     )
@@ -422,7 +416,6 @@ def test_max_rounds_bounds_search_and_keeps_expected_signatures():
         strategy = build_beam_search_strategy(
             object(),
             config=BeamSearchConfig(coordinator=SearchCoordinatorConfig(width=1, max_retries=0), beam_width=1, max_rounds=2),
-            combat_start_deck_multiset={},
             lease_registry=LeaseRegistry(),
             snapshot_state_loader=lambda _snapshot: context.current_decision_result,
         )

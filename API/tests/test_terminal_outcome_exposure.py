@@ -227,7 +227,6 @@ def test_combat_single_emulate_action_cleans_up_when_finalization_raises():
     inst._bookkeeping = {}  # noqa: SLF001
     inst._root_history = HistoryBuilder()  # noqa: SLF001
     inst._root_branch_log = []  # noqa: SLF001
-    inst._combat_start_deck_multiset = {}  # noqa: SLF001
     inst._rng_table = _FakeCombatRngTable()  # noqa: SLF001
     inst._branch_manager = _FakeCombatBranchManager()  # noqa: SLF001
     parent_view = SimpleNamespace(

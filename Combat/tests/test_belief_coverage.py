@@ -110,7 +110,7 @@ def test_compute_public_multiset_with_coverage_delegates_to_rng_hypothesis():
         snapshot,
         combat_start_deck_multiset=combat_start,
     )
-    direct_multiset = compute_public_multiset(snapshot, combat_start_deck_multiset=combat_start)
+    direct_multiset = compute_public_multiset(snapshot)
 
     assert wrapped_multiset == direct_multiset
     assert assessment.is_complete is True
@@ -127,7 +127,7 @@ def test_live_collision_course_generation_emits_resolvable_card_generated_entry(
     generated = [entry for entry in snapshot.CombatHistory.Entries if entry.EntryType == "CardGeneratedEntry"]
     assert len(generated) == 1
     assert generated[0].Fields.get("cardInstanceId") in {card.InstanceId for card in snapshot.Player.Hand}
-    public_multiset = compute_public_multiset(snapshot, combat_start_deck_multiset={"COLLISION_COURSE": 1})
+    public_multiset = compute_public_multiset(snapshot)
     assert public_multiset == {}
 
 
@@ -146,7 +146,6 @@ def test_search_coordinator_hypothesis_entries_include_public_multiset_coverage_
             strategy = build_search_strategy(
                 pool,
                 config=SearchCoordinatorConfig(width=1, hypothesis_count=2),
-                combat_start_deck_multiset=_deck_multiset("STRIKE_IRONCLAD", "BASH"),
                 lease_registry=LeaseRegistry(),
             )
             result = strategy(context)
@@ -158,7 +157,7 @@ def test_search_coordinator_hypothesis_entries_include_public_multiset_coverage_
     assert diagnostics
     assert all(item["is_complete"] is True for item in diagnostics)
     assert all(item["uncertain_sources"] == [] for item in diagnostics)
-    assert all("Relic:BIIIG_HUG" in item["reason"] for item in diagnostics)
+    assert all("Player.DrawPile" in item["reason"] for item in diagnostics)
 
 
 def _run_all() -> int:

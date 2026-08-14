@@ -65,7 +65,7 @@ def _toolbox_pending_spec():
     for the same scenario used for a different purpose (restore-rejection testing)."""
     return {
         "character_id": "IRONCLAD", "player_hp": None, "player_max_hp": None,
-        "hand": ["STRIKE_IRONCLAD"], "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
+        "deck": ["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "BASH"],
         "player_powers": [], "relics": ["TOOLBOX"], "potions": [], "seed": 1,
         "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
     }

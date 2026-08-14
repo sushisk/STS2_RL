@@ -21,7 +21,6 @@ intermediate actions Training never specified, which is out of scope for a singl
 from __future__ import annotations
 
 import os
-from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -109,7 +108,7 @@ class _DecisionView:
 
 
 class _BranchBookkeeping:
-    __slots__ = ("internal_id", "parent_public_id", "branch_log", "history", "view", "terminal", "outcome", "combat_start_deck_multiset", "rng_id")
+    __slots__ = ("internal_id", "parent_public_id", "branch_log", "history", "view", "terminal", "outcome", "rng_id")
 
     def __init__(self, internal_id: str, parent_public_id: str, branch_log: list, history: HistoryBuilder, rng_id: int) -> None:
         self.internal_id = internal_id
@@ -150,25 +149,9 @@ class CombatInstance:
         scenario_spec = {k: v for k, v in instance_config.items() if k != "instance_type"}
         self._session = LiveCombatSession()
         self._root_state = self._session.start_combat(scenario_spec)
-        # Each pile accepts either a plain card-id list (`hand`) or a structured
-        # per-instance list (`hand_cards`, needed for upgrade_level/enchantment) -
-        # CombatScenario treats them as mutually exclusive alternatives for the same
-        # pile (see Sts2Emulator.Dto.CombatScenario's doc comment), so both must be
-        # read here or a scenario using only the structured form looks deckless.
-        # `deck`/`deck_cards` (the deck-composition-only start mode - see
-        # CombatScenario.Deck's doc comment) is included in this same loop rather than
-        # branched on separately: it is mutually exclusive with the four exact piles
-        # above (enforced by the Emulator), so exactly one side of this loop ever
-        # contributes non-empty ids for a given scenario, and the existing per-pile
-        # plain/structured merge already generalizes to it unchanged.
-        combat_start_deck_ids: list[str] = []
-        for pile_name in ("hand", "draw_pile", "discard_pile", "exhaust_pile", "deck"):
-            combat_start_deck_ids.extend(scenario_spec.get(pile_name) or [])
-            for entry in scenario_spec.get(f"{pile_name}_cards") or []:
-                card_id = entry.get("card_id") if isinstance(entry, dict) else None
-                if card_id:
-                    combat_start_deck_ids.append(str(card_id))
-        self._combat_start_deck_multiset = dict(Counter(combat_start_deck_ids))
+        # Reserved for future true/root draw-hypothesis bookkeeping; current branch
+        # decision logic still uses Training-provided rng_id mappings exclusively.
+        self.true_draw_hypothesis_index = 0
         self._pool = _make_branch_pool(
             worker_count=worker_count,
             request_timeout_s=request_timeout_s,
@@ -312,7 +295,7 @@ class CombatInstance:
         internal_id: str | None = None
         try:
             hypothesis_index = self._rng_table.hypothesis_index_for(parent_branch_id, decision_point_id, rng_id)
-            work_item = build_single_hypothesis_work_item(parent_view.decision_context, candidate, hypothesis_index, work_kind=WORK_KIND_SUB_BRANCH, combat_start_deck_multiset=self._combat_start_deck_multiset)
+            work_item = build_single_hypothesis_work_item(parent_view.decision_context, candidate, hypothesis_index, work_kind=WORK_KIND_SUB_BRANCH)
             parent_internal_id = None if parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[parent_branch_id].internal_id
             (internal_id,) = self._branch_manager.submit([work_item], parent_branch_id=parent_internal_id)
             parent_history = self._root_history if parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[parent_branch_id].history
@@ -400,7 +383,7 @@ class CombatInstance:
             prepared: list[tuple] = []
             for admitted_item in admitted:
                 hypothesis_index = self._rng_table.hypothesis_index_for(admitted_item.parent_branch_id, admitted_item.decision_point_id, admitted_item.rng_id)
-                work_item = build_single_hypothesis_work_item(admitted_item.parent_view.decision_context, admitted_item.candidate, hypothesis_index, work_kind=WORK_KIND_SUB_BRANCH, combat_start_deck_multiset=self._combat_start_deck_multiset)
+                work_item = build_single_hypothesis_work_item(admitted_item.parent_view.decision_context, admitted_item.candidate, hypothesis_index, work_kind=WORK_KIND_SUB_BRANCH)
                 parent_internal_id = None if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].internal_id
                 parent_history = self._root_history if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].history
                 parent_log = list(self._root_branch_log) if admitted_item.parent_branch_id == ROOT_BRANCH_ID else list(self._bookkeeping[admitted_item.parent_branch_id].branch_log)

@@ -7,7 +7,7 @@ Hypothesis grid (`config.hypothesis_count` cells) for internal aggregation - the
 opposite of what `emulate_action` needs (Training picks ONE `rng_id` => RL simulates
 exactly ONE Hypothesis, never aggregating/choosing a winner across several). This module
 reuses the same underlying primitives (`generate_belief_hypotheses`,
-`derive_substituted_snapshot`/`derive_substituted_replay_root`, `with_search_hypothesis`)
+`derive_substituted_snapshot`, `with_search_hypothesis`)
 directly, generating only the PREFIX of the belief-hypothesis sequence needed to reach
 the requested index and keeping just the last one - `generate_belief_hypotheses` is a
 pure function of its inputs, so `generate_belief_hypotheses(multiset, count=n)[n-1]` is
@@ -22,12 +22,17 @@ state to Training (contract §3: "seed、RNG内部状態、DrawPile順序は公�
 
 from __future__ import annotations
 
-from combat_state_snapshot import SerializableRngSnapshot
-from search.belief_coverage import compute_public_multiset_with_coverage, compute_public_multiset_with_coverage_for_combat_start
+import dataclasses
+
 from search.branch_worker_pool import WorkItem
 from search.candidate_pipeline import PipelineCandidateRef
 from search.decision_context import CombatStartReplayRoot, DecisionContext
-from search.rng_hypothesis import apply_hypothesis_to_context, generate_belief_hypotheses
+from search.rng_hypothesis import (
+    apply_hypothesis_to_context,
+    compute_public_multiset,
+    derive_combat_start_replay_roots,
+    generate_belief_hypotheses,
+)
 
 
 def build_single_hypothesis_work_item(
@@ -36,7 +41,6 @@ def build_single_hypothesis_work_item(
     hypothesis_index: int,
     *,
     work_kind: str,
-    combat_start_deck_multiset: dict,
 ) -> WorkItem:
     """Return exactly one `WorkItem` derived under the Hypothesis at `hypothesis_index`
     (0-based) for `candidate`, leaving `decision_context`/`candidate` themselves
@@ -45,19 +49,15 @@ def build_single_hypothesis_work_item(
     is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
     count = hypothesis_index + 1
     if is_combat_start:
-        scenario_spec = decision_context.root_snapshot.scenario_spec
-        public_multiset, _coverage = compute_public_multiset_with_coverage_for_combat_start(
-            scenario_spec, combat_start_deck_multiset=combat_start_deck_multiset
+        derived = derive_combat_start_replay_roots(decision_context.root_snapshot, count=count)[hypothesis_index]
+        context = dataclasses.replace(
+            decision_context,
+            root_snapshot=derived.derived_replay_root,
+            search_hypothesis_id=derived.hypothesis.to_slot_value(),
         )
-        seed_rng = SerializableRngSnapshot(
-            Counter=int(scenario_spec.get("seed", 1)), State0=0, State1=0, State2=0, State3=0
-        )
-        hypotheses = generate_belief_hypotheses(public_multiset, count=count, rng_seed_source=lambda _i: seed_rng)
-        hypothesis = hypotheses[hypothesis_index]
+        return WorkItem.from_candidate_ref(context, candidate, work_kind=work_kind)
     else:
-        public_multiset, _coverage = compute_public_multiset_with_coverage(
-            decision_context.root_snapshot, combat_start_deck_multiset=combat_start_deck_multiset
-        )
+        public_multiset = compute_public_multiset(decision_context.root_snapshot)
         shuffle_rng = decision_context.root_snapshot.Rng.RunRng["Shuffle"]
         hypotheses = generate_belief_hypotheses(public_multiset, count=count, rng_seed_source=lambda _i: shuffle_rng)
         hypothesis = hypotheses[hypothesis_index]

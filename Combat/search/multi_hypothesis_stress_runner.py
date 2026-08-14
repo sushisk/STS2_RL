@@ -519,8 +519,6 @@ def run_multi_hypothesis_stress(
                 loop_state.held_stable_snapshot = session.capture_snapshot()
                 loop_state.replay_prefix = []
                 context = build_main_decision_context(loop_state)
-                combat_start_deck_multiset = _deck_multiset(spec)
-
                 def _strategy(context):
                     metrics = SearchCoordinatorMetrics()
                     controller.begin_decision()
@@ -529,7 +527,6 @@ def run_multi_hypothesis_stress(
                         strategy = build_search_strategy(
                             pool,
                             config=config,
-                            combat_start_deck_multiset=combat_start_deck_multiset,
                             lease_registry=registry,
                             main_state_provider=lambda: loop_state,
                             metrics=metrics,

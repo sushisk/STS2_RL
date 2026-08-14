@@ -55,15 +55,12 @@ class StopConditionError(RuntimeError):
     """Raised immediately when a required invariant is violated."""
 
 
-def _base_spec(*, relic: str, hand: list[str], draw_pile: Optional[list[str]] = None, seed: int = 1) -> dict:
+def _base_spec(*, relic: str, deck: list[str], seed: int = 1) -> dict:
     return {
         "character_id": "IRONCLAD",
         "player_hp": None,
         "player_max_hp": None,
-        "hand": hand,
-        "draw_pile": draw_pile or [],
-        "discard_pile": [],
-        "exhaust_pile": [],
+        "deck": deck,
         "player_powers": [],
         "relics": [relic],
         "potions": [],
@@ -77,11 +74,10 @@ def _spec_for(relic: str, index: int) -> dict:
     if relic == "GAMBLING_CHIP":
         return _base_spec(
             relic=relic,
-            hand=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "BASH"],
-            draw_pile=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD"],
+            deck=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "BASH", "STRIKE_IRONCLAD", "DEFEND_IRONCLAD"],
             seed=seed,
         )
-    return _base_spec(relic=relic, hand=["STRIKE_IRONCLAD"], seed=seed)
+    return _base_spec(relic=relic, deck=["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "BASH"], seed=seed)
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:

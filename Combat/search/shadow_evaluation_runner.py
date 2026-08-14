@@ -293,7 +293,6 @@ def run_batch(
                 snapshot,
                 pool=pool,
                 config=config,
-                combat_start_deck_multiset=_deck_multiset(spec),
                 old_timeout_s=120.0,
             )
             rows.append(_row(index, spec, result))

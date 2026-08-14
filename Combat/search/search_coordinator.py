@@ -14,7 +14,7 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from combat_state_snapshot import CombatStateSnapshot, SerializableRngSnapshot, canonical_json
+from combat_state_snapshot import CombatStateSnapshot, canonical_json
 from search.branch_worker_pool import (
     BRANCH_STATUS_FAULT,
     BRANCH_STATUS_SUCCESS,
@@ -43,18 +43,15 @@ from search.fault_taxonomy import (
     WORK_ITEM_FINAL_SUCCESS,
     WorkItemAttempt,
 )
-from search.belief_coverage import (
-    CoverageAssessment,
-    compute_public_multiset_with_coverage,
-    compute_public_multiset_with_coverage_for_combat_start,
-)
+from search.belief_coverage import CoverageAssessment
 from search.main_loop import SearchEvaluationFailure, SearchStrategy
 from search.main_loop import MainLoopState
 from search.rng_hypothesis import (
     apply_hypothesis_to_context,
     build_grid,
-    build_grid_for_combat_start,
     consume_check,
+    compute_public_multiset,
+    derive_combat_start_replay_roots,
     generate_belief_hypotheses,
 )
 
@@ -234,13 +231,11 @@ def _hypothesis_work_items(
     candidates: list[PipelineCandidateRef],
     *,
     config: SearchCoordinatorConfig,
-    combat_start_deck_multiset: dict[str, int],
 ) -> list[WorkItem]:
     work_items, _coverage = _hypothesis_work_items_with_coverage(
         decision_context,
         candidates,
         config=config,
-        combat_start_deck_multiset=combat_start_deck_multiset,
     )
     return work_items
 
@@ -250,38 +245,36 @@ def _hypothesis_work_items_with_coverage(
     candidates: list[PipelineCandidateRef],
     *,
     config: SearchCoordinatorConfig,
-    combat_start_deck_multiset: dict[str, int],
 ) -> tuple[list[WorkItem], CoverageAssessment]:
     is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
+    coverage = CoverageAssessment(
+        is_complete=True,
+        uncertain_sources=(),
+        reason="PUBLIC_MULTISET is read directly from Player.DrawPile or naturally dealt from CombatScenario.Seed",
+    )
     if is_combat_start:
-        # Start-of-Combat Pending: no captured Snapshot exists to read PUBLIC_MULTISET
-        # or a Shuffle RNG stream from - derive both from the Combat Start Replay Root's
-        # own declared Scenario spec instead (see belief_coverage.py / rng_hypothesis.py
-        # genesis counterparts). Main's true declared draw_pile order is read ONLY to
-        # compute combat_start_deck_multiset's complement (never exposed to a
-        # candidate/evaluator - identical privacy posture to the Snapshot path).
-        scenario_spec = decision_context.root_snapshot.scenario_spec
-        public_multiset, coverage = compute_public_multiset_with_coverage_for_combat_start(
-            scenario_spec,
-            combat_start_deck_multiset=combat_start_deck_multiset,
-        )
-        # hypothesis.rng is never consumed downstream on this path (derive_substituted_
-        # replay_root() only reads ordered_draw_pile_card_ids) - this seed only needs to
-        # be a stable, well-formed SerializableRngSnapshot to hash per hypothesis index.
-        seed_rng = SerializableRngSnapshot(
-            Counter=int(scenario_spec.get("seed", 1)), State0=0, State1=0, State2=0, State3=0
-        )
-        hypotheses = generate_belief_hypotheses(
-            public_multiset,
-            count=config.hypothesis_count,
-            rng_seed_source=lambda _index: seed_rng,
-        )
-        cells = build_grid_for_combat_start(candidates, hypotheses, decision_context.root_snapshot)
-    else:
-        public_multiset, coverage = compute_public_multiset_with_coverage(
+        derived_roots = derive_combat_start_replay_roots(
             decision_context.root_snapshot,
-            combat_start_deck_multiset=combat_start_deck_multiset,
+            count=config.hypothesis_count,
         )
+        work_items: list[WorkItem] = []
+        for root_index, candidate in enumerate(candidates):
+            for derived in derived_roots:
+                context = dataclasses.replace(
+                    decision_context,
+                    root_snapshot=derived.derived_replay_root,
+                    search_hypothesis_id=derived.hypothesis.to_slot_value(),
+                )
+                work_items.append(
+                    WorkItem.from_candidate_ref(
+                        context,
+                        candidate,
+                        work_kind=WORK_KIND_CONTINUATION if root_index == 0 else WORK_KIND_SUB_BRANCH,
+                    )
+                )
+        return work_items, coverage
+    else:
+        public_multiset = compute_public_multiset(decision_context.root_snapshot)
         shuffle_rng = decision_context.root_snapshot.Rng.RunRng["Shuffle"]
         hypotheses = generate_belief_hypotheses(
             public_multiset,
@@ -426,7 +419,6 @@ def dispatch_explicit_candidates(
     pool: BranchWorkerPool,
     config: SearchCoordinatorConfig,
     lease_registry: LeaseRegistry,
-    combat_start_deck_multiset: dict[str, int],
     metrics: Optional[SearchCoordinatorMetrics] = None,
 ) -> "list[ExplicitBranchDispatchResult]":
     """Training-facing Branch execution entry point (RL担当指示：推論処理撤去と受動実行基盤
@@ -456,7 +448,7 @@ def dispatch_explicit_candidates(
         metrics.hypothesis_involved = hypothesis_involved
     if hypothesis_involved:
         work_items = _hypothesis_work_items(
-            decision_context, candidates, config=config, combat_start_deck_multiset=combat_start_deck_multiset
+            decision_context, candidates, config=config
         )
     else:
         work_items = _plain_work_items(decision_context, candidates)
@@ -477,7 +469,6 @@ def build_search_strategy(
     pool: BranchWorkerPool,
     *,
     config: SearchCoordinatorConfig,
-    combat_start_deck_multiset: dict[str, int],
     lease_registry: LeaseRegistry,
     main_state_provider: Optional[Callable[[], MainLoopState]] = None,
     metrics: Optional[SearchCoordinatorMetrics] = None,
@@ -538,7 +529,6 @@ def build_search_strategy(
                 decision_context,
                 candidates,
                 config=config,
-                combat_start_deck_multiset=combat_start_deck_multiset,
             )
         else:
             work_items = _plain_work_items(decision_context, candidates)

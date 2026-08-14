@@ -128,7 +128,6 @@ def test_run_new_path_real_restore_snapshot_produces_result():
             snapshot,
             pool=pool,
             config=_config(),
-            combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
         )
 
     assert result.status in {"success", "evaluation_failure", "no_decision"}
@@ -152,7 +151,6 @@ def test_compare_paths_reports_agreement_on_trivial_lethal_board():
             snapshot,
             pool=pool,
             config=_config(),
-            combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
         )
 
     assert isinstance(result, ShadowComparisonResult)
@@ -182,7 +180,6 @@ def test_batch_shadow_comparison_preserves_input_order_and_uses_distinct_restore
             [first, second],
             pool=pool,
             config=_config(),
-            combat_start_deck_multiset=_deck_multiset("WHIRLWIND", "STRIKE_IRONCLAD"),
         )
 
     assert len(results) == 2
@@ -205,7 +202,6 @@ def test_shadow_comparison_does_not_advance_original_live_session_state():
                 snapshot,
                 pool=pool,
                 config=_config(),
-                combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
             )
             assert result.old.action is not None
             assert result.new.status in {"success", "evaluation_failure", "no_decision"}
