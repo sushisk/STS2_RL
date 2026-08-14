@@ -906,8 +906,11 @@ def dispatch_work_items(
         )
         if use_real_pool:
             assert worker_pool is not None
-            ipc_work_item = _work_item_for_ipc(work_item)
-            ipc_request = dataclasses.replace(request, work_item=ipc_work_item)
+            if getattr(worker_pool, "requires_ipc_serialization", True):
+                ipc_work_item = _work_item_for_ipc(work_item)
+                ipc_request = dataclasses.replace(request, work_item=ipc_work_item)
+            else:
+                ipc_request = request
             request_id = worker_pool._submit(worker_id, ipc_request)  # noqa: SLF001
             pending_real[request_id] = work_item
             pending_request_worker_ids[request_id] = worker_id
