@@ -31,7 +31,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from combat_state_snapshot import CombatStateSnapshot
-from search.rng_hypothesis import compute_public_multiset, compute_public_multiset_for_combat_start
+from search.rng_hypothesis import compute_public_multiset
 
 
 @dataclass(frozen=True)
@@ -131,10 +131,7 @@ def compute_public_multiset_with_coverage(
     combat_start_deck_multiset: dict[str, int],
 ) -> tuple[dict[str, int], CoverageAssessment]:
     """Return Phase-6 PUBLIC_MULTISET plus the Task-6 coverage assessment."""
-    public_multiset = compute_public_multiset(
-        snapshot,
-        combat_start_deck_multiset=combat_start_deck_multiset,
-    )
+    public_multiset = compute_public_multiset(snapshot)
     return public_multiset, assess_public_multiset_coverage(snapshot)
 
 
@@ -177,8 +174,5 @@ def compute_public_multiset_with_coverage_for_combat_start(
     combat_start_deck_multiset: dict[str, int],
 ) -> tuple[dict[str, int], CoverageAssessment]:
     """Genesis counterpart to ``compute_public_multiset_with_coverage()``."""
-    public_multiset = compute_public_multiset_for_combat_start(
-        scenario_spec,
-        combat_start_deck_multiset=combat_start_deck_multiset,
-    )
+    public_multiset = dict(sorted((str(k), int(v)) for k, v in combat_start_deck_multiset.items() if int(v) != 0))
     return public_multiset, assess_public_multiset_coverage_for_combat_start(scenario_spec)

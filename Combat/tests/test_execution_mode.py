@@ -172,7 +172,6 @@ def test_dispatch_explicit_candidates_never_selects_a_winner():
         deck_multiset = {"STRIKE_IRONCLAD": 1, "DEFEND_IRONCLAD": 1, "BASH": 1}
         results = dispatch_explicit_candidates(
             context, [0, 2], pool=pool, config=SearchCoordinatorConfig(), lease_registry=registry,
-            combat_start_deck_multiset=deck_multiset,
         )
         assert len(results) >= 2
         distinct = {r.work_item.candidate.semantic_action for r in results}

@@ -81,9 +81,17 @@ def _simple_spec(hand=None, draw_pile=None, enemy_hp=48):
 
 
 def _toolbox_pending_spec():
-    spec = _simple_spec(hand=["STRIKE_IRONCLAD"], draw_pile=[], enemy_hp=48)
-    spec["relics"] = ["TOOLBOX"]
-    return spec
+    return {
+        "character_id": "IRONCLAD",
+        "player_hp": None,
+        "player_max_hp": None,
+        "deck": ["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "BASH"],
+        "player_powers": [],
+        "relics": ["TOOLBOX"],
+        "potions": [],
+        "seed": 1,
+        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+    }
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
@@ -154,7 +162,6 @@ def test_end_to_end_main_loop_invokes_real_search_and_reaches_terminal():
         strategy = build_search_strategy(
             pool,
             config=SearchCoordinatorConfig(width=1, hypothesis_count=2),
-            combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
             lease_registry=registry,
             main_state_provider=lambda: loop_state,
         )
@@ -215,7 +222,6 @@ def test_fresh_root_snapshot_is_eligible_and_synthetic_dangling_history_faults_s
             strategy = build_search_strategy(
                 pool,
                 config=SearchCoordinatorConfig(width=1, max_retries=0),
-                combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
                 lease_registry=LeaseRegistry(),
             )
             result = strategy(context)
@@ -254,7 +260,6 @@ def test_search_strategy_without_main_state_provider_keeps_backward_compatible_c
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=1),
-            combat_start_deck_multiset={},
             lease_registry=registry,
         )
         result = strategy(context)
@@ -289,7 +294,6 @@ def test_search_strategy_with_real_main_state_provider_passes_when_unchanged():
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=1),
-            combat_start_deck_multiset={},
             lease_registry=registry,
             main_state_provider=lambda: loop_state,
         )
@@ -326,7 +330,6 @@ def test_search_strategy_raises_main_invariant_error_when_state_identity_changes
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=1),
-            combat_start_deck_multiset={},
             lease_registry=registry,
             main_state_provider=lambda: changed_loop_state,
         )
@@ -386,7 +389,6 @@ def test_hypothesis_path_builds_distinct_hypothesis_work_items_and_commit_first_
             strategy = build_search_strategy(
                 pool,
                 config=SearchCoordinatorConfig(width=1, hypothesis_count=2),
-                combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
                 lease_registry=registry,
             )
             result = strategy(context)
@@ -428,7 +430,6 @@ def test_passthrough_path_returns_expected_signature_from_real_worker_result():
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=1),
-            combat_start_deck_multiset={},
             lease_registry=registry,
         )
         result = strategy(context)
@@ -449,7 +450,6 @@ def test_no_viable_candidates_returns_search_evaluation_failure():
         strategy = build_search_strategy(
             pool,
             config=SearchCoordinatorConfig(width=0),
-            combat_start_deck_multiset=_deck_multiset("WHIRLWIND"),
             lease_registry=LeaseRegistry(),
         )
         result = strategy(context)
@@ -526,7 +526,6 @@ def test_shared_lease_registry_allows_holder_reuse_across_strategy_calls():
         strategy = build_search_strategy(
             object(),  # worker_pool is unused by the injected Phase-5 fake dispatcher.
             config=SearchCoordinatorConfig(width=1),
-            combat_start_deck_multiset={},
             lease_registry=registry,
         )
         first = strategy(context)
@@ -582,7 +581,6 @@ def test_retry_loop_resubmits_force_restart_fault_and_commits_retry_success():
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=1, max_retries=1),
-            combat_start_deck_multiset={},
             lease_registry=registry,
         )
         result = strategy(context)
@@ -631,7 +629,6 @@ def test_retry_loop_resubmits_reuse_safe_validation_rejection():
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=1, max_retries=1),
-            combat_start_deck_multiset={},
             lease_registry=registry,
         )
         result = strategy(context)
@@ -699,7 +696,6 @@ def test_retry_loop_final_fault_after_max_retries_is_excluded_from_plain_aggrega
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=2, max_retries=1),
-            combat_start_deck_multiset=_deck_multiset("STRIKE_IRONCLAD", "DEFEND_IRONCLAD"),
             lease_registry=registry,
         )
         result = strategy(context)
@@ -741,7 +737,6 @@ def test_retry_loop_defensive_cap_stays_above_decide_retry_bounded_rounds():
         strategy = build_search_strategy(
             object(),
             config=SearchCoordinatorConfig(width=1, max_retries=max_retries),
-            combat_start_deck_multiset={},
             lease_registry=registry,
         )
         result = strategy(context)
@@ -782,7 +777,6 @@ def test_real_worker_faults_are_retried_and_successful_candidates_still_commit()
             strategy = build_search_strategy(
                 pool,
                 config=SearchCoordinatorConfig(width=2, max_retries=1),
-                combat_start_deck_multiset=_deck_multiset("STRIKE_IRONCLAD", "DEFEND_IRONCLAD"),
                 lease_registry=registry,
             )
             result = strategy(context)

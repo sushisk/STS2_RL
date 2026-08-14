@@ -162,14 +162,12 @@ def _completed_hypothesis_round(
     *,
     pool: BranchWorkerPool,
     config: BeamSearchConfig,
-    combat_start_deck_multiset: dict[str, int],
     lease_registry: LeaseRegistry,
 ) -> Optional[_CompletedBeam]:
     work_items = _hypothesis_work_items(
         entry.context,
         candidates,
         config=config.coordinator,
-        combat_start_deck_multiset=combat_start_deck_multiset,
     )
     final_results = _dispatch_work_items_until_final(
         work_items,
@@ -262,7 +260,6 @@ def build_beam_search_strategy(
     pool: BranchWorkerPool,
     *,
     config: BeamSearchConfig,
-    combat_start_deck_multiset: dict[str, int],
     lease_registry: LeaseRegistry,
     main_state_provider: Optional[Callable[[], MainLoopState]] = None,
     snapshot_state_loader: Optional[SnapshotStateLoader] = None,
@@ -310,7 +307,6 @@ def build_beam_search_strategy(
                         candidates,
                         pool=pool,
                         config=config,
-                        combat_start_deck_multiset=combat_start_deck_multiset,
                         lease_registry=lease_registry,
                     )
                     if completed_hypothesis is not None:

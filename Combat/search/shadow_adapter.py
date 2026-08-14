@@ -374,7 +374,6 @@ def run_new_path(
     *,
     pool: BranchWorkerPool,
     config: "SearchCoordinatorConfig | None" = None,
-    combat_start_deck_multiset: "dict[str, int] | None" = None,
     repo_root: "Path | str | None" = None,
 ) -> NewPathResult:
     """Evaluate the new single-round Search Coordinator path once against a fresh Restore."""
@@ -392,7 +391,6 @@ def run_new_path(
         strategy = build_search_strategy(
             pool,
             config=effective_config,
-            combat_start_deck_multiset=combat_start_deck_multiset or {},
             lease_registry=LeaseRegistry(),
             main_state_provider=lambda: loop_state,
             metrics=coordinator_metrics,
@@ -497,7 +495,6 @@ def compare_paths(
     *,
     pool: BranchWorkerPool,
     config: "SearchCoordinatorConfig | None" = None,
-    combat_start_deck_multiset: "dict[str, int] | None" = None,
     repo_root: "Path | str | None" = None,
     old_timeout_s: float = 120.0,
 ) -> ShadowComparisonResult:
@@ -508,7 +505,6 @@ def compare_paths(
         snapshot,
         pool=pool,
         config=config,
-        combat_start_deck_multiset=combat_start_deck_multiset,
         repo_root=repo_root,
     )
     return ShadowComparisonResult(
@@ -525,7 +521,6 @@ def run_shadow_comparison_over_snapshots(
     *,
     pool: BranchWorkerPool,
     config: "SearchCoordinatorConfig | None" = None,
-    combat_start_deck_multiset: "dict[str, int] | None" = None,
     repo_root: "Path | str | None" = None,
     old_timeout_s: float = 120.0,
 ) -> list[ShadowComparisonResult]:
@@ -536,7 +531,6 @@ def run_shadow_comparison_over_snapshots(
             snapshot,
             pool=pool,
             config=config,
-            combat_start_deck_multiset=combat_start_deck_multiset,
             repo_root=repo_root,
             old_timeout_s=old_timeout_s,
         )

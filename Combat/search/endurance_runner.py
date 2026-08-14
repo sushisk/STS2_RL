@@ -476,7 +476,6 @@ def run_endurance(
                     inner_strategy = build_beam_search_strategy(
                         pool,
                         config=BeamSearchConfig(coordinator=config, beam_width=2, max_rounds=2),
-                        combat_start_deck_multiset=_deck_multiset(spec),
                         lease_registry=registry,
                         main_state_provider=lambda: loop_state,
                     )
@@ -484,7 +483,6 @@ def run_endurance(
                     inner_strategy = build_search_strategy(
                         pool,
                         config=config,
-                        combat_start_deck_multiset=_deck_multiset(spec),
                         lease_registry=registry,
                         main_state_provider=lambda: loop_state,
                         metrics=metrics,

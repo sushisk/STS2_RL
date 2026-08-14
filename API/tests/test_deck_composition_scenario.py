@@ -41,14 +41,6 @@ def _deck_config() -> dict:
     }
 
 
-def test_deck_composition_computes_combat_start_deck_multiset() -> None:
-    inst = CombatInstance("deck-multiset", _deck_config(), worker_count=1)
-    try:
-        assert inst._combat_start_deck_multiset == dict(Counter(_DECK)), inst._combat_start_deck_multiset
-    finally:
-        inst.close()
-
-
 def test_deck_composition_deals_real_hand_and_draw_pile() -> None:
     inst = CombatInstance("deck-deal", _deck_config(), worker_count=1)
     try:
@@ -86,7 +78,6 @@ def test_deck_composition_structured_form_upgrade_survives() -> None:
     }
     inst = CombatInstance("deck-structured", config, worker_count=1)
     try:
-        assert inst._combat_start_deck_multiset == dict(Counter(_DECK)), inst._combat_start_deck_multiset
         dto = inst.start_instance_response()["masked_emulator_dto"]
 
         # Every STRIKE_IRONCLAD was declared upgraded; wherever they landed (hand or draw
@@ -101,7 +92,6 @@ def test_deck_composition_structured_form_upgrade_survives() -> None:
 
 
 _TESTS = [
-    test_deck_composition_computes_combat_start_deck_multiset,
     test_deck_composition_deals_real_hand_and_draw_pile,
     test_deck_composition_structured_form_upgrade_survives,
 ]
