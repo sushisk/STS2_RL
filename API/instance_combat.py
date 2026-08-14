@@ -89,7 +89,10 @@ class _DecisionView:
         self.legal_actions_raw = legal_actions_raw
         self.decision_context = decision_context
         self.boundary = boundary
-        self.public_id_by_index = {str(i): i for i in range(len(legal_actions_raw))}
+        self.public_id_by_index = {
+            str(action.get("action_id", i)): i
+            for i, action in enumerate(legal_actions_raw)
+        }
 
     def resolve_action_id(self, public_action_id: str) -> int:
         if public_action_id not in self.public_id_by_index:
