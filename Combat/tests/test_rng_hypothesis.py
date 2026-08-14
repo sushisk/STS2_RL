@@ -151,6 +151,29 @@ def test_derive_combat_start_replay_roots_replace_only_seed():
     assert root.scenario_spec["seed"] == 17
 
 
+def test_derive_combat_start_replay_roots_seed_fits_int32_and_boots():
+    # Regression test: the raw SHA-256-derived seed can exceed CombatScenario.Seed's
+    # accepted C# `int` range (signed 32-bit) and overflow at the Emulator boundary.
+    # Cover enough hypothesis_index values to actually hit that overflow if the masking
+    # regresses, and boot a high-index derived root for real to catch it end-to-end.
+    spec = _simple_spec(hand=[], draw_pile=[])
+    spec.pop("hand")
+    spec.pop("draw_pile")
+    spec.pop("discard_pile")
+    spec.pop("exhaust_pile")
+    spec["deck"] = ["STRIKE_IRONCLAD", "DEFEND_IRONCLAD", "BASH"]
+    spec["seed"] = 1
+    root = CombatStartReplayRoot(scenario_spec=spec)
+
+    derived = derive_combat_start_replay_roots(root, count=32)
+    for cell in derived:
+        seed = cell.derived_replay_root.scenario_spec["seed"]
+        assert 0 <= seed <= 2**31 - 1, (cell.hypothesis.hypothesis_index, seed)
+
+    session = LiveCombatSession()
+    session.start_combat(derived[5].derived_replay_root.scenario_spec)
+
+
 def test_compute_public_multiset_reads_draw_pile_after_real_primal_force_transform():
     session = LiveCombatSession()
     spec = _simple_spec(

@@ -173,6 +173,11 @@ def compute_public_multiset_with_coverage_for_combat_start(
     *,
     combat_start_deck_multiset: dict[str, int],
 ) -> tuple[dict[str, int], CoverageAssessment]:
-    """Genesis counterpart to ``compute_public_multiset_with_coverage()``."""
+    """Genesis counterpart to ``compute_public_multiset_with_coverage()``.
+
+    No longer called by production code (search_coordinator.py/combat_rng_mapping.py
+    now derive Genesis hypotheses via rng_hypothesis.derive_combat_start_replay_roots()
+    instead) - kept only so this module's own tests still exercise it, pending the
+    deferred belief_coverage.py cleanup PR."""
     public_multiset = dict(sorted((str(k), int(v)) for k, v in combat_start_deck_multiset.items() if int(v) != 0))
     return public_multiset, assess_public_multiset_coverage_for_combat_start(scenario_spec)

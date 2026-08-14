@@ -238,13 +238,18 @@ def _shuffle_seed_from_rng(rng: SerializableRngSnapshot, hypothesis_index: int) 
 
 
 def _combat_start_seed_from_root(root_seed: int, hypothesis_index: int) -> int:
+    """Derive a per-hypothesis Seed override, masked into ``CombatScenario.Seed``'s
+    accepted range (a C# ``int``, i.e. signed 32-bit: 0..2**31-1 here since seeds in
+    this codebase are conventionally non-negative) - the raw SHA-256 digest can exceed
+    that range and overflow at the Emulator boundary otherwise."""
     payload = json.dumps(
         {"root_seed": int(root_seed), "hypothesis_index": int(hypothesis_index)},
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=True,
     )
-    return int.from_bytes(hashlib.sha256(payload.encode("utf-8")).digest()[:8], "big")
+    digest = int.from_bytes(hashlib.sha256(payload.encode("utf-8")).digest()[:8], "big")
+    return digest & 0x7FFFFFFF
 
 
 def derive_combat_start_replay_roots(
