@@ -43,10 +43,10 @@ from search.fault_taxonomy import (
     WORK_ITEM_FINAL_SUCCESS,
     WorkItemAttempt,
 )
-from search.belief_coverage import CoverageAssessment
 from search.main_loop import SearchEvaluationFailure, SearchStrategy
 from search.main_loop import MainLoopState
 from search.rng_hypothesis import (
+    CoverageAssessment,
     apply_hypothesis_to_context,
     build_grid,
     consume_check,

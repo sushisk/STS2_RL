@@ -80,6 +80,12 @@ def _simple_spec(hand=None, draw_pile=None, enemy_hp=48):
     }
 
 
+def _simple_spec_with_relics(hand=None, draw_pile=None, relics=None, enemy_hp=48):
+    spec = _simple_spec(hand=hand, draw_pile=draw_pile, enemy_hp=enemy_hp)
+    spec["relics"] = relics if relics is not None else []
+    return spec
+
+
 def _toolbox_pending_spec():
     return {
         "character_id": "IRONCLAD",
@@ -404,6 +410,42 @@ def test_hypothesis_path_builds_distinct_hypothesis_work_items_and_commit_first_
     assert len(hypothesis_ids) == 2
     assert len(work_items) == 2  # 1 pruned card candidate x 2 hypotheses
     assert result.planned_sequence[0].expected_signature is None
+
+
+def test_hypothesis_entries_include_public_multiset_coverage_diagnostics():
+    context = _context(
+        _simple_spec_with_relics(
+            hand=["STRIKE_IRONCLAD"],
+            draw_pile=["BASH"],
+            relics=["BIIIG_HUG"],
+            enemy_hp=999,
+        )
+    )
+    captured_entries = {}
+    original_aggregate = coordinator_module.aggregate_hypothesis_results
+
+    def _capturing_hypothesis_aggregate(entries, *, min_coverage_fraction):
+        captured_entries["entries"] = list(entries)
+        return original_aggregate(entries, min_coverage_fraction=min_coverage_fraction)
+
+    coordinator_module.aggregate_hypothesis_results = _capturing_hypothesis_aggregate
+    try:
+        with BranchWorkerPool(worker_count=2, request_timeout_s=120.0) as pool:
+            strategy = build_search_strategy(
+                pool,
+                config=SearchCoordinatorConfig(width=1, hypothesis_count=2),
+                lease_registry=LeaseRegistry(),
+            )
+            result = strategy(context)
+    finally:
+        coordinator_module.aggregate_hypothesis_results = original_aggregate
+
+    assert isinstance(result, SearchSuccess), result
+    diagnostics = [entry.diagnostics["public_multiset_coverage"] for entry in captured_entries["entries"]]
+    assert diagnostics
+    assert all(item["is_complete"] is True for item in diagnostics)
+    assert all(item["uncertain_sources"] == [] for item in diagnostics)
+    assert all("Player.DrawPile" in item["reason"] for item in diagnostics)
 
 
 def test_passthrough_path_returns_expected_signature_from_real_worker_result():

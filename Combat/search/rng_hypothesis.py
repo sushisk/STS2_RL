@@ -75,6 +75,15 @@ class SearchHypothesisId:
 
 
 @dataclass(frozen=True)
+class CoverageAssessment:
+    """PUBLIC_MULTISET source coverage diagnostic attached to hypothesis-involved search entries."""
+
+    is_complete: bool
+    uncertain_sources: list[str]
+    reason: str
+
+
+@dataclass(frozen=True)
 class ConsumeCheckResult:
     """Result of the privacy-first consume gate.
 
