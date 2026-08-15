@@ -278,28 +278,39 @@ class CombatInstance:
             next_state = self._session.step(self._root_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True)
         except Exception as exc:
             return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
-        observed_signature = DecisionSignature.from_battle_state(
-            next_state,
-            semantic_action=_semantic_action_for(chosen),
-            resolved_action=chosen,
-            target_index=target_index,
-            target_enemy_index=target_enemy_index,
-        )
-        boundary = boundary_of_battle_state(next_state)
-        if boundary == BOUNDARY_STABLE:
-            self._held_stable_snapshot = self._session.capture_snapshot()
-            self._replay_prefix = start_new_replay_prefix_from_stable()
-        elif boundary == BOUNDARY_PENDING:
-            entry = ReplayPrefixEntry(
+        # The live session has already irreversibly advanced at this point (Step
+        # succeeded), so a failure anywhere below must not leave `_root_state`
+        # pointing at the stale pre-Step state while `_session` has moved on - that
+        # divergence would make every subsequent call silently wrong rather than
+        # loudly rejected. Update `_root_state` first and close the instance on any
+        # bookkeeping failure instead of leaving `_held_stable_snapshot`/
+        # `_replay_prefix` in a state that no longer matches the live session.
+        self._root_state = next_state
+        try:
+            observed_signature = DecisionSignature.from_battle_state(
+                next_state,
                 semantic_action=_semantic_action_for(chosen),
-                expected_signature=observed_signature,
+                resolved_action=chosen,
                 target_index=target_index,
                 target_enemy_index=target_enemy_index,
             )
-            self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
+            boundary = boundary_of_battle_state(next_state)
+            if boundary == BOUNDARY_STABLE:
+                self._held_stable_snapshot = self._session.capture_snapshot()
+                self._replay_prefix = start_new_replay_prefix_from_stable()
+            elif boundary == BOUNDARY_PENDING:
+                entry = ReplayPrefixEntry(
+                    semantic_action=_semantic_action_for(chosen),
+                    expected_signature=observed_signature,
+                    target_index=target_index,
+                    target_enemy_index=target_enemy_index,
+                )
+                self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
+        except Exception as exc:
+            self._closed = True
+            return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
         depth = len(self._root_branch_log)
         self._root_branch_log.append({"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": ROOT_RNG_ID})
-        self._root_state = next_state
         self._cancel_and_release_all_branches()
         self._decision_points.issue(ROOT_BRANCH_ID)
         view = self._root_view()
