@@ -80,7 +80,9 @@ from search.decision_context import (
     ReplayPrefixEntry,
     SemanticAction,
     SemanticActionUnresolvedError,
+    _representative_signature_for_empty_prefix,
     append_replay_prefix_entry,
+    build_decision_context_from_held_stable,
     boundary_of_battle_state,
     start_new_replay_prefix_from_stable,
 )
@@ -263,33 +265,6 @@ def _capture_stable(loop_state: MainLoopState) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _representative_signature_for_empty_prefix(current_result: BattleState) -> DecisionSignature:
-    """Builds a real (non-fabricated) `DecisionSignature` to serve as `current_context_
-    signature` for a Stable root whose Replay Prefix is still empty (MAIN_DC - no
-    Transition Record exists yet in this segment to reuse as the arrival signature).
-
-    Judgment call (see this task's final report): `replay_decision_context()`
-    (Phase 2, `Combat/search/decision_context.py`) documents that when `context.
-    replay_prefix` is empty, CTX_SIG_CHECK compares ONLY `.boundary` - the Semantic
-    Action/resolved-action/candidate fields of `current_context_signature` are never
-    actually read in that branch. Any legal candidate from the CURRENT Decision Result's
-    own Choice Payload is therefore a safe, real representative pick for those otherwise-
-    unused fields; the first candidate in the Emulator's own reported order is used,
-    deterministically, rather than fabricating a placeholder action that was never
-    actually offered."""
-    legal_actions = current_result._cached_legal_actions or []  # noqa: SLF001 - NOTE_NO_REREAD, same pattern as decision_context.py
-    if not legal_actions:
-        raise RuntimeError(
-            "cannot build a Main Decision Context signature: Current Decision Result reports no candidates"
-        )
-    action = legal_actions[0]
-    params = action.get("parameters") or {}
-    semantic_action = SemanticAction(
-        action_type=action.get("action_type"), card_id=params.get("cardId"), target_type=params.get("targetType")
-    )
-    return DecisionSignature.from_battle_state(current_result, semantic_action=semantic_action, resolved_action=action)
-
-
 def build_main_decision_context(loop_state: MainLoopState) -> DecisionContext:
     """MAIN_DC ("Held Stable Snapshot＋Replay Prefix(空)＋Current Result") when the
     Replay Prefix is currently empty, or MAIN_DC2 ("Held Stable Snapshot(直前分)＋Replay
@@ -309,18 +284,9 @@ def build_main_decision_context(loop_state: MainLoopState) -> DecisionContext:
     `_representative_signature_for_empty_prefix()`."""
     if loop_state.held_stable_snapshot is None:
         raise RuntimeError("build_main_decision_context() called before any Held Stable Snapshot was captured")
-
-    if loop_state.replay_prefix:
-        current_context_signature = loop_state.replay_prefix[-1].expected_signature
-    else:
-        current_context_signature = _representative_signature_for_empty_prefix(loop_state.current_result)
-
-    context = DecisionContext.from_main_stable_capture(
-        loop_state.held_stable_snapshot, loop_state.current_result, current_context_signature
+    return build_decision_context_from_held_stable(
+        loop_state.held_stable_snapshot, loop_state.replay_prefix, loop_state.current_result
     )
-    if loop_state.replay_prefix:
-        context = dataclasses.replace(context, replay_prefix=list(loop_state.replay_prefix))
-    return context
 
 
 def build_combat_start_decision_context(loop_state: MainLoopState) -> DecisionContext:

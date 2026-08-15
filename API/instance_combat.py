@@ -28,16 +28,25 @@ from combat_state_snapshot import CombatStateSnapshot
 from live_combat_session import LiveCombatSession
 from search.branch_manager import BranchManager, BranchReleasedError, UnknownBranchError
 from search.branch_worker_pool import (
-    BOUNDARY_PENDING,
-    BOUNDARY_STABLE,
-    BOUNDARY_TERMINAL,
     BranchWorkerPool,
     LeaseRegistry,
     WORK_KIND_SUB_BRANCH,
     derive_context_id,
 )
 from search.candidate_pipeline import PipelineCandidateRef
-from search.decision_context import DecisionContext, DecisionSignature, SemanticAction
+from search.decision_context import (
+    BOUNDARY_PENDING,
+    BOUNDARY_STABLE,
+    BOUNDARY_TERMINAL,
+    DecisionContext,
+    DecisionSignature,
+    ReplayPrefixEntry,
+    SemanticAction,
+    append_replay_prefix_entry,
+    boundary_of_battle_state,
+    build_decision_context_from_held_stable,
+    start_new_replay_prefix_from_stable,
+)
 
 from API.combat_rng_mapping import build_single_hypothesis_work_item
 from API.dto import (
@@ -61,6 +70,10 @@ from API.validation import RequestRejected
 
 DEFAULT_ALC_WORKER_COUNT = 8
 _AMBIGUOUS_ACTION_INDEX = -1
+_START_PENDING_UNSUPPORTED = (
+    "CombatInstance does not yet support a Start-of-Combat Pending root - "
+    "see main_loop.py's CombatStartReplayRoot handling for the mechanism this would need"
+)
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
@@ -149,6 +162,14 @@ class CombatInstance:
         scenario_spec = {k: v for k, v in instance_config.items() if k != "instance_type"}
         self._session = LiveCombatSession()
         self._root_state = self._session.start_combat(scenario_spec)
+        self._held_stable_snapshot: Optional[CombatStateSnapshot] = None
+        self._replay_prefix: list[ReplayPrefixEntry] = []
+        root_boundary = boundary_of_battle_state(self._root_state)
+        if root_boundary == BOUNDARY_STABLE:
+            self._held_stable_snapshot = self._session.capture_snapshot()
+            self._replay_prefix = start_new_replay_prefix_from_stable()
+        elif root_boundary == BOUNDARY_PENDING:
+            raise RuntimeError(_START_PENDING_UNSUPPORTED)
         # Reserved for future true/root draw-hypothesis bookkeeping; current branch
         # decision logic still uses Training-provided rng_id mappings exclusively.
         self.true_draw_hypothesis_index = 0
@@ -183,16 +204,12 @@ class CombatInstance:
             legal = []
         elif not legal:
             raise RuntimeError("non-terminal combat state has no cached legal actions")
-        # A terminal state (combat just concluded) has no real action to be
-        # "representative" of - `action_id` is otherwise always present on a genuine
-        # legal_actions entry, so DecisionSignature.from_battle_state's
-        # `int(resolved_action["action_id"])` KeyErrors here without this sentinel; -1
-        # never collides with a real (non-negative) action_id and this signature is
-        # never used to branch further from a terminal state anyway.
-        representative = legal[0] if legal else {"action_type": "system", "parameters": {}, "action_id": -1}
-        signature = DecisionSignature.from_battle_state(self._root_state, semantic_action=_semantic_action_for(representative), resolved_action=representative)
-        context = DecisionContext.from_main_stable_capture(self._session.capture_snapshot(), self._root_state, signature)
-        return _DecisionView(legal, context, signature.boundary)
+        if self._held_stable_snapshot is None:
+            raise RuntimeError(_START_PENDING_UNSUPPORTED)
+        context = build_decision_context_from_held_stable(
+            self._held_stable_snapshot, self._replay_prefix, self._root_state
+        )
+        return _DecisionView(legal, context, context.current_context_signature.boundary)
 
     def _view_for(self, public_branch_id: str) -> _DecisionView:
         if public_branch_id == ROOT_BRANCH_ID:
@@ -261,9 +278,39 @@ class CombatInstance:
             next_state = self._session.step(self._root_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True)
         except Exception as exc:
             return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
+        # The live session has already irreversibly advanced at this point (Step
+        # succeeded), so a failure anywhere below must not leave `_root_state`
+        # pointing at the stale pre-Step state while `_session` has moved on - that
+        # divergence would make every subsequent call silently wrong rather than
+        # loudly rejected. Update `_root_state` first and close the instance on any
+        # bookkeeping failure instead of leaving `_held_stable_snapshot`/
+        # `_replay_prefix` in a state that no longer matches the live session.
+        self._root_state = next_state
+        try:
+            observed_signature = DecisionSignature.from_battle_state(
+                next_state,
+                semantic_action=_semantic_action_for(chosen),
+                resolved_action=chosen,
+                target_index=target_index,
+                target_enemy_index=target_enemy_index,
+            )
+            boundary = boundary_of_battle_state(next_state)
+            if boundary == BOUNDARY_STABLE:
+                self._held_stable_snapshot = self._session.capture_snapshot()
+                self._replay_prefix = start_new_replay_prefix_from_stable()
+            elif boundary == BOUNDARY_PENDING:
+                entry = ReplayPrefixEntry(
+                    semantic_action=_semantic_action_for(chosen),
+                    expected_signature=observed_signature,
+                    target_index=target_index,
+                    target_enemy_index=target_enemy_index,
+                )
+                self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
+        except Exception as exc:
+            self._closed = True
+            return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
         depth = len(self._root_branch_log)
         self._root_branch_log.append({"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": ROOT_RNG_ID})
-        self._root_state = next_state
         self._cancel_and_release_all_branches()
         self._decision_points.issue(ROOT_BRANCH_ID)
         view = self._root_view()

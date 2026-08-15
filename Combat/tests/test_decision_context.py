@@ -292,6 +292,38 @@ def test_matches_for_replay_ignores_non_portable_identity_fields():
     assert base.diff_for_replay(genuinely_different) == ["resolved_card_id"]
 
 
+def test_matches_for_replay_ignores_choice_kind_only_when_unclassified():
+    """`choice_kind` comes from the Emulator's closed `GetPendingChoiceType()`
+    enumeration (Wish/GamblingChip/ChoicesParadox/Toolbox + a catch-all "Unsupported"
+    bucket for everything else). A mismatch is ignored for replay-safety purposes ONLY
+    when at least one side is that "Unsupported" catch-all - two genuinely different
+    unrecognized Pending choices would both report "Unsupported" and be
+    indistinguishable by this field alone, so `candidate_semantic_keys` is what
+    actually verifies identity in that case. But when the Emulator DID recognize BOTH
+    sides as actual named kinds, a mismatch there is still real and must be caught -
+    excluding choice_kind unconditionally would silently lose that signal."""
+    base = _base_pending_signature()  # choice_kind="ToolboxChooseCard"
+    unclassified_side = _base_pending_signature(choice_kind="Unsupported")
+    assert base != unclassified_side  # strict eq still sees them as different
+    assert base.matches_for_replay(unclassified_side)
+    assert base.diff_for_replay(unclassified_side) == []
+
+    both_unclassified = _base_pending_signature(choice_kind="Unsupported")
+    other_unclassified = _base_pending_signature(choice_kind="Unsupported")
+    assert both_unclassified.matches_for_replay(other_unclassified)
+
+    both_recognized_but_different = _base_pending_signature(choice_kind="WishDrawToHand")
+    assert not base.matches_for_replay(both_recognized_but_different)
+    assert base.diff_for_replay(both_recognized_but_different) == ["choice_kind"]
+
+    genuinely_different = _base_pending_signature(
+        choice_kind="Unsupported",
+        candidate_semantic_keys=(( ("choice_card", "SHATTER", None), 1), (("choice_skip", None, None), 1)),
+    )
+    assert not base.matches_for_replay(genuinely_different)
+    assert base.diff_for_replay(genuinely_different) == ["candidate_semantic_keys"]
+
+
 # ---------------------------------------------------------------------------
 # Structural constraint: no board-state field can exist on DecisionSignature
 # ---------------------------------------------------------------------------

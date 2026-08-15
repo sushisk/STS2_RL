@@ -22,6 +22,7 @@ docstring and `Combat/tests/test_decision_context.py`'s structural test.
 from __future__ import annotations
 
 import json
+import dataclasses
 from collections import Counter
 from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Optional
@@ -189,7 +190,9 @@ class DecisionSignature:
     same-origin comparisons (e.g. unit tests constructing two signatures by hand).
     `matches_for_replay()`/`diff_for_replay()` are what `replay_decision_context()`
     actually uses for REPLAY_SIG_CHECK/CTX_SIG_CHECK - they compare everything BUT
-    `combat_session_id` and `resolved_action_id`.
+    `combat_session_id`/`resolved_action_id`, plus a `choice_kind` mismatch is ignored
+    specifically when at least one side is the Emulator's "Unsupported" catch-all (see
+    `choice_kind`'s own field comment and `_CHOICE_KIND_UNCLASSIFIED`).
     """
 
     # --- State identity (Stable/Pending common) ---
@@ -208,6 +211,17 @@ class DecisionSignature:
     boundary: str
     # --- Pending-only (None/None/None whenever boundary != "pending") ---
     choice_scope: "Optional[str]" = None
+    # Derived from the Emulator's own `GetPendingChoiceType()`, a closed enumeration of
+    # a handful of named mechanics (Wish/GamblingChip/ChoicesParadox/Toolbox) that
+    # exists primarily to support `CombatScenario.PendingChoice`'s scenario-authoring
+    # reconstruction. Any Pending choice outside those falls into a single shared
+    # "Unsupported" bucket, so two DIFFERENT unrecognized choices are indistinguishable
+    # by this field alone whenever either side is that bucket - `diff_for_replay()`
+    # accounts for this (see `_CHOICE_KIND_UNCLASSIFIED`) rather than trusting a raw
+    # equality check in that case. When BOTH sides are actual recognized kinds, this
+    # field IS a meaningful, enforced replay-safety signal.
+    # `candidate_semantic_keys` is the structurally-grounded signal that actually
+    # verifies "did we reach the same Pending choice".
     choice_kind: "Optional[str]" = None
     candidate_semantic_keys: "Optional[tuple[tuple[tuple, int], ...]]" = None
 
@@ -284,10 +298,24 @@ class DecisionSignature:
 
     _REPLAY_INCOMPARABLE_FIELDS = frozenset({"combat_session_id", "resolved_action_id"})
 
+    # The Emulator's own sentinel for "this Pending choice didn't match any of
+    # GetPendingChoiceType()'s recognized mechanics" (see `choice_kind`'s field
+    # comment). A `choice_kind` mismatch is only ignored for replay-safety purposes
+    # when at least one side is this unreliable catch-all - two genuinely RECOGNIZED
+    # kinds (e.g. "ToolboxChooseCard" vs "WishDrawToHand") still must match, since that
+    # comparison IS meaningful when the Emulator actually classified both sides.
+    _CHOICE_KIND_UNCLASSIFIED = "Unsupported"
+
     def diff_for_replay(self, other: "DecisionSignature") -> "list[str]":
-        """Like `diff()` but excludes `combat_session_id`/`resolved_action_id` - see the
-        class docstring for why those two are never portable across a Restore boundary."""
-        return [name for name in self.diff(other) if name not in self._REPLAY_INCOMPARABLE_FIELDS]
+        """Like `diff()` but excludes `combat_session_id`/`resolved_action_id` (never
+        portable across a Restore boundary - see the class docstring), and ignores a
+        `choice_kind` mismatch specifically when at least one side is the Emulator's
+        "Unsupported" catch-all (see `_CHOICE_KIND_UNCLASSIFIED`) - `candidate_semantic_
+        keys` is what actually verifies Pending-choice identity in that case."""
+        diffs = [name for name in self.diff(other) if name not in self._REPLAY_INCOMPARABLE_FIELDS]
+        if "choice_kind" in diffs and self._CHOICE_KIND_UNCLASSIFIED in (self.choice_kind, other.choice_kind):
+            diffs = [name for name in diffs if name != "choice_kind"]
+        return diffs
 
     def matches_for_replay(self, other: "DecisionSignature") -> bool:
         """REPLAY_SIG_CHECK/CTX_SIG_CHECK-style comparison: everything except
@@ -603,6 +631,63 @@ def start_new_replay_prefix_from_stable() -> "list[ReplayPrefixEntry]":
     """On every Stable boundary (STABLE_CAPTURE / STEP_STABLE_CAPTURE), the Held Stable
     Snapshot's Replay Prefix resets to empty - "次のStepを行う前に必ず再現元を確保する"."""
     return []
+
+
+def _representative_signature_for_empty_prefix(current_result: "BattleState") -> DecisionSignature:
+    """Builds a real (non-fabricated) `DecisionSignature` to serve as `current_context_
+    signature` for a Stable root whose Replay Prefix is still empty (MAIN_DC - no
+    Transition Record exists yet in this segment to reuse as the arrival signature).
+
+    Judgment call: `replay_decision_context()` documents that when `context.
+    replay_prefix` is empty, CTX_SIG_CHECK compares ONLY `.boundary` - the Semantic
+    Action/resolved-action/candidate fields of `current_context_signature` are never
+    actually read in that branch. Any legal candidate from the CURRENT Decision Result's
+    own Choice Payload is therefore a safe, real representative pick for those otherwise-
+    unused fields; the first candidate in the Emulator's own reported order is used,
+    deterministically, rather than fabricating a placeholder action that was never
+    actually offered."""
+    legal_actions = current_result._cached_legal_actions or []  # noqa: SLF001 - NOTE_NO_REREAD, same pattern as replay_decision_context()
+    if not legal_actions:
+        if current_result.is_terminal:
+            action = {"action_type": "system", "parameters": {}, "action_id": -1}
+            semantic_action = SemanticAction(action_type="system", card_id=None, target_type=None)
+            return DecisionSignature.from_battle_state(
+                current_result, semantic_action=semantic_action, resolved_action=action
+            )
+        raise RuntimeError(
+            "cannot build a Decision Context signature: Current Decision Result reports no candidates"
+        )
+    action = legal_actions[0]
+    params = action.get("parameters") or {}
+    semantic_action = SemanticAction(
+        action_type=action.get("action_type"), card_id=params.get("cardId"), target_type=params.get("targetType")
+    )
+    return DecisionSignature.from_battle_state(current_result, semantic_action=semantic_action, resolved_action=action)
+
+
+def build_decision_context_from_held_stable(
+    held_stable_snapshot: "CombatStateSnapshot",
+    replay_prefix: "list[ReplayPrefixEntry]",
+    current_result: "BattleState",
+) -> DecisionContext:
+    """Builds a Decision Context from a Held Stable Snapshot, Replay Prefix, and current
+    Decision Result.
+
+    When the Replay Prefix is non-empty, its last entry's observed post-step signature is
+    the Current Context Signature. When it is empty, a representative signature is built
+    from the first legal action in the Emulator's own reported order; see
+    `_representative_signature_for_empty_prefix()` for the documented judgment call."""
+    if replay_prefix:
+        current_context_signature = replay_prefix[-1].expected_signature
+    else:
+        current_context_signature = _representative_signature_for_empty_prefix(current_result)
+
+    context = DecisionContext.from_main_stable_capture(
+        held_stable_snapshot, current_result, current_context_signature
+    )
+    if replay_prefix:
+        context = dataclasses.replace(context, replay_prefix=list(replay_prefix))
+    return context
 
 
 def append_replay_prefix_entry(
