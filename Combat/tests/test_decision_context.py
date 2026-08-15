@@ -292,6 +292,28 @@ def test_matches_for_replay_ignores_non_portable_identity_fields():
     assert base.diff_for_replay(genuinely_different) == ["resolved_card_id"]
 
 
+def test_matches_for_replay_ignores_choice_kind():
+    """`choice_kind` comes from the Emulator's closed `GetPendingChoiceType()`
+    enumeration (Wish/GamblingChip/ChoicesParadox/Toolbox + a catch-all "Unsupported"
+    bucket for everything else) - it is informational only and must not gate
+    replay-safety verification, since two genuinely different unrecognized Pending
+    choices would both report "Unsupported" and be indistinguishable by this field
+    alone. `candidate_semantic_keys` is what actually verifies Pending-choice identity,
+    and still must catch a genuine divergence."""
+    base = _base_pending_signature()
+    same_content_different_choice_kind = _base_pending_signature(choice_kind="Unsupported")
+    assert base != same_content_different_choice_kind  # strict eq still sees them as different
+    assert base.matches_for_replay(same_content_different_choice_kind)
+    assert base.diff_for_replay(same_content_different_choice_kind) == []
+
+    genuinely_different = _base_pending_signature(
+        choice_kind="Unsupported",
+        candidate_semantic_keys=(( ("choice_card", "SHATTER", None), 1), (("choice_skip", None, None), 1)),
+    )
+    assert not base.matches_for_replay(genuinely_different)
+    assert base.diff_for_replay(genuinely_different) == ["candidate_semantic_keys"]
+
+
 # ---------------------------------------------------------------------------
 # Structural constraint: no board-state field can exist on DecisionSignature
 # ---------------------------------------------------------------------------

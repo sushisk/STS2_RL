@@ -190,7 +190,8 @@ class DecisionSignature:
     same-origin comparisons (e.g. unit tests constructing two signatures by hand).
     `matches_for_replay()`/`diff_for_replay()` are what `replay_decision_context()`
     actually uses for REPLAY_SIG_CHECK/CTX_SIG_CHECK - they compare everything BUT
-    `combat_session_id` and `resolved_action_id`.
+    `combat_session_id`, `resolved_action_id`, and `choice_kind` (see `choice_kind`'s
+    own field comment for why that one is excluded too).
     """
 
     # --- State identity (Stable/Pending common) ---
@@ -209,6 +210,15 @@ class DecisionSignature:
     boundary: str
     # --- Pending-only (None/None/None whenever boundary != "pending") ---
     choice_scope: "Optional[str]" = None
+    # Informational only - derived from the Emulator's own `GetPendingChoiceType()`,
+    # a closed enumeration of a handful of named mechanics (Wish/GamblingChip/
+    # ChoicesParadox/Toolbox) that exists solely to support `CombatScenario.
+    # PendingChoice`'s scenario-authoring reconstruction. Any Pending choice outside
+    # those falls into a single shared "Unsupported" bucket, so two DIFFERENT
+    # unrecognized choices are indistinguishable by this field alone - it must never
+    # be relied on for replay-safety verification (see `_REPLAY_INCOMPARABLE_FIELDS`).
+    # `candidate_semantic_keys` is the structurally-grounded signal that actually
+    # verifies "did we reach the same Pending choice".
     choice_kind: "Optional[str]" = None
     candidate_semantic_keys: "Optional[tuple[tuple[tuple, int], ...]]" = None
 
@@ -283,11 +293,13 @@ class DecisionSignature:
         (e.g. unit tests). Use `diff_for_replay()` for SUB_REPLAY-style checks."""
         return [f.name for f in fields(self) if getattr(self, f.name) != getattr(other, f.name)]
 
-    _REPLAY_INCOMPARABLE_FIELDS = frozenset({"combat_session_id", "resolved_action_id"})
+    _REPLAY_INCOMPARABLE_FIELDS = frozenset({"combat_session_id", "resolved_action_id", "choice_kind"})
 
     def diff_for_replay(self, other: "DecisionSignature") -> "list[str]":
-        """Like `diff()` but excludes `combat_session_id`/`resolved_action_id` - see the
-        class docstring for why those two are never portable across a Restore boundary."""
+        """Like `diff()` but excludes `combat_session_id`/`resolved_action_id` (never
+        portable across a Restore boundary - see the class docstring) and `choice_kind`
+        (not a reliable replay-safety signal - see that field's own comment;
+        `candidate_semantic_keys` is what actually verifies Pending-choice identity)."""
         return [name for name in self.diff(other) if name not in self._REPLAY_INCOMPARABLE_FIELDS]
 
     def matches_for_replay(self, other: "DecisionSignature") -> bool:
