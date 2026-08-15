@@ -621,6 +621,12 @@ def _representative_signature_for_empty_prefix(current_result: "BattleState") ->
     actually offered."""
     legal_actions = current_result._cached_legal_actions or []  # noqa: SLF001 - NOTE_NO_REREAD, same pattern as replay_decision_context()
     if not legal_actions:
+        if current_result.is_terminal:
+            action = {"action_type": "system", "parameters": {}, "action_id": -1}
+            semantic_action = SemanticAction(action_type="system", card_id=None, target_type=None)
+            return DecisionSignature.from_battle_state(
+                current_result, semantic_action=semantic_action, resolved_action=action
+            )
         raise RuntimeError(
             "cannot build a Decision Context signature: Current Decision Result reports no candidates"
         )
