@@ -76,7 +76,7 @@ class SearchHypothesisId:
 
 @dataclass(frozen=True)
 class CoverageAssessment:
-    """Whether PUBLIC_MULTISET coverage diagnostics are complete for a hypothesis set."""
+    """PUBLIC_MULTISET source coverage diagnostic attached to hypothesis-involved search entries."""
 
     is_complete: bool
     uncertain_sources: list[str]
