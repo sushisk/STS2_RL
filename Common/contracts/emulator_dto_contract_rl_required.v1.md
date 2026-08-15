@@ -142,7 +142,7 @@ StepResult/ResetResult/RestoreResultに含まれる一括戻り値の一部で�
 
 | 要求 | 現行実装 | 対応 |
 |---|---|---|
-| Card Instance型 | `CardInstanceSnapshot`(Snapshot側): `InstanceId, CardId, Type, Rarity, Cost, TargetType, IsUpgraded, UpgradeLevel, Zone?, TinkerTimeType?, TinkerTimeRider?` | **一致** |
+| Card Instance型 | `CardInstanceSnapshot`(Snapshot側): `InstanceId, CardId, Type, Rarity, Cost, LocalCostModifiers, TemporaryStarCosts, TargetType, IsUpgraded, UpgradeLevel, Zone?, TinkerTimeType?, TinkerTimeRider?` | **一致** |
 | Card Instance型(Scenario入力側) | `CardInstanceScenario`(Start入力側): `CardId, IsUpgraded, TinkerTimeType, TinkerTimeRider`(InstanceId/Zone/Rarity/Cost/TargetTypeは持たない。Reset時にEmulatorが採番) | **一致だが別型**。Snapshot側とScenario側で情報量が異なることに注意 |
 | Pileの型 | `PlayerSnapshot.{Hand,DrawPile,DiscardPile,ExhaustPile,PlayPile,Deck}: list[CardInstanceSnapshot]` | **一致** |
 | 順序方向(先頭=山札上) | `Common/schemas/combat_state_schema.json`の`drawPile`定義コメント「Index 0 is top-of-pile / next drawn」。エンジン側`CardPile.MoveToTopInternal`が`_cards.Insert(0, card)`、`CardPileCmd.DrawInternal`が`Cards.FirstOrDefault()`で確認済み | **一致** |
