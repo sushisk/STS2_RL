@@ -79,6 +79,37 @@ class UnsupportedSnapshotField:
 
 
 @dataclass
+class LocalCostModifierSnapshot:
+    Amount: int
+    Type: str
+    Expiration: int
+    IsReduceOnly: bool
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "LocalCostModifierSnapshot":
+        _require(d, ["Amount", "Type", "Expiration", "IsReduceOnly"], "LocalCostModifierSnapshot")
+        return cls(
+            Amount=int(d["Amount"]), Type=d["Type"], Expiration=int(d["Expiration"]),
+            IsReduceOnly=bool(d["IsReduceOnly"]),
+        )
+
+
+@dataclass
+class TemporaryStarCostSnapshot:
+    Cost: int
+    ClearsWhenTurnEnds: bool
+    ClearsWhenCardIsPlayed: bool
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "TemporaryStarCostSnapshot":
+        _require(d, ["Cost", "ClearsWhenTurnEnds", "ClearsWhenCardIsPlayed"], "TemporaryStarCostSnapshot")
+        return cls(
+            Cost=int(d["Cost"]), ClearsWhenTurnEnds=bool(d["ClearsWhenTurnEnds"]),
+            ClearsWhenCardIsPlayed=bool(d["ClearsWhenCardIsPlayed"]),
+        )
+
+
+@dataclass
 class CardInstanceSnapshot:
     InstanceId: str
     CardId: str
@@ -88,6 +119,8 @@ class CardInstanceSnapshot:
     TargetType: str
     IsUpgraded: bool
     UpgradeLevel: int
+    LocalCostModifiers: list = field(default_factory=list)  # list[LocalCostModifierSnapshot]
+    TemporaryStarCosts: list = field(default_factory=list)  # list[TemporaryStarCostSnapshot]
     Zone: "str | None" = None
     TinkerTimeType: "str | None" = None
     TinkerTimeRider: "str | None" = None
@@ -98,6 +131,8 @@ class CardInstanceSnapshot:
         return cls(
             InstanceId=d["InstanceId"], CardId=d["CardId"], Type=d["Type"], Rarity=d["Rarity"], Cost=int(d["Cost"]),
             TargetType=d["TargetType"], IsUpgraded=bool(d["IsUpgraded"]), UpgradeLevel=int(d["UpgradeLevel"]),
+            LocalCostModifiers=[LocalCostModifierSnapshot.from_dict(m) for m in d.get("LocalCostModifiers", [])],
+            TemporaryStarCosts=[TemporaryStarCostSnapshot.from_dict(c) for c in d.get("TemporaryStarCosts", [])],
             Zone=d.get("Zone"), TinkerTimeType=d.get("TinkerTimeType"), TinkerTimeRider=d.get("TinkerTimeRider"),
         )
 
