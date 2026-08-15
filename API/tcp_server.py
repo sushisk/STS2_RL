@@ -18,7 +18,7 @@ from API.faults import fault_response
 JsonObject = dict[str, Any]
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
-DEFAULT_MAX_MESSAGE_BYTES = 1024 * 1024
+DEFAULT_MAX_MESSAGE_BYTES = 5 * 1024 * 1024
 
 
 class AsyncioTcpServer:
