@@ -190,8 +190,9 @@ class DecisionSignature:
     same-origin comparisons (e.g. unit tests constructing two signatures by hand).
     `matches_for_replay()`/`diff_for_replay()` are what `replay_decision_context()`
     actually uses for REPLAY_SIG_CHECK/CTX_SIG_CHECK - they compare everything BUT
-    `combat_session_id`, `resolved_action_id`, and `choice_kind` (see `choice_kind`'s
-    own field comment for why that one is excluded too).
+    `combat_session_id`/`resolved_action_id`, plus a `choice_kind` mismatch is ignored
+    specifically when at least one side is the Emulator's "Unsupported" catch-all (see
+    `choice_kind`'s own field comment and `_CHOICE_KIND_UNCLASSIFIED`).
     """
 
     # --- State identity (Stable/Pending common) ---
@@ -210,13 +211,15 @@ class DecisionSignature:
     boundary: str
     # --- Pending-only (None/None/None whenever boundary != "pending") ---
     choice_scope: "Optional[str]" = None
-    # Informational only - derived from the Emulator's own `GetPendingChoiceType()`,
-    # a closed enumeration of a handful of named mechanics (Wish/GamblingChip/
-    # ChoicesParadox/Toolbox) that exists solely to support `CombatScenario.
-    # PendingChoice`'s scenario-authoring reconstruction. Any Pending choice outside
-    # those falls into a single shared "Unsupported" bucket, so two DIFFERENT
-    # unrecognized choices are indistinguishable by this field alone - it must never
-    # be relied on for replay-safety verification (see `_REPLAY_INCOMPARABLE_FIELDS`).
+    # Derived from the Emulator's own `GetPendingChoiceType()`, a closed enumeration of
+    # a handful of named mechanics (Wish/GamblingChip/ChoicesParadox/Toolbox) that
+    # exists primarily to support `CombatScenario.PendingChoice`'s scenario-authoring
+    # reconstruction. Any Pending choice outside those falls into a single shared
+    # "Unsupported" bucket, so two DIFFERENT unrecognized choices are indistinguishable
+    # by this field alone whenever either side is that bucket - `diff_for_replay()`
+    # accounts for this (see `_CHOICE_KIND_UNCLASSIFIED`) rather than trusting a raw
+    # equality check in that case. When BOTH sides are actual recognized kinds, this
+    # field IS a meaningful, enforced replay-safety signal.
     # `candidate_semantic_keys` is the structurally-grounded signal that actually
     # verifies "did we reach the same Pending choice".
     choice_kind: "Optional[str]" = None
@@ -293,14 +296,26 @@ class DecisionSignature:
         (e.g. unit tests). Use `diff_for_replay()` for SUB_REPLAY-style checks."""
         return [f.name for f in fields(self) if getattr(self, f.name) != getattr(other, f.name)]
 
-    _REPLAY_INCOMPARABLE_FIELDS = frozenset({"combat_session_id", "resolved_action_id", "choice_kind"})
+    _REPLAY_INCOMPARABLE_FIELDS = frozenset({"combat_session_id", "resolved_action_id"})
+
+    # The Emulator's own sentinel for "this Pending choice didn't match any of
+    # GetPendingChoiceType()'s recognized mechanics" (see `choice_kind`'s field
+    # comment). A `choice_kind` mismatch is only ignored for replay-safety purposes
+    # when at least one side is this unreliable catch-all - two genuinely RECOGNIZED
+    # kinds (e.g. "ToolboxChooseCard" vs "WishDrawToHand") still must match, since that
+    # comparison IS meaningful when the Emulator actually classified both sides.
+    _CHOICE_KIND_UNCLASSIFIED = "Unsupported"
 
     def diff_for_replay(self, other: "DecisionSignature") -> "list[str]":
         """Like `diff()` but excludes `combat_session_id`/`resolved_action_id` (never
-        portable across a Restore boundary - see the class docstring) and `choice_kind`
-        (not a reliable replay-safety signal - see that field's own comment;
-        `candidate_semantic_keys` is what actually verifies Pending-choice identity)."""
-        return [name for name in self.diff(other) if name not in self._REPLAY_INCOMPARABLE_FIELDS]
+        portable across a Restore boundary - see the class docstring), and ignores a
+        `choice_kind` mismatch specifically when at least one side is the Emulator's
+        "Unsupported" catch-all (see `_CHOICE_KIND_UNCLASSIFIED`) - `candidate_semantic_
+        keys` is what actually verifies Pending-choice identity in that case."""
+        diffs = [name for name in self.diff(other) if name not in self._REPLAY_INCOMPARABLE_FIELDS]
+        if "choice_kind" in diffs and self._CHOICE_KIND_UNCLASSIFIED in (self.choice_kind, other.choice_kind):
+            diffs = [name for name in diffs if name != "choice_kind"]
+        return diffs
 
     def matches_for_replay(self, other: "DecisionSignature") -> bool:
         """REPLAY_SIG_CHECK/CTX_SIG_CHECK-style comparison: everything except
