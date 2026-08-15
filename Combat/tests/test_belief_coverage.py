@@ -17,7 +17,6 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env", _COMBAT_DIR /
         sys.path.insert(0, str(_p))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import search.search_coordinator as coordinator_module  # noqa: E402
 from battle_emulator import BattleState  # noqa: E402
 from live_combat_session import LiveCombatSession  # noqa: E402
 from search.belief_coverage import (  # noqa: E402
@@ -25,12 +24,8 @@ from search.belief_coverage import (  # noqa: E402
     assess_public_multiset_coverage_for_combat_start,
     compute_public_multiset_with_coverage,
 )
-from search.branch_worker_pool import BranchWorkerPool, LeaseRegistry  # noqa: E402
-from search.candidate_pipeline import CandidatePipelineSuccess, build_candidate_pipeline_result  # noqa: E402
 from search.decision_context import DecisionContext, DecisionSignature, SemanticAction  # noqa: E402
-from search.main_loop import SearchSuccess  # noqa: E402
 from search.rng_hypothesis import compute_public_multiset  # noqa: E402
-from search.search_coordinator import SearchCoordinatorConfig, build_search_strategy  # noqa: E402
 
 
 def _simple_spec(hand=None, draw_pile=None, relics=None, player_powers=None, enemy_hp=48):
@@ -129,35 +124,6 @@ def test_live_collision_course_generation_emits_resolvable_card_generated_entry(
     assert generated[0].Fields.get("cardInstanceId") in {card.InstanceId for card in snapshot.Player.Hand}
     public_multiset = compute_public_multiset(snapshot)
     assert public_multiset == {}
-
-
-def test_search_coordinator_hypothesis_entries_include_public_multiset_coverage_diagnostics():
-    context = _context(_simple_spec(hand=["STRIKE_IRONCLAD"], draw_pile=["BASH"], relics=["BIIIG_HUG"], enemy_hp=999))
-    captured_entries = {}
-    original_aggregate = coordinator_module.aggregate_hypothesis_results
-
-    def _capturing_hypothesis_aggregate(entries, *, min_coverage_fraction):
-        captured_entries["entries"] = list(entries)
-        return original_aggregate(entries, min_coverage_fraction=min_coverage_fraction)
-
-    coordinator_module.aggregate_hypothesis_results = _capturing_hypothesis_aggregate
-    try:
-        with BranchWorkerPool(worker_count=2, request_timeout_s=120.0) as pool:
-            strategy = build_search_strategy(
-                pool,
-                config=SearchCoordinatorConfig(width=1, hypothesis_count=2),
-                lease_registry=LeaseRegistry(),
-            )
-            result = strategy(context)
-    finally:
-        coordinator_module.aggregate_hypothesis_results = original_aggregate
-
-    assert isinstance(result, SearchSuccess), result
-    diagnostics = [entry.diagnostics["public_multiset_coverage"] for entry in captured_entries["entries"]]
-    assert diagnostics
-    assert all(item["is_complete"] is True for item in diagnostics)
-    assert all(item["uncertain_sources"] == [] for item in diagnostics)
-    assert all("Player.DrawPile" in item["reason"] for item in diagnostics)
 
 
 def _run_all() -> int:

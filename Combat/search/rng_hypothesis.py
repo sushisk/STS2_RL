@@ -75,6 +75,15 @@ class SearchHypothesisId:
 
 
 @dataclass(frozen=True)
+class CoverageAssessment:
+    """Whether PUBLIC_MULTISET coverage diagnostics are complete for a hypothesis set."""
+
+    is_complete: bool
+    uncertain_sources: list[str]
+    reason: str
+
+
+@dataclass(frozen=True)
 class ConsumeCheckResult:
     """Result of the privacy-first consume gate.
 

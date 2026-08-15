@@ -28,19 +28,8 @@ Belief incomplete.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from combat_state_snapshot import CombatStateSnapshot
-from search.rng_hypothesis import compute_public_multiset
-
-
-@dataclass(frozen=True)
-class CoverageAssessment:
-    """Whether PUBLIC_MULTISET generated-card coverage is complete for a snapshot."""
-
-    is_complete: bool
-    uncertain_sources: list[str]
-    reason: str
+from search.rng_hypothesis import CoverageAssessment, compute_public_multiset
 
 
 # Active Relic/Power IDs whose vendored source can generate cards into the player's
