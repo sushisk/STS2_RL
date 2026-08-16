@@ -25,12 +25,18 @@ def _config() -> dict:
         "character_id": "SILENT",
         "player_hp": 70,
         "player_max_hp": 70,
-        "hand_cards": [{"card_id": "ACROBATICS", "is_upgraded": False}],
+        # Keep one pre-existing card after Acrobatics is played. The discard PendingChoice
+        # contains this card plus the three newly drawn cards; replay pinning must verify
+        # the existing hand card without mistaking it for a draw constraint.
+        "hand_cards": [
+            {"card_id": "ACROBATICS", "is_upgraded": False},
+            {"card_id": "NEUTRALIZE", "is_upgraded": False},
+        ],
         "draw_pile_cards": [
             {"card_id": "DEFEND_SILENT", "is_upgraded": True},
             {"card_id": "DEFEND_SILENT", "is_upgraded": False},
             {"card_id": "STRIKE_SILENT", "is_upgraded": False},
-            {"card_id": "NEUTRALIZE", "is_upgraded": False},
+            {"card_id": "SURVIVOR", "is_upgraded": False},
         ],
         "discard_pile": [],
         "exhaust_pile": [],
@@ -64,7 +70,7 @@ def test_acrobatics_replay_prefix_uses_visible_exact_instances_under_every_hypot
         assert pending["status"] == "completed", pending
 
         candidates = [a for a in _legal_actions(pending) if a["action_type"] == "choice_card"]
-        assert len(candidates) == 3, candidates
+        assert len(candidates) == 4, candidates
         identities = [
             (
                 action["parameters"]["cardId"],
@@ -73,7 +79,8 @@ def test_acrobatics_replay_prefix_uses_visible_exact_instances_under_every_hypot
             for action in candidates
         ]
         assert all(instance_id for _card_id, instance_id in identities), identities
-        assert len({instance_id for _card_id, instance_id in identities}) == 3, identities
+        assert len({instance_id for _card_id, instance_id in identities}) == 4, identities
+        assert any(card_id == "NEUTRALIZE" for card_id, _instance_id in identities), identities
         defend_instances = [
             instance_id for card_id, instance_id in identities if card_id == "DEFEND_SILENT"
         ]
@@ -81,7 +88,8 @@ def test_acrobatics_replay_prefix_uses_visible_exact_instances_under_every_hypot
 
         # Each rng_id forces a different CardId-level hypothesis index. Reconstructing the
         # real Acrobatics prefix must nevertheless reproduce the already-visible concrete
-        # choice set, so resolving any true candidate must not fault with replay_mismatch.
+        # choice set, including the pre-existing hand card, so resolving any true
+        # candidate must not fault with replay_mismatch.
         for rng_id in range(1, 9):
             candidate = candidates[(rng_id - 1) % len(candidates)]
             result = inst.emulate_action(
