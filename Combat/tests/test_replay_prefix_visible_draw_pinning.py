@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -20,6 +22,8 @@ from search.rng_hypothesis import (  # noqa: E402
     _reorder_hypothesis_for_visible_draw_constraints,
 )
 
+_COMBAT_SESSION_ID = "combat-session-visible-id-regression"
+
 
 def _card(instance_id: str, card_id: str, *, upgraded: bool = False) -> CardInstanceSnapshot:
     return CardInstanceSnapshot(
@@ -35,7 +39,19 @@ def _card(instance_id: str, card_id: str, *, upgraded: bool = False) -> CardInst
 
 
 def _root(cards):
-    return SimpleNamespace(Player=SimpleNamespace(DrawPile=list(cards)))
+    return SimpleNamespace(
+        Metadata=SimpleNamespace(CombatSessionId=_COMBAT_SESSION_ID),
+        Player=SimpleNamespace(DrawPile=list(cards)),
+    )
+
+
+def _public_instance_id(internal_instance_id: str) -> str:
+    digest = hmac.new(
+        _COMBAT_SESSION_ID.encode("utf-8"),
+        internal_instance_id.encode("utf-8"),
+        hashlib.sha256,
+    ).digest()
+    return f"cardv-{digest[:16].hex()}"
 
 
 def _state(options) -> BattleState:
@@ -57,12 +73,19 @@ def _rng() -> SerializableRngSnapshot:
 
 def test_visible_constraints_require_complete_exact_identity_from_remaining_root_draw_pile() -> None:
     root = _root([_card("i-a1", "A"), _card("i-a2", "A", upgraded=True), _card("i-b", "B")])
+    visible_a2 = _public_instance_id("i-a2")
+    visible_b = _public_instance_id("i-b")
+    assert visible_a2.startswith("cardv-") and visible_a2 != "i-a2"
+    assert visible_b.startswith("cardv-") and visible_b != "i-b"
+
     state = _state(
         [
-            {"id": "A", "optionId": "o-a2", "cardInstanceId": "i-a2"},
-            {"id": "B", "optionId": "o-b", "cardInstanceId": "i-b"},
+            {"id": "A", "optionId": "o-a2", "cardInstanceId": visible_a2},
+            {"id": "B", "optionId": "o-b", "cardInstanceId": visible_b},
         ]
     )
+    # Public Emulator identities are translated back to the internal Snapshot IDs that
+    # hypothesis allocation needs; the two identity domains must never be compared raw.
     assert visible_draw_constraints_from_pending_choice(state, root, []) == (
         ("A", "i-a2"),
         ("B", "i-b"),
@@ -70,7 +93,7 @@ def test_visible_constraints_require_complete_exact_identity_from_remaining_root
 
     # A previously pinned concrete instance is no longer eligible for a later entry.
     assert visible_draw_constraints_from_pending_choice(
-        _state([{"id": "A", "optionId": "again", "cardInstanceId": "i-a2"}]),
+        _state([{"id": "A", "optionId": "again", "cardInstanceId": visible_a2}]),
         root,
         [_entry(("A", "i-a2"))],
     ) == ()
@@ -81,7 +104,15 @@ def test_visible_constraints_require_complete_exact_identity_from_remaining_root
         _state([{"id": "A", "optionId": "legacy"}]), root, []
     ) == ()
     assert visible_draw_constraints_from_pending_choice(
-        _state([{"id": "HAND_ONLY", "optionId": "h", "cardInstanceId": "i-hand"}]),
+        _state(
+            [
+                {
+                    "id": "HAND_ONLY",
+                    "optionId": "h",
+                    "cardInstanceId": _public_instance_id("i-hand"),
+                }
+            ]
+        ),
         root,
         [],
     ) == ()
