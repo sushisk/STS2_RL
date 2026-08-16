@@ -1,4 +1,4 @@
-"""Regression coverage for generic draw-then-choose replay pinning."""
+"""Fail-closed regression coverage for unproven draw-then-choose replay shapes."""
 
 from __future__ import annotations
 
@@ -68,7 +68,8 @@ def _pending(options) -> BattleState:
     )
 
 
-def test_prepared_shape_uses_triggering_card_id_instead_of_acrobatics_literal() -> None:
+def test_prepared_shape_remains_unpinned_without_proven_provenance_contract() -> None:
+    """Matching the Acrobatics post-step shape is not proof of root draw position."""
     root = _root(
         hand_cards=[_card("i-prepared", "PREPARED"), _card("i-neutralize", "NEUTRALIZE")],
         draw_cards=[_card("i-a", "A"), _card("i-b", "B")],
@@ -85,26 +86,37 @@ def test_prepared_shape_uses_triggering_card_id_instead_of_acrobatics_literal() 
         ]
     )
 
-    constraints = visible_draw_constraints_from_pending_choice(
+    # Exact visible identity, root-DrawPile membership, matching triggering CardId, and
+    # append-only option shape still do not establish absolute root draw position for an
+    # arbitrary mechanic. Only the cross-repo audited Acrobatics path is currently safe.
+    assert visible_draw_constraints_from_pending_choice(
         state,
         root,
         [],
         triggering_action=SemanticAction("card", "4:PREPARED"),
-    )
-
-    assert constraints == (("A", "i-a"), ("B", "i-b"))
+    ) == ()
 
 
-def test_triggering_card_id_must_match_the_missing_root_hand_card() -> None:
+def test_unproven_card_stays_rejected_even_when_root_also_contains_acrobatics() -> None:
+    """Presence of Acrobatics elsewhere in Hand must not accidentally satisfy the gate."""
     root = _root(
-        hand_cards=[_card("i-prepared", "PREPARED"), _card("i-neutralize", "NEUTRALIZE")],
+        hand_cards=[
+            _card("i-acrobatics", "ACROBATICS"),
+            _card("i-prepared", "PREPARED"),
+            _card("i-neutralize", "NEUTRALIZE"),
+        ],
         draw_cards=[_card("i-a", "A")],
     )
     state = _pending(
         [
             {
+                "id": "ACROBATICS",
+                "optionId": "acrobatics",
+                "cardInstanceId": _public_instance_id("i-acrobatics"),
+            },
+            {
                 "id": "NEUTRALIZE",
-                "optionId": "hand",
+                "optionId": "neutralize",
                 "cardInstanceId": _public_instance_id("i-neutralize"),
             },
             {"id": "A", "optionId": "draw-a", "cardInstanceId": _public_instance_id("i-a")},
@@ -115,13 +127,14 @@ def test_triggering_card_id_must_match_the_missing_root_hand_card() -> None:
         state,
         root,
         [],
-        triggering_action=SemanticAction("card", "4:DAGGER_THROW"),
+        triggering_action=SemanticAction("card", "4:PREPARED"),
     ) == ()
 
 
 def test_nonempty_replay_prefix_remains_fail_closed_without_a_proven_draw_offset() -> None:
+    """Even the audited card cannot be flattened to root position zero later in a prefix."""
     root = _root(
-        hand_cards=[_card("i-prepared", "PREPARED")],
+        hand_cards=[_card("i-acrobatics", "ACROBATICS")],
         draw_cards=[_card("i-a", "A")],
     )
     state = _pending(
@@ -132,5 +145,5 @@ def test_nonempty_replay_prefix_remains_fail_closed_without_a_proven_draw_offset
         state,
         root,
         [SimpleNamespace(visible_draw_constraints=())],
-        triggering_action=SemanticAction("card", "4:PREPARED"),
+        triggering_action=SemanticAction("card", "4:ACROBATICS"),
     ) == ()
