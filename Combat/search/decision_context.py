@@ -23,6 +23,8 @@ from __future__ import annotations
 
 import json
 import dataclasses
+import hashlib
+import hmac
 from collections import Counter
 from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Optional
@@ -326,9 +328,9 @@ class ReplayPrefixEntry:
     `target_index`/`target_enemy_index` travel alongside the SemanticAction because
     `LiveCombatSession.step()` takes them as separate parameters from the resolved
     action itself. `visible_draw_constraints` is populated only by Main/Training real
-    stepping: ordered ``(CardId, CardInstanceId)`` pairs that were already visible in
-    the resulting card PendingChoice and still map to as-yet-unconsumed cards from the
-    Held Stable Snapshot's DrawPile. Search-internal/hypothesis steps leave it empty.
+    stepping: ordered ``(CardId, CardInstanceSnapshot.InstanceId)`` pairs translated
+    from Emulator-visible opaque ``cardInstanceId`` tokens after validating them against
+    the Held Stable Snapshot's DrawPile. Search-internal/hypothesis steps leave it empty.
     """
 
     semantic_action: SemanticAction
@@ -336,6 +338,16 @@ class ReplayPrefixEntry:
     target_index: "Optional[int]" = None
     target_enemy_index: "Optional[int]" = None
     visible_draw_constraints: "tuple[tuple[str, str], ...]" = ()
+
+
+def _public_card_instance_id(combat_session_id: str, snapshot_instance_id: str) -> str:
+    """Mirror Emulator #25's privacy-safe public card identity derivation exactly."""
+    digest = hmac.new(
+        combat_session_id.encode("utf-8"),
+        snapshot_instance_id.encode("utf-8"),
+        hashlib.sha256,
+    ).digest()
+    return f"cardv-{digest[:16].hex()}"
 
 
 def visible_draw_constraints_from_pending_choice(
@@ -347,11 +359,17 @@ def visible_draw_constraints_from_pending_choice(
 
     Emulator PR #25 exposes ``cardInstanceId`` only on already-visible card PendingChoice
     options (and matching ``choice_card`` actions), deliberately not as raw draw history.
-    We therefore record an option set only when *every* visible option can be matched to a
-    distinct, still-unconsumed concrete card from the Held Stable Snapshot's DrawPile.
-    This rejects hand/discard/generated choices and partial/malformed identity rather than
-    inferring hidden provenance. Prior recorded constraints are removed first so a later
-    Pending choice cannot re-claim an instance already pinned by an earlier replay step.
+    Those visible ids are opaque ``cardv-*`` HMAC tokens, intentionally distinct from
+    ``CardInstanceSnapshot.InstanceId``. Re-derive each remaining root card's public
+    token from ``Metadata.CombatSessionId`` and its internal Snapshot id, validate the
+    visible option set in that public identity domain, then return the matching internal
+    Snapshot ids required by hypothesis allocation.
+
+    We record an option set only when *every* visible option can be matched to a distinct,
+    still-unconsumed concrete card from the Held Stable Snapshot's DrawPile. This rejects
+    hand/discard/generated choices and partial/malformed identity rather than inferring
+    hidden provenance. Prior recorded constraints are removed first so a later Pending
+    choice cannot re-claim an instance already pinned by an earlier replay step.
     """
     pending = battle_state.engine_state.get("pendingChoice")
     if not isinstance(pending, dict):
@@ -360,20 +378,20 @@ def visible_draw_constraints_from_pending_choice(
     if not isinstance(raw_options, list) or not raw_options:
         return ()
 
-    constraints: list[tuple[str, str]] = []
+    visible_constraints: list[tuple[str, str]] = []
     for option in raw_options:
         if not isinstance(option, dict):
             return ()
         card_id = option.get("id")
-        card_instance_id = option.get("cardInstanceId")
+        public_instance_id = option.get("cardInstanceId")
         if not isinstance(card_id, str) or not card_id:
             return ()
-        if not isinstance(card_instance_id, str) or not card_instance_id:
+        if not isinstance(public_instance_id, str) or not public_instance_id:
             return ()
-        constraints.append((card_id, card_instance_id))
+        visible_constraints.append((card_id, public_instance_id))
 
-    instance_ids = [instance_id for _card_id, instance_id in constraints]
-    if len(set(instance_ids)) != len(instance_ids):
+    public_instance_ids = [instance_id for _card_id, instance_id in visible_constraints]
+    if len(set(public_instance_ids)) != len(public_instance_ids):
         return ()
 
     player = getattr(root_snapshot, "Player", None)
@@ -390,9 +408,25 @@ def visible_draw_constraints_from_pending_choice(
                 return ()
             remaining.pop(prior_instance_id)
 
-    if any(remaining.get(instance_id) != card_id for card_id, instance_id in constraints):
+    metadata = getattr(root_snapshot, "Metadata", None)
+    combat_session_id = getattr(metadata, "CombatSessionId", None)
+    if not isinstance(combat_session_id, str) or not combat_session_id:
         return ()
-    return tuple(constraints)
+
+    by_public_instance_id: dict[str, tuple[str, str]] = {}
+    for internal_instance_id, card_id in remaining.items():
+        public_instance_id = _public_card_instance_id(combat_session_id, internal_instance_id)
+        if public_instance_id in by_public_instance_id:
+            return ()
+        by_public_instance_id[public_instance_id] = (card_id, internal_instance_id)
+
+    internal_constraints: list[tuple[str, str]] = []
+    for card_id, public_instance_id in visible_constraints:
+        matched = by_public_instance_id.get(public_instance_id)
+        if matched is None or matched[0] != card_id:
+            return ()
+        internal_constraints.append((card_id, matched[1]))
+    return tuple(internal_constraints)
 
 
 @dataclass
