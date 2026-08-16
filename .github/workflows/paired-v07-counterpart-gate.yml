@@ -50,6 +50,8 @@ jobs:
             API/tests/test_root_commit_release_lifecycle.py \
             API/tests/test_whole_run_action_id_resolution.py \
             API/tests/test_whole_run_event_emulate_actions.py \
+            API/tests/test_visible_card_instance_masking.py \
+            Combat/tests/test_replay_prefix_visible_draw_pinning.py \
             Run/tests/test_god_mode_scope.py
 
       - name: Explain paired validation boundary
