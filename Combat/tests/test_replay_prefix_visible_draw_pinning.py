@@ -218,18 +218,36 @@ def test_visible_constraints_reject_malformed_or_non_root_draw_identity() -> Non
     ) == ()
 
 
-def test_pinned_prefix_validation_stops_before_invalid_tail_entry() -> None:
+def test_pinned_prefix_accepts_only_first_transition_root_relative_constraints() -> None:
     root = _root([_card("i-a", "A"), _card("i-b", "B"), _card("i-c", "C")])
-    context = SimpleNamespace(
+
+    root_only = SimpleNamespace(
         root_snapshot=root,
-        replay_prefix=[
-            _entry(("A", "i-a")),
-            _entry(),
-            _entry(("B", "i-b")),
-            _entry(("C", "not-a-root-instance")),
-        ],
+        replay_prefix=[_entry(("A", "i-a"), ("B", "i-b")), _entry()],
     )
-    assert _pinned_prefix_visible_draw_constraints(context) == (("A", "i-a"), ("B", "i-b"))
+    assert _pinned_prefix_visible_draw_constraints(root_only) == (("A", "i-a"), ("B", "i-b"))
+
+    # A later transition's visible cards have an unknown Stable-root-relative draw
+    # offset. Do not concatenate them and move them to root position zero.
+    later_constraint = SimpleNamespace(
+        root_snapshot=root,
+        replay_prefix=[_entry(("A", "i-a")), _entry(), _entry(("B", "i-b"))],
+    )
+    assert _pinned_prefix_visible_draw_constraints(later_constraint) == ()
+
+    # A constraint that appears only later is equally unsafe, even if its instance is in
+    # the root DrawPile.
+    later_only = SimpleNamespace(
+        root_snapshot=root,
+        replay_prefix=[_entry(), _entry(("B", "i-b"))],
+    )
+    assert _pinned_prefix_visible_draw_constraints(later_only) == ()
+
+    malformed_first = SimpleNamespace(
+        root_snapshot=root,
+        replay_prefix=[_entry(("A", "not-a-root-instance"))],
+    )
+    assert _pinned_prefix_visible_draw_constraints(malformed_first) == ()
 
 
 def test_hypothesis_reorder_and_concrete_allocation_pin_duplicate_cardid_exact_instance() -> None:
