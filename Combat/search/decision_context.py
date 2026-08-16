@@ -325,12 +325,74 @@ class ReplayPrefixEntry:
     atomic unit BOTH Replay Prefix and Plan Path accumulate (DC_DEF/NOTE_PLAN_PATH).
     `target_index`/`target_enemy_index` travel alongside the SemanticAction because
     `LiveCombatSession.step()` takes them as separate parameters from the resolved
-    action itself."""
+    action itself. `visible_draw_constraints` is populated only by Main/Training real
+    stepping: ordered ``(CardId, CardInstanceId)`` pairs that were already visible in
+    the resulting card PendingChoice and still map to as-yet-unconsumed cards from the
+    Held Stable Snapshot's DrawPile. Search-internal/hypothesis steps leave it empty.
+    """
 
     semantic_action: SemanticAction
     expected_signature: DecisionSignature
     target_index: "Optional[int]" = None
     target_enemy_index: "Optional[int]" = None
+    visible_draw_constraints: "tuple[tuple[str, str], ...]" = ()
+
+
+def visible_draw_constraints_from_pending_choice(
+    battle_state: "BattleState",
+    root_snapshot: "CombatStateSnapshot",
+    replay_prefix: "list[ReplayPrefixEntry]",
+) -> "tuple[tuple[str, str], ...]":
+    """Return privacy-safe exact-card constraints visible at this Pending boundary.
+
+    Emulator PR #25 exposes ``cardInstanceId`` only on already-visible card PendingChoice
+    options (and matching ``choice_card`` actions), deliberately not as raw draw history.
+    We therefore record an option set only when *every* visible option can be matched to a
+    distinct, still-unconsumed concrete card from the Held Stable Snapshot's DrawPile.
+    This rejects hand/discard/generated choices and partial/malformed identity rather than
+    inferring hidden provenance. Prior recorded constraints are removed first so a later
+    Pending choice cannot re-claim an instance already pinned by an earlier replay step.
+    """
+    pending = battle_state.engine_state.get("pendingChoice")
+    if not isinstance(pending, dict):
+        return ()
+    raw_options = pending.get("options")
+    if not isinstance(raw_options, list) or not raw_options:
+        return ()
+
+    constraints: list[tuple[str, str]] = []
+    for option in raw_options:
+        if not isinstance(option, dict):
+            return ()
+        card_id = option.get("id")
+        card_instance_id = option.get("cardInstanceId")
+        if not isinstance(card_id, str) or not card_id:
+            return ()
+        if not isinstance(card_instance_id, str) or not card_instance_id:
+            return ()
+        constraints.append((card_id, card_instance_id))
+
+    instance_ids = [instance_id for _card_id, instance_id in constraints]
+    if len(set(instance_ids)) != len(instance_ids):
+        return ()
+
+    player = getattr(root_snapshot, "Player", None)
+    draw_pile = getattr(player, "DrawPile", None)
+    if draw_pile is None:
+        return ()
+    remaining = {str(card.InstanceId): str(card.CardId) for card in draw_pile}
+    if len(remaining) != len(draw_pile):
+        return ()
+
+    for entry in replay_prefix:
+        for prior_card_id, prior_instance_id in entry.visible_draw_constraints:
+            if remaining.get(prior_instance_id) != prior_card_id:
+                return ()
+            remaining.pop(prior_instance_id)
+
+    if any(remaining.get(instance_id) != card_id for card_id, instance_id in constraints):
+        return ()
+    return tuple(constraints)
 
 
 @dataclass

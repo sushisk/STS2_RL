@@ -46,6 +46,7 @@ from search.decision_context import (
     boundary_of_battle_state,
     build_decision_context_from_held_stable,
     start_new_replay_prefix_from_stable,
+    visible_draw_constraints_from_pending_choice,
 )
 
 from API.combat_rng_mapping import build_single_hypothesis_work_item
@@ -298,11 +299,16 @@ class CombatInstance:
                 self._held_stable_snapshot = self._session.capture_snapshot()
                 self._replay_prefix = start_new_replay_prefix_from_stable()
             elif boundary == BOUNDARY_PENDING:
+                if self._held_stable_snapshot is None:
+                    raise RuntimeError("Pending replay prefix requires a Held Stable Snapshot")
                 entry = ReplayPrefixEntry(
                     semantic_action=_semantic_action_for(chosen),
                     expected_signature=observed_signature,
                     target_index=target_index,
                     target_enemy_index=target_enemy_index,
+                    visible_draw_constraints=visible_draw_constraints_from_pending_choice(
+                        next_state, self._held_stable_snapshot, self._replay_prefix
+                    ),
                 )
                 self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
         except Exception as exc:

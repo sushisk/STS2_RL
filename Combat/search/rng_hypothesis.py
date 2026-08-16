@@ -349,28 +349,116 @@ def _card_identity_key(card: CardInstanceSnapshot) -> str:
     return canonical_json(dataclasses.asdict(card), exclude_volatile=False)
 
 
+def _pinned_prefix_visible_draw_constraints(
+    decision_context: DecisionContext,
+) -> tuple[tuple[str, str], ...]:
+    """Return the longest verified replay-prefix exact-instance constraint sequence.
+
+    Constraints are recorded only at real, client-visible Pending boundaries. Validate
+    them again against the Stable root DrawPile before hypothesis substitution. If a
+    malformed/stale entry would re-use or reference a non-root instance, stop before that
+    entry and leave the tail unpinned. This is the exact-instance counterpart of the old
+    CardId Counter guard, without publishing raw draw history.
+    """
+    if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
+        return ()
+    remaining = {
+        str(card.InstanceId): str(card.CardId)
+        for card in decision_context.root_snapshot.Player.DrawPile
+    }
+    if len(remaining) != len(decision_context.root_snapshot.Player.DrawPile):
+        return ()
+
+    pinned: list[tuple[str, str]] = []
+    for entry in decision_context.replay_prefix:
+        constraints = entry.visible_draw_constraints
+        if not constraints:
+            continue
+        instance_ids = [instance_id for _card_id, instance_id in constraints]
+        if len(set(instance_ids)) != len(instance_ids):
+            break
+        if any(remaining.get(instance_id) != card_id for card_id, instance_id in constraints):
+            break
+        pinned.extend(constraints)
+        for _card_id, instance_id in constraints:
+            remaining.pop(instance_id)
+    return tuple(pinned)
+
+
+def _reorder_hypothesis_for_visible_draw_constraints(
+    hypothesis: SearchHypothesisId,
+    constraints: tuple[tuple[str, str], ...],
+) -> SearchHypothesisId:
+    """Move visible constrained CardIds to the hypothesis front, preserving its tail."""
+    remaining = list(hypothesis.ordered_draw_pile_card_ids)
+    pinned_card_ids = [card_id for card_id, _instance_id in constraints]
+    for card_id in pinned_card_ids:
+        remaining.remove(card_id)
+    return dataclasses.replace(
+        hypothesis,
+        ordered_draw_pile_card_ids=tuple(pinned_card_ids) + tuple(remaining),
+    )
+
+
 def _draw_pile_instances_for_hypothesis(
     root_snapshot: CombatStateSnapshot,
     ordered_card_ids: tuple[str, ...],
+    pinned_instance_ids: tuple[str, ...] = (),
 ) -> list[dict]:
-    by_card_id: dict[str, deque[CardInstanceSnapshot]] = {}
-    for card in sorted(root_snapshot.Player.DrawPile, key=_card_identity_key):
-        by_card_id.setdefault(str(card.CardId), deque()).append(card)
-
+    root_cards = list(root_snapshot.Player.DrawPile)
     requested = Counter(ordered_card_ids)
-    available = Counter({card_id: len(cards) for card_id, cards in by_card_id.items()})
+    available = Counter(str(card.CardId) for card in root_cards)
     if requested != available:
         raise ValueError(
             "hypothesis DrawPile multiset does not match root snapshot Player.DrawPile multiset: "
             f"requested={dict(sorted(requested.items()))}, available={dict(sorted(available.items()))}"
         )
 
-    return [dataclasses.asdict(by_card_id[card_id].popleft()) for card_id in ordered_card_ids]
+    by_instance_id = {str(card.InstanceId): card for card in root_cards}
+    if len(by_instance_id) != len(root_cards):
+        raise ValueError("root snapshot DrawPile contains duplicate CardInstanceSnapshot.InstanceId values")
+    if len(set(pinned_instance_ids)) != len(pinned_instance_ids):
+        raise ValueError("pinned draw constraints contain duplicate cardInstanceId values")
+    if len(pinned_instance_ids) > len(ordered_card_ids):
+        raise ValueError("more pinned card instances than hypothesis DrawPile entries")
+
+    pinned_cards: list[CardInstanceSnapshot] = []
+    pinned_set = set(pinned_instance_ids)
+    for index, instance_id in enumerate(pinned_instance_ids):
+        card = by_instance_id.get(instance_id)
+        if card is None:
+            raise ValueError(f"pinned cardInstanceId {instance_id!r} is absent from root DrawPile")
+        expected_card_id = ordered_card_ids[index]
+        if str(card.CardId) != expected_card_id:
+            raise ValueError(
+                f"pinned cardInstanceId {instance_id!r} has CardId={card.CardId!r}, "
+                f"but hypothesis position {index} requires {expected_card_id!r}"
+            )
+        pinned_cards.append(card)
+
+    by_card_id: dict[str, deque[CardInstanceSnapshot]] = {}
+    for card in sorted(
+        (card for card in root_cards if str(card.InstanceId) not in pinned_set),
+        key=_card_identity_key,
+    ):
+        by_card_id.setdefault(str(card.CardId), deque()).append(card)
+
+    allocated = [dataclasses.asdict(card) for card in pinned_cards]
+    for card_id in ordered_card_ids[len(pinned_cards):]:
+        cards = by_card_id.get(card_id)
+        if not cards:
+            raise ValueError(
+                f"hypothesis concrete-card allocation exhausted CardId {card_id!r} after exact-instance pinning"
+            )
+        allocated.append(dataclasses.asdict(cards.popleft()))
+    return allocated
 
 
 def derive_substituted_snapshot(
     root_snapshot: CombatStateSnapshot,
     hypothesis: SearchHypothesisId,
+    *,
+    pinned_draw_card_instance_ids: tuple[str, ...] = (),
 ) -> CombatStateSnapshot:
     """Return a Method-B derived snapshot for one hypothesis.
 
@@ -389,6 +477,7 @@ def derive_substituted_snapshot(
     payload["Player"]["DrawPile"] = _draw_pile_instances_for_hypothesis(
         root_snapshot,
         hypothesis.ordered_draw_pile_card_ids,
+        pinned_instance_ids=pinned_draw_card_instance_ids,
     )
     return CombatStateSnapshot.from_dict(payload)
 
@@ -428,17 +517,38 @@ def apply_hypothesis_to_context(
     decision_context: DecisionContext,
     hypothesis: SearchHypothesisId,
 ) -> DecisionContext:
-    """Low-level primitive shared by Search Coordinator's full-grid expansion
-    (`search_coordinator._hypothesis_work_items_with_coverage`) and Training API's
-    single-Hypothesis path (`API.combat_rng_mapping.build_single_hypothesis_work_item`):
-    substitute `decision_context.root_snapshot` with the Method-B derived root for
-    `hypothesis` (Combat-Start Pending vs ordinary Snapshot, dispatched by
-    `root_snapshot`'s type), then stamp the Phase-2 `search_hypothesis_id` slot via
-    `with_search_hypothesis`. Both callers keep their own, differing higher-level policy
-    (multi-Hypothesis grid expansion vs one requested Hypothesis) - only this two-step
-    derive+replace dance is shared.
+    """Apply one CardId-level belief plus any already-visible replay constraints.
+
+    The hypothesis itself deliberately remains CardId-level. Exact ``cardInstanceId``
+    values come only from real, already-visible Pending choices in the Replay Prefix;
+    they constrain concrete allocation in the derived snapshot but are never added to
+    ``SearchHypothesisId`` or exposed as hidden future order.
     """
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         raise TypeError("Genesis hypotheses must use derive_combat_start_replay_roots()")
-    context = dataclasses.replace(decision_context, root_snapshot=derive_substituted_snapshot(decision_context.root_snapshot, hypothesis))
-    return with_search_hypothesis(context, hypothesis)
+
+    constraints = _pinned_prefix_visible_draw_constraints(decision_context)
+    effective_hypothesis = hypothesis
+    if constraints:
+        try:
+            effective_hypothesis = _reorder_hypothesis_for_visible_draw_constraints(
+                hypothesis, constraints
+            )
+        except ValueError:
+            # A future/stale caller may provide constraints whose CardId multiset no longer
+            # exists in this hypothesis. Falling back to the previous unpinned behavior is
+            # safer than crashing or partially applying an unverifiable exact-instance set.
+            constraints = ()
+            effective_hypothesis = hypothesis
+
+    context = dataclasses.replace(
+        decision_context,
+        root_snapshot=derive_substituted_snapshot(
+            decision_context.root_snapshot,
+            effective_hypothesis,
+            pinned_draw_card_instance_ids=tuple(
+                instance_id for _card_id, instance_id in constraints
+            ),
+        ),
+    )
+    return with_search_hypothesis(context, effective_hypothesis)

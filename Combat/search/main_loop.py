@@ -85,6 +85,7 @@ from search.decision_context import (
     build_decision_context_from_held_stable,
     boundary_of_battle_state,
     start_new_replay_prefix_from_stable,
+    visible_draw_constraints_from_pending_choice,
 )
 
 if TYPE_CHECKING:
@@ -463,6 +464,13 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
             expected_signature=observed_signature,
             target_index=planned_step.target_index,
             target_enemy_index=planned_step.target_enemy_index,
+            visible_draw_constraints=(
+                visible_draw_constraints_from_pending_choice(
+                    next_result, loop_state.held_stable_snapshot, loop_state.replay_prefix
+                )
+                if loop_state.held_stable_snapshot is not None
+                else ()
+            ),
         )
         loop_state.replay_prefix = append_replay_prefix_entry(loop_state.replay_prefix, entry)
         loop_state.planned_sequence = loop_state.planned_sequence[1:]
