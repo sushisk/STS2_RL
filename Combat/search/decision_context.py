@@ -356,6 +356,8 @@ def visible_draw_constraints_from_pending_choice(
     battle_state: "BattleState",
     root_snapshot: "CombatStateSnapshot",
     replay_prefix: "list[ReplayPrefixEntry]",
+    *,
+    triggering_action: SemanticAction,
 ) -> "tuple[tuple[str, str], ...]":
     """Return exact draw constraints only when provenance and root-relative position are proven.
 
@@ -367,6 +369,7 @@ def visible_draw_constraints_from_pending_choice(
     Acrobatics reproduction, and only on the first transition after the Held Stable root:
 
     * the Replay Prefix is still empty, so the draw cursor is provably root offset 0;
+    * the triggering SemanticAction is the card action for ``ACROBATICS``;
     * the Pending choice is an ActionContinuation discard from canonical source zone
       ``hand``;
     * exactly one root-Hand concrete card is absent from the choice, that missing card is
@@ -380,6 +383,15 @@ def visible_draw_constraints_from_pending_choice(
     mechanic, reordered/mutated pre-existing hand, malformed identity, or ambiguous
     provenance fails closed to ``()`` rather than inventing a draw offset/order.
     """
+    # Do not infer the producer solely from the post-step hand/choice shape. Both real
+    # committed-step call sites already know the SemanticAction that produced this state,
+    # so require an actual Acrobatics card action before considering exact draw pinning.
+    if triggering_action.action_type != "card":
+        return ()
+    semantic_slot, separator, semantic_card_id = triggering_action.semantic_key.partition(":")
+    if not separator or not semantic_slot or semantic_card_id != "ACROBATICS":
+        return ()
+
     # A later Replay Prefix entry has no visibility-scoped draw cursor in Emulator #25's
     # contract. Never flatten such evidence back to absolute root position 0.
     if replay_prefix:

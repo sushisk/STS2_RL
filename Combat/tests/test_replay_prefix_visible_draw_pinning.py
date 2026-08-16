@@ -14,7 +14,10 @@ if str(_COMBAT_DIR) not in sys.path:
 
 from battle_emulator import BattleState  # noqa: E402
 from combat_state_snapshot import CardInstanceSnapshot, SerializableRngSnapshot  # noqa: E402
-from search.decision_context import visible_draw_constraints_from_pending_choice  # noqa: E402
+from search.decision_context import (  # noqa: E402
+    SemanticAction,
+    visible_draw_constraints_from_pending_choice as _extract_visible_draw_constraints,
+)
 from search.rng_hypothesis import (  # noqa: E402
     SearchHypothesisId,
     _draw_pile_instances_for_hypothesis,
@@ -82,6 +85,15 @@ def _entry(*constraints):
     return SimpleNamespace(visible_draw_constraints=tuple(constraints))
 
 
+def _visible_constraints(state, root, replay_prefix, *, card_id: str = "ACROBATICS"):
+    return _extract_visible_draw_constraints(
+        state,
+        root,
+        replay_prefix,
+        triggering_action=SemanticAction("card", f"0:{card_id}"),
+    )
+
+
 def _rng() -> SerializableRngSnapshot:
     return SerializableRngSnapshot(Counter=1, State0=2, State1=3, State2=4, State3=5)
 
@@ -116,7 +128,7 @@ def test_visible_constraints_keep_new_acrobatics_draws_when_choice_contains_pree
 
     # The pre-existing hand card is verified but is not a draw constraint. Only the
     # newly appended Acrobatics cards are translated to internal Snapshot IDs.
-    assert visible_draw_constraints_from_pending_choice(state, root, []) == (
+    assert _visible_constraints(state, root, []) == (
         ("A", "i-a2"),
         ("B", "i-b"),
         ("C", "i-c"),
@@ -142,16 +154,16 @@ def test_visible_constraints_fail_closed_without_proven_root_acrobatics_shape() 
 
     # A later Replay Prefix entry has no safe root-relative draw cursor, so it must not
     # be flattened to position zero.
-    assert visible_draw_constraints_from_pending_choice(_state(options), root, [_entry()]) == ()
+    assert _visible_constraints(_state(options), root, [_entry()]) == ()
 
     # Canonical source-zone and discard/action-continuation shape are part of the proof.
-    assert visible_draw_constraints_from_pending_choice(
+    assert _visible_constraints(
         _state(options, semantic_source_zone="draw_pile"), root, []
     ) == ()
-    assert visible_draw_constraints_from_pending_choice(
+    assert _visible_constraints(
         _state(options, choice_operation="exhaust"), root, []
     ) == ()
-    assert visible_draw_constraints_from_pending_choice(
+    assert _visible_constraints(
         _state(options, scope="TopLevel"), root, []
     ) == ()
 
@@ -169,7 +181,7 @@ def test_visible_constraints_fail_closed_without_proven_root_acrobatics_shape() 
         {"id": "SURVIVOR", "optionId": "l", "cardInstanceId": _public_instance_id("i-left")},
         {"id": "A", "optionId": "a", "cardInstanceId": _public_instance_id("i-a")},
     ]
-    assert visible_draw_constraints_from_pending_choice(
+    assert _visible_constraints(
         _state(reordered_options), reordered_root, []
     ) == ()
 
@@ -178,7 +190,7 @@ def test_visible_constraints_fail_closed_without_proven_root_acrobatics_shape() 
         [_card("i-a", "A")],
         hand_cards=[_card("i-strike", "STRIKE_SILENT"), _card("i-neutralize", "NEUTRALIZE")],
     )
-    assert visible_draw_constraints_from_pending_choice(
+    assert _visible_constraints(
         _state(
             [
                 {
@@ -194,16 +206,48 @@ def test_visible_constraints_fail_closed_without_proven_root_acrobatics_shape() 
     ) == ()
 
 
+def test_visible_constraints_reject_same_acrobatics_shape_from_non_acrobatics_action() -> None:
+    root = _root(
+        [_card("i-a", "A")],
+        hand_cards=[
+            _card("i-acrobatics", "ACROBATICS"),
+            _card("i-neutralize", "NEUTRALIZE"),
+        ],
+    )
+    state = _state(
+        [
+            {
+                "id": "NEUTRALIZE",
+                "optionId": "o-hand",
+                "cardInstanceId": _public_instance_id("i-neutralize"),
+            },
+            {
+                "id": "A",
+                "optionId": "o-a",
+                "cardInstanceId": _public_instance_id("i-a"),
+            },
+        ]
+    )
+
+    # The post-step shape itself is a valid Acrobatics shape, proving this fixture
+    # would have been accepted before the triggering-action gate was added.
+    assert _visible_constraints(state, root, []) == (("A", "i-a"),)
+
+    # The same root hand and PendingChoice must fail closed when a different card
+    # action produced it; post-step shape alone is not sufficient provenance.
+    assert _visible_constraints(state, root, [], card_id="STRIKE_SILENT") == ()
+
+
 def test_visible_constraints_reject_malformed_or_non_root_draw_identity() -> None:
     root = _root(
         [_card("i-a", "A"), _card("i-b", "B")],
         hand_cards=[_card("i-acrobatics", "ACROBATICS")],
     )
 
-    assert visible_draw_constraints_from_pending_choice(
+    assert _visible_constraints(
         _state([{"id": "A", "optionId": "legacy"}]), root, []
     ) == ()
-    assert visible_draw_constraints_from_pending_choice(
+    assert _visible_constraints(
         _state(
             [
                 {

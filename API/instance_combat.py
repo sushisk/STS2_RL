@@ -307,7 +307,10 @@ class CombatInstance:
                     target_index=target_index,
                     target_enemy_index=target_enemy_index,
                     visible_draw_constraints=visible_draw_constraints_from_pending_choice(
-                        next_state, self._held_stable_snapshot, self._replay_prefix
+                        next_state,
+                        self._held_stable_snapshot,
+                        self._replay_prefix,
+                        triggering_action=_semantic_action_for(chosen),
                     ),
                 )
                 self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)

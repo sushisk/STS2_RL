@@ -466,7 +466,10 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
             target_enemy_index=planned_step.target_enemy_index,
             visible_draw_constraints=(
                 visible_draw_constraints_from_pending_choice(
-                    next_result, loop_state.held_stable_snapshot, loop_state.replay_prefix
+                    next_result,
+                    loop_state.held_stable_snapshot,
+                    loop_state.replay_prefix,
+                    triggering_action=planned_step.semantic_action,
                 )
                 if loop_state.held_stable_snapshot is not None
                 else ()
