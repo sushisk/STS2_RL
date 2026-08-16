@@ -1,9 +1,9 @@
-"""Visible cardInstanceId survives masking only at the already-public choice boundary."""
+"""Emulator cardInstanceId is RL-internal replay evidence, never a Training feature."""
 
 from API.masking import build_masked_emulator_dto
 
 
-def test_visible_pending_and_choice_action_card_instance_ids_survive_masking_without_pile_leak() -> None:
+def test_card_instance_ids_are_redacted_from_training_facing_choice_and_piles() -> None:
     raw_state = {
         "pendingChoice": {
             "choiceType": "TestCardChoice",
@@ -17,11 +17,10 @@ def test_visible_pending_and_choice_action_card_instance_ids_survive_masking_wit
                 {
                     "id": "DEFEND_SILENT",
                     "optionId": "opt-1",
-                    "cardInstanceId": "card-000123",
+                    "cardInstanceId": "cardv-0123456789abcdef0123456789abcdef",
                 }
             ],
         },
-        # Hidden pile order/instance identity must remain masked.
         "drawPile": [
             {
                 "id": "DEFEND_SILENT",
@@ -42,7 +41,7 @@ def test_visible_pending_and_choice_action_card_instance_ids_survive_masking_wit
             "parameters": {
                 "cardId": "DEFEND_SILENT",
                 "optionId": "opt-1",
-                "cardInstanceId": "card-000123",
+                "cardInstanceId": "cardv-0123456789abcdef0123456789abcdef",
             },
             "semantic_key": "opt-1:DEFEND_SILENT",
         }
@@ -50,6 +49,6 @@ def test_visible_pending_and_choice_action_card_instance_ids_survive_masking_wit
 
     masked = build_masked_emulator_dto(raw_state, extra={"legal_actions": legal_actions})
 
-    assert masked["pendingChoice"]["options"][0]["cardInstanceId"] == "card-000123"
-    assert masked["legal_actions"][0]["parameters"]["cardInstanceId"] == "card-000123"
+    assert "cardInstanceId" not in masked["pendingChoice"]["options"][0]
+    assert "cardInstanceId" not in masked["legal_actions"][0]["parameters"]
     assert "cardInstanceId" not in masked["drawPile"][0]
