@@ -41,8 +41,7 @@ from search.main_loop import build_main_decision_context, initialize_main_loop_s
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _simple_spec():

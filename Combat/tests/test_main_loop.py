@@ -91,8 +91,7 @@ def _find_action(state: BattleState, action_type: str, card_id=None) -> dict:
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _strike_targeting_selector(battle_state: BattleState) -> PlannedStep:
@@ -394,7 +393,7 @@ def test_verify_transition_matching_expected_signature_does_not_discard():
 def test_verify_transition_mismatched_expected_signature_discards_but_keeps_transition_record():
     spec = _simple_spec()
     real_sig = _dry_run_strike_signature(spec)
-    tampered_sig = dataclasses.replace(real_sig, resolved_card_id="DEFEND_IRONCLAD")
+    tampered_sig = dataclasses.replace(real_sig, resolved_semantic_key="DEFEND_IRONCLAD")
 
     session = LiveCombatSession()
     state = session.start_combat(spec)

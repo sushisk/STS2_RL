@@ -54,9 +54,8 @@ def zero_index_pending_selector(current_result) -> PlannedStep:
     if not legal_actions:
         raise RuntimeError("zero_index: Current Decision Result reports no candidates to choose from")
     action = legal_actions[0]
-    params = action.get("parameters") or {}
     semantic_action = SemanticAction(
-        action_type=action.get("action_type"), card_id=params.get("cardId"), target_type=params.get("targetType")
+        action_type=action.get("action_type"), semantic_key=action.get("semantic_key", "")
     )
     return PlannedStep(semantic_action=semantic_action, target_index=None, target_enemy_index=None, expected_signature=None)
 
@@ -83,9 +82,8 @@ def make_external_action_selector(resolve_action_id: Callable[[list], int]) -> D
                 f"not a unique action_id among {[a.get('action_id') for a in legal_actions]!r}"
             )
         action = matches[0]
-        params = action.get("parameters") or {}
         semantic_action = SemanticAction(
-            action_type=action.get("action_type"), card_id=params.get("cardId"), target_type=params.get("targetType")
+            action_type=action.get("action_type"), semantic_key=action.get("semantic_key", "")
         )
         return PlannedStep(semantic_action=semantic_action, target_index=None, target_enemy_index=None, expected_signature=None)
 

@@ -85,7 +85,7 @@ def _survivor_spec(index: int) -> dict:
 
 
 def _survivor_root_selector(ref) -> bool:
-    return ref.semantic_action.action_type == "card" and ref.semantic_action.card_id == "SURVIVOR"
+    return ref.semantic_action.action_type == "card" and ref.semantic_action.semantic_key.endswith(":SURVIVOR")
 
 
 def _liquid_memories_spec(index: int) -> dict:
@@ -230,11 +230,10 @@ def _run_one_pending_event(
     state = session.start_combat(spec)
     root_snapshot = session.capture_snapshot()
     first_action = state._cached_legal_actions[0]  # noqa: SLF001 - established pattern, see test_branch_worker_pool.py
-    first_params = first_action.get("parameters") or {}
     root_signature = DecisionSignature.from_battle_state(
         state,
         semantic_action=SemanticAction(
-            action_type=first_action["action_type"], card_id=first_params.get("cardId"), target_type=first_params.get("targetType")
+            action_type=first_action["action_type"], semantic_key=first_action.get("semantic_key", "")
         ),
         resolved_action=first_action,
     )
@@ -347,7 +346,7 @@ def _run_one_pending_event(
             )
         if sibling_result.result_signature.boundary != BOUNDARY_STABLE or sibling_result.child_snapshot is None:
             raise StopConditionError(f"sibling did not resolve its own different choice to Stable: {sibling_result!r}")
-        if sibling_result.result_signature.resolved_card_id == holder_result.result_signature.resolved_card_id:
+        if sibling_result.result_signature.resolved_semantic_key == holder_result.result_signature.resolved_semantic_key:
             raise StopConditionError("Holder and sibling resolved to the SAME card - candidates were not distinct")
 
     return {

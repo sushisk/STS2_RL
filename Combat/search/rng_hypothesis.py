@@ -184,8 +184,9 @@ def _candidate_action_type(candidate: Any) -> str:
 def _candidate_card_id(candidate: Any) -> Optional[str]:
     if hasattr(candidate, "semantic_action"):
         action = getattr(candidate, "semantic_action")
-        if getattr(action, "card_id", None) is not None:
-            return str(action.card_id)
+        semantic_key = getattr(action, "semantic_key", "")
+        if action.action_type in {"card", "choice_card", "choice_reward_card"} and semantic_key:
+            return str(semantic_key).split(":", 1)[-1]
     if isinstance(candidate, dict):
         params = candidate.get("parameters") or {}
         if params.get("cardId") is not None:

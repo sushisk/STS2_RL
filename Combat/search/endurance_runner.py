@@ -400,7 +400,7 @@ def _install_spies(controller: FaultInjectionController, observer: EnduranceObse
         if controller.active and isinstance(pipeline, CandidatePipelineSuccess):
             invalid = dataclasses.replace(
                 pipeline.continuation_candidate,
-                semantic_action=SemanticAction("card", "NOT_A_REAL_CARD", "SingleEnemy"),
+                semantic_action=SemanticAction("card", "0:NOT_A_REAL_CARD"),
                 target_enemy_index=0,
                 score=pipeline.continuation_candidate.score - 100.0,
             )

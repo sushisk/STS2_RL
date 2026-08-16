@@ -106,18 +106,16 @@ class CombatStartReplayRoot:
 @dataclass(frozen=True)
 class SemanticAction:
     """The 'Semantic Action' side of DC_SIGNATURE's Semantic Action <-> ActionId
-    correspondence: (action_type, card_id, target_type). Deliberately NOT an action_id -
+    correspondence: (action_type, semantic_key). Deliberately NOT an action_id -
     action_id "is valid only within the DecisionFrame it was issued against"
     (combat_state_contract.v0.3.md, and `live_combat_session.py`'s own
     `DecisionFrameMismatchError` docstring) and is re-resolved fresh against whatever
-    legal_actions the CURRENT Decision Result reports every time this is replayed. Same
-    shape this package's own tests already use informally for this purpose - see
-    `Combat/tests/test_restore_snapshot_phase3c1.py`'s `_first_logical_action`/
-    `_find_logical_action` helpers."""
+    legal_actions the CURRENT Decision Result reports every time this is replayed. The
+    semantic key is authored by the Emulator for exactly this re-resolution purpose; this
+    package only echoes it."""
 
     action_type: str
-    card_id: "Optional[str]"
-    target_type: "Optional[str]"
+    semantic_key: str
 
     def resolve(self, legal_actions: "list[dict]") -> dict:
         """Re-resolves this Semantic Action against `legal_actions` (always the CURRENT
@@ -127,11 +125,9 @@ class SemanticAction:
         silently returning None - if nothing matches, so callers can't accidentally step
         with the wrong candidate."""
         for action in legal_actions:
-            params = action.get("parameters") or {}
             if (
                 action.get("action_type") == self.action_type
-                and params.get("cardId") == self.card_id
-                and params.get("targetType") == self.target_type
+                and action.get("semantic_key", "") == self.semantic_key
             ):
                 return action
         raise SemanticActionUnresolvedError(
@@ -140,8 +136,7 @@ class SemanticAction:
 
 
 def _candidate_semantic_key(action: dict) -> tuple:
-    params = action.get("parameters") or {}
-    return (action.get("action_type"), params.get("cardId"), params.get("targetType"))
+    return (action.get("action_type"), action.get("semantic_key", ""))
 
 
 def candidate_multiset(legal_actions: "list[dict]") -> "tuple[tuple[tuple, int], ...]":
@@ -163,7 +158,7 @@ class DecisionSignature:
     """Decision Signature (DC_SIGNATURE) - "Action実行とDecision Boundary制御情報の
     確認専用。盤面Signatureではない". Confirms ONLY: the pre/post-step State Identity,
     the Semantic Action <-> resolved ActionId correspondence (one-time, not a persistent
-    cross-state id), the card/target/selection the EMULATOR ITSELF reports as resolved
+    cross-state id), the semantic key/selection the EMULATOR ITSELF reports as resolved
     (echoed from the Decision Result/StepResult, never independently recomputed here),
     the Boundary kind reached, and (Pending only) choice_scope/choice_kind/the candidate
     Semantic Key multiset.
@@ -202,9 +197,8 @@ class DecisionSignature:
     # --- Semantic Action <-> ActionId correspondence (Stable/Pending common) ---
     semantic_action: SemanticAction
     resolved_action_id: int
-    # --- Emulator-reported resolved card/target/selection (Stable/Pending common) ---
-    resolved_card_id: "Optional[str]"
-    resolved_target_type: "Optional[str]"
+    # --- Emulator-reported resolved semantic key/selection (Stable/Pending common) ---
+    resolved_semantic_key: str
     resolved_target_index: "Optional[int]"
     resolved_target_slot_index: "Optional[int]"
     # --- Boundary kind reached (Stable/Pending common) ---
@@ -251,15 +245,13 @@ class DecisionSignature:
         """Builds a DecisionSignature from whatever `LiveCombatSession` actually returns
         after a Start/Step/Restore call - `battle_state` is that real return value
         (a `battle_emulator.BattleState`), `resolved_action` is the legal-action dict
-        `SemanticAction.resolve()` matched (its `parameters` are the Emulator's OWN
-        reported cardId/targetType, echoed verbatim - never recomputed). `legal_actions`
+        `SemanticAction.resolve()` matched (its `semantic_key` is the Emulator's OWN
+        reported replay key, echoed verbatim - never recomputed). `legal_actions`
         defaults to `battle_state`'s own cached candidates
         (`_cached_legal_actions` - always populated for a BattleState LiveCombatSession
         itself produced), matching NOTE_NO_REREAD."""
         frame = battle_state.decision_frame
         boundary = boundary_of_battle_state(battle_state)
-        params = resolved_action.get("parameters") or {}
-
         choice_scope = None
         choice_kind = None
         candidate_keys = None
@@ -280,8 +272,7 @@ class DecisionSignature:
             continuation_step_index=frame.continuation_step_index if frame is not None else None,
             semantic_action=semantic_action,
             resolved_action_id=int(resolved_action["action_id"]),
-            resolved_card_id=params.get("cardId"),
-            resolved_target_type=params.get("targetType"),
+            resolved_semantic_key=resolved_action.get("semantic_key", ""),
             resolved_target_index=target_index,
             resolved_target_slot_index=target_enemy_index,
             boundary=boundary,
@@ -649,8 +640,8 @@ def _representative_signature_for_empty_prefix(current_result: "BattleState") ->
     legal_actions = current_result._cached_legal_actions or []  # noqa: SLF001 - NOTE_NO_REREAD, same pattern as replay_decision_context()
     if not legal_actions:
         if current_result.is_terminal:
-            action = {"action_type": "system", "parameters": {}, "action_id": -1}
-            semantic_action = SemanticAction(action_type="system", card_id=None, target_type=None)
+            action = {"action_type": "system", "parameters": {}, "action_id": -1, "semantic_key": ""}
+            semantic_action = SemanticAction(action_type="system", semantic_key="")
             return DecisionSignature.from_battle_state(
                 current_result, semantic_action=semantic_action, resolved_action=action
             )
@@ -658,9 +649,8 @@ def _representative_signature_for_empty_prefix(current_result: "BattleState") ->
             "cannot build a Decision Context signature: Current Decision Result reports no candidates"
         )
     action = legal_actions[0]
-    params = action.get("parameters") or {}
     semantic_action = SemanticAction(
-        action_type=action.get("action_type"), card_id=params.get("cardId"), target_type=params.get("targetType")
+        action_type=action.get("action_type"), semantic_key=action.get("semantic_key", "")
     )
     return DecisionSignature.from_battle_state(current_result, semantic_action=semantic_action, resolved_action=action)
 

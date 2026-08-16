@@ -325,8 +325,7 @@ def _semantic_action_key(action: SemanticAction, target_index: Optional[int], ta
     return _digest(
         {
             "action_type": action.action_type,
-            "card_id": action.card_id,
-            "target_type": action.target_type,
+            "semantic_key": action.semantic_key,
             "target_index": target_index,
             "target_enemy_index": target_enemy_index,
         },

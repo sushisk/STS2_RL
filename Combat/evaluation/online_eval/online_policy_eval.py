@@ -117,12 +117,11 @@ def load_manifest(name: str) -> list[dict]:
     return rows
 
 
-ACTION_SEMANTIC_KEYS = ("action_type", "label")
+ACTION_SEMANTIC_KEYS = ("action_type", "semantic_key")
 
 
 def action_semantic_key(action: dict) -> tuple:
-    params = action.get("parameters") or {}
-    return (action.get("action_type"), action.get("label"), params.get("cardId"), params.get("potionId"))
+    return (action.get("action_type"), action.get("semantic_key", ""))
 
 
 def encounter_key(spec: dict) -> str:

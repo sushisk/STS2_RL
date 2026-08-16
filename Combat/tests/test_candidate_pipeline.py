@@ -101,8 +101,7 @@ def _find_action(state: BattleState, action_type: str, card_id=None) -> dict:
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _representative_signature(state: BattleState) -> DecisionSignature:
@@ -140,9 +139,8 @@ def test_extract_candidates_from_real_stable_boundary_shape():
     assert len(candidates) == len(state._cached_legal_actions)  # noqa: SLF001
     assert {c.choice_kind for c in candidates} == {a["action_type"] for a in state._cached_legal_actions}  # noqa: SLF001
     assert all(c.choice_scope == CHOICE_SCOPE_TOP_LEVEL for c in candidates)
-    strike = next(c for c in candidates if c.semantic_action.card_id == "STRIKE_IRONCLAD")
+    strike = next(c for c in candidates if c.semantic_action.semantic_key == "0:STRIKE_IRONCLAD")
     assert strike.choice_kind == "card"
-    assert strike.semantic_action.target_type in ("SingleEnemy", "AnyEnemy")
     assert strike.target_index is None
     assert strike.target_enemy_index is None
 
@@ -156,7 +154,7 @@ def test_extract_candidates_from_real_pending_boundary_derives_top_level_scope()
     assert len(candidates) == len(state._cached_legal_actions)  # noqa: SLF001
     assert {c.choice_kind for c in candidates} == {"choice_card", "choice_skip"}
     assert all(c.choice_scope == CHOICE_SCOPE_TOP_LEVEL for c in candidates)
-    assert any(c.semantic_action.card_id == "EQUILIBRIUM" for c in candidates if c.choice_kind == "choice_card")
+    assert any(c.semantic_action.semantic_key.endswith(":EQUILIBRIUM") for c in candidates if c.choice_kind == "choice_card")
     assert any(c.choice_kind == "choice_skip" for c in candidates)
 
 

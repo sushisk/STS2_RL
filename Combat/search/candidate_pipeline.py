@@ -178,8 +178,7 @@ def extract_candidates(current_result: BattleState) -> "list[Candidate]":
         card_id = params.get("cardId")
         semantic_action = SemanticAction(
             action_type=action_type,
-            card_id=card_id,
-            target_type=params.get("targetType"),
+            semantic_key=action.get("semantic_key", ""),
         )
         card_feature = _card_feature_by_id(current_result.engine_state, card_id)
         candidates.append(
