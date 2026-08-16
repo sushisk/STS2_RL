@@ -89,8 +89,7 @@ def _simple_spec(hand=None, enemy_hp=48):
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _find_action(state: BattleState, action_type: str, card_id=None) -> dict:
@@ -121,15 +120,14 @@ def _with_synthetic_dangling_draw(snapshot):
 
 
 def _sig(action: SemanticAction | None = None, *, boundary=BOUNDARY_STABLE) -> DecisionSignature:
-    action = action or SemanticAction("card", "STRIKE_IRONCLAD", "SingleEnemy")
+    action = action or SemanticAction("card", "0:STRIKE_IRONCLAD")
     return DecisionSignature(
         combat_session_id="session-a",
         step_index=0,
         continuation_step_index=None,
         semantic_action=action,
         resolved_action_id=1,
-        resolved_card_id=action.card_id,
-        resolved_target_type=action.target_type,
+        resolved_semantic_key=action.semantic_key,
         resolved_target_index=None,
         resolved_target_slot_index=0,
         boundary=boundary,
@@ -152,7 +150,7 @@ def _candidate(action: SemanticAction, score: float, signature: DecisionSignatur
     return PipelineCandidateRef(
         current_context_signature=signature or _sig(action),
         semantic_action=action,
-        target_enemy_index=0 if action.target_type == "SingleEnemy" else None,
+        target_enemy_index=0 if action.semantic_key == "SingleEnemy" else None,
         score=score,
         choice_kind=action.action_type,
         choice_scope="TopLevel",
@@ -172,7 +170,7 @@ def _work_item(action: SemanticAction, score: float, *, hypothesis_id=None, work
 
 
 def _success_log(root: str, hyp: str | None, score: float, *, work_id=None) -> BranchDecisionLogEntry:
-    action = SemanticAction("card", root, "SingleEnemy")
+    action = SemanticAction("card", root)
     return BranchDecisionLogEntry(
         status="success",
         root_action_key=root,
@@ -297,7 +295,7 @@ def test_aggregate_plain_results_excludes_faults_and_selects_best_score():
 
 
 def test_build_commit_decision_shapes_hypothesis_plain_invariant_and_empty_paths():
-    action = SemanticAction("card", "STRIKE_IRONCLAD", "SingleEnemy")
+    action = SemanticAction("card", "0:STRIKE_IRONCLAD")
     hyp_aggregation = AggregationResult(
         viable_actions=(
             dataclasses.replace(
@@ -330,7 +328,7 @@ def test_build_commit_decision_shapes_hypothesis_plain_invariant_and_empty_paths
     empty = AggregationResult(viable_actions=(), best_action=None, diagnostics={})
     failure = build_commit_decision(empty, hypothesis_involved=False, verify_main_invariant=lambda: True)
     assert isinstance(failure, SearchEvaluationFailure)
-    assert action.card_id == "STRIKE_IRONCLAD"  # keeps this fixture's action used and explicit
+    assert action.semantic_key == "0:STRIKE_IRONCLAD"  # keeps this fixture's action used and explicit
 
 
 def test_depth_cap_helper_triggers_at_or_above_threshold_only():
@@ -344,7 +342,7 @@ def test_depth_cap_helper_triggers_at_or_above_threshold_only():
 
 
 def test_decision_log_entry_wraps_success_and_fault_results():
-    action = SemanticAction("card", "STRIKE_IRONCLAD", "SingleEnemy")
+    action = SemanticAction("card", "0:STRIKE_IRONCLAD")
     item = _work_item(action, 12.5, hypothesis_id="H1", work_id="wrap-success")
     success = BranchResult(
         status=BRANCH_STATUS_SUCCESS,
@@ -419,7 +417,7 @@ def test_real_worker_replay_mismatch_diagnostics_classify_as_replay_mismatch():
     state1 = record_session.step(state0, strike, target_enemy_index=0)
     sig1 = DecisionSignature.from_battle_state(state1, semantic_action=strike_semantic, resolved_action=strike, target_enemy_index=0)
     tampered = ReplayPrefixEntry(
-        semantic_action=SemanticAction("card", "A_CARD_THAT_DOES_NOT_EXIST", None),
+        semantic_action=SemanticAction("card", "0:A_CARD_THAT_DOES_NOT_EXIST"),
         expected_signature=sig1,
         target_enemy_index=0,
     )

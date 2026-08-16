@@ -84,9 +84,8 @@ def test_zero_index_pending_selector_never_reorders_never_scores():
     step = zero_index_pending_selector(state)
     legal = state._cached_legal_actions  # noqa: SLF001
     first = legal[0]
-    params = first.get("parameters") or {}
     assert step.semantic_action.action_type == first.get("action_type")
-    assert step.semantic_action.card_id == params.get("cardId")
+    assert step.semantic_action.semantic_key == first.get("semantic_key", "")
     assert step.expected_signature is None
 
 
@@ -105,9 +104,8 @@ def test_external_control_selector_resolves_exactly_the_given_action_id_never_ot
     target = legal[-1]  # deliberately NOT index 0 - proves this is not zero_index
     selector = make_external_action_selector(lambda _legal: target["action_id"])
     step = selector(state)
-    params = target.get("parameters") or {}
     assert step.semantic_action.action_type == target["action_type"]
-    assert step.semantic_action.card_id == params.get("cardId")
+    assert step.semantic_action.semantic_key == target.get("semantic_key", "")
 
 
 def test_external_control_selector_rejects_unresolvable_action_id():

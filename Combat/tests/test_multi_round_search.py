@@ -79,8 +79,7 @@ def _liquid_memories_spec():
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _representative_signature(state: BattleState) -> DecisionSignature:
@@ -129,11 +128,14 @@ def _candidate(
     score: float,
     target_index: int | None = 0,
     action_type: str = "system",
+    semantic_key="",
     card_id=None,
 ):
+    if card_id is not None and not semantic_key:
+        semantic_key = f"0:{card_id}"
     return PipelineCandidateRef(
         current_context_signature=context.current_context_signature,
-        semantic_action=SemanticAction(action_type, card_id, None),
+        semantic_action=SemanticAction(action_type, semantic_key),
         target_index=target_index,
         score=score,
         choice_kind=action_type,
@@ -155,7 +157,7 @@ def _stable_signature(base: DecisionSignature, semantic_action: SemanticAction, 
     return dataclasses.replace(
         base,
         semantic_action=semantic_action,
-        resolved_card_id=semantic_action.card_id,
+        resolved_semantic_key=semantic_action.semantic_key,
         resolved_target_index=target_index,
         boundary=BOUNDARY_STABLE,
         choice_scope=None,
@@ -349,7 +351,7 @@ def test_real_pending_mid_chain_continues_with_holder_and_sibling_replay():
                     result.worker_id,
                     result.result_signature.boundary if result.result_signature is not None else None,
                     item.candidate.semantic_action.action_type,
-                    item.candidate.semantic_action.card_id,
+                    item.candidate.semantic_action.semantic_key,
                 )
                 for item, result in zip(work_items, results)
             ]

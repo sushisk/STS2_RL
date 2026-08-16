@@ -89,8 +89,7 @@ def _toolbox_pending_spec():
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _eligible_root_snapshot(session: LiveCombatSession):
@@ -160,7 +159,7 @@ def test_lease_validity_checks_hypothesis_worker_generation_and_decision_result_
     assert not lease.is_valid_for(item, worker_generation=4)
     assert not dataclasses.replace(lease, search_hypothesis_id="H2").is_valid_for(item, worker_generation=3)
     assert not dataclasses.replace(lease, step_index=sig.step_index + 1).is_valid_for(item, worker_generation=3)
-    stale_sig = dataclasses.replace(sig, resolved_card_id="A_DIFFERENT_CARD")
+    stale_sig = dataclasses.replace(sig, resolved_semantic_key="A_DIFFERENT_CARD")
     assert not dataclasses.replace(lease, decision_result_digest=decision_result_digest(stale_sig)).is_valid_for(
         item, worker_generation=3
     )
@@ -487,9 +486,9 @@ def test_real_multiprocess_pool_combat_start_pending_siblings_bootstrap_independ
     distinct_by_card_id = []
     seen_card_ids = set()
     for candidate in card_candidates:
-        if candidate.semantic_action.card_id in seen_card_ids:
+        if candidate.semantic_action.semantic_key in seen_card_ids:
             continue
-        seen_card_ids.add(candidate.semantic_action.card_id)
+        seen_card_ids.add(candidate.semantic_action.semantic_key)
         distinct_by_card_id.append(candidate)
     assert len(distinct_by_card_id) >= 2, [c.semantic_action for c in card_candidates]
 
@@ -520,7 +519,7 @@ def test_real_multiprocess_pool_combat_start_pending_siblings_bootstrap_independ
     assert all(result.execution_mode == EXECUTION_MODE_BOOTSTRAP_STEP for result in results)
     assert all(result.result_signature.boundary == BOUNDARY_STABLE for result in results)
     assert len({result.result_signature.combat_session_id for result in results}) == 2
-    assert len({result.result_signature.resolved_card_id for result in results}) == 2
+    assert len({result.result_signature.resolved_semantic_key for result in results}) == 2
 
 
 def _run_all() -> int:

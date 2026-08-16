@@ -155,6 +155,7 @@ def legal_action_to_dict(action) -> dict:
         "label": str(action.Label),
         "is_available": bool(action.IsAvailable),
         "parameters": to_plain(action.Parameters),
+        "semantic_key": str(action.SemanticKey),
     }
 
 

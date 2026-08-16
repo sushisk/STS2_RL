@@ -190,8 +190,7 @@ def _root_action_key(work_item) -> str:
     return json.dumps(
         {
             "action_type": action.action_type,
-            "card_id": action.card_id,
-            "target_type": action.target_type,
+            "semantic_key": action.semantic_key,
             "target_index": work_item.candidate.target_index,
             "target_enemy_index": work_item.candidate.target_enemy_index,
         },
@@ -205,8 +204,7 @@ def _action_label(step) -> str:
     return json.dumps(
         {
             "action_type": action.action_type,
-            "card_id": action.card_id,
-            "target_type": action.target_type,
+            "semantic_key": action.semantic_key,
             "target_index": step.target_index,
             "target_enemy_index": step.target_enemy_index,
         },

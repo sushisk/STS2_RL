@@ -70,8 +70,7 @@ def _pending_context_and_work_items():
     from search.decision_context import DecisionContext, DecisionSignature, SemanticAction
 
     def semantic_action_for(action):
-        params = action.get("parameters") or {}
-        return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+        return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
     spec = _liquid_memories_spec()
     session = LiveCombatSession()

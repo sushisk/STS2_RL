@@ -77,6 +77,7 @@ class ShadowAction:
     """
 
     action_type: str
+    semantic_key: str = ""
     card_id: "Optional[str]" = None
     potion_id: "Optional[str]" = None
     target_type: "Optional[str]" = None
@@ -87,6 +88,8 @@ class ShadowAction:
     @property
     def comparison_key(self) -> tuple:
         target_key = self.target_enemy_index if self.target_enemy_index is not None else self.target_index
+        if self.semantic_key:
+            return (self.action_type, self.semantic_key, target_key)
         return (self.action_type, self.card_id, self.potion_id, self.target_type, target_key)
 
 
@@ -139,6 +142,7 @@ def _action_from_legal_action(
     params = action.get("parameters") or {}
     return ShadowAction(
         action_type=str(action.get("action_type")),
+        semantic_key=str(action.get("semantic_key", "")),
         card_id=params.get("cardId"),
         potion_id=params.get("potionId"),
         target_type=params.get("targetType"),
@@ -158,8 +162,7 @@ def _action_from_semantic_action(
 ) -> ShadowAction:
     return ShadowAction(
         action_type=action.action_type,
-        card_id=action.card_id,
-        target_type=action.target_type,
+        semantic_key=action.semantic_key,
         target_index=target_index,
         target_enemy_index=target_enemy_index,
     )

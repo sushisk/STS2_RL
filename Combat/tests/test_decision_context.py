@@ -88,8 +88,7 @@ def _find_action(state: BattleState, action_type: str, card_id=None) -> dict:
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _eligible_root_snapshot(session: LiveCombatSession):
@@ -137,7 +136,7 @@ def test_signature_from_stable_boundary_has_no_pending_fields():
 
     sig = DecisionSignature.from_battle_state(next_state, semantic_action=semantic_action, resolved_action=strike, target_enemy_index=0)
     assert sig.boundary == BOUNDARY_STABLE
-    assert sig.resolved_card_id == "STRIKE_IRONCLAD"
+    assert sig.resolved_semantic_key == "0:STRIKE_IRONCLAD"
     assert sig.resolved_action_id == strike["action_id"]
     assert sig.combat_session_id == next_state.decision_frame.combat_session_id
     assert sig.step_index == next_state.decision_frame.step_index
@@ -161,7 +160,7 @@ def test_signature_from_pending_boundary_populates_pending_only_fields():
     assert sig.choice_kind == "ToolboxChooseCard"
     assert sig.candidate_semantic_keys is not None
     candidate_keys_dict = dict(sig.candidate_semantic_keys)
-    assert candidate_keys_dict[("choice_card", "EQUILIBRIUM", None)] == 1
+    assert candidate_keys_dict[(chosen["action_type"], chosen["semantic_key"])] == 1
     assert sum(candidate_keys_dict.values()) == len(state._cached_legal_actions)  # noqa: SLF001
 
 
@@ -186,13 +185,12 @@ def test_restore_input_eligibility_rejects_pending_capture_but_accepts_stable_ca
 
 
 def test_boundary_construction_rejects_pending_fields_when_not_pending():
-    strike_semantic = SemanticAction("card", "STRIKE_IRONCLAD", None)
+    strike_semantic = SemanticAction("card", "0:STRIKE_IRONCLAD")
     try:
         DecisionSignature(
             combat_session_id="s", step_index=0, continuation_step_index=None,
             semantic_action=strike_semantic, resolved_action_id=1,
-            resolved_card_id="STRIKE_IRONCLAD", resolved_target_type=None,
-            resolved_target_index=None, resolved_target_slot_index=0,
+            resolved_semantic_key="STRIKE_IRONCLAD", resolved_target_index=None, resolved_target_slot_index=0,
             boundary=BOUNDARY_STABLE, choice_scope=CHOICE_SCOPE_TOP_LEVEL,
         )
         raise AssertionError("expected ValueError for Pending-only field set on a Stable signature")
@@ -207,14 +205,14 @@ def test_boundary_construction_rejects_pending_fields_when_not_pending():
 
 def test_candidate_multiset_preserves_duplicates():
     legal_actions = [
-        {"action_id": 0, "action_type": "card", "parameters": {"cardId": "STRIKE_IRONCLAD", "targetType": "SingleEnemy"}},
-        {"action_id": 1, "action_type": "card", "parameters": {"cardId": "STRIKE_IRONCLAD", "targetType": "SingleEnemy"}},
-        {"action_id": 2, "action_type": "card", "parameters": {"cardId": "DEFEND_IRONCLAD", "targetType": None}},
+        {"action_id": 0, "action_type": "card", "semantic_key": "0:STRIKE_IRONCLAD", "parameters": {"cardId": "STRIKE_IRONCLAD", "targetType": "SingleEnemy"}},
+        {"action_id": 1, "action_type": "card", "semantic_key": "0:STRIKE_IRONCLAD", "parameters": {"cardId": "STRIKE_IRONCLAD", "targetType": "SingleEnemy"}},
+        {"action_id": 2, "action_type": "card", "semantic_key": "2:DEFEND_IRONCLAD", "parameters": {"cardId": "DEFEND_IRONCLAD", "targetType": None}},
     ]
     multiset = candidate_multiset(legal_actions)
     as_dict = dict(multiset)
-    assert as_dict[("card", "STRIKE_IRONCLAD", "SingleEnemy")] == 2, as_dict
-    assert as_dict[("card", "DEFEND_IRONCLAD", None)] == 1, as_dict
+    assert as_dict[("card", "0:STRIKE_IRONCLAD")] == 2, as_dict
+    assert as_dict[("card", "2:DEFEND_IRONCLAD")] == 1, as_dict
     assert sum(as_dict.values()) == 3
     # A naive `set()` over the same keys would have collapsed the duplicate away - assert
     # the multiset actually carries MORE total count than the deduplicated key set would.
@@ -229,9 +227,8 @@ def test_candidate_multiset_preserves_duplicates():
 def _base_signature(**overrides):
     fields = dict(
         combat_session_id="session-a", step_index=3, continuation_step_index=None,
-        semantic_action=SemanticAction("card", "STRIKE_IRONCLAD", "SingleEnemy"),
-        resolved_action_id=7, resolved_card_id="STRIKE_IRONCLAD", resolved_target_type="SingleEnemy",
-        resolved_target_index=None, resolved_target_slot_index=0, boundary=BOUNDARY_STABLE,
+        semantic_action=SemanticAction("card", "0:STRIKE_IRONCLAD"),
+        resolved_action_id=7, resolved_semantic_key="0:STRIKE_IRONCLAD", resolved_target_index=None, resolved_target_slot_index=0, boundary=BOUNDARY_STABLE,
     )
     fields.update(overrides)
     return DecisionSignature(**fields)
@@ -240,11 +237,10 @@ def _base_signature(**overrides):
 def _base_pending_signature(**overrides):
     fields = dict(
         combat_session_id="session-a", step_index=3, continuation_step_index=None,
-        semantic_action=SemanticAction("choice_card", "EQUILIBRIUM", None),
-        resolved_action_id=0, resolved_card_id="EQUILIBRIUM", resolved_target_type=None,
-        resolved_target_index=None, resolved_target_slot_index=None, boundary=BOUNDARY_PENDING,
+        semantic_action=SemanticAction("choice_card", "0:EQUILIBRIUM"),
+        resolved_action_id=0, resolved_semantic_key="0:EQUILIBRIUM", resolved_target_index=None, resolved_target_slot_index=None, boundary=BOUNDARY_PENDING,
         choice_scope=CHOICE_SCOPE_TOP_LEVEL, choice_kind="ToolboxChooseCard",
-        candidate_semantic_keys=(( ("choice_card", "EQUILIBRIUM", None), 1), (("choice_skip", None, None), 1)),
+        candidate_semantic_keys=((("choice_card", "0:EQUILIBRIUM"), 1), (("choice_skip", ""), 1)),
     )
     fields.update(overrides)
     return DecisionSignature(**fields)
@@ -255,10 +251,9 @@ def test_diff_detects_divergence_in_each_stable_field():
     cases = {
         "combat_session_id": _base_signature(combat_session_id="session-b"),
         "step_index": _base_signature(step_index=4),
-        "semantic_action": _base_signature(semantic_action=SemanticAction("card", "DEFEND_IRONCLAD", None)),
+        "semantic_action": _base_signature(semantic_action=SemanticAction("card", "0:DEFEND_IRONCLAD")),
         "resolved_action_id": _base_signature(resolved_action_id=8),
-        "resolved_card_id": _base_signature(resolved_card_id="DEFEND_IRONCLAD"),
-        "resolved_target_type": _base_signature(resolved_target_type="AllEnemies"),
+        "resolved_semantic_key": _base_signature(resolved_semantic_key="0:DEFEND_IRONCLAD"),
         "resolved_target_slot_index": _base_signature(resolved_target_slot_index=1),
         "boundary": _base_signature(boundary="terminal"),
     }
@@ -273,7 +268,7 @@ def test_diff_detects_divergence_in_each_pending_only_field():
         "choice_scope": _base_pending_signature(choice_scope=CHOICE_SCOPE_ACTION_CONTINUATION),
         "choice_kind": _base_pending_signature(choice_kind="OtherChoice"),
         "candidate_semantic_keys": _base_pending_signature(
-            candidate_semantic_keys=(( ("choice_card", "EQUILIBRIUM", None), 2), (("choice_skip", None, None), 1))
+            candidate_semantic_keys=((("choice_card", "0:EQUILIBRIUM"), 2), (("choice_skip", ""), 1))
         ),
     }
     for field_name, mutated in cases.items():
@@ -287,9 +282,9 @@ def test_matches_for_replay_ignores_non_portable_identity_fields():
     assert base.matches_for_replay(same_content_different_session)  # replay-relevant eq does not
     assert base.diff_for_replay(same_content_different_session) == []
 
-    genuinely_different = _base_signature(resolved_card_id="DEFEND_IRONCLAD")
+    genuinely_different = _base_signature(resolved_semantic_key="0:DEFEND_IRONCLAD")
     assert not base.matches_for_replay(genuinely_different)
-    assert base.diff_for_replay(genuinely_different) == ["resolved_card_id"]
+    assert base.diff_for_replay(genuinely_different) == ["resolved_semantic_key"]
 
 
 def test_matches_for_replay_ignores_choice_kind_only_when_unclassified():
@@ -513,7 +508,7 @@ def test_replay_decision_context_detects_tampered_action_as_mismatch():
     state1 = record_session.step(state0, strike, target_enemy_index=0)
     sig1 = DecisionSignature.from_battle_state(state1, semantic_action=strike_semantic, resolved_action=strike, target_enemy_index=0)
 
-    tampered_action = SemanticAction("card", "A_CARD_THAT_DOES_NOT_EXIST", None)
+    tampered_action = SemanticAction("card", "0:A_CARD_THAT_DOES_NOT_EXIST")
     tampered_entry = ReplayPrefixEntry(semantic_action=tampered_action, expected_signature=sig1, target_enemy_index=0)
     context = DecisionContext.from_main_stable_capture(root_snapshot, state0, sig1)
     context = dataclasses.replace(context, replay_prefix=[tampered_entry], current_context_signature=sig1)
@@ -534,7 +529,7 @@ def test_replay_decision_context_detects_tampered_expected_signature_as_mismatch
     state1 = record_session.step(state0, strike, target_enemy_index=0)
     sig1 = DecisionSignature.from_battle_state(state1, semantic_action=strike_semantic, resolved_action=strike, target_enemy_index=0)
 
-    tampered_sig1 = dataclasses.replace(sig1, resolved_card_id="DEFEND_IRONCLAD")
+    tampered_sig1 = dataclasses.replace(sig1, resolved_semantic_key="DEFEND_IRONCLAD")
     tampered_entry = ReplayPrefixEntry(semantic_action=strike_semantic, expected_signature=tampered_sig1, target_enemy_index=0)
     context = DecisionContext.from_main_stable_capture(root_snapshot, state0, sig1)
     context = dataclasses.replace(context, replay_prefix=[tampered_entry], current_context_signature=tampered_sig1)
@@ -543,7 +538,7 @@ def test_replay_decision_context_detects_tampered_expected_signature_as_mismatch
     assert isinstance(outcome, ReplayMismatch), outcome
     assert outcome.stage == "signature"
     assert outcome.step_index == 0
-    assert "resolved_card_id" in outcome.diverged_fields
+    assert "resolved_semantic_key" in outcome.diverged_fields
 
 
 def test_replay_decision_context_surfaces_real_restore_rejection_uncaught():

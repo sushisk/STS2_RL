@@ -101,8 +101,7 @@ def _toolbox_pending_spec():
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _representative_signature(state: BattleState) -> DecisionSignature:
@@ -801,7 +800,7 @@ def test_real_worker_faults_are_retried_and_successful_candidates_still_commit()
         assert isinstance(pipeline, CandidatePipelineSuccess), pipeline
         invalid = dataclasses.replace(
             pipeline.continuation_candidate,
-            semantic_action=SemanticAction("card", "NOT_A_REAL_CARD", "SingleEnemy"),
+            semantic_action=SemanticAction("card", "0:NOT_A_REAL_CARD"),
             target_enemy_index=0,
             score=pipeline.continuation_candidate.score - 100.0,
         )

@@ -81,8 +81,7 @@ def _spec_for(relic: str, index: int) -> dict:
 
 
 def _semantic_action_for(action: dict) -> SemanticAction:
-    params = action.get("parameters") or {}
-    return SemanticAction(action_type=action["action_type"], card_id=params.get("cardId"), target_type=params.get("targetType"))
+    return SemanticAction(action_type=action["action_type"], semantic_key=action.get("semantic_key", ""))
 
 
 def _signature_for_first_choice(state) -> DecisionSignature:
@@ -118,10 +117,10 @@ def _branch_candidates_for_relic(relic: str, pipeline: CandidatePipelineSuccess)
         for candidate in candidates:
             if candidate.semantic_action.action_type != "choice_card":
                 continue
-            card_id = candidate.semantic_action.card_id
-            if card_id in seen:
+            semantic_key = candidate.semantic_action.semantic_key
+            if semantic_key in seen:
                 continue
-            seen.add(card_id)
+            seen.add(semantic_key)
             distinct.append(candidate)
         if len(distinct) < 2:
             raise StopConditionError(f"{relic} exposed fewer than two distinct choice_card candidates: {candidates!r}")
@@ -255,7 +254,7 @@ def _resolved_marker(result: BranchResult) -> tuple[str, Optional[str]]:
     candidate_action = result.work_item.candidate.semantic_action
     return (
         sig.boundary,
-        sig.resolved_card_id or candidate_action.card_id or candidate_action.action_type,
+        sig.resolved_semantic_key or candidate_action.semantic_key or candidate_action.action_type,
     )
 
 

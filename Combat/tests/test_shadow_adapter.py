@@ -111,7 +111,7 @@ def test_run_old_path_real_restore_snapshot_produces_chosen_action():
 
     assert result.action is not None
     assert result.action.action_type == "card"
-    assert result.action.card_id == "WHIRLWIND"
+    assert result.action.semantic_key == "0:WHIRLWIND"
     assert result.action_id is not None
     assert result.score is not None
     assert result.candidate_details
@@ -136,7 +136,7 @@ def test_run_new_path_real_restore_snapshot_produces_result():
     if result.status == "success":
         assert result.action is not None
         assert result.action.action_type == "card"
-        assert result.action.card_id == "WHIRLWIND"
+        assert result.action.semantic_key == "0:WHIRLWIND"
         assert result.planned_sequence_length >= 1
     else:
         assert result.action is None

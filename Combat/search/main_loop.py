@@ -368,9 +368,8 @@ def pending_static_select(current_result: BattleState) -> PlannedStep:
         return (_PENDING_STATIC_ACTION_TYPE_RANK.get(action.get("action_type"), _PENDING_STATIC_DEFAULT_RANK), index)
 
     _, chosen = min(enumerate(legal_actions), key=_rank)
-    params = chosen.get("parameters") or {}
     semantic_action = SemanticAction(
-        action_type=chosen.get("action_type"), card_id=params.get("cardId"), target_type=params.get("targetType")
+        action_type=chosen.get("action_type"), semantic_key=chosen.get("semantic_key", "")
     )
     return PlannedStep(semantic_action=semantic_action, target_index=None, target_enemy_index=None, expected_signature=None)
 
@@ -387,9 +386,8 @@ def first_candidate_direct_selector(current_result: BattleState) -> PlannedStep:
     if not legal_actions:
         raise RuntimeError("DIRECT: Current Decision Result reports no candidates to choose from")
     action = legal_actions[0]
-    params = action.get("parameters") or {}
     semantic_action = SemanticAction(
-        action_type=action.get("action_type"), card_id=params.get("cardId"), target_type=params.get("targetType")
+        action_type=action.get("action_type"), semantic_key=action.get("semantic_key", "")
     )
     return PlannedStep(semantic_action=semantic_action, target_index=None, target_enemy_index=None, expected_signature=None)
 
