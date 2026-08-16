@@ -16,7 +16,9 @@ never silently drift apart.
 
 `pendingChoice` is the exception to the broad name-driven rule: choice-card semantic and
 identity fields are security/behavior-sensitive, so they are normalized through an
-explicit public allowlist before the recursive scrub continues.
+explicit public allowlist before the recursive scrub continues. Emulator-only
+`cardInstanceId` is consumed by RL before masking for replay reconstruction and is then
+redacted here; Training never needs persistent concrete-card identity.
 
 Applies identically to Combat and Whole Run state dicts (contract: "CombatとWhole Runで
 同じ公開規則を使用してください") - callers never need a domain-specific mask function.
@@ -38,7 +40,7 @@ _FORBIDDEN_KEY_SUBSTRINGS: tuple[str, ...] = (
     "hypothesis", "shuffle", "cursor", "eventqueue", "event_queue", "encounterqueue",
     "encounter_queue", "futureevents", "future_events", "upcomingencounters",
     "upcoming_encounters", "bossqueue", "boss_queue", "ancientqueue", "ancient_queue",
-    "unknown_fields",
+    "cardinstanceid", "card_instance_id", "unknown_fields",
 )
 
 _MULTISET_PILE_KEYS = frozenset({"drawPile", "discardPile", "exhaustPile"})
