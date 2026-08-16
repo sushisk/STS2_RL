@@ -29,22 +29,31 @@ to the Stable root DrawPile is therefore not enough to place it at a particular 
 
 ## 2. Emulator #25 contract (source of truth)
 
-Exact identity is exposed only where the card is already public:
+Exact identity is exposed by the Emulator only where the card is already visible:
 
 - `pendingChoice.options[*].cardInstanceId`
 - matching `choice_card.parameters.cardInstanceId`
 - `StepResult.Info["selectedCardInstanceId"]` for the selected card
 
 The public identity is an opaque `cardv-<32 hex>` HMAC-derived token. It is intentionally different
-from the internal sequential `CardInstanceSnapshot.InstanceId`. The same public token survives
-Capture -> Restore -> Replay because the source Snapshot carries the internal combat-session
-namespace.
+from the internal sequential `CardInstanceSnapshot.InstanceId`. The HMAC key is the **current live
+DecisionFrame `combatSessionId`**.
+
+Ordinary Capture within one live session does not rotate the public token namespace. Restore does:
+`RestoreSnapshot()` creates a fresh DecisionFrame combat session, preserves the source Snapshot's
+stable internal card `InstanceId` values, and uses the newly-issued session id as the HMAC namespace.
+Therefore a Stable Snapshot captured **after** Restore is self-describing: its own
+`Metadata.CombatSessionId` plus its internal `CardInstanceSnapshot.InstanceId` values reproduce the
+`cardv-*` tokens subsequently emitted in that restored live session. This is the contract RL relies
+on when a Held Stable root comes from a resumed/restored execution path.
 
 Raw `cardsDrawnThisStep` / `CardDrawnEntry` history is deliberately absent. `SearchHypothesisId`
 remains CardId-level.
 
-RL's existing recursive mask preserves these choice-boundary ids while hidden-pile masking drops
-concrete identity/order; no new hidden-pile exposure is added by this change.
+`cardInstanceId` is an Emulator -> RL reconstruction signal, not a Training/policy feature. RL must
+consume it from the raw committed step before masking, translate it into internal Snapshot instance
+constraints, and then remove it from the Training-facing `masked_emulator_dto`. This avoids adding
+persistent concrete-copy linkability to the policy boundary while retaining exact replay inside RL.
 
 ## 3. RL implementation
 
@@ -62,7 +71,9 @@ hypothesis must never become a pin for a sibling hypothesis.
 
 `visible_draw_constraints_from_pending_choice()` first translates Emulator-visible `cardv-*`
 identities back into internal Snapshot instance ids by reproducing Emulator #25's HMAC mapping with
-the internal Stable Snapshot `Metadata.CombatSessionId`.
+the internal Stable Snapshot `Metadata.CombatSessionId`. For a Held Stable snapshot captured after
+Restore, that metadata is the restored live session's new namespace, so the translation remains
+self-consistent across `Restore -> Capture -> real step`.
 
 Crucially, it does **not** treat arbitrary visible PendingChoice options as a draw prefix. The
 current minimal fix records constraints only for the confirmed, position-provable transition shape:
@@ -111,12 +122,29 @@ a CardId. The remaining hidden future still comes from the belief hypothesis.
 instance ids are context-local replay evidence derived from already-visible facts, not an additional
 hidden RNG dimension.
 
+### 3.3 Training-facing masking
+
+The raw `BattleState` and raw Emulator legal actions still contain `cardInstanceId` long enough for
+`commit_action()` / the real execution loop to build `visible_draw_constraints`. The generic public
+mask then removes every `cardInstanceId` / `card_instance_id` key recursively, including:
+
+- `pendingChoice.options[*].cardInstanceId`;
+- `choice_card.parameters.cardInstanceId`;
+- any accidental occurrence in other Training-facing fragments.
+
+Hidden draw/discard/exhaust piles remain multisets without concrete identity or order. Training sees
+the normal card fields and semantic/action identity needed to choose among candidates, but not the
+Emulator's persistent concrete-copy token.
+
 ## 4. Privacy and safety properties
 
 - No true/unsubstituted DrawPile is replayed to Training.
 - No raw ordered draw-event feed is introduced.
 - Public `cardv-*` identity is translated internally; the public token is never compared directly
   with the sequential Snapshot `InstanceId`.
+- `cardInstanceId` is removed before constructing the Training-facing `masked_emulator_dto`.
+- Restore rotates the public-card namespace with the new DecisionFrame session, while a post-Restore
+  Stable Snapshot remains self-describing for RL's internal translation.
 - A pre-existing Hand card visible in the Acrobatics discard choice is verified and excluded from
   draw constraints.
 - No later Replay Prefix choice is flattened to root draw position 0 without a proven offset.
@@ -133,30 +161,43 @@ contract for those cases.
 Hosted pure-Python regressions cover:
 
 - public `cardv-*` -> internal Snapshot identity translation;
-- mixed-hand Acrobatics: a pre-existing Hand card remains visible while only the three newly drawn
-  exact instances become constraints;
+- mixed-hand Acrobatics: a pre-existing Hand card remains visible internally while only the three
+  newly drawn exact instances become constraints;
 - rejection when the transition is not first after the Stable root;
 - rejection when scope/operation/canonical source-zone provenance does not match;
 - rejection when the pre-existing Hand is reordered or the missing played card is not Acrobatics;
 - CardId-prefix reordering while preserving the hypothesis tail;
 - exact allocation of the upgraded copy among duplicate same-CardId instances;
-- mask behavior: choice-boundary `cardInstanceId` survives while hidden pile identity does not.
+- mask behavior: `cardInstanceId` is removed from PendingChoice options, `choice_card` parameters,
+  and hidden piles before the DTO is exposed to Training.
 
 The paired RL/Emulator regression uses a normal mixed Hand (`ACROBATICS` + pre-existing
-`NEUTRALIZE`) and requires multiple `rng_id` hypotheses to replay the resulting four-option discard
-choice without `replay_mismatch`.
+`NEUTRALIZE`) and now explicitly exercises the review-critical namespace sequence:
 
-STS2_Training PR #72 carries the corresponding production Oracle/Beam integration gate for the same
-mixed-hand shape and requires zero branch faults.
+1. capture Stable `S0` in session A;
+2. `Restore(S0)`, which creates session B;
+3. capture Stable `S1` in session B;
+4. play Acrobatics from `S1`;
+5. verify RL translated the raw visible `cardv-*` values into three internal exact-instance draw
+   constraints, including distinct upgraded/unupgraded `DEFEND_SILENT` copies;
+6. verify the Training-facing PendingChoice/actions contain no `cardInstanceId`;
+7. require multiple `rng_id` hypotheses to replay the resulting four-option discard choice without
+   `replay_mismatch`.
 
-Before treating the cross-repo fix as mergeable, run the paired integration regression against
-Emulator PR #25 (or a build containing it) and re-run the previously failing harvested
+STS2_Training PR #72 carries the production Oracle/Beam integration path for the same mixed-hand
+shape. Its Training-facing assertions must follow the paired privacy contract above: it should test
+candidate behavior and zero branch faults without depending on `cardInstanceId` being present in the
+masked DTO.
+
+Before treating the cross-repo fix as mergeable, run the paired integration regression against the
+current Emulator PR #25 (or a build containing it) and re-run the previously failing harvested
 Silent/Acrobatics reproduction with seed override `101`. Expected result: no `replay_mismatch` and
 no `RuntimeError: all emulate_actions branch results faulted`.
 
 ## 6. Explicitly out of scope
 
 - exporting `cardsDrawnThisStep` or any equivalent raw draw-history signal;
+- exposing `cardInstanceId` as a Training/policy feature;
 - adding concrete instance ids to `SearchHypothesisId`;
 - pinning search-internal/hypothesis-fabricated Replay Prefix entries;
 - inferring a later Replay Prefix draw offset from visible membership alone;
