@@ -328,7 +328,7 @@ class ReplayPrefixEntry:
     `target_index`/`target_enemy_index` travel alongside the SemanticAction because
     `LiveCombatSession.step()` takes them as separate parameters from the resolved
     action itself. `visible_draw_constraints` is populated only by Main/Training real
-    stepping, and only for a Stable-root-first Acrobatics -> hand-discard Pending shape
+    stepping, and only for a Stable-root-first draw-then-discard-from-hand Pending shape
     whose draw offset/order can be justified without exposing hidden draw history. Each
     value is an ordered ``(CardId, CardInstanceSnapshot.InstanceId)`` pair translated
     from Emulator-visible opaque ``cardInstanceId`` tokens. Search-internal/hypothesis
@@ -365,64 +365,48 @@ def visible_draw_constraints_from_pending_choice(
     *not* guarantee that arbitrary ``pendingChoice.options`` are an ordered draw-history
     feed. Therefore root-DrawPile membership alone is insufficient evidence for pinning.
 
-    This intentionally narrow implementation records constraints only for the confirmed
-    Acrobatics reproduction, and only on the first transition after the Held Stable root:
+    This extractor accepts the generic transition shape "play a card, draw one or more
+    cards, then choose/discard from the resulting hand", but only on the first transition
+    after the Held Stable root:
 
     * the Replay Prefix is still empty, so the draw cursor is provably root offset 0;
-    * the triggering SemanticAction is the card action for ``ACROBATICS``;
+    * the triggering SemanticAction is a card action whose semantic key identifies the
+      played CardId;
     * the Pending choice is an ActionContinuation discard from canonical source zone
       ``hand``;
-    * exactly one root-Hand concrete card is absent from the choice, that missing card is
-      ``ACROBATICS`` (the played card), and every other root-Hand card appears first in
-      the same order and with the same public instance identity;
+    * exactly one root-Hand concrete card is absent from the choice, that missing card's
+      CardId matches the triggering action's CardId, and every other root-Hand card
+      appears first in the same order and with the same public instance identity;
     * the remaining option tail consists only of distinct concrete cards from the root
       DrawPile.
 
-    Under that shape the tail is precisely the newly drawn ordered Acrobatics cards, even
-    when the pre-action hand contained other cards. Any later-prefix choice, other
-    mechanic, reordered/mutated pre-existing hand, malformed identity, or ambiguous
-    provenance fails closed to ``()`` rather than inventing a draw offset/order.
+    Under that shape the tail is precisely the newly drawn ordered cards, even when the
+    pre-action hand contained other cards. This covers Acrobatics and other cards with
+    the same draw-then-choose/discard shape (for example Prepared) without a CardId
+    allowlist. Any later-prefix choice, different mechanic shape, reordered/mutated
+    pre-existing hand, malformed identity, or ambiguous provenance fails closed to ``()``
+    rather than inventing a draw offset/order.
 
-    SCOPE GAP (flagged during design review, not yet fixed): this function is narrower
-    than the bug it was written to close. `replay_mismatch`/`candidate_semantic_keys`
-    divergence is not Acrobatics-specific - it reproduces for ANY card whose effect
-    shape is "draw N, then choose/discard from the resulting hand". The Sts2Emulator
-    source audit behind this fix (see the design doc's card/relic inventory) found this
-    same "draw then choose from hand" shape also covers, at minimum: ThinkingAhead,
-    Prepared, DaggerThrow, PhotonCut, Glimmer, DecisionsDecisions - none of them are
-    covered by the literal ``"ACROBATICS"`` checks below, so `replay_mismatch` will still
-    reproduce for any of them exactly as it did for Acrobatics before this fix. Fixing
-    this does not need a new Emulator contract: `triggering_action` already carries the
-    exact played card's own identity (its `semantic_key`, e.g. ``"4:PREPARED"``), so both
-    literal ``"ACROBATICS"`` comparisons below should match against THAT card's own
-    CardId instead of a hardcoded string - the rest of the shape/provenance verification
-    already generalizes as-is.
-
-    SEPARATE AND STILL UNADDRESSED after that generalization: an entirely different
-    mechanic shape - cards/relics/powers that REVEAL the draw pile in place without
-    drawing anything (`sourceZone == "drawPile"`, not `"hand"` - e.g. Charge, Cleanse,
-    Seance, SecretTechnique, SecretWeapon, Wish, ForegoneConclusionPower, StratagemPower,
-    DropletOfPrecognition per the same audit). Those never remove a card from Hand, so
-    this function's core "one root-Hand card went missing" shape-check (the `sourceZone
-    == "hand"` requirements a few lines below, and the missing-card search further down)
-    structurally does not apply to them at all - they would need their own, differently
-    shaped constraint-extraction function, not just a broadened CardId check here.
+    Mechanics that reveal/select directly from ``sourceZone == "drawPile"`` are
+    structurally different: no played Hand card disappears from the choice payload, and
+    Emulator #25 does not define their option ordering as a root-relative draw cursor.
+    They therefore remain unsupported here and must use a separately proven provenance
+    contract rather than being folded into this hand-discard extractor.
     """
     # Do not infer the producer solely from the post-step hand/choice shape. Both real
     # committed-step call sites already know the SemanticAction that produced this state,
-    # so require an actual Acrobatics card action before considering exact draw pinning.
-    # SCOPE GAP: see this function's docstring - `semantic_card_id != "ACROBATICS"` should
-    # be `semantic_card_id != <the card ThinkingAhead/Prepared/DaggerThrow/PhotonCut/
-    # Glimmer/DecisionsDecisions would each report here>, i.e. this check itself is the
-    # thing that needs generalizing, not evidence that only Acrobatics needs a fix.
+    # so require a card action and use its own reported CardId as the missing-Hand proof.
     if triggering_action.action_type != "card":
         return ()
     semantic_slot, separator, semantic_card_id = triggering_action.semantic_key.partition(":")
-    if not separator or not semantic_slot or semantic_card_id != "ACROBATICS":
+    if not separator or not semantic_slot or not semantic_card_id:
         return ()
 
     # A later Replay Prefix entry has no visibility-scoped draw cursor in Emulator #25's
-    # contract. Never flatten such evidence back to absolute root position 0.
+    # contract. Normal non-Pending Steps immediately capture a new Stable root and reset
+    # this prefix, so a newly played card from the next normal decision reaches this
+    # extractor with an empty prefix. Keep the guard as a fail-closed invariant for any
+    # unusual/continuation caller rather than guessing a later absolute draw offset.
     if replay_prefix:
         return ()
 
@@ -486,19 +470,11 @@ def visible_draw_constraints_from_pending_choice(
         )
 
     # Identify the one exact root-Hand card that disappeared when the action was played.
-    # The remaining pre-action hand must be an unchanged prefix of the PendingChoice.
-    # SCOPE GAP (see this function's docstring): `missing_card_id != "ACROBATICS"` is the
-    # same hardcoded-literal problem as the triggering_action gate above, duplicated here.
-    # This should search for the SPECIFIC card `triggering_action` reports as played
-    # (its CardId is already known to the caller, not something that needs guessing) -
-    # that is both more correct (verifies the missing card really is the one that was
-    # played, not merely "any hand card happening to be named ACROBATICS") and
-    # automatically generalizes to every other draw-then-choose-from-hand card
-    # (ThinkingAhead, Prepared, DaggerThrow, PhotonCut, Glimmer, DecisionsDecisions)
-    # without any further change to this loop.
+    # The remaining pre-action hand must be an unchanged prefix of the PendingChoice, and
+    # the missing card must be the specific CardId reported by triggering_action.
     matching_missing_indices: list[int] = []
     for missing_index, (missing_card_id, _public_id, _internal_id) in enumerate(root_hand_visible):
-        if missing_card_id != "ACROBATICS":
+        if missing_card_id != semantic_card_id:
             continue
         expected_existing_prefix = [
             (card_id, public_id)
@@ -511,7 +487,6 @@ def visible_draw_constraints_from_pending_choice(
     if len(matching_missing_indices) != 1:
         return ()
 
-    missing_index = matching_missing_indices[0]
     expected_existing_count = len(root_hand_visible) - 1
     drawn_visible_tail = visible_options[expected_existing_count:]
     if not drawn_visible_tail:
@@ -536,9 +511,6 @@ def visible_draw_constraints_from_pending_choice(
             return ()
         internal_constraints.append((card_id, matched[1]))
 
-    # Silence the intentionally-unused binding while keeping the uniqueness proof above
-    # explicit: exactly one missing root-hand Acrobatics established the action shape.
-    _ = missing_index
     return tuple(internal_constraints)
 
 

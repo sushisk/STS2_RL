@@ -354,27 +354,19 @@ def _pinned_prefix_visible_draw_constraints(
 ) -> tuple[tuple[str, str], ...]:
     """Return only a verified Stable-root-relative exact-instance constraint sequence.
 
-    Emulator #25 does not expose a visibility-safe draw cursor/offset for later Replay
-    Prefix transitions. Therefore only the first transition after the Held Stable root
-    may contribute root-position-zero constraints. If any later entry carries constraints,
-    fail closed instead of concatenating them and flattening an unknown offset to the
-    front of the root DrawPile.
+    ``visible_draw_constraints_from_pending_choice()`` records constraints only while
+    the real committed Replay Prefix is empty, so any accepted sequence is anchored to
+    root DrawPile position zero. This is consistent with the Main/API boundary contract:
+    every non-Pending Step is immediately captured as a new Stable root and resets the
+    Replay Prefix before the next normal card action. A draw-then-choose card played
+    after one or more completed cards in the same turn therefore still starts from a
+    fresh Stable root; those earlier cards are not entries in this Replay Prefix.
 
-    SCOPE GAP (separate from, and in addition to, the CardId-literal gap flagged in
-    `visible_draw_constraints_from_pending_choice`'s own docstring): even once that
-    function is generalized past the single "ACROBATICS" literal, THIS restriction still
-    silently fails closed for any draw-then-choose action that is not the very first
-    entry in `replay_prefix` since the last Held Stable capture - e.g. a turn where the
-    player plays one or two other cards before playing Prepared/Acrobatics/etc. That is a
-    real, not-hypothetical case (a real playthrough routinely plays multiple cards per
-    turn before any Stable boundary is reached again), not just an edge case. Closing
-    this gap needs the thing the docstring above says Emulator #25 does not provide: a
-    way to prove a draw-then-choose entry's position/offset for ANY `replay_prefix`
-    index, not only index 0 - i.e. a visibility-safe draw cursor per entry, not just at
-    the root. Until that exists, this fix only reliably covers the specific shape of the
-    reproduction scenario (single draw-then-choose action as the first thing played since
-    the last Stable point) - do not treat passing tests built around that shape as
-    evidence the general case is handled.
+    Keep the consumer defensive: if a malformed/future caller attaches constraints to a
+    later entry, fail closed instead of concatenating them and inventing an unknown root
+    offset. Supporting a genuinely later-Pending constraint would require an explicit
+    visibility-safe cursor/provenance contract, but normal sequential card play does not
+    create that shape in the current state machine.
     """
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         return ()
