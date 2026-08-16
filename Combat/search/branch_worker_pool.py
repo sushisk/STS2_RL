@@ -534,6 +534,15 @@ class _WorkerRuntime:
                             "step_index": replay_outcome.step_index,
                             "detail": replay_outcome.detail,
                             "diverged_fields": replay_outcome.diverged_fields,
+                            # API.instance_combat._finalize_branch_result reads "message" for the
+                            # RPC-visible "error" field; without this key it always falls back to
+                            # the generic "branch execution faulted" string and the stage/detail/
+                            # diverged_fields above never reach the client.
+                            "message": (
+                                f"replay_mismatch at stage={replay_outcome.stage} "
+                                f"step_index={replay_outcome.step_index}: {replay_outcome.detail} "
+                                f"diverged_fields={replay_outcome.diverged_fields}"
+                            ),
                         },
                     )
                 assert isinstance(replay_outcome, ReplaySuccess)
