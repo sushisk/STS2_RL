@@ -382,10 +382,39 @@ def visible_draw_constraints_from_pending_choice(
     when the pre-action hand contained other cards. Any later-prefix choice, other
     mechanic, reordered/mutated pre-existing hand, malformed identity, or ambiguous
     provenance fails closed to ``()`` rather than inventing a draw offset/order.
+
+    SCOPE GAP (flagged during design review, not yet fixed): this function is narrower
+    than the bug it was written to close. `replay_mismatch`/`candidate_semantic_keys`
+    divergence is not Acrobatics-specific - it reproduces for ANY card whose effect
+    shape is "draw N, then choose/discard from the resulting hand". The Sts2Emulator
+    source audit behind this fix (see the design doc's card/relic inventory) found this
+    same "draw then choose from hand" shape also covers, at minimum: ThinkingAhead,
+    Prepared, DaggerThrow, PhotonCut, Glimmer, DecisionsDecisions - none of them are
+    covered by the literal ``"ACROBATICS"`` checks below, so `replay_mismatch` will still
+    reproduce for any of them exactly as it did for Acrobatics before this fix. Fixing
+    this does not need a new Emulator contract: `triggering_action` already carries the
+    exact played card's own identity (its `semantic_key`, e.g. ``"4:PREPARED"``), so both
+    literal ``"ACROBATICS"`` comparisons below should match against THAT card's own
+    CardId instead of a hardcoded string - the rest of the shape/provenance verification
+    already generalizes as-is.
+
+    SEPARATE AND STILL UNADDRESSED after that generalization: an entirely different
+    mechanic shape - cards/relics/powers that REVEAL the draw pile in place without
+    drawing anything (`sourceZone == "drawPile"`, not `"hand"` - e.g. Charge, Cleanse,
+    Seance, SecretTechnique, SecretWeapon, Wish, ForegoneConclusionPower, StratagemPower,
+    DropletOfPrecognition per the same audit). Those never remove a card from Hand, so
+    this function's core "one root-Hand card went missing" shape-check (the `sourceZone
+    == "hand"` requirements a few lines below, and the missing-card search further down)
+    structurally does not apply to them at all - they would need their own, differently
+    shaped constraint-extraction function, not just a broadened CardId check here.
     """
     # Do not infer the producer solely from the post-step hand/choice shape. Both real
     # committed-step call sites already know the SemanticAction that produced this state,
     # so require an actual Acrobatics card action before considering exact draw pinning.
+    # SCOPE GAP: see this function's docstring - `semantic_card_id != "ACROBATICS"` should
+    # be `semantic_card_id != <the card ThinkingAhead/Prepared/DaggerThrow/PhotonCut/
+    # Glimmer/DecisionsDecisions would each report here>, i.e. this check itself is the
+    # thing that needs generalizing, not evidence that only Acrobatics needs a fix.
     if triggering_action.action_type != "card":
         return ()
     semantic_slot, separator, semantic_card_id = triggering_action.semantic_key.partition(":")
@@ -458,6 +487,15 @@ def visible_draw_constraints_from_pending_choice(
 
     # Identify the one exact root-Hand card that disappeared when the action was played.
     # The remaining pre-action hand must be an unchanged prefix of the PendingChoice.
+    # SCOPE GAP (see this function's docstring): `missing_card_id != "ACROBATICS"` is the
+    # same hardcoded-literal problem as the triggering_action gate above, duplicated here.
+    # This should search for the SPECIFIC card `triggering_action` reports as played
+    # (its CardId is already known to the caller, not something that needs guessing) -
+    # that is both more correct (verifies the missing card really is the one that was
+    # played, not merely "any hand card happening to be named ACROBATICS") and
+    # automatically generalizes to every other draw-then-choose-from-hand card
+    # (ThinkingAhead, Prepared, DaggerThrow, PhotonCut, Glimmer, DecisionsDecisions)
+    # without any further change to this loop.
     matching_missing_indices: list[int] = []
     for missing_index, (missing_card_id, _public_id, _internal_id) in enumerate(root_hand_visible):
         if missing_card_id != "ACROBATICS":

@@ -359,6 +359,22 @@ def _pinned_prefix_visible_draw_constraints(
     may contribute root-position-zero constraints. If any later entry carries constraints,
     fail closed instead of concatenating them and flattening an unknown offset to the
     front of the root DrawPile.
+
+    SCOPE GAP (separate from, and in addition to, the CardId-literal gap flagged in
+    `visible_draw_constraints_from_pending_choice`'s own docstring): even once that
+    function is generalized past the single "ACROBATICS" literal, THIS restriction still
+    silently fails closed for any draw-then-choose action that is not the very first
+    entry in `replay_prefix` since the last Held Stable capture - e.g. a turn where the
+    player plays one or two other cards before playing Prepared/Acrobatics/etc. That is a
+    real, not-hypothetical case (a real playthrough routinely plays multiple cards per
+    turn before any Stable boundary is reached again), not just an edge case. Closing
+    this gap needs the thing the docstring above says Emulator #25 does not provide: a
+    way to prove a draw-then-choose entry's position/offset for ANY `replay_prefix`
+    index, not only index 0 - i.e. a visibility-safe draw cursor per entry, not just at
+    the root. Until that exists, this fix only reliably covers the specific shape of the
+    reproduction scenario (single draw-then-choose action as the first thing played since
+    the last Stable point) - do not treat passing tests built around that shape as
+    evidence the general case is handled.
     """
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         return ()
