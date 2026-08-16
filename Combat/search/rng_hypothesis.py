@@ -352,16 +352,25 @@ def _card_identity_key(card: CardInstanceSnapshot) -> str:
 def _pinned_prefix_visible_draw_constraints(
     decision_context: DecisionContext,
 ) -> tuple[tuple[str, str], ...]:
-    """Return the longest verified replay-prefix exact-instance constraint sequence.
+    """Return only a verified Stable-root-relative exact-instance constraint sequence.
 
-    Constraints are recorded only at real, client-visible Pending boundaries. Validate
-    them again against the Stable root DrawPile before hypothesis substitution. If a
-    malformed/stale entry would re-use or reference a non-root instance, stop before that
-    entry and leave the tail unpinned. This is the exact-instance counterpart of the old
-    CardId Counter guard, without publishing raw draw history.
+    Emulator #25 does not expose a visibility-safe draw cursor/offset for later Replay
+    Prefix transitions. Therefore only the first transition after the Held Stable root
+    may contribute root-position-zero constraints. If any later entry carries constraints,
+    fail closed instead of concatenating them and flattening an unknown offset to the
+    front of the root DrawPile.
     """
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         return ()
+    if not decision_context.replay_prefix:
+        return ()
+
+    first_constraints = decision_context.replay_prefix[0].visible_draw_constraints
+    if any(entry.visible_draw_constraints for entry in decision_context.replay_prefix[1:]):
+        return ()
+    if not first_constraints:
+        return ()
+
     remaining = {
         str(card.InstanceId): str(card.CardId)
         for card in decision_context.root_snapshot.Player.DrawPile
@@ -369,20 +378,12 @@ def _pinned_prefix_visible_draw_constraints(
     if len(remaining) != len(decision_context.root_snapshot.Player.DrawPile):
         return ()
 
-    pinned: list[tuple[str, str]] = []
-    for entry in decision_context.replay_prefix:
-        constraints = entry.visible_draw_constraints
-        if not constraints:
-            continue
-        instance_ids = [instance_id for _card_id, instance_id in constraints]
-        if len(set(instance_ids)) != len(instance_ids):
-            break
-        if any(remaining.get(instance_id) != card_id for card_id, instance_id in constraints):
-            break
-        pinned.extend(constraints)
-        for _card_id, instance_id in constraints:
-            remaining.pop(instance_id)
-    return tuple(pinned)
+    instance_ids = [instance_id for _card_id, instance_id in first_constraints]
+    if len(set(instance_ids)) != len(instance_ids):
+        return ()
+    if any(remaining.get(instance_id) != card_id for card_id, instance_id in first_constraints):
+        return ()
+    return tuple(first_constraints)
 
 
 def _reorder_hypothesis_for_visible_draw_constraints(
@@ -517,12 +518,13 @@ def apply_hypothesis_to_context(
     decision_context: DecisionContext,
     hypothesis: SearchHypothesisId,
 ) -> DecisionContext:
-    """Apply one CardId-level belief plus any already-visible replay constraints.
+    """Apply one CardId-level belief plus proven root-relative replay constraints.
 
     The hypothesis itself deliberately remains CardId-level. Exact ``cardInstanceId``
-    values come only from real, already-visible Pending choices in the Replay Prefix;
-    they constrain concrete allocation in the derived snapshot but are never added to
-    ``SearchHypothesisId`` or exposed as hidden future order.
+    values come only from a real, already-visible first Pending transition in the Replay
+    Prefix whose position was proven relative to the Stable root. They constrain concrete
+    allocation in the derived snapshot but are never added to ``SearchHypothesisId`` or
+    exposed as hidden future order.
     """
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         raise TypeError("Genesis hypotheses must use derive_combat_start_replay_roots()")
