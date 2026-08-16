@@ -38,10 +38,10 @@ def _card(instance_id: str, card_id: str, *, upgraded: bool = False) -> CardInst
     )
 
 
-def _root(cards):
+def _root(draw_cards, *, hand_cards=()):
     return SimpleNamespace(
         Metadata=SimpleNamespace(CombatSessionId=_COMBAT_SESSION_ID),
-        Player=SimpleNamespace(DrawPile=list(cards)),
+        Player=SimpleNamespace(Hand=list(hand_cards), DrawPile=list(draw_cards)),
     )
 
 
@@ -54,9 +54,24 @@ def _public_instance_id(internal_instance_id: str) -> str:
     return f"cardv-{digest[:16].hex()}"
 
 
-def _state(options) -> BattleState:
+def _state(
+    options,
+    *,
+    scope: str = "ActionContinuation",
+    choice_operation: str = "discard",
+    source_zone: str = "hand",
+    semantic_source_zone: str = "hand",
+) -> BattleState:
     return BattleState(
-        engine_state={"pendingChoice": {"options": list(options)}},
+        engine_state={
+            "pendingChoice": {
+                "scope": scope,
+                "choiceOperation": choice_operation,
+                "sourceZone": source_zone,
+                "choiceSemantics": {"sourceZone": semantic_source_zone},
+                "options": list(options),
+            }
+        },
         is_terminal=False,
         outcome="in_progress",
         turn=1,
@@ -71,35 +86,120 @@ def _rng() -> SerializableRngSnapshot:
     return SerializableRngSnapshot(Counter=1, State0=2, State1=3, State2=4, State3=5)
 
 
-def test_visible_constraints_require_complete_exact_identity_from_remaining_root_draw_pile() -> None:
-    root = _root([_card("i-a1", "A"), _card("i-a2", "A", upgraded=True), _card("i-b", "B")])
+def test_visible_constraints_keep_new_acrobatics_draws_when_choice_contains_preexisting_hand() -> None:
+    root = _root(
+        [
+            _card("i-a1", "A"),
+            _card("i-a2", "A", upgraded=True),
+            _card("i-b", "B"),
+            _card("i-c", "C"),
+        ],
+        hand_cards=[
+            _card("i-acrobatics", "ACROBATICS"),
+            _card("i-neutralize", "NEUTRALIZE"),
+        ],
+    )
+    visible_hand = _public_instance_id("i-neutralize")
     visible_a2 = _public_instance_id("i-a2")
     visible_b = _public_instance_id("i-b")
-    assert visible_a2.startswith("cardv-") and visible_a2 != "i-a2"
-    assert visible_b.startswith("cardv-") and visible_b != "i-b"
+    visible_c = _public_instance_id("i-c")
 
+    assert visible_a2.startswith("cardv-") and visible_a2 != "i-a2"
     state = _state(
         [
+            {"id": "NEUTRALIZE", "optionId": "o-hand", "cardInstanceId": visible_hand},
             {"id": "A", "optionId": "o-a2", "cardInstanceId": visible_a2},
             {"id": "B", "optionId": "o-b", "cardInstanceId": visible_b},
+            {"id": "C", "optionId": "o-c", "cardInstanceId": visible_c},
         ]
     )
-    # Public Emulator identities are translated back to the internal Snapshot IDs that
-    # hypothesis allocation needs; the two identity domains must never be compared raw.
+
+    # The pre-existing hand card is verified but is not a draw constraint. Only the
+    # newly appended Acrobatics cards are translated to internal Snapshot IDs.
     assert visible_draw_constraints_from_pending_choice(state, root, []) == (
         ("A", "i-a2"),
         ("B", "i-b"),
+        ("C", "i-c"),
     )
 
-    # A previously pinned concrete instance is no longer eligible for a later entry.
+
+def test_visible_constraints_fail_closed_without_proven_root_acrobatics_shape() -> None:
+    root = _root(
+        [_card("i-a", "A"), _card("i-b", "B")],
+        hand_cards=[
+            _card("i-acrobatics", "ACROBATICS"),
+            _card("i-neutralize", "NEUTRALIZE"),
+        ],
+    )
+    options = [
+        {
+            "id": "NEUTRALIZE",
+            "optionId": "o-hand",
+            "cardInstanceId": _public_instance_id("i-neutralize"),
+        },
+        {"id": "A", "optionId": "o-a", "cardInstanceId": _public_instance_id("i-a")},
+    ]
+
+    # A later Replay Prefix entry has no safe root-relative draw cursor, so it must not
+    # be flattened to position zero.
+    assert visible_draw_constraints_from_pending_choice(_state(options), root, [_entry()]) == ()
+
+    # Canonical source-zone and discard/action-continuation shape are part of the proof.
     assert visible_draw_constraints_from_pending_choice(
-        _state([{"id": "A", "optionId": "again", "cardInstanceId": visible_a2}]),
-        root,
-        [_entry(("A", "i-a2"))],
+        _state(options, semantic_source_zone="draw_pile"), root, []
+    ) == ()
+    assert visible_draw_constraints_from_pending_choice(
+        _state(options, choice_operation="exhaust"), root, []
+    ) == ()
+    assert visible_draw_constraints_from_pending_choice(
+        _state(options, scope="TopLevel"), root, []
     ) == ()
 
-    # Missing exact identity or a visible card not from the remaining root DrawPile is
-    # rejected all-or-nothing rather than partially inferred.
+    # Reordering the pre-existing hand destroys the append-only Acrobatics proof.
+    reordered_root = _root(
+        [_card("i-a", "A")],
+        hand_cards=[
+            _card("i-left", "SURVIVOR"),
+            _card("i-acrobatics", "ACROBATICS"),
+            _card("i-right", "NEUTRALIZE"),
+        ],
+    )
+    reordered_options = [
+        {"id": "NEUTRALIZE", "optionId": "r", "cardInstanceId": _public_instance_id("i-right")},
+        {"id": "SURVIVOR", "optionId": "l", "cardInstanceId": _public_instance_id("i-left")},
+        {"id": "A", "optionId": "a", "cardInstanceId": _public_instance_id("i-a")},
+    ]
+    assert visible_draw_constraints_from_pending_choice(
+        _state(reordered_options), reordered_root, []
+    ) == ()
+
+    # A non-Acrobatics played-card shape is not generalized from root-pile membership.
+    non_acrobatics_root = _root(
+        [_card("i-a", "A")],
+        hand_cards=[_card("i-strike", "STRIKE_SILENT"), _card("i-neutralize", "NEUTRALIZE")],
+    )
+    assert visible_draw_constraints_from_pending_choice(
+        _state(
+            [
+                {
+                    "id": "NEUTRALIZE",
+                    "optionId": "h",
+                    "cardInstanceId": _public_instance_id("i-neutralize"),
+                },
+                {"id": "A", "optionId": "a", "cardInstanceId": _public_instance_id("i-a")},
+            ]
+        ),
+        non_acrobatics_root,
+        [],
+    ) == ()
+
+
+def test_visible_constraints_reject_malformed_or_non_root_draw_identity() -> None:
+    root = _root(
+        [_card("i-a", "A"), _card("i-b", "B")],
+        hand_cards=[_card("i-acrobatics", "ACROBATICS")],
+    )
+
     assert visible_draw_constraints_from_pending_choice(
         _state([{"id": "A", "optionId": "legacy"}]), root, []
     ) == ()
@@ -109,7 +209,7 @@ def test_visible_constraints_require_complete_exact_identity_from_remaining_root
                 {
                     "id": "HAND_ONLY",
                     "optionId": "h",
-                    "cardInstanceId": _public_instance_id("i-hand"),
+                    "cardInstanceId": _public_instance_id("i-not-root-draw"),
                 }
             ]
         ),
