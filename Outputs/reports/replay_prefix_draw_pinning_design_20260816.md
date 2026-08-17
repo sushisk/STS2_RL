@@ -17,7 +17,7 @@ TinkerTimeType, TinkerTimeRider,
 enchantment
 ```
 
-Physical `InstanceId`, choice-local option id, zone and list position are excluded.
+Physical `InstanceId`, choice-local option id, zone and list position are excluded. Required public field types are validated instead of coerced; malformed booleans/tinker/enchantment shapes fail closed rather than becoming a different observable key accidentally.
 
 ## Supported public transition shape
 
@@ -51,10 +51,10 @@ This is deliberately narrower than the previous Gate A / Gate B design. There is
 The supported shape covers real Acrobatics-style transitions:
 
 ```text
-play one Hand card -> draw -> append drawn cards to Hand -> PendingChoice
+play one Hand card -> transfer DrawPile cards into appended Hand suffix
 ```
 
-The structural proof does not inspect PendingChoice at all. Choice operation/scope/source/origin metadata and option ordering are not replay-safety inputs.
+The recognizer proves this public transfer shape; it does not claim to prove which internal primitive caused it. PendingChoice, choice operation/scope/source/origin metadata, option ordering, and Snapshot order are not replay-safety inputs.
 
 Unsupported shapes fail closed when DrawPile changes, including:
 
@@ -88,7 +88,7 @@ Current `CardInstanceSnapshot` does not yet project enchantment into this equali
 
 ## Information boundary
 
-Replay safety does not depend on:
+Replay evidence extraction does not depend on:
 
 - card-name allowlists;
 - PendingChoice option order or choice semantic metadata;
@@ -97,16 +97,19 @@ Replay safety does not depend on:
 - public instance tokens or Snapshot `InstanceId`;
 - raw draw history;
 - public Observation DrawPile list order;
-- Stable Snapshot DrawPile list order.
+- Stable Snapshot DrawPile list order;
+- the Stable Snapshot object itself.
+
+Snapshot state is consulted later only for safe concrete materialization of already-recorded observable constraints.
 
 ## Cross-repo responsibility
 
-STS2_Emulator PR #25 only protects the ordinary real-game publication behavior needed by this structural check: for Acrobatics, the played card leaves Hand, drawn cards appear as a post-Hand suffix matching the public DrawPile multiset decrease, and the later discard PendingChoice reflects the resulting Hand normally.
+STS2_Emulator PR #25 only protects the ordinary real-game behavior needed by this structural check: for Acrobatics, the played card leaves Hand and the public DrawPile multiset decrease appears as the appended post-Hand suffix. PendingChoice publication remains a separate general Emulator contract and is not part of #64's replay proof.
 
 Emulator does not publish a sequential-draw marker, draw ordinal, replay provenance DTO, or hidden order oracle for RL.
 
 ## Tests
 
-`Combat/tests/test_replay_prefix_visible_draw_pinning.py` covers the supported Hand-transfer shape, PendingChoice independence, drawn-only choice fail-closed behavior, public/Stable DrawPile order independence, Hand-prefix violations, unexplained mutation blocking, contiguous-prefix enforcement, observable-state distinctions, and hidden-state ambiguity.
+`Combat/tests/test_replay_prefix_visible_draw_pinning.py` covers the supported Hand-transfer shape, PendingChoice independence, drawn-only choice fail-closed behavior, public DrawPile order independence, Hand-prefix violations, malformed public-card field fail-closed behavior, unexplained mutation blocking, contiguous-prefix enforcement, observable-state distinctions, and hidden-state ambiguity.
 
 `API/tests/test_acrobatics_exact_instance_replay_pinning.py` remains the paired real-Emulator regression; despite its historical filename it validates observable-state replay pinning rather than exact physical identity.
