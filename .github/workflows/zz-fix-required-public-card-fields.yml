@@ -1,0 +1,54 @@
+name: apply-required-public-card-field-fix
+
+on:
+  push:
+    branches: [replay-prefix-draw-pinning-design]
+    paths: [.github/workflows/zz-fix-required-public-card-fields.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay-prefix-draw-pinning-design
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch implementation and regression
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('Combat/search/replay_draw_restore.py')
+          text = path.read_text()
+          old = '''    upgraded = card.get("upgraded", False)\n    upgrade_level = card.get("upgradeLevel", 0)\n'''
+          new = '''    if "upgraded" not in card or "upgradeLevel" not in card:\n        return None\n    upgraded = card["upgraded"]\n    upgrade_level = card["upgradeLevel"]\n'''
+          if text.count(old) != 1:
+              raise SystemExit(f'implementation replacement count={text.count(old)}')
+          path.write_text(text.replace(old, new))
+
+          test_path = Path('Combat/tests/test_replay_prefix_visible_draw_pinning.py')
+          test = test_path.read_text()
+          marker = '''def test_invalid_public_card_field_types_fail_closed() -> None:\n'''
+          new_test = '''def test_missing_required_public_card_fields_fail_closed() -> None:\n    missing_upgraded = _public("A")\n    missing_upgraded.pop("upgraded")\n    missing_upgrade_level = _public("B")\n    missing_upgrade_level.pop("upgradeLevel")\n\n    assert observable_card_key_from_public(missing_upgraded) is None\n    assert observable_card_key_from_public(missing_upgrade_level) is None\n\n    played = _public("PLAYED")\n    pre = _state(hand=[played], draw=[missing_upgraded])\n    post = _state(hand=[_public("A")], draw=[])\n    result = _evidence(pre, post)\n    assert result.constraints == ()\n    assert result.blocks_later_pinning is True\n\n\n'''
+          if test.count(marker) != 1:
+              raise SystemExit(f'test marker count={test.count(marker)}')
+          test_path.write_text(test.replace(marker, new_test + marker))
+          PY
+      - name: Run focused tests
+        run: |
+          python -m pip install pytest
+          python -m pytest -q Combat/tests/test_replay_prefix_visible_draw_pinning.py
+      - name: Commit final changes and remove helper
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/zz-fix-required-public-card-fields.yml
+          git add Combat/search/replay_draw_restore.py Combat/tests/test_replay_prefix_visible_draw_pinning.py
+          git commit -m 'Fail closed on missing public card state'
+          git push origin HEAD:replay-prefix-draw-pinning-design
