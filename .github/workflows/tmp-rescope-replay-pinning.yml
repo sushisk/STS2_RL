@@ -1,0 +1,35 @@
+name: Temporary rescope replay pinning
+on:
+  push:
+    branches: [replay-prefix-draw-pinning-design]
+permissions:
+  contents: write
+jobs:
+  rescope:
+    if: github.event.head_commit.message == 'chore: run scoped replay pinning rescope'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay-prefix-draw-pinning-design
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply scoped implementation
+        run: python scripts/tmp_rescope_replay_pinning.py
+      - name: Compile changed modules
+        run: python -m compileall -q API Combat/search Combat/tests/test_replay_prefix_visible_draw_pinning.py
+      - name: Install hosted test dependency
+        run: python -m pip install pytest
+      - name: Run focused hosted regression
+        run: python -m pytest -q Combat/tests/test_replay_prefix_visible_draw_pinning.py
+      - name: Commit scoped implementation and clean temporary files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f --ignore-unmatch scripts/tmp_rescope_replay_pinning.py .github/workflows/tmp-rescope-replay-pinning.yml
+          git add -A
+          git commit -m "refactor: scope replay pinning to existing structural identity"
+          git push origin HEAD:replay-prefix-draw-pinning-design
