@@ -85,8 +85,8 @@ from search.decision_context import (
     build_decision_context_from_held_stable,
     boundary_of_battle_state,
     start_new_replay_prefix_from_stable,
-    visible_draw_constraints_from_committed_transition,
 )
+from search.replay_draw_restore import visible_draw_transition_evidence_from_committed_transition
 
 if TYPE_CHECKING:
     from combat_state_snapshot import CombatStateSnapshot
@@ -459,20 +459,25 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
             target_index=planned_step.target_index,
             target_enemy_index=planned_step.target_enemy_index,
         )
+        draw_evidence = (
+            visible_draw_transition_evidence_from_committed_transition(
+                next_result,
+                loop_state.held_stable_snapshot,
+                loop_state.replay_prefix,
+                triggering_action=planned_step.semantic_action,
+                pre_battle_state=current_result,
+            )
+            if loop_state.held_stable_snapshot is not None
+            else None
+        )
         entry = ReplayPrefixEntry(
             semantic_action=planned_step.semantic_action,
             expected_signature=observed_signature,
             target_index=planned_step.target_index,
             target_enemy_index=planned_step.target_enemy_index,
-            visible_draw_constraints=(
-                visible_draw_constraints_from_committed_transition(
-                    next_result,
-                    loop_state.held_stable_snapshot,
-                    loop_state.replay_prefix,
-                    triggering_action=planned_step.semantic_action,
-                )
-                if loop_state.held_stable_snapshot is not None
-                else ()
+            visible_draw_constraints=draw_evidence.constraints if draw_evidence is not None else (),
+            visible_draw_tracking_blocked=(
+                draw_evidence.blocks_later_pinning if draw_evidence is not None else False
             ),
         )
         loop_state.replay_prefix = append_replay_prefix_entry(loop_state.replay_prefix, entry)

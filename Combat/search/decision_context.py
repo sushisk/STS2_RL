@@ -28,6 +28,13 @@ from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Optional
 
 from battle_emulator import BattleState, is_action_continuation_pending_choice, pending_choice_metadata
+from search.replay_draw_restore import (
+    VisibleDrawConstraint,
+    VisibleDrawConstraints,
+    VisibleDrawTransitionEvidence,
+    visible_draw_constraints_from_committed_transition,
+    visible_draw_transition_evidence_from_committed_transition,
+)
 
 if TYPE_CHECKING:
     from combat_state_snapshot import CombatStateSnapshot
@@ -319,22 +326,15 @@ class DecisionSignature:
 # ---------------------------------------------------------------------------
 
 
-VisibleDrawConstraint = tuple[int, str, str]
-VisibleDrawConstraints = tuple[VisibleDrawConstraint, ...]
-
-
 @dataclass(frozen=True)
 class ReplayPrefixEntry:
-    """One Transition Record: (Semantic Action, Observed Post-Step Signature) - the
-    atomic unit BOTH Replay Prefix and Plan Path accumulate (DC_DEF/NOTE_PLAN_PATH).
-    `target_index`/`target_enemy_index` travel alongside the SemanticAction because
-    `LiveCombatSession.step()` takes them as separate parameters from the resolved
-    action itself. `visible_draw_constraints` is populated only by real committed
-    stepping after a producer-specific proof establishes a root-relative visible draw
-    fact. The stored constraint shape is source-agnostic: card, relic, and potion
-    producers all feed the same ``(draw offset, CardId, internal Snapshot InstanceId)``
-    tuple to hypothesis materialization. Only audited card producers exist today;
-    unproven relic/potion paths therefore leave it empty and fail closed.
+    """One committed Transition Record in the Replay Prefix / Plan Path.
+
+    ``visible_draw_constraints`` contains only Gate-A+Gate-B-proven sequential draws,
+    represented as ``(root-relative offset, observable_card_key)``.  No physical card
+    identity is stored. ``visible_draw_tracking_blocked`` records an intervening
+    DrawPile mutation that could not be explained safely; later transitions must not
+    invent root-relative draw offsets past that point.
     """
 
     semantic_action: SemanticAction
@@ -342,221 +342,7 @@ class ReplayPrefixEntry:
     target_index: "Optional[int]" = None
     target_enemy_index: "Optional[int]" = None
     visible_draw_constraints: VisibleDrawConstraints = ()
-
-
-def _visible_card_state_key_from_snapshot(card: object) -> tuple:
-    """Gameplay-relevant card state that is already present in public card DTOs.
-
-    Snapshot ``InstanceId`` and hidden pile position are deliberately excluded. If two
-    root cards have the same key they are behaviorally indistinguishable for this replay
-    pinning purpose; no client-visible physical-copy identity is needed.
-    """
-    return (
-        str(getattr(card, "CardId", "")),
-        str(getattr(card, "Type", "")),
-        str(getattr(card, "Rarity", "")),
-        int(getattr(card, "Cost", 0)),
-        str(getattr(card, "TargetType", "")),
-        bool(getattr(card, "IsUpgraded", False)),
-        int(getattr(card, "UpgradeLevel", 0)),
-        getattr(card, "TinkerTimeType", None),
-        getattr(card, "TinkerTimeRider", None),
-    )
-
-
-def _visible_card_state_key_from_option(option: object) -> "Optional[tuple]":
-    if not isinstance(option, dict):
-        return None
-    card_id = option.get("id")
-    card_type = option.get("type")
-    rarity = option.get("rarity")
-    cost = option.get("cost")
-    target_type = option.get("targetType")
-    upgrade_level = option.get("upgradeLevel", 0)
-    if not isinstance(card_id, str) or not card_id:
-        return None
-    if not isinstance(card_type, str) or not isinstance(rarity, str) or not isinstance(target_type, str):
-        return None
-    if isinstance(cost, bool) or not isinstance(cost, int):
-        return None
-    if isinstance(upgrade_level, bool) or not isinstance(upgrade_level, int):
-        return None
-    return (
-        card_id,
-        card_type,
-        rarity,
-        cost,
-        target_type,
-        bool(option.get("upgraded", False)),
-        upgrade_level,
-        option.get("tinkerTimeType"),
-        option.get("tinkerTimeRider"),
-    )
-
-
-_AUDITED_DRAW_THEN_DISCARD_CARDS = frozenset({"ACROBATICS", "DAGGER_THROW", "PHOTON_CUT"})
-
-
-def _semantic_card_id(action: SemanticAction) -> "Optional[str]":
-    if action.action_type != "card":
-        return None
-    _slot, separator, card_id = action.semantic_key.partition(":")
-    return card_id if separator and card_id else None
-
-
-def _pending_source_card_id(pending: dict, triggering_action: SemanticAction) -> "Optional[str]":
-    origin_type = pending.get("originEntityType")
-    origin_id = pending.get("originEntityId")
-    if isinstance(origin_id, str) and origin_id and (origin_type is None or str(origin_type).lower() == "card"):
-        return origin_id.upper()
-    source_effect = pending.get("sourceEffectId")
-    if isinstance(source_effect, str) and source_effect.lower().startswith("card:"):
-        return source_effect.split(":", 1)[1].upper()
-    card_id = _semantic_card_id(triggering_action)
-    return card_id.upper() if card_id else None
-
-
-def _is_audited_zero_draw_target_prefix(
-    replay_prefix: "list[ReplayPrefixEntry]", source_card_id: str
-) -> bool:
-    """Allow the mechanically-audited targeted-card hop and nothing broader.
-
-    For a multi-enemy AnyEnemy card, Emulator ``BeginPlayCard`` publishes
-    ``choice_target`` without enqueueing ``PlayCardAction``. Therefore that first
-    transition consumes no draw RNG. The following ``choice_target`` step performs the
-    real card resolution. This is the DaggerThrow/PhotonCut two-hop shape called out in
-    the review. Any other non-empty prefix remains fail-closed.
-    """
-    if not replay_prefix:
-        return True
-    if len(replay_prefix) != 1:
-        return False
-    entry = replay_prefix[0]
-    if entry.visible_draw_constraints:
-        return False
-    if (_semantic_card_id(entry.semantic_action) or "").upper() != source_card_id:
-        return False
-    candidate_multiset_value = entry.expected_signature.candidate_semantic_keys
-    if not candidate_multiset_value:
-        return False
-    return all(
-        isinstance(key, tuple) and len(key) >= 1 and key[0] == "choice_target"
-        for key, _count in candidate_multiset_value
-    )
-
-
-def _visible_draw_constraints_from_audited_card_pending_choice(
-    battle_state: "BattleState",
-    root_snapshot: "CombatStateSnapshot",
-    replay_prefix: "list[ReplayPrefixEntry]",
-    *,
-    triggering_action: SemanticAction,
-) -> VisibleDrawConstraints:
-    """Card-producer proof for the mechanically-audited draw-then-discard shape.
-
-    This intentionally uses no Emulator-only ``cardInstanceId`` or HMAC namespace. The
-    visible PendingChoice already contains the card's gameplay state, while the Held
-    Stable root already contains the exact ordered ``CardInstanceSnapshot`` objects.
-    Once the audited transition proves that the appended visible tail is the sequential
-    draw prefix, each tail position maps directly to the root DrawPile at the same offset;
-    the internal Snapshot ``InstanceId`` can then be retained only inside ReplayPrefix.
-
-    This proof is deliberately card-specific: Acrobatics plus the structurally
-    confirmed DaggerThrow/PhotonCut target-selection two-hop. Other card shapes fail
-    closed here. Relic/potion producers do not pass through this proof; they belong in
-    separate producer functions feeding the common dispatcher below.
-    """
-    pending = battle_state.engine_state.get("pendingChoice")
-    if not isinstance(pending, dict):
-        return ()
-    source_card_id = _pending_source_card_id(pending, triggering_action)
-    if source_card_id not in _AUDITED_DRAW_THEN_DISCARD_CARDS:
-        return ()
-    if not _is_audited_zero_draw_target_prefix(replay_prefix, source_card_id):
-        return ()
-    if pending.get("scope") != "ActionContinuation":
-        return ()
-    if pending.get("choiceOperation") != "discard":
-        return ()
-    if pending.get("sourceZone") != "hand":
-        return ()
-    semantics = pending.get("choiceSemantics")
-    if not isinstance(semantics, dict) or semantics.get("sourceZone") != "hand":
-        return ()
-
-    raw_options = pending.get("options")
-    if not isinstance(raw_options, list) or not raw_options:
-        return ()
-    option_keys = [_visible_card_state_key_from_option(option) for option in raw_options]
-    if any(key is None for key in option_keys):
-        return ()
-
-    player = getattr(root_snapshot, "Player", None)
-    root_hand = list(getattr(player, "Hand", ()) or ())
-    root_draw = list(getattr(player, "DrawPile", ()) or ())
-    if not root_draw:
-        return ()
-
-    root_hand_keys = [_visible_card_state_key_from_snapshot(card) for card in root_hand]
-    matching_missing_indices = []
-    for missing_index, card in enumerate(root_hand):
-        if str(getattr(card, "CardId", "")).upper() != source_card_id:
-            continue
-        expected_prefix = root_hand_keys[:missing_index] + root_hand_keys[missing_index + 1 :]
-        if option_keys[: len(expected_prefix)] == expected_prefix:
-            matching_missing_indices.append(missing_index)
-    if len(matching_missing_indices) != 1:
-        return ()
-
-    existing_count = len(root_hand) - 1
-    drawn_keys = option_keys[existing_count:]
-    if not drawn_keys or len(drawn_keys) > len(root_draw):
-        return ()
-
-    constraints: list[VisibleDrawConstraint] = []
-    for offset, visible_key in enumerate(drawn_keys):
-        root_card = root_draw[offset]
-        if visible_key != _visible_card_state_key_from_snapshot(root_card):
-            return ()
-        constraints.append((offset, str(root_card.CardId), str(root_card.InstanceId)))
-    return tuple(constraints)
-
-
-# Producer proofs are intentionally separate from the ReplayPrefix constraint contract.
-# Future mechanically-audited card/relic/potion proofs extend this tuple; callers and
-# hypothesis materialization stay source-agnostic.
-_VISIBLE_DRAW_CONSTRAINT_PRODUCERS = (
-    _visible_draw_constraints_from_audited_card_pending_choice,
-)
-
-
-def visible_draw_constraints_from_committed_transition(
-    battle_state: "BattleState",
-    root_snapshot: "CombatStateSnapshot",
-    replay_prefix: "list[ReplayPrefixEntry]",
-    *,
-    triggering_action: SemanticAction,
-) -> VisibleDrawConstraints:
-    """Return one unambiguous producer-proven root-relative draw constraint set.
-
-    This dispatcher deliberately does not gate on ``triggering_action.action_type`` or
-    assume a card origin. Each producer owns its own mechanical proof and returns empty
-    when it cannot prove the transition. That keeps the commit path and hypothesis
-    consumer unchanged when audited relic or potion producers are added later. If two
-    producers ever claim the same transition, fail closed rather than combining facts
-    from ambiguous provenance.
-    """
-    matched: list[VisibleDrawConstraints] = []
-    for producer in _VISIBLE_DRAW_CONSTRAINT_PRODUCERS:
-        constraints = producer(
-            battle_state,
-            root_snapshot,
-            replay_prefix,
-            triggering_action=triggering_action,
-        )
-        if constraints:
-            matched.append(constraints)
-    return matched[0] if len(matched) == 1 else ()
+    visible_draw_tracking_blocked: bool = False
 
 
 @dataclass

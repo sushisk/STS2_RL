@@ -1,4 +1,4 @@
-"""Paired-Emulator regression for local structural exact-instance replay pinning."""
+"""Paired-Emulator regression for observable-state replay draw pinning."""
 from __future__ import annotations
 import sys
 import traceback
@@ -33,12 +33,10 @@ def _find_card(response: dict, action_type: str, card_id: str) -> dict:
     return next(a for a in _legal_actions(response) if a["action_type"] == action_type and (a.get("parameters") or {}).get("cardId") == card_id)
 
 
-def test_acrobatics_replay_prefix_pins_structural_state_without_emulator_identity_extension() -> None:
-    inst = CombatInstance("acrobatics-structural-replay", _config(), worker_count=2)
+def test_acrobatics_replay_prefix_pins_observable_state_without_instance_identity() -> None:
+    inst = CombatInstance("acrobatics-observable-replay", _config(), worker_count=2)
     try:
         start = inst.start_instance_response()
-        root_snapshot = inst._held_stable_snapshot
-        assert root_snapshot is not None
         acrobatics = _find_card(start, "card", "ACROBATICS")
         pending = inst.commit_action(start["decision_point_id"], acrobatics["action_id"])
         assert pending["status"] == "completed", pending
@@ -46,11 +44,11 @@ def test_acrobatics_replay_prefix_pins_structural_state_without_emulator_identit
         assert len(candidates) == 4, candidates
 
         constraints = inst._replay_prefix[0].visible_draw_constraints
-        assert [offset for offset, _card_id, _instance_id in constraints] == [0, 1, 2]
-        root_by_instance = {str(card.InstanceId): card for card in root_snapshot.Player.DrawPile}
-        defend_ids = [iid for _offset, card_id, iid in constraints if card_id == "DEFEND_SILENT"]
-        assert len(defend_ids) == 2 and defend_ids[0] != defend_ids[1]
-        assert {bool(root_by_instance[iid].IsUpgraded) for iid in defend_ids} == {False, True}
+        assert [offset for offset, _key in constraints] == [0, 1, 2]
+        defend_keys = [key for _offset, key in constraints if key[0] == "DEFEND_SILENT"]
+        assert len(defend_keys) == 2
+        assert {bool(key[5]) for key in defend_keys} == {False, True}
+        assert inst._replay_prefix[0].visible_draw_tracking_blocked is False
 
         for rng_id in range(1, 9):
             candidate = candidates[(rng_id - 1) % len(candidates)]
