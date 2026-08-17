@@ -14,19 +14,25 @@ jobs:
         with:
           python-version: '3.12'
       - name: Apply scoped implementation
-        run: python scripts/tmp_rescope_replay_pinning.py
+        run: |
+          python scripts/tmp_rescope_replay_pinning.py
+          git restore \
+            .github/workflows/paired-v07-counterpart-gate.yml \
+            .github/workflows/tmp-export-overspec-rescope.yml \
+            .github/workflows/tmp-export-relic-pinning-sources.yml \
+            .github/workflows/tmp-rescope-replay-pinning.yml
       - name: Compile changed modules
         run: python -m compileall -q API Combat/search Combat/tests/test_replay_prefix_visible_draw_pinning.py
       - name: Install hosted test dependency
         run: python -m pip install pytest
       - name: Run focused hosted regression
         run: python -m pytest -q Combat/tests/test_replay_prefix_visible_draw_pinning.py
-      - name: Commit scoped implementation and clean temporary files
+      - name: Commit scoped implementation
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm -f --ignore-unmatch scripts/tmp_rescope_replay_pinning.py .github/workflows/tmp-rescope-replay-pinning.yml
+          git rm -f scripts/tmp_rescope_replay_pinning.py
           git add -A
           git commit -m "refactor: scope replay pinning to existing structural identity"
           git push origin HEAD:replay-prefix-draw-pinning-design
