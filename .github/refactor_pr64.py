@@ -121,11 +121,20 @@ text = replace_once(
     '''    assert observable_transfer_evidence(pre, post) is not None\n\n    result = _evidence(pre, post)\n''',
     "drawn-only redundant direct Gate B assertion",
 )
+text = text.replace('        triggering_action=SemanticAction("card", "0:ANY_CARD"),\n', '')
+text = text.replace('        triggering_action=SemanticAction("potion", "unrelated"),\n', '')
+text = text.replace('from search.decision_context import SemanticAction\n', '')
 text = replace_once(
     text,
     '    constraints = ((0, upgraded_key), (2, b_key))\n',
     '    constraints = ((0, upgraded_key), (1, b_key))\n',
     "contiguous pinning test constraints",
+)
+text = replace_once(
+    text,
+    '    assert pinned.ordered_draw_pile_card_ids == ("A", "A", "B")\n',
+    '    assert pinned.ordered_draw_pile_card_ids == ("A", "B", "A")\n',
+    "contiguous reordered hypothesis",
 )
 text = replace_once(
     text,
