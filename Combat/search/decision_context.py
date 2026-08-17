@@ -334,7 +334,9 @@ class ReplayPrefixEntry:
     represented as ``(root-relative offset, observable_card_key)``.  No physical card
     identity is stored. ``visible_draw_tracking_blocked`` records an intervening
     DrawPile mutation that could not be explained safely; later transitions must not
-    invent root-relative draw offsets past that point.
+    invent root-relative draw offsets past that point. ``visible_draw_tracking_error``
+    retains the fail-closed Gate-A/Gate-B diagnostic so an ordering-contract regression
+    remains observable.
     """
 
     semantic_action: SemanticAction
@@ -343,6 +345,7 @@ class ReplayPrefixEntry:
     target_enemy_index: "Optional[int]" = None
     visible_draw_constraints: VisibleDrawConstraints = ()
     visible_draw_tracking_blocked: bool = False
+    visible_draw_tracking_error: "Optional[str]" = None
 
 
 @dataclass

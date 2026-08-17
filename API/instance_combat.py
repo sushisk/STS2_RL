@@ -316,6 +316,7 @@ class CombatInstance:
                     target_enemy_index=target_enemy_index,
                     visible_draw_constraints=draw_evidence.constraints,
                     visible_draw_tracking_blocked=draw_evidence.blocks_later_pinning,
+                    visible_draw_tracking_error=draw_evidence.tracking_error,
                 )
                 self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
         except Exception as exc:

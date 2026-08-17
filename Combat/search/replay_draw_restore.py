@@ -16,6 +16,7 @@ from __future__ import annotations
 import dataclasses
 from collections import Counter
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Any, Optional
 
 
@@ -60,6 +61,7 @@ class VisibleDrawTransitionEvidence:
 
     constraints: VisibleDrawConstraints = ()
     blocks_later_pinning: bool = False
+    tracking_error: Optional[str] = None
 
 
 def _enchantment_key(value: object) -> Optional[tuple]:
@@ -238,59 +240,60 @@ def observable_transfer_evidence(
     )
 
 
-def _is_subsequence(needle: tuple[ObservableCardKey, ...], haystack: tuple[ObservableCardKey, ...]) -> bool:
-    if not needle:
-        return True
-    index = 0
-    for value in haystack:
-        if value == needle[index]:
-            index += 1
-            if index == len(needle):
-                return True
-    return False
-
-
-def _hand_append_draw_order(
-    pre_state: object,
-    post_state: object,
+def _distinct_draw_sequences_from_options(
     transfer: ObservableTransferEvidence,
-) -> Optional[tuple[ObservableCardKey, ...]]:
-    """Gate-B prover for the common draw -> append-to-Hand -> choose-from-Hand path.
+    *,
+    limit: int = 2,
+) -> tuple[tuple[ObservableCardKey, ...], ...]:
+    """Return at most ``limit`` distinct R-subsequences of PendingChoice order.
 
-    This is structural, not card-specific. It requires the published options to be the
-    post-transition Hand sequence, the non-draw options to form a surviving pre-Hand
-    subsequence, and the DrawPile-removed cards to be one contiguous suffix. The
-    real-game Acrobatics path satisfies exactly this engine-level ordering contract.
+    Gate A proved ``O = R + E``. Remove exactly ``E`` occurrences while preserving
+    option order. Different occurrence assignments are acceptable only when they
+    collapse to the same observable-key sequence; otherwise Gate B is ambiguous and
+    fails closed.
     """
-    pre_engine = getattr(pre_state, "engine_state", None)
-    post_engine = getattr(post_state, "engine_state", None)
-    if not isinstance(pre_engine, dict) or not isinstance(post_engine, dict):
-        return None
-    pre_hand = _keys_from_public_cards(pre_engine.get("hand"))
-    post_hand = _keys_from_public_cards(post_engine.get("hand"))
-    if pre_hand is None or post_hand is None:
-        return None
+    if limit <= 0:
+        return ()
     options = transfer.option_keys
-    if options != post_hand:
-        return None
+    target_keys = tuple(sorted(transfer.removed_from_draw.keys(), key=repr))
+    slots = {key: index for index, key in enumerate(target_keys)}
+    initial = tuple(int(transfer.removed_from_draw[key]) for key in target_keys)
 
-    draw_count = sum(transfer.removed_from_draw.values())
-    if draw_count <= 0 or draw_count > len(options):
-        return None
-    prefix = options[:-draw_count]
-    suffix = options[-draw_count:]
-    if Counter(prefix) != transfer.explained_non_draw:
-        return None
-    if Counter(suffix) != transfer.removed_from_draw:
-        return None
-    if not _is_subsequence(prefix, pre_hand):
-        return None
-    return suffix
+    @lru_cache(maxsize=None)
+    def visit(
+        index: int,
+        remaining: tuple[int, ...],
+    ) -> tuple[tuple[ObservableCardKey, ...], ...]:
+        if not any(remaining):
+            return ((),)
+        if index >= len(options):
+            return ()
 
+        results: list[tuple[ObservableCardKey, ...]] = []
 
-_ORDERED_DRAW_PROVERS = (
-    _hand_append_draw_order,
-)
+        def add(sequence: tuple[ObservableCardKey, ...]) -> None:
+            if sequence not in results and len(results) < limit:
+                results.append(sequence)
+
+        # This option occurrence belongs to E.
+        for tail in visit(index + 1, remaining):
+            add(tail)
+            if len(results) >= limit:
+                return tuple(results)
+
+        # This option occurrence belongs to R.
+        key = options[index]
+        slot = slots.get(key)
+        if slot is not None and remaining[slot] > 0:
+            next_remaining = list(remaining)
+            next_remaining[slot] -= 1
+            for tail in visit(index + 1, tuple(next_remaining)):
+                add((key, *tail))
+                if len(results) >= limit:
+                    break
+        return tuple(results)
+
+    return visit(0, initial)
 
 
 def ordered_draw_sequence(
@@ -298,24 +301,39 @@ def ordered_draw_sequence(
     post_state: object,
     transfer: ObservableTransferEvidence,
 ) -> Optional[tuple[ObservableCardKey, ...]]:
-    """Gate B: return one unambiguous engine-proven sequential draw order.
+    """Generic Gate B: the unique option-order subsequence whose multiset is ``R``."""
+    del pre_state, post_state
+    sequences = _distinct_draw_sequences_from_options(transfer)
+    return sequences[0] if len(sequences) == 1 else None
 
-    New mechanics extend ``_ORDERED_DRAW_PROVERS`` at the engine-primitive/structural
-    level. In particular, a future draw-N-choose-M path whose options contain only the
-    drawn cards can reuse Gate A immediately, but should add an order prover only after
-    the Emulator/game contract confirms that those option positions preserve draw order.
-    """
-    matches = []
-    for prover in _ORDERED_DRAW_PROVERS:
-        sequence = prover(pre_state, post_state, transfer)
-        if sequence is not None:
-            matches.append(sequence)
-    if not matches:
+
+def _stable_root_draw_slice(
+    root_snapshot: object,
+    cursor: int,
+    count: int,
+) -> Optional[tuple[ObservableCardKey, ...]]:
+    """Independent order sentinel from Held Stable Snapshot, never a fallback source."""
+    player = getattr(root_snapshot, "Player", None)
+    draw_pile = getattr(player, "DrawPile", None)
+    if draw_pile is None:
         return None
-    first = matches[0]
-    if any(sequence != first for sequence in matches[1:]):
+    cards = list(draw_pile or ())
+    if cursor < 0 or count <= 0 or cursor + count > len(cards):
         return None
-    return first
+    return tuple(
+        observable_card_key_from_snapshot(card)
+        for card in cards[cursor : cursor + count]
+    )
+
+
+def _order_validation_projection(key: ObservableCardKey) -> tuple:
+    # Snapshot currently lacks enchantment. Compare every mutually-representable field;
+    # full materialization still rejects an enchantment representation mismatch.
+    return key[:-1]
+
+
+def _card_ids(sequence: tuple[ObservableCardKey, ...]) -> list[str]:
+    return [card_id_from_observable_key(key) for key in sequence]
 
 
 def visible_draw_transition_evidence_from_committed_transition(
@@ -326,25 +344,86 @@ def visible_draw_transition_evidence_from_committed_transition(
     triggering_action: object,
     pre_battle_state: object,
 ) -> VisibleDrawTransitionEvidence:
-    """Return Gate-A+B-proven root-relative draw constraints for one real transition."""
-    del root_snapshot, triggering_action  # intentionally not proof inputs
+    """Return generic Gate-A+B-proven root-relative draw constraints.
 
-    if any(bool(getattr(entry, "visible_draw_tracking_blocked", False)) for entry in replay_prefix):
-        return VisibleDrawTransitionEvidence(blocks_later_pinning=True)
+    Gate B derives order from PendingChoice options after removing ``E``. The inferred
+    order is independently checked against Held Stable Snapshot at the current root-
+    relative cursor. Snapshot order is never used as a fallback derivation when the two
+    disagree.
+    """
+    del triggering_action
+
+    if any(
+        bool(getattr(entry, "visible_draw_tracking_blocked", False))
+        for entry in replay_prefix
+    ):
+        return VisibleDrawTransitionEvidence(
+            blocks_later_pinning=True,
+            tracking_error=(
+                "draw tracking was already blocked by an earlier Replay Prefix transition"
+            ),
+        )
 
     transfer = observable_transfer_evidence(pre_battle_state, post_state)
     if transfer is None:
+        changed = _draw_multiset_changed(pre_battle_state, post_state)
         return VisibleDrawTransitionEvidence(
-            blocks_later_pinning=_draw_multiset_changed(pre_battle_state, post_state)
+            blocks_later_pinning=changed,
+            tracking_error=(
+                "Gate A could not explain an observed DrawPile multiset mutation"
+                if changed
+                else None
+            ),
         )
 
-    sequence = ordered_draw_sequence(pre_battle_state, post_state, transfer)
-    if sequence is None:
-        return VisibleDrawTransitionEvidence(blocks_later_pinning=True)
+    sequences = _distinct_draw_sequences_from_options(transfer)
+    if len(sequences) != 1:
+        return VisibleDrawTransitionEvidence(
+            blocks_later_pinning=True,
+            tracking_error=(
+                "Gate B could not uniquely separate draw-origin option occurrences "
+                "from E; draw order is ambiguous under observable card equality"
+            ),
+        )
+    sequence = sequences[0]
 
-    cursor = sum(len(getattr(entry, "visible_draw_constraints", ()) or ()) for entry in replay_prefix)
-    constraints = tuple((cursor + offset, key) for offset, key in enumerate(sequence))
-    return VisibleDrawTransitionEvidence(constraints=constraints)
+    cursor = sum(
+        len(getattr(entry, "visible_draw_constraints", ()) or ())
+        for entry in replay_prefix
+    )
+    expected = _stable_root_draw_slice(root_snapshot, cursor, len(sequence))
+    if expected is None:
+        return VisibleDrawTransitionEvidence(
+            blocks_later_pinning=True,
+            tracking_error=(
+                "Gate B could not validate option-derived draw order against Held "
+                f"Stable Snapshot offsets {cursor}..{cursor + len(sequence) - 1}"
+            ),
+        )
+
+    inferred_projection = tuple(
+        _order_validation_projection(key) for key in sequence
+    )
+    stable_projection = tuple(
+        _order_validation_projection(key) for key in expected
+    )
+    if inferred_projection != stable_projection:
+        return VisibleDrawTransitionEvidence(
+            blocks_later_pinning=True,
+            tracking_error=(
+                "Gate B option-order contract rejected: option-derived draw order "
+                f"{_card_ids(sequence)!r} disagrees with Held Stable Snapshot order "
+                f"{_card_ids(expected)!r} at root offsets "
+                f"{cursor}..{cursor + len(sequence) - 1}"
+            ),
+        )
+
+    return VisibleDrawTransitionEvidence(
+        constraints=tuple(
+            (cursor + offset, key)
+            for offset, key in enumerate(sequence)
+        )
+    )
 
 
 def visible_draw_constraints_from_committed_transition(

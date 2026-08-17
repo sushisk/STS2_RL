@@ -88,10 +88,11 @@ def _root(draw_cards):
     return SimpleNamespace(Player=SimpleNamespace(DrawPile=list(draw_cards)))
 
 
-def _entry(*constraints, blocked: bool = False):
+def _entry(*constraints, blocked: bool = False, error: str | None = None):
     return SimpleNamespace(
         visible_draw_constraints=tuple(constraints),
         visible_draw_tracking_blocked=blocked,
+        visible_draw_tracking_error=error,
     )
 
 
@@ -99,10 +100,24 @@ def _rng() -> SerializableRngSnapshot:
     return SerializableRngSnapshot(Counter=1, State0=2, State1=3, State2=4, State3=5)
 
 
-def _evidence(pre, post, prefix=()):
+def _root_from_public(cards):
+    return _root([
+        _card(
+            f"root-{index}",
+            card["id"],
+            upgraded=bool(card.get("upgraded", False)),
+            cost=int(card.get("cost", 0)),
+        )
+        for index, card in enumerate(cards)
+    ])
+
+
+def _evidence(pre, post, prefix=(), *, root_draw=None):
+    if root_draw is None:
+        root_draw = pre.engine_state["drawPile"]
     return visible_draw_transition_evidence_from_committed_transition(
         post,
-        _root([]),
+        _root_from_public(root_draw),
         list(prefix),
         triggering_action=SemanticAction("card", "0:ANY_CARD"),
         pre_battle_state=pre,
@@ -140,7 +155,7 @@ def test_card_allowlist_and_choice_semantics_are_not_safety_gates() -> None:
     )
     result = visible_draw_transition_evidence_from_committed_transition(
         post,
-        _root([]),
+        _root_from_public([a]),
         [],
         triggering_action=SemanticAction("potion", "unrelated"),
         pre_battle_state=pre,
@@ -149,7 +164,7 @@ def test_card_allowlist_and_choice_semantics_are_not_safety_gates() -> None:
     assert card_id_from_observable_key(result.constraints[0][1]) == "A"
 
 
-def test_drawn_only_choice_passes_gate_a_and_reuses_same_order_prover_extension_point() -> None:
+def test_drawn_only_choice_uses_generic_gate_b_without_mechanic_specific_prover() -> None:
     a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))
     h = _public("H")
     pre = _state(hand=[h], draw=[a, b, c, d])
@@ -157,31 +172,50 @@ def test_drawn_only_choice_passes_gate_a_and_reuses_same_order_prover_extension_
 
     transfer = observable_transfer_evidence(pre, post)
     assert transfer is not None
-    assert transfer.removed_from_draw == Counter(
-        observable_card_key_from_public(card) for card in (a, b, c)
-    )
-    assert transfer.explained_non_draw == Counter()
-    assert replay_draw_restore.ordered_draw_sequence(pre, post, transfer) is None
+    sequence = replay_draw_restore.ordered_draw_sequence(pre, post, transfer)
+    assert sequence is not None
+    assert [card_id_from_observable_key(key) for key in sequence] == ["A", "B", "C"]
 
-    original = replay_draw_restore._ORDERED_DRAW_PROVERS
-    try:
-        def drawn_only_order(_pre, _post, evidence):
-            return evidence.option_keys if not evidence.explained_non_draw else None
-
-        replay_draw_restore._ORDERED_DRAW_PROVERS = (*original, drawn_only_order)
-        result = _evidence(pre, post)
-        assert [card_id_from_observable_key(key) for _offset, key in result.constraints] == ["A", "B", "C"]
-    finally:
-        replay_draw_restore._ORDERED_DRAW_PROVERS = original
+    result = _evidence(pre, post)
+    assert result.blocks_later_pinning is False
+    assert result.tracking_error is None
+    assert [card_id_from_observable_key(key) for _offset, key in result.constraints] == ["A", "B", "C"]
 
 
 def test_drawpile_publication_order_is_not_gate_a_evidence() -> None:
     h = _public("H")
     a, b, c = (_public(name) for name in ("A", "B", "C"))
     post = _state(hand=[h, a, b], draw=[c], options=[h, a, b])
-    first = _evidence(_state(hand=[h], draw=[a, b, c]), post)
-    second = _evidence(_state(hand=[h], draw=[b, a, c]), post)
+    root_draw = [a, b, c]
+    first = _evidence(_state(hand=[h], draw=[a, b, c]), post, root_draw=root_draw)
+    second = _evidence(_state(hand=[h], draw=[b, a, c]), post, root_draw=root_draw)
     assert first.constraints == second.constraints
+
+
+def test_gate_b_rejects_wrong_option_order_against_stable_root_and_records_error() -> None:
+    a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))
+    pre = _state(hand=[], draw=[a, b, c, d])
+    post = _state(hand=[], draw=[d], options=[c, b, a])
+
+    result = _evidence(pre, post, root_draw=[a, b, c, d])
+    assert result.constraints == ()
+    assert result.blocks_later_pinning is True
+    assert result.tracking_error is not None
+    assert "option-order contract rejected" in result.tracking_error
+    assert "['C', 'B', 'A']" in result.tracking_error
+    assert "['A', 'B', 'C']" in result.tracking_error
+
+
+def test_gate_b_fails_closed_when_r_and_e_occurrences_make_order_ambiguous() -> None:
+    a, b, c = (_public(name) for name in ("A", "B", "C"))
+    pre = _state(hand=[a], draw=[a, b, c])
+    post = _state(hand=[a], draw=[c], options=[a, b, a])
+
+    result = _evidence(pre, post, root_draw=[a, b, c])
+    assert result.constraints == ()
+    assert result.blocks_later_pinning is True
+    assert result.tracking_error is not None
+    assert "ambiguous under observable card equality" in result.tracking_error
 
 
 def test_unaccounted_drawpile_mutation_blocks_later_root_relative_pinning() -> None:
