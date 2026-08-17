@@ -70,8 +70,10 @@ def observable_card_key_from_public(card: object) -> Optional[ObservableCardKey]
     rarity = card.get("rarity")
     cost = card.get("cost")
     target_type = card.get("targetType")
-    upgraded = card.get("upgraded", False)
-    upgrade_level = card.get("upgradeLevel", 0)
+    if "upgraded" not in card or "upgradeLevel" not in card:
+        return None
+    upgraded = card["upgraded"]
+    upgrade_level = card["upgradeLevel"]
     tinker_type = card.get("tinkerTimeType")
     tinker_rider = card.get("tinkerTimeRider")
     enchantment_ok, enchantment = _enchantment_key(card.get("enchantment"))

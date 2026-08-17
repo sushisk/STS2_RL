@@ -186,6 +186,23 @@ def test_transition_requires_exactly_one_pre_hand_card_consumed() -> None:
     assert result.blocks_later_pinning is True
 
 
+def test_missing_required_public_card_fields_fail_closed() -> None:
+    missing_upgraded = _public("A")
+    missing_upgraded.pop("upgraded")
+    missing_upgrade_level = _public("B")
+    missing_upgrade_level.pop("upgradeLevel")
+
+    assert observable_card_key_from_public(missing_upgraded) is None
+    assert observable_card_key_from_public(missing_upgrade_level) is None
+
+    played = _public("PLAYED")
+    pre = _state(hand=[played], draw=[missing_upgraded])
+    post = _state(hand=[_public("A")], draw=[])
+    result = _evidence(pre, post)
+    assert result.constraints == ()
+    assert result.blocks_later_pinning is True
+
+
 def test_invalid_public_card_field_types_fail_closed() -> None:
     invalid_upgraded = _public("A")
     invalid_upgraded["upgraded"] = "false"
