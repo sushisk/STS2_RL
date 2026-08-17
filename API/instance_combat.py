@@ -67,6 +67,17 @@ from API.masking import build_masked_emulator_dto, mask_legal_actions
 from API.terminal_outcome import require_terminal_outcome
 from API.validation import RequestRejected
 
+# BranchManager.poll()'s per-Branch execution deadline when a caller's simulation_options
+# doesn't set max_time_ms explicitly (no current caller does - confirmed by repo-wide grep
+# before lowering this). Previously 60000 (60s): a genuinely hung/deadlocked worker paid
+# this full deadline before being detected/faulted/respawned, and BranchManager.poll() has
+# no internal retry of its own (a "task_timeout" fault is returned to the caller as-is) -
+# so a single hung worker could consume a large fraction of a whole Oracle-collect episode's
+# wall-clock budget. 20s stays generous for a real (non-hung) Branch's computation while
+# bounding how long any one stuck worker can cost before Branch Manager detects and
+# respawns it.
+DEFAULT_MAX_TIME_MS = 20000
+
 
 DEFAULT_ALC_WORKER_COUNT = 8
 _AMBIGUOUS_ACTION_INDEX = -1
@@ -350,7 +361,7 @@ class CombatInstance:
             branch_log = parent_log + [{"depth": depth, "decision_point_id": decision_point_id, "action_id": action_id, "rng_id": rng_id}]
             book = _BranchBookkeeping(internal_id, parent_branch_id, branch_log, parent_history.fork(), rng_id)
             self._bookkeeping[branch_id] = book
-            results = self._branch_manager.poll(timeout=(simulation_options or {}).get("max_time_ms", 60000) / 1000.0, branch_ids=[internal_id])
+            results = self._branch_manager.poll(timeout=(simulation_options or {}).get("max_time_ms", DEFAULT_MAX_TIME_MS) / 1000.0, branch_ids=[internal_id])
             result = results.get(internal_id)
             if result is None:
                 return {"status": STATUS_RUNNING, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id}
@@ -447,7 +458,7 @@ class CombatInstance:
             for admitted_item, internal_id, book, branch_log in local_books:
                 self._bookkeeping[admitted_item.branch_id] = book
                 pending.append((admitted_item, internal_id, book, branch_log))
-            branch_timeout_s = (simulation_options or {}).get("max_time_ms", 60000) / 1000.0
+            branch_timeout_s = (simulation_options or {}).get("max_time_ms", DEFAULT_MAX_TIME_MS) / 1000.0
             results = self._branch_manager.poll(timeout=branch_timeout_s, branch_ids=internal_ids)
             branch_results: dict = {}
             for admitted_item, internal_id, book, branch_log in pending:
