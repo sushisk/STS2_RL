@@ -319,24 +319,29 @@ class DecisionSignature:
 # ---------------------------------------------------------------------------
 
 
+VisibleDrawConstraint = tuple[int, str, str]
+VisibleDrawConstraints = tuple[VisibleDrawConstraint, ...]
+
+
 @dataclass(frozen=True)
 class ReplayPrefixEntry:
     """One Transition Record: (Semantic Action, Observed Post-Step Signature) - the
     atomic unit BOTH Replay Prefix and Plan Path accumulate (DC_DEF/NOTE_PLAN_PATH).
     `target_index`/`target_enemy_index` travel alongside the SemanticAction because
     `LiveCombatSession.step()` takes them as separate parameters from the resolved
-    action itself. `visible_draw_constraints` is populated only by Main/Training real
-    stepping, but only for a mechanically-audited visible draw-then-discard transition.
-    Each value is a ``(root-relative draw offset, CardId, internal Snapshot InstanceId)``
-    tuple. No new Emulator-side identity namespace is required; search-internal/
-    hypothesis steps leave it empty.
+    action itself. `visible_draw_constraints` is populated only by real committed
+    stepping after a producer-specific proof establishes a root-relative visible draw
+    fact. The stored constraint shape is source-agnostic: card, relic, and potion
+    producers all feed the same ``(draw offset, CardId, internal Snapshot InstanceId)``
+    tuple to hypothesis materialization. Only audited card producers exist today;
+    unproven relic/potion paths therefore leave it empty and fail closed.
     """
 
     semantic_action: SemanticAction
     expected_signature: DecisionSignature
     target_index: "Optional[int]" = None
     target_enemy_index: "Optional[int]" = None
-    visible_draw_constraints: "tuple[tuple[int, str, str], ...]" = ()
+    visible_draw_constraints: VisibleDrawConstraints = ()
 
 
 def _visible_card_state_key_from_snapshot(card: object) -> tuple:
@@ -440,14 +445,14 @@ def _is_audited_zero_draw_target_prefix(
     )
 
 
-def visible_draw_constraints_from_pending_choice(
+def _visible_draw_constraints_from_audited_card_pending_choice(
     battle_state: "BattleState",
     root_snapshot: "CombatStateSnapshot",
     replay_prefix: "list[ReplayPrefixEntry]",
     *,
     triggering_action: SemanticAction,
-) -> "tuple[tuple[int, str, str], ...]":
-    """Return exact root-relative pins for the small mechanically-audited draw shape.
+) -> VisibleDrawConstraints:
+    """Card-producer proof for the mechanically-audited draw-then-discard shape.
 
     This intentionally uses no Emulator-only ``cardInstanceId`` or HMAC namespace. The
     visible PendingChoice already contains the card's gameplay state, while the Held
@@ -456,11 +461,10 @@ def visible_draw_constraints_from_pending_choice(
     draw prefix, each tail position maps directly to the root DrawPile at the same offset;
     the internal Snapshot ``InstanceId`` can then be retained only inside ReplayPrefix.
 
-    Scope is deliberately narrow per review feedback: Acrobatics plus the structurally
-    confirmed DaggerThrow/PhotonCut target-selection two-hop. Other cards, relic-origin
-    choices, draw-pile reveal/tutor mechanics, later unknown-RNG prefix hops, and reshuffle
-    cases fail closed. The consumer remains offset-aware/multi-entry so a future audited
-    producer can add constraints without changing hypothesis materialization.
+    This proof is deliberately card-specific: Acrobatics plus the structurally
+    confirmed DaggerThrow/PhotonCut target-selection two-hop. Other card shapes fail
+    closed here. Relic/potion producers do not pass through this proof; they belong in
+    separate producer functions feeding the common dispatcher below.
     """
     pending = battle_state.engine_state.get("pendingChoice")
     if not isinstance(pending, dict):
@@ -509,13 +513,50 @@ def visible_draw_constraints_from_pending_choice(
     if not drawn_keys or len(drawn_keys) > len(root_draw):
         return ()
 
-    constraints: list[tuple[int, str, str]] = []
+    constraints: list[VisibleDrawConstraint] = []
     for offset, visible_key in enumerate(drawn_keys):
         root_card = root_draw[offset]
         if visible_key != _visible_card_state_key_from_snapshot(root_card):
             return ()
         constraints.append((offset, str(root_card.CardId), str(root_card.InstanceId)))
     return tuple(constraints)
+
+
+# Producer proofs are intentionally separate from the ReplayPrefix constraint contract.
+# Future mechanically-audited card/relic/potion proofs extend this tuple; callers and
+# hypothesis materialization stay source-agnostic.
+_VISIBLE_DRAW_CONSTRAINT_PRODUCERS = (
+    _visible_draw_constraints_from_audited_card_pending_choice,
+)
+
+
+def visible_draw_constraints_from_committed_transition(
+    battle_state: "BattleState",
+    root_snapshot: "CombatStateSnapshot",
+    replay_prefix: "list[ReplayPrefixEntry]",
+    *,
+    triggering_action: SemanticAction,
+) -> VisibleDrawConstraints:
+    """Return one unambiguous producer-proven root-relative draw constraint set.
+
+    This dispatcher deliberately does not gate on ``triggering_action.action_type`` or
+    assume a card origin. Each producer owns its own mechanical proof and returns empty
+    when it cannot prove the transition. That keeps the commit path and hypothesis
+    consumer unchanged when audited relic or potion producers are added later. If two
+    producers ever claim the same transition, fail closed rather than combining facts
+    from ambiguous provenance.
+    """
+    matched: list[VisibleDrawConstraints] = []
+    for producer in _VISIBLE_DRAW_CONSTRAINT_PRODUCERS:
+        constraints = producer(
+            battle_state,
+            root_snapshot,
+            replay_prefix,
+            triggering_action=triggering_action,
+        )
+        if constraints:
+            matched.append(constraints)
+    return matched[0] if len(matched) == 1 else ()
 
 
 @dataclass

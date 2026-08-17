@@ -46,7 +46,7 @@ from search.decision_context import (
     boundary_of_battle_state,
     build_decision_context_from_held_stable,
     start_new_replay_prefix_from_stable,
-    visible_draw_constraints_from_pending_choice,
+    visible_draw_constraints_from_committed_transition,
 )
 
 from API.combat_rng_mapping import build_single_hypothesis_work_item
@@ -306,7 +306,7 @@ class CombatInstance:
                     expected_signature=observed_signature,
                     target_index=target_index,
                     target_enemy_index=target_enemy_index,
-                    visible_draw_constraints=visible_draw_constraints_from_pending_choice(
+                    visible_draw_constraints=visible_draw_constraints_from_committed_transition(
                         next_state,
                         self._held_stable_snapshot,
                         self._replay_prefix,

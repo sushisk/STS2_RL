@@ -52,7 +52,7 @@ Producer-specific proof may differ by source. For example, a relic or potion doe
 
 Constrained CardIds and internal Snapshot instances are fixed at proven offsets; all remaining concrete cards are allocated by the existing `_card_identity_key` canonical ordering.
 
-The materialization layer must not branch on whether a constraint originated from a card, relic, or potion. Producer classification belongs only in the proof/extraction layer.
+The materialization layer must not branch on whether a constraint originated from a card, relic, or potion. Producer classification belongs only in the proof/extraction layer. The committed-step call sites use `visible_draw_constraints_from_committed_transition()`, which dispatches to producer-specific proofs; the currently registered proof is the audited card path, and future relic/potion proofs extend that producer list without changing ReplayPrefix or hypothesis materialization.
 
 ## Deliberate current scope boundary
 
