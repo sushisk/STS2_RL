@@ -53,28 +53,15 @@ Equivalently, remove exactly `E` occurrences from the ordered options and preser
 
 Gate B relies on an Emulator publication contract: when freshly removed DrawPile cards are exposed in `pendingChoice.options`, the relative order of those draw-origin occurrences preserves sequential draw order.
 
-RL does **not** verify that premise by consulting:
+RL does **not** verify that premise by consulting `StableRoot.Player.DrawPile` order, public DrawPile order, raw draw history, RNG state, or physical card identity. Using any of those as a hidden answer key would violate the public-proof boundary.
 
-- `StableRoot.Player.DrawPile` order;
-- public Observation DrawPile order;
-- raw draw history;
-- RNG state;
-- physical card identity.
+## Validation boundary
 
-Using any of those as a hidden answer key would violate the public-proof boundary.
+RL can fail closed on public evidence: unexplained DrawPile multiset mutation, ambiguous Gate B, malformed Replay Prefix offsets, or ordinary replay-signature divergence.
 
-## What can and cannot be validated at runtime
+If an Emulator producer consistently publishes draw-origin options in an order different from actual sequential draw order and no public state exposes that difference, RL cannot prove the producer wrong without hidden information. That premise therefore belongs to Emulator contract/regression testing.
 
-RL can fail closed on evidence that is visible in the public state:
-
-- Gate A cannot explain the DrawPile multiset mutation;
-- Gate B has more than one observable draw-origin sequence;
-- Replay Prefix offsets cease to be one contiguous generated prefix;
-- later Replay Prefix execution fails its normal replay signature checks.
-
-However, if an Emulator producer **consistently** publishes draw-origin options in an order different from actual sequential draw order, and no public state exposes that difference, RL cannot prove the producer wrong without consulting hidden information. That premise must therefore be validated as an Emulator contract, not by RL runtime provenance logic.
-
-A useful additional hardening step is to re-derive Gate A/B during Replay Prefix execution from the replayed public pre/post states and compare it with the recorded constraints. That would detect public-card-state divergence that `candidate_semantic_keys` alone may miss. It still would not—and should not—act as a hidden draw-order oracle.
+As an optional additional hardening step, Replay Prefix execution can re-derive Gate A/B from replayed public pre/post states and compare it with the recorded constraints. That would detect public-card-state divergence that `candidate_semantic_keys` alone may miss, while still avoiding any hidden order oracle.
 
 ## Replay Prefix invariant
 
@@ -86,19 +73,13 @@ visible_draw_tracking_blocked: bool
 visible_draw_tracking_error: str | None
 ```
 
-Across the usable prefix, constraints must appear in generation order as exactly:
-
-```text
-0, 1, 2, ..., N-1
-```
-
-The consumer does not sort or repair malformed constraints. Any gap or reordering is an error. Tracking stops at the first blocked transition.
+Across the usable prefix, constraints must appear in generation order as exactly `0, 1, 2, ..., N-1`. The consumer does not sort or repair malformed constraints. Tracking stops at the first blocked transition.
 
 ## Materialization
 
 Observed CardIds are moved to the proven prefix positions while the unobserved candidate-hypothesis remainder keeps its relative order.
 
-Concrete Snapshot copies are selected only during restore. If observable-equal copies have different hidden gameplay-relevant Snapshot state, materialization fails closed instead of selecting by physical identity. Snapshot state is therefore used only to materialize a public constraint safely, not to decide which draw facts were observed or in what order.
+Concrete Snapshot copies are selected only during restore. If observable-equal copies have different hidden gameplay-relevant Snapshot state, materialization fails closed instead of selecting by physical identity. Snapshot state is used only to materialize a public constraint safely, not to decide which draw facts were observed or in what order.
 
 ## Safety boundary
 
