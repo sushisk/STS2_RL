@@ -462,7 +462,6 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
         draw_evidence = (
             visible_draw_transition_evidence_from_committed_transition(
                 next_result,
-                loop_state.held_stable_snapshot,
                 loop_state.replay_prefix,
                 pre_battle_state=current_result,
             )
