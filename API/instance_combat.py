@@ -302,15 +302,15 @@ class CombatInstance:
             elif boundary == BOUNDARY_PENDING:
                 if self._held_stable_snapshot is None:
                     raise RuntimeError("Pending replay prefix requires a Held Stable Snapshot")
+                semantic_action = _semantic_action_for(chosen)
                 draw_evidence = visible_draw_transition_evidence_from_committed_transition(
                     next_state,
                     self._held_stable_snapshot,
                     self._replay_prefix,
-                    triggering_action=_semantic_action_for(chosen),
                     pre_battle_state=pre_state,
                 )
                 entry = ReplayPrefixEntry(
-                    semantic_action=_semantic_action_for(chosen),
+                    semantic_action=semantic_action,
                     expected_signature=observed_signature,
                     target_index=target_index,
                     target_enemy_index=target_enemy_index,

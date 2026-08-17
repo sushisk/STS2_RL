@@ -1,16 +1,4 @@
-"""Observable-state proof for replay-prefix DrawPile reconstruction.
-
-The core rule is deliberately split in two:
-
-* Gate A proves an unordered DrawPile -> PendingChoice transfer from public card state.
-* Gate B proves that the transferred cards have an ordered representation that is safe
-  to interpret as sequential draw order.
-
-Neither gate uses card-name allowlists, rng_id, public instance identity, or Snapshot
-InstanceId. The output is an RL-internal sequence of root-relative offsets paired with
-observable replay-equivalence keys. Concrete Snapshot allocation is handled separately
-by ``search.rng_hypothesis``.
-"""
+"""Infer already-observed draw order for replay-prefix reconstruction."""
 from __future__ import annotations
 
 import dataclasses
@@ -46,7 +34,6 @@ class ObservableTransferEvidence:
     """Gate-A result before any draw-order interpretation."""
 
     removed_from_draw: Counter
-    explained_non_draw: Counter
     option_keys: tuple[ObservableCardKey, ...]
 
 
@@ -233,11 +220,7 @@ def observable_transfer_evidence(
     if not _counter_subset(explained_non_draw, persistent):
         return None
 
-    return ObservableTransferEvidence(
-        removed_from_draw=removed,
-        explained_non_draw=explained_non_draw,
-        option_keys=options,
-    )
+    return ObservableTransferEvidence(removed_from_draw=removed, option_keys=options)
 
 
 def _distinct_draw_sequences_from_options(
@@ -296,17 +279,6 @@ def _distinct_draw_sequences_from_options(
     return visit(0, initial)
 
 
-def ordered_draw_sequence(
-    pre_state: object,
-    post_state: object,
-    transfer: ObservableTransferEvidence,
-) -> Optional[tuple[ObservableCardKey, ...]]:
-    """Generic Gate B: the unique option-order subsequence whose multiset is ``R``."""
-    del pre_state, post_state
-    sequences = _distinct_draw_sequences_from_options(transfer)
-    return sequences[0] if len(sequences) == 1 else None
-
-
 def _stable_root_draw_slice(
     root_snapshot: object,
     cursor: int,
@@ -341,7 +313,6 @@ def visible_draw_transition_evidence_from_committed_transition(
     root_snapshot: object,
     replay_prefix: list[object],
     *,
-    triggering_action: object,
     pre_battle_state: object,
 ) -> VisibleDrawTransitionEvidence:
     """Return generic Gate-A+B-proven root-relative draw constraints.
@@ -351,8 +322,6 @@ def visible_draw_transition_evidence_from_committed_transition(
     relative cursor. Snapshot order is never used as a fallback derivation when the two
     disagree.
     """
-    del triggering_action
-
     if any(
         bool(getattr(entry, "visible_draw_tracking_blocked", False))
         for entry in replay_prefix
@@ -425,20 +394,3 @@ def visible_draw_transition_evidence_from_committed_transition(
         )
     )
 
-
-def visible_draw_constraints_from_committed_transition(
-    post_state: object,
-    root_snapshot: object,
-    replay_prefix: list[object],
-    *,
-    triggering_action: object,
-    pre_battle_state: object,
-) -> VisibleDrawConstraints:
-    """Compatibility wrapper for callers that only need the constraint tuple."""
-    return visible_draw_transition_evidence_from_committed_transition(
-        post_state,
-        root_snapshot,
-        replay_prefix,
-        triggering_action=triggering_action,
-        pre_battle_state=pre_battle_state,
-    ).constraints

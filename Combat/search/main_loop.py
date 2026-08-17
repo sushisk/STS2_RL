@@ -464,7 +464,6 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
                 next_result,
                 loop_state.held_stable_snapshot,
                 loop_state.replay_prefix,
-                triggering_action=planned_step.semantic_action,
                 pre_battle_state=current_result,
             )
             if loop_state.held_stable_snapshot is not None

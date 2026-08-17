@@ -358,36 +358,16 @@ def _card_identity_key(card: CardInstanceSnapshot) -> str:
 def _pinned_prefix_visible_draw_constraints(
     decision_context: DecisionContext,
 ) -> tuple[tuple[int, ObservableCardKey], ...]:
-    """Return the proven sequential-draw prefix before the first blocked mutation."""
     constraints: list[tuple[int, ObservableCardKey]] = []
     for entry in decision_context.replay_prefix:
         constraints.extend(entry.visible_draw_constraints)
-        if getattr(entry, "visible_draw_tracking_blocked", False):
+        if entry.visible_draw_tracking_blocked:
             break
-    if not constraints:
-        return ()
-    if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
-        raise ValueError("visible draw constraints require a Stable root snapshot")
 
     ordered = tuple(sorted(constraints, key=lambda item: item[0]))
-    offsets = [offset for offset, _key in ordered]
-    if len(set(offsets)) != len(offsets):
-        raise ValueError("visible draw constraints contain duplicate root-relative offsets")
-    if offsets != list(range(len(offsets))):
+    if [offset for offset, _key in ordered] != list(range(len(ordered))):
         raise ValueError(
             "visible draw constraints must form one contiguous prefix from Stable-root offset 0"
-        )
-
-    root_cards = list(decision_context.root_snapshot.Player.DrawPile)
-    if len(ordered) > len(root_cards):
-        raise ValueError("visible draw constraints exceed the Stable root DrawPile length")
-    requested = Counter(key for _offset, key in ordered)
-    available = Counter(observable_card_key_from_snapshot(card) for card in root_cards)
-    missing = {key: count - available.get(key, 0) for key, count in requested.items() if count > available.get(key, 0)}
-    if missing:
-        raise ValueError(
-            "visible draw constraints contain observable card state absent from the Stable root DrawPile: "
-            f"{missing!r}"
         )
     return ordered
 
@@ -396,24 +376,23 @@ def _reorder_hypothesis_for_visible_draw_constraints(
     hypothesis: SearchHypothesisId,
     constraints: tuple[tuple[int, ObservableCardKey], ...],
 ) -> SearchHypothesisId:
-    """Pin observed CardIds at proven offsets while preserving the candidate remainder."""
     remaining = list(hypothesis.ordered_draw_pile_card_ids)
-    ordered: list[Optional[str]] = [None] * len(remaining)
+    pinned: list[str] = []
     for offset, key in constraints:
+        if offset != len(pinned):
+            raise ValueError("visible draw constraints must be a contiguous prefix")
         card_id = card_id_from_observable_key(key)
-        if offset < 0 or offset >= len(ordered) or ordered[offset] is not None:
-            raise ValueError("invalid or duplicate visible draw offset")
         try:
             remaining.remove(card_id)
         except ValueError as exc:
             raise ValueError(
-                f"visible draw constraint requires CardId {card_id!r} that is absent "
-                "from this hypothesis multiset"
+                f"visible draw constraint requires CardId {card_id!r} absent from the hypothesis"
             ) from exc
-        ordered[offset] = card_id
-    tail = iter(remaining)
-    resolved = tuple(next(tail) if card_id is None else card_id for card_id in ordered)
-    return dataclasses.replace(hypothesis, ordered_draw_pile_card_ids=resolved)
+        pinned.append(card_id)
+    return dataclasses.replace(
+        hypothesis,
+        ordered_draw_pile_card_ids=tuple(pinned + remaining),
+    )
 
 
 def _draw_pile_instances_for_hypothesis(

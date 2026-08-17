@@ -14,8 +14,6 @@ if str(_COMBAT_DIR) not in sys.path:
 
 from battle_emulator import BattleState
 from combat_state_snapshot import CardInstanceSnapshot, LocalCostModifierSnapshot, SerializableRngSnapshot
-from search.decision_context import SemanticAction
-import search.replay_draw_restore as replay_draw_restore
 from search.replay_draw_restore import (
     card_id_from_observable_key,
     observable_card_key_from_public,
@@ -119,7 +117,6 @@ def _evidence(pre, post, prefix=(), *, root_draw=None):
         post,
         _root_from_public(root_draw),
         list(prefix),
-        triggering_action=SemanticAction("card", "0:ANY_CARD"),
         pre_battle_state=pre,
     )
 
@@ -157,7 +154,6 @@ def test_card_allowlist_and_choice_semantics_are_not_safety_gates() -> None:
         post,
         _root_from_public([a]),
         [],
-        triggering_action=SemanticAction("potion", "unrelated"),
         pre_battle_state=pre,
     )
     assert len(result.constraints) == 1
@@ -170,11 +166,7 @@ def test_drawn_only_choice_uses_generic_gate_b_without_mechanic_specific_prover(
     pre = _state(hand=[h], draw=[a, b, c, d])
     post = _state(hand=[h], draw=[d], options=[a, b, c])
 
-    transfer = observable_transfer_evidence(pre, post)
-    assert transfer is not None
-    sequence = replay_draw_restore.ordered_draw_sequence(pre, post, transfer)
-    assert sequence is not None
-    assert [card_id_from_observable_key(key) for key in sequence] == ["A", "B", "C"]
+    assert observable_transfer_evidence(pre, post) is not None
 
     result = _evidence(pre, post)
     assert result.blocks_later_pinning is False
@@ -271,12 +263,12 @@ def test_observable_state_pin_distinguishes_upgraded_copy_without_instance_contr
     upgraded_key = observable_card_key_from_public(_public("A", upgraded=True))
     b_key = observable_card_key_from_public(_public("B"))
     assert upgraded_key is not None and b_key is not None
-    constraints = ((0, upgraded_key), (2, b_key))
+    constraints = ((0, upgraded_key), (1, b_key))
     raw = SearchHypothesisId(
         rng=_rng(), ordered_draw_pile_card_ids=("B", "A", "A"), hypothesis_index=7
     )
     pinned = _reorder_hypothesis_for_visible_draw_constraints(raw, constraints)
-    assert pinned.ordered_draw_pile_card_ids == ("A", "A", "B")
+    assert pinned.ordered_draw_pile_card_ids == ("A", "B", "A")
     allocated = _draw_pile_instances_for_hypothesis(
         root,
         pinned.ordered_draw_pile_card_ids,
@@ -284,7 +276,7 @@ def test_observable_state_pin_distinguishes_upgraded_copy_without_instance_contr
     )
     assert allocated[0]["CardId"] == "A"
     assert allocated[0]["IsUpgraded"] is True
-    assert allocated[2]["CardId"] == "B"
+    assert allocated[1]["CardId"] == "B"
 
 
 def test_hidden_gameplay_state_ambiguity_fails_closed() -> None:

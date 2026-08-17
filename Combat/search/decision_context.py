@@ -28,13 +28,7 @@ from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Optional
 
 from battle_emulator import BattleState, is_action_continuation_pending_choice, pending_choice_metadata
-from search.replay_draw_restore import (
-    VisibleDrawConstraint,
-    VisibleDrawConstraints,
-    VisibleDrawTransitionEvidence,
-    visible_draw_constraints_from_committed_transition,
-    visible_draw_transition_evidence_from_committed_transition,
-)
+from search.replay_draw_restore import VisibleDrawConstraints
 
 if TYPE_CHECKING:
     from combat_state_snapshot import CombatStateSnapshot
@@ -328,16 +322,7 @@ class DecisionSignature:
 
 @dataclass(frozen=True)
 class ReplayPrefixEntry:
-    """One committed Transition Record in the Replay Prefix / Plan Path.
-
-    ``visible_draw_constraints`` contains only Gate-A+Gate-B-proven sequential draws,
-    represented as ``(root-relative offset, observable_card_key)``.  No physical card
-    identity is stored. ``visible_draw_tracking_blocked`` records an intervening
-    DrawPile mutation that could not be explained safely; later transitions must not
-    invent root-relative draw offsets past that point. ``visible_draw_tracking_error``
-    retains the fail-closed Gate-A/Gate-B diagnostic so an ordering-contract regression
-    remains observable.
-    """
+    """One committed replay step plus any proven root-relative draw prefix."""
 
     semantic_action: SemanticAction
     expected_signature: DecisionSignature
