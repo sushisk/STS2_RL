@@ -305,7 +305,6 @@ class CombatInstance:
                 semantic_action = _semantic_action_for(chosen)
                 draw_evidence = visible_draw_transition_evidence_from_committed_transition(
                     next_state,
-                    self._held_stable_snapshot,
                     self._replay_prefix,
                     pre_battle_state=pre_state,
                 )
