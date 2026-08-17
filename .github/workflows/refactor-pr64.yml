@@ -1,0 +1,32 @@
+name: refactor-pr64
+on:
+  push:
+    branches: [replay-prefix-draw-pinning-design]
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay-prefix-draw-pinning-design
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply cleanup
+        run: python .github/refactor_pr64.py
+      - name: Validate
+        run: |
+          python -m pip install pytest
+          python -m compileall -q API Combat/search
+          python -m pytest -q Combat/tests/test_replay_prefix_visible_draw_pinning.py
+      - name: Commit cleanup
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm .github/refactor_pr64.py .github/workflows/refactor-pr64.yml
+          git add API/instance_combat.py Combat/search/decision_context.py Combat/search/main_loop.py Combat/search/replay_draw_restore.py Combat/search/rng_hypothesis.py Combat/tests/test_replay_prefix_visible_draw_pinning.py
+          git commit -m 'Simplify replay draw pinning implementation'
+          git push origin HEAD:replay-prefix-draw-pinning-design
