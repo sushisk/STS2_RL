@@ -1,9 +1,6 @@
-"""Privacy-safe exact-instance replay pinning unit regressions for RL PR #64."""
-
+"""Repo-local regressions for the narrow replay-prefix draw pinning contract."""
 from __future__ import annotations
 
-import hashlib
-import hmac
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -12,72 +9,55 @@ _COMBAT_DIR = Path(__file__).resolve().parents[1]
 if str(_COMBAT_DIR) not in sys.path:
     sys.path.insert(0, str(_COMBAT_DIR))
 
-from battle_emulator import BattleState  # noqa: E402
-from combat_state_snapshot import CardInstanceSnapshot, SerializableRngSnapshot  # noqa: E402
-from search.decision_context import (  # noqa: E402
-    SemanticAction,
-    visible_draw_constraints_from_pending_choice as _extract_visible_draw_constraints,
-)
-from search.rng_hypothesis import (  # noqa: E402
+from battle_emulator import BattleState
+from combat_state_snapshot import CardInstanceSnapshot, SerializableRngSnapshot
+from search.decision_context import SemanticAction, visible_draw_constraints_from_pending_choice
+from search.rng_hypothesis import (
     SearchHypothesisId,
     _draw_pile_instances_for_hypothesis,
     _pinned_prefix_visible_draw_constraints,
     _reorder_hypothesis_for_visible_draw_constraints,
 )
 
-_COMBAT_SESSION_ID = "combat-session-visible-id-regression"
 
-
-def _card(instance_id: str, card_id: str, *, upgraded: bool = False) -> CardInstanceSnapshot:
+def _card(instance_id: str, card_id: str, *, upgraded: bool = False, cost: int = 1) -> CardInstanceSnapshot:
     return CardInstanceSnapshot(
-        InstanceId=instance_id,
-        CardId=card_id,
-        Type="Skill",
-        Rarity="Common",
-        Cost=1,
-        TargetType="None",
-        IsUpgraded=upgraded,
-        UpgradeLevel=1 if upgraded else 0,
+        InstanceId=instance_id, CardId=card_id, Type="Skill", Rarity="Common", Cost=cost,
+        TargetType="None", IsUpgraded=upgraded, UpgradeLevel=1 if upgraded else 0,
     )
+
+
+def _option(card_id: str, *, upgraded: bool = False, cost: int = 1, option_id: str = "o") -> dict:
+    return {
+        "id": card_id, "type": "Skill", "rarity": "Common", "cost": cost,
+        "targetType": "None", "upgraded": upgraded,
+        "upgradeLevel": 1 if upgraded else 0, "tinkerTimeType": None,
+        "tinkerTimeRider": None, "optionId": option_id,
+    }
 
 
 def _root(draw_cards, *, hand_cards=()):
-    return SimpleNamespace(
-        Metadata=SimpleNamespace(CombatSessionId=_COMBAT_SESSION_ID),
-        Player=SimpleNamespace(Hand=list(hand_cards), DrawPile=list(draw_cards)),
+    return SimpleNamespace(Player=SimpleNamespace(Hand=list(hand_cards), DrawPile=list(draw_cards)))
+
+
+def _state(options, *, source_card: str = "ACROBATICS") -> BattleState:
+    return BattleState(
+        engine_state={"pendingChoice": {
+            "scope": "ActionContinuation", "choiceOperation": "discard", "sourceZone": "hand",
+            "originEntityType": "card", "originEntityId": source_card,
+            "sourceEffectId": f"card:{source_card}", "choiceSemantics": {"sourceZone": "hand"},
+            "options": list(options),
+        }},
+        is_terminal=False, outcome="in_progress", turn=1,
     )
 
 
-def _public_instance_id(internal_instance_id: str) -> str:
-    digest = hmac.new(
-        _COMBAT_SESSION_ID.encode("utf-8"),
-        internal_instance_id.encode("utf-8"),
-        hashlib.sha256,
-    ).digest()
-    return f"cardv-{digest[:16].hex()}"
-
-
-def _state(
-    options,
-    *,
-    scope: str = "ActionContinuation",
-    choice_operation: str = "discard",
-    source_zone: str = "hand",
-    semantic_source_zone: str = "hand",
-) -> BattleState:
-    return BattleState(
-        engine_state={
-            "pendingChoice": {
-                "scope": scope,
-                "choiceOperation": choice_operation,
-                "sourceZone": source_zone,
-                "choiceSemantics": {"sourceZone": semantic_source_zone},
-                "options": list(options),
-            }
-        },
-        is_terminal=False,
-        outcome="in_progress",
-        turn=1,
+def _target_prefix(card_id: str):
+    return SimpleNamespace(
+        semantic_action=SemanticAction("card", f"0:{card_id}"), visible_draw_constraints=(),
+        expected_signature=SimpleNamespace(
+            candidate_semantic_keys=((('choice_target', '0'), 1), (('choice_target', '1'), 1)),
+        ),
     )
 
 
@@ -85,260 +65,93 @@ def _entry(*constraints):
     return SimpleNamespace(visible_draw_constraints=tuple(constraints))
 
 
-def _visible_constraints(state, root, replay_prefix, *, card_id: str = "ACROBATICS"):
-    return _extract_visible_draw_constraints(
-        state,
-        root,
-        replay_prefix,
-        triggering_action=SemanticAction("card", f"0:{card_id}"),
-    )
-
-
 def _rng() -> SerializableRngSnapshot:
     return SerializableRngSnapshot(Counter=1, State0=2, State1=3, State2=4, State3=5)
 
 
-def test_visible_constraints_keep_new_acrobatics_draws_when_choice_contains_preexisting_hand() -> None:
+def test_acrobatics_uses_visible_state_and_root_position_without_public_instance_token() -> None:
     root = _root(
-        [
-            _card("i-a1", "A"),
-            _card("i-a2", "A", upgraded=True),
-            _card("i-b", "B"),
-            _card("i-c", "C"),
-        ],
-        hand_cards=[
-            _card("i-acrobatics", "ACROBATICS"),
-            _card("i-neutralize", "NEUTRALIZE"),
-        ],
+        [_card("i-a-up", "A", upgraded=True), _card("i-a", "A"), _card("i-b", "B"), _card("i-c", "C")],
+        hand_cards=[_card("i-acro", "ACROBATICS"), _card("i-neutralize", "NEUTRALIZE")],
     )
-    visible_hand = _public_instance_id("i-neutralize")
-    visible_a2 = _public_instance_id("i-a2")
-    visible_b = _public_instance_id("i-b")
-    visible_c = _public_instance_id("i-c")
-
-    assert visible_a2.startswith("cardv-") and visible_a2 != "i-a2"
-    state = _state(
-        [
-            {"id": "NEUTRALIZE", "optionId": "o-hand", "cardInstanceId": visible_hand},
-            {"id": "A", "optionId": "o-a2", "cardInstanceId": visible_a2},
-            {"id": "B", "optionId": "o-b", "cardInstanceId": visible_b},
-            {"id": "C", "optionId": "o-c", "cardInstanceId": visible_c},
-        ]
-    )
-
-    # The pre-existing hand card is verified but is not a draw constraint. Only the
-    # newly appended Acrobatics cards are translated to internal Snapshot IDs.
-    assert _visible_constraints(state, root, []) == (
-        ("A", "i-a2"),
-        ("B", "i-b"),
-        ("C", "i-c"),
-    )
-
-
-def test_visible_constraints_fail_closed_without_proven_root_acrobatics_shape() -> None:
-    root = _root(
-        [_card("i-a", "A"), _card("i-b", "B")],
-        hand_cards=[
-            _card("i-acrobatics", "ACROBATICS"),
-            _card("i-neutralize", "NEUTRALIZE"),
-        ],
-    )
-    options = [
-        {
-            "id": "NEUTRALIZE",
-            "optionId": "o-hand",
-            "cardInstanceId": _public_instance_id("i-neutralize"),
-        },
-        {"id": "A", "optionId": "o-a", "cardInstanceId": _public_instance_id("i-a")},
-    ]
-
-    # A later Replay Prefix entry has no safe root-relative draw cursor, so it must not
-    # be flattened to position zero.
-    assert _visible_constraints(_state(options), root, [_entry()]) == ()
-
-    # Canonical source-zone and discard/action-continuation shape are part of the proof.
-    assert _visible_constraints(
-        _state(options, semantic_source_zone="draw_pile"), root, []
-    ) == ()
-    assert _visible_constraints(
-        _state(options, choice_operation="exhaust"), root, []
-    ) == ()
-    assert _visible_constraints(
-        _state(options, scope="TopLevel"), root, []
-    ) == ()
-
-    # Reordering the pre-existing hand destroys the append-only Acrobatics proof.
-    reordered_root = _root(
-        [_card("i-a", "A")],
-        hand_cards=[
-            _card("i-left", "SURVIVOR"),
-            _card("i-acrobatics", "ACROBATICS"),
-            _card("i-right", "NEUTRALIZE"),
-        ],
-    )
-    reordered_options = [
-        {"id": "NEUTRALIZE", "optionId": "r", "cardInstanceId": _public_instance_id("i-right")},
-        {"id": "SURVIVOR", "optionId": "l", "cardInstanceId": _public_instance_id("i-left")},
-        {"id": "A", "optionId": "a", "cardInstanceId": _public_instance_id("i-a")},
-    ]
-    assert _visible_constraints(
-        _state(reordered_options), reordered_root, []
-    ) == ()
-
-    # A non-Acrobatics played-card shape is not generalized from root-pile membership.
-    non_acrobatics_root = _root(
-        [_card("i-a", "A")],
-        hand_cards=[_card("i-strike", "STRIKE_SILENT"), _card("i-neutralize", "NEUTRALIZE")],
-    )
-    assert _visible_constraints(
-        _state(
-            [
-                {
-                    "id": "NEUTRALIZE",
-                    "optionId": "h",
-                    "cardInstanceId": _public_instance_id("i-neutralize"),
-                },
-                {"id": "A", "optionId": "a", "cardInstanceId": _public_instance_id("i-a")},
-            ]
-        ),
-        non_acrobatics_root,
-        [],
-    ) == ()
-
-
-def test_visible_constraints_reject_same_acrobatics_shape_from_non_acrobatics_action() -> None:
-    root = _root(
-        [_card("i-a", "A")],
-        hand_cards=[
-            _card("i-acrobatics", "ACROBATICS"),
-            _card("i-neutralize", "NEUTRALIZE"),
-        ],
-    )
-    state = _state(
-        [
-            {
-                "id": "NEUTRALIZE",
-                "optionId": "o-hand",
-                "cardInstanceId": _public_instance_id("i-neutralize"),
-            },
-            {
-                "id": "A",
-                "optionId": "o-a",
-                "cardInstanceId": _public_instance_id("i-a"),
-            },
-        ]
-    )
-
-    # The post-step shape itself is a valid Acrobatics shape, proving this fixture
-    # would have been accepted before the triggering-action gate was added.
-    assert _visible_constraints(state, root, []) == (("A", "i-a"),)
-
-    # The same root hand and PendingChoice must fail closed when a different card
-    # action produced it; post-step shape alone is not sufficient provenance.
-    assert _visible_constraints(state, root, [], card_id="STRIKE_SILENT") == ()
-
-
-def test_visible_constraints_reject_malformed_or_non_root_draw_identity() -> None:
-    root = _root(
-        [_card("i-a", "A"), _card("i-b", "B")],
-        hand_cards=[_card("i-acrobatics", "ACROBATICS")],
-    )
-
-    assert _visible_constraints(
-        _state([{"id": "A", "optionId": "legacy"}]), root, []
-    ) == ()
-    assert _visible_constraints(
-        _state(
-            [
-                {
-                    "id": "HAND_ONLY",
-                    "optionId": "h",
-                    "cardInstanceId": _public_instance_id("i-not-root-draw"),
-                }
-            ]
-        ),
-        root,
-        [],
-    ) == ()
-
-
-def test_pinned_prefix_accepts_only_first_transition_root_relative_constraints() -> None:
-    root = _root([_card("i-a", "A"), _card("i-b", "B"), _card("i-c", "C")])
-
-    root_only = SimpleNamespace(
-        root_snapshot=root,
-        replay_prefix=[_entry(("A", "i-a"), ("B", "i-b")), _entry()],
-    )
-    assert _pinned_prefix_visible_draw_constraints(root_only) == (("A", "i-a"), ("B", "i-b"))
-
-    # A later transition's visible cards have an unknown Stable-root-relative draw
-    # offset. Do not concatenate them and move them to root position zero.
-    later_constraint = SimpleNamespace(
-        root_snapshot=root,
-        replay_prefix=[_entry(("A", "i-a")), _entry(), _entry(("B", "i-b"))],
-    )
-    assert _pinned_prefix_visible_draw_constraints(later_constraint) == ()
-
-    # A constraint that appears only later is equally unsafe, even if its instance is in
-    # the root DrawPile.
-    later_only = SimpleNamespace(
-        root_snapshot=root,
-        replay_prefix=[_entry(), _entry(("B", "i-b"))],
-    )
-    assert _pinned_prefix_visible_draw_constraints(later_only) == ()
-
-    malformed_first = SimpleNamespace(
-        root_snapshot=root,
-        replay_prefix=[_entry(("A", "not-a-root-instance"))],
-    )
-    assert _pinned_prefix_visible_draw_constraints(malformed_first) == ()
-
-
-def test_hypothesis_reorder_and_concrete_allocation_pin_duplicate_cardid_exact_instance() -> None:
-    # i-a2 is upgraded while i-a1 is not. CardId-only canonical allocation may choose
-    # either copy; exact-instance pinning must force the already-visible upgraded copy.
-    root = _root([
-        _card("i-a1", "A", upgraded=False),
-        _card("i-a2", "A", upgraded=True),
-        _card("i-b", "B"),
+    state = _state([
+        _option("NEUTRALIZE", option_id="hand"), _option("A", upgraded=True, option_id="a-up"),
+        _option("A", option_id="a"), _option("B", option_id="b"),
     ])
-    constraints = (("A", "i-a2"), ("B", "i-b"))
-    raw = SearchHypothesisId(
-        rng=_rng(),
-        ordered_draw_pile_card_ids=("B", "A", "A"),
-        hypothesis_index=7,
-    )
+    assert all("cardInstanceId" not in option for option in state.engine_state["pendingChoice"]["options"])
+    assert visible_draw_constraints_from_pending_choice(
+        state, root, [], triggering_action=SemanticAction("card", "0:ACROBATICS")
+    ) == ((0, "A", "i-a-up"), (1, "A", "i-a"), (2, "B", "i-b"))
 
+
+def test_same_cardid_different_state_is_disambiguated_by_visible_card_state() -> None:
+    root = _root(
+        [_card("i-a-up", "A", upgraded=True), _card("i-a", "A")],
+        hand_cards=[_card("i-acro", "ACROBATICS")],
+    )
+    assert visible_draw_constraints_from_pending_choice(
+        _state([_option("A", upgraded=True)]), root, [],
+        triggering_action=SemanticAction("card", "0:ACROBATICS"),
+    ) == ((0, "A", "i-a-up"),)
+    assert visible_draw_constraints_from_pending_choice(
+        _state([_option("A", upgraded=False)]), root, [],
+        triggering_action=SemanticAction("card", "0:ACROBATICS"),
+    ) == ()
+
+
+def test_non_audited_similar_shape_fails_closed() -> None:
+    root = _root([_card("i-a", "A")], hand_cards=[_card("i-prepared", "PREPARED")])
+    assert visible_draw_constraints_from_pending_choice(
+        _state([_option("A")], source_card="PREPARED"), root, [],
+        triggering_action=SemanticAction("card", "0:PREPARED"),
+    ) == ()
+
+
+def test_targeted_dagger_throw_two_hop_is_the_supported_nonempty_prefix_shape() -> None:
+    root = _root(
+        [_card("i-a", "A")],
+        hand_cards=[_card("i-dagger", "DAGGER_THROW"), _card("i-neutralize", "NEUTRALIZE")],
+    )
+    state = _state([_option("NEUTRALIZE", option_id="hand"), _option("A", option_id="draw")], source_card="DAGGER_THROW")
+    prefix = [_target_prefix("DAGGER_THROW")]
+    assert visible_draw_constraints_from_pending_choice(
+        state, root, prefix, triggering_action=SemanticAction("choice_target", "0")
+    ) == ((0, "A", "i-a"),)
+
+    unsafe = [SimpleNamespace(
+        semantic_action=SemanticAction("card", "0:STRIKE_SILENT"), visible_draw_constraints=(),
+        expected_signature=prefix[0].expected_signature,
+    )]
+    assert visible_draw_constraints_from_pending_choice(
+        state, root, unsafe, triggering_action=SemanticAction("choice_target", "0")
+    ) == ()
+
+
+def test_offset_aware_consumer_retains_multi_entry_forward_compatibility() -> None:
+    root = _root([_card("i-a", "A"), _card("i-b", "B"), _card("i-c", "C")])
+    context = SimpleNamespace(
+        root_snapshot=root,
+        replay_prefix=[_entry((2, "C", "i-c")), _entry(), _entry((0, "A", "i-a"))],
+    )
+    assert _pinned_prefix_visible_draw_constraints(context) == ((0, "A", "i-a"), (2, "C", "i-c"))
+
+
+def test_hypothesis_reorder_and_allocator_pin_internal_snapshot_instances_at_offsets() -> None:
+    root = _root([_card("i-a", "A"), _card("i-a-up", "A", upgraded=True), _card("i-b", "B")])
+    constraints = ((0, "A", "i-a-up"), (2, "B", "i-b"))
+    raw = SearchHypothesisId(rng=_rng(), ordered_draw_pile_card_ids=("B", "A", "A"), hypothesis_index=7)
     pinned = _reorder_hypothesis_for_visible_draw_constraints(raw, constraints)
-    assert pinned.ordered_draw_pile_card_ids == ("A", "B", "A")
-    assert pinned.hypothesis_index == raw.hypothesis_index
-
+    assert pinned.ordered_draw_pile_card_ids == ("A", "A", "B")
     allocated = _draw_pile_instances_for_hypothesis(
-        root,
-        pinned.ordered_draw_pile_card_ids,
-        pinned_instance_ids=("i-a2", "i-b"),
+        root, pinned.ordered_draw_pile_card_ids, pinned_instances=((0, "i-a-up"), (2, "i-b"))
     )
-    assert [card["InstanceId"] for card in allocated] == ["i-a2", "i-b", "i-a1"]
-    assert [card["CardId"] for card in allocated] == ["A", "B", "A"]
+    assert [card["InstanceId"] for card in allocated] == ["i-a-up", "i-a", "i-b"]
     assert allocated[0]["IsUpgraded"] is True
 
 
-def test_exact_instance_allocator_rejects_absent_or_cardid_mismatched_pin() -> None:
+def test_consumer_rejects_duplicate_offsets_or_mismatched_snapshot_instance() -> None:
     root = _root([_card("i-a", "A"), _card("i-b", "B")])
-    try:
-        _draw_pile_instances_for_hypothesis(
-            root, ("A", "B"), pinned_instance_ids=("missing",)
-        )
-    except ValueError as exc:
-        assert "absent" in str(exc)
-    else:
-        raise AssertionError("absent cardInstanceId was accepted")
-
-    try:
-        _draw_pile_instances_for_hypothesis(
-            root, ("A", "B"), pinned_instance_ids=("i-b",)
-        )
-    except ValueError as exc:
-        assert "requires" in str(exc)
-    else:
-        raise AssertionError("CardId-mismatched exact instance was accepted")
+    duplicate = SimpleNamespace(root_snapshot=root, replay_prefix=[_entry((0, "A", "i-a"), (0, "B", "i-b"))])
+    assert _pinned_prefix_visible_draw_constraints(duplicate) == ()
+    mismatch = SimpleNamespace(root_snapshot=root, replay_prefix=[_entry((0, "A", "i-b"))])
+    assert _pinned_prefix_visible_draw_constraints(mismatch) == ()

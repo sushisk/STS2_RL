@@ -282,10 +282,7 @@ def derive_combat_start_replay_roots(
         roots.append(
             CombatStartDerivedReplayRoot(
                 hypothesis=hypothesis,
-                derived_replay_root=CombatStartReplayRoot(
-                    scenario_spec=spec,
-                    visible_draw_constraints=combat_start_replay_root.visible_draw_constraints,
-                ),
+                derived_replay_root=CombatStartReplayRoot(scenario_spec=spec),
             )
         )
     return roots
@@ -418,7 +415,7 @@ def _draw_pile_instances_for_hypothesis(
     offsets = [offset for offset, _instance_id in pinned_instances]
     instance_ids = [instance_id for _offset, instance_id in pinned_instances]
     if len(set(offsets)) != len(offsets) or len(set(instance_ids)) != len(instance_ids):
-        raise ValueError("pinned draw constraints contain duplicate offsets or cardInstanceId values")
+        raise ValueError("pinned draw constraints contain duplicate offsets or Snapshot instance ids")
 
     allocated: list[Optional[CardInstanceSnapshot]] = [None] * len(ordered_card_ids)
     pinned_set = set(instance_ids)
@@ -427,11 +424,11 @@ def _draw_pile_instances_for_hypothesis(
             raise ValueError(f"pinned draw offset {offset} is outside the root DrawPile")
         card = by_instance_id.get(instance_id)
         if card is None:
-            raise ValueError(f"pinned cardInstanceId {instance_id!r} is absent from root DrawPile")
+            raise ValueError(f"pinned Snapshot instance {instance_id!r} is absent from root DrawPile")
         expected_card_id = ordered_card_ids[offset]
         if str(card.CardId) != expected_card_id:
             raise ValueError(
-                f"pinned cardInstanceId {instance_id!r} has CardId={card.CardId!r}, "
+                f"pinned Snapshot instance {instance_id!r} has CardId={card.CardId!r}, "
                 f"but hypothesis position {offset} requires {expected_card_id!r}"
             )
         allocated[offset] = card
@@ -512,9 +509,9 @@ def apply_hypothesis_to_context(
 ) -> DecisionContext:
     """Apply one CardId-level belief plus proven root-relative replay constraints.
 
-    The hypothesis itself deliberately remains CardId-level. Exact ``cardInstanceId``
-    values come only from a real, already-visible first Pending transition in the Replay
-    Prefix whose position was proven relative to the Stable root. They constrain concrete
+    The hypothesis itself deliberately remains CardId-level. Exact internal Snapshot
+    instance pins come only from mechanically-audited visible Replay Prefix transitions
+    whose positions are proven relative to the Stable root. They constrain concrete
     allocation in the derived snapshot but are never added to ``SearchHypothesisId`` or
     exposed as hidden future order.
     """

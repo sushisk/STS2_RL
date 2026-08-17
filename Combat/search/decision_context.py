@@ -23,8 +23,6 @@ from __future__ import annotations
 
 import json
 import dataclasses
-import hashlib
-import hmac
 from collections import Counter
 from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Optional
@@ -103,10 +101,6 @@ class CombatStartReplayRoot:
     object."""
 
     scenario_spec: dict
-    # Start-of-Combat has no Stable Snapshot/portable Snapshot InstanceId. Keep only
-    # visibility-safe (combat-global draw ordinal, visible option fingerprint) facts;
-    # each restarted session verifies them against its newly-issued exact token.
-    visible_draw_constraints: "tuple[tuple[int, str], ...]" = ()
 
 
 @dataclass(frozen=True)
@@ -332,10 +326,10 @@ class ReplayPrefixEntry:
     `target_index`/`target_enemy_index` travel alongside the SemanticAction because
     `LiveCombatSession.step()` takes them as separate parameters from the resolved
     action itself. `visible_draw_constraints` is populated only by Main/Training real
-    stepping from Emulator-authored visibility-scoped draw provenance. Each value is a
-    ``(root-relative draw offset, CardId, CardInstanceSnapshot.InstanceId)`` tuple. The
-    producer/action type is deliberately absent: cards and relics share the same exact-
-    instance consumer. Search-internal/hypothesis steps leave it empty.
+    stepping, but only for a mechanically-audited visible draw-then-discard transition.
+    Each value is a ``(root-relative draw offset, CardId, internal Snapshot InstanceId)``
+    tuple. No new Emulator-side identity namespace is required; search-internal/
+    hypothesis steps leave it empty.
     """
 
     semantic_action: SemanticAction
@@ -345,83 +339,105 @@ class ReplayPrefixEntry:
     visible_draw_constraints: "tuple[tuple[int, str, str], ...]" = ()
 
 
-def _public_card_instance_id(combat_session_id: str, snapshot_instance_id: str) -> str:
-    """Mirror Emulator #25's privacy-safe public card identity derivation exactly."""
-    digest = hmac.new(
-        combat_session_id.encode("utf-8"),
-        snapshot_instance_id.encode("utf-8"),
-        hashlib.sha256,
-    ).digest()
-    return f"cardv-{digest[:16].hex()}"
+def _visible_card_state_key_from_snapshot(card: object) -> tuple:
+    """Gameplay-relevant card state that is already present in public card DTOs.
 
-
-def _split_public_card_instance_id(value: object) -> "tuple[Optional[str], Optional[int]]":
-    """Split Emulator's visibility-scoped ``cardv-…@draw:N`` token.
-
-    Legacy/generated tokens have no draw suffix and therefore carry no sequential-draw
-    provenance. Malformed suffixes fail closed rather than being treated as identity.
+    Snapshot ``InstanceId`` and hidden pile position are deliberately excluded. If two
+    root cards have the same key they are behaviorally indistinguishable for this replay
+    pinning purpose; no client-visible physical-copy identity is needed.
     """
-    if not isinstance(value, str) or not value:
-        return None, None
-    base, marker, ordinal_text = value.rpartition("@draw:")
-    if not marker:
-        return value, None
-    if not base.startswith("cardv-") or not ordinal_text.isdigit():
-        return None, None
-    return base, int(ordinal_text)
+    return (
+        str(getattr(card, "CardId", "")),
+        str(getattr(card, "Type", "")),
+        str(getattr(card, "Rarity", "")),
+        int(getattr(card, "Cost", 0)),
+        str(getattr(card, "TargetType", "")),
+        bool(getattr(card, "IsUpgraded", False)),
+        int(getattr(card, "UpgradeLevel", 0)),
+        getattr(card, "TinkerTimeType", None),
+        getattr(card, "TinkerTimeRider", None),
+    )
 
 
-def _visible_option_fingerprint(option: object) -> "Optional[str]":
+def _visible_card_state_key_from_option(option: object) -> "Optional[tuple]":
     if not isinstance(option, dict):
         return None
-    payload = {
-        key: value
-        for key, value in option.items()
-        if key not in {"cardInstanceId", "optionId"}
-    }
-    try:
-        return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-    except (TypeError, ValueError):
+    card_id = option.get("id")
+    card_type = option.get("type")
+    rarity = option.get("rarity")
+    cost = option.get("cost")
+    target_type = option.get("targetType")
+    upgrade_level = option.get("upgradeLevel", 0)
+    if not isinstance(card_id, str) or not card_id:
         return None
+    if not isinstance(card_type, str) or not isinstance(rarity, str) or not isinstance(target_type, str):
+        return None
+    if isinstance(cost, bool) or not isinstance(cost, int):
+        return None
+    if isinstance(upgrade_level, bool) or not isinstance(upgrade_level, int):
+        return None
+    return (
+        card_id,
+        card_type,
+        rarity,
+        cost,
+        target_type,
+        bool(option.get("upgraded", False)),
+        upgrade_level,
+        option.get("tinkerTimeType"),
+        option.get("tinkerTimeRider"),
+    )
 
 
-def visible_combat_start_draw_constraints(
-    battle_state: "BattleState",
-) -> "tuple[tuple[int, str], ...]":
-    """Return visibility-safe Start-of-Combat sequential-draw constraints.
-
-    A Genesis root has no portable Snapshot InstanceId: restarting the combat rotates the
-    public exact-token namespace. Persist only the engine-authored draw ordinal plus the
-    already-visible option fingerprint, and re-validate that pair in each restarted
-    session where a fresh exact token exists.
-    """
-    pending = battle_state.engine_state.get("pendingChoice")
-    if not isinstance(pending, dict) or pending.get("scope") != "StartOfCombat":
-        return ()
-    raw_options = pending.get("options")
-    if not isinstance(raw_options, list) or not raw_options:
-        return ()
-    constraints: list[tuple[int, str]] = []
-    for option in raw_options:
-        if not isinstance(option, dict):
-            return ()
-        _identity, ordinal = _split_public_card_instance_id(option.get("cardInstanceId"))
-        if ordinal is None:
-            continue
-        fingerprint = _visible_option_fingerprint(option)
-        if fingerprint is None:
-            return ()
-        constraints.append((ordinal, fingerprint))
-    offsets = [offset for offset, _fingerprint in constraints]
-    if len(set(offsets)) != len(offsets):
-        return ()
-    return tuple(sorted(constraints))
+_AUDITED_DRAW_THEN_DISCARD_CARDS = frozenset({"ACROBATICS", "DAGGER_THROW", "PHOTON_CUT"})
 
 
-def _combat_start_draw_constraints_match(
-    battle_state: "BattleState", expected: "tuple[tuple[int, str], ...]"
+def _semantic_card_id(action: SemanticAction) -> "Optional[str]":
+    if action.action_type != "card":
+        return None
+    _slot, separator, card_id = action.semantic_key.partition(":")
+    return card_id if separator and card_id else None
+
+
+def _pending_source_card_id(pending: dict, triggering_action: SemanticAction) -> "Optional[str]":
+    origin_type = pending.get("originEntityType")
+    origin_id = pending.get("originEntityId")
+    if isinstance(origin_id, str) and origin_id and (origin_type is None or str(origin_type).lower() == "card"):
+        return origin_id.upper()
+    source_effect = pending.get("sourceEffectId")
+    if isinstance(source_effect, str) and source_effect.lower().startswith("card:"):
+        return source_effect.split(":", 1)[1].upper()
+    card_id = _semantic_card_id(triggering_action)
+    return card_id.upper() if card_id else None
+
+
+def _is_audited_zero_draw_target_prefix(
+    replay_prefix: "list[ReplayPrefixEntry]", source_card_id: str
 ) -> bool:
-    return visible_combat_start_draw_constraints(battle_state) == expected
+    """Allow the mechanically-audited targeted-card hop and nothing broader.
+
+    For a multi-enemy AnyEnemy card, Emulator ``BeginPlayCard`` publishes
+    ``choice_target`` without enqueueing ``PlayCardAction``. Therefore that first
+    transition consumes no draw RNG. The following ``choice_target`` step performs the
+    real card resolution. This is the DaggerThrow/PhotonCut two-hop shape called out in
+    the review. Any other non-empty prefix remains fail-closed.
+    """
+    if not replay_prefix:
+        return True
+    if len(replay_prefix) != 1:
+        return False
+    entry = replay_prefix[0]
+    if entry.visible_draw_constraints:
+        return False
+    if (_semantic_card_id(entry.semantic_action) or "").upper() != source_card_id:
+        return False
+    candidate_multiset_value = entry.expected_signature.candidate_semantic_keys
+    if not candidate_multiset_value:
+        return False
+    return all(
+        isinstance(key, tuple) and len(key) >= 1 and key[0] == "choice_target"
+        for key, _count in candidate_multiset_value
+    )
 
 
 def visible_draw_constraints_from_pending_choice(
@@ -431,78 +447,75 @@ def visible_draw_constraints_from_pending_choice(
     *,
     triggering_action: SemanticAction,
 ) -> "tuple[tuple[int, str, str], ...]":
-    """Translate visible producer-neutral draw provenance to exact root constraints.
+    """Return exact root-relative pins for the small mechanically-audited draw shape.
 
-    Emulator encodes the most recent engine-authored ``CardDrawnEntry`` ordinal only in
-    an already-visible card option token. The RL side never infers provenance from a
-    card/relic/action shape. For a Stable root, subtract the number of sequential draws
-    already present in that captured root to obtain a root-relative draw offset, then
-    translate the token's HMAC identity back to the exact root DrawPile instance.
+    This intentionally uses no Emulator-only ``cardInstanceId`` or HMAC namespace. The
+    visible PendingChoice already contains the card's gameplay state, while the Held
+    Stable root already contains the exact ordered ``CardInstanceSnapshot`` objects.
+    Once the audited transition proves that the appended visible tail is the sequential
+    draw prefix, each tail position maps directly to the root DrawPile at the same offset;
+    the internal Snapshot ``InstanceId`` can then be retained only inside ReplayPrefix.
 
-    Options drawn before the root, generated/tutored/moved options without a draw suffix,
-    offsets beyond the root DrawPile (reshuffle territory), malformed identities, or
-    duplicate offsets/instances fail closed. ``triggering_action`` and ``replay_prefix``
-    are intentionally not provenance inputs; they remain parameters for call-site
-    compatibility and to make that design choice explicit.
+    Scope is deliberately narrow per review feedback: Acrobatics plus the structurally
+    confirmed DaggerThrow/PhotonCut target-selection two-hop. Other cards, relic-origin
+    choices, draw-pile reveal/tutor mechanics, later unknown-RNG prefix hops, and reshuffle
+    cases fail closed. The consumer remains offset-aware/multi-entry so a future audited
+    producer can add constraints without changing hypothesis materialization.
     """
-    _ = triggering_action, replay_prefix
     pending = battle_state.engine_state.get("pendingChoice")
     if not isinstance(pending, dict):
         return ()
+    source_card_id = _pending_source_card_id(pending, triggering_action)
+    if source_card_id not in _AUDITED_DRAW_THEN_DISCARD_CARDS:
+        return ()
+    if not _is_audited_zero_draw_target_prefix(replay_prefix, source_card_id):
+        return ()
+    if pending.get("scope") != "ActionContinuation":
+        return ()
+    if pending.get("choiceOperation") != "discard":
+        return ()
+    if pending.get("sourceZone") != "hand":
+        return ()
+    semantics = pending.get("choiceSemantics")
+    if not isinstance(semantics, dict) or semantics.get("sourceZone") != "hand":
+        return ()
+
     raw_options = pending.get("options")
     if not isinstance(raw_options, list) or not raw_options:
         return ()
+    option_keys = [_visible_card_state_key_from_option(option) for option in raw_options]
+    if any(key is None for key in option_keys):
+        return ()
 
     player = getattr(root_snapshot, "Player", None)
-    draw_pile = getattr(player, "DrawPile", None)
-    if draw_pile is None:
-        return ()
-    metadata = getattr(root_snapshot, "Metadata", None)
-    combat_session_id = getattr(metadata, "CombatSessionId", None)
-    if not isinstance(combat_session_id, str) or not combat_session_id:
+    root_hand = list(getattr(player, "Hand", ()) or ())
+    root_draw = list(getattr(player, "DrawPile", ()) or ())
+    if not root_draw:
         return ()
 
-    history = getattr(root_snapshot, "CombatHistory", None)
-    entries = getattr(history, "Entries", ()) if history is not None else ()
-    root_draw_ordinal = sum(1 for entry in entries if getattr(entry, "EntryType", None) == "CardDrawnEntry")
+    root_hand_keys = [_visible_card_state_key_from_snapshot(card) for card in root_hand]
+    matching_missing_indices = []
+    for missing_index, card in enumerate(root_hand):
+        if str(getattr(card, "CardId", "")).upper() != source_card_id:
+            continue
+        expected_prefix = root_hand_keys[:missing_index] + root_hand_keys[missing_index + 1 :]
+        if option_keys[: len(expected_prefix)] == expected_prefix:
+            matching_missing_indices.append(missing_index)
+    if len(matching_missing_indices) != 1:
+        return ()
 
-    by_public_identity: dict[str, tuple[str, str]] = {}
-    internal_ids: set[str] = set()
-    for card in draw_pile:
-        internal_instance_id = str(card.InstanceId)
-        if internal_instance_id in internal_ids:
-            return ()
-        internal_ids.add(internal_instance_id)
-        public_identity = _public_card_instance_id(combat_session_id, internal_instance_id)
-        if public_identity in by_public_identity:
-            return ()
-        by_public_identity[public_identity] = (str(card.CardId), internal_instance_id)
+    existing_count = len(root_hand) - 1
+    drawn_keys = option_keys[existing_count:]
+    if not drawn_keys or len(drawn_keys) > len(root_draw):
+        return ()
 
     constraints: list[tuple[int, str, str]] = []
-    for option in raw_options:
-        if not isinstance(option, dict):
+    for offset, visible_key in enumerate(drawn_keys):
+        root_card = root_draw[offset]
+        if visible_key != _visible_card_state_key_from_snapshot(root_card):
             return ()
-        card_id = option.get("id")
-        identity, absolute_ordinal = _split_public_card_instance_id(option.get("cardInstanceId"))
-        if absolute_ordinal is None:
-            continue
-        if not isinstance(card_id, str) or not card_id or identity is None:
-            return ()
-        offset = absolute_ordinal - root_draw_ordinal
-        if offset < 0:
-            continue
-        if offset >= len(draw_pile):
-            return ()
-        matched = by_public_identity.get(identity)
-        if matched is None or matched[0] != card_id:
-            return ()
-        constraints.append((offset, card_id, matched[1]))
-
-    offsets = [offset for offset, _card_id, _instance_id in constraints]
-    exact_ids = [instance_id for _offset, _card_id, instance_id in constraints]
-    if len(set(offsets)) != len(offsets) or len(set(exact_ids)) != len(exact_ids):
-        return ()
-    return tuple(sorted(constraints))
+        constraints.append((offset, str(root_card.CardId), str(root_card.InstanceId)))
+    return tuple(constraints)
 
 
 @dataclass
@@ -557,11 +570,6 @@ class DecisionContext:
         kept as a separate, honestly-named classmethod rather than reusing that one
         because the root here is never a "Stable Capture" - it is a `CombatStartReplayRoot`,
         and Main must never treat it as (or store it into) a Held Stable Snapshot."""
-        visible_constraints = visible_combat_start_draw_constraints(current_decision_result)
-        if visible_constraints:
-            combat_start_replay_root = dataclasses.replace(
-                combat_start_replay_root, visible_draw_constraints=visible_constraints
-            )
         return cls(
             root_snapshot=combat_start_replay_root,
             replay_prefix=[],
@@ -717,14 +725,6 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
         # Start-of-Combat Pending's own Bootstrap: re-run the SAME combat start, never
         # Restore - there is no prior Stable boundary to Restore from at all.
         state = session.start_combat(context.root_snapshot.scenario_spec)
-        expected_draws = context.root_snapshot.visible_draw_constraints
-        if expected_draws and not _combat_start_draw_constraints_match(state, expected_draws):
-            return ReplayMismatch(
-                step_index=None,
-                stage="root_provenance",
-                detail="restarted Start-of-Combat visible draw provenance diverged from the recorded root",
-                diverged_fields=["visible_draw_constraints"],
-            )
     else:
         state = session.restore_snapshot(context.root_snapshot)
     last_observed: "Optional[DecisionSignature]" = None
