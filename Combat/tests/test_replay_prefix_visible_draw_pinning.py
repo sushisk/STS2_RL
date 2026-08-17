@@ -96,24 +96,9 @@ def _rng() -> SerializableRngSnapshot:
     return SerializableRngSnapshot(Counter=1, State0=2, State1=3, State2=4, State3=5)
 
 
-def _root_from_public(cards):
-    return _root([
-        _card(
-            f"root-{index}",
-            card["id"],
-            upgraded=bool(card.get("upgraded", False)),
-            cost=int(card.get("cost", 0)),
-        )
-        for index, card in enumerate(cards)
-    ])
-
-
-def _evidence(pre, post, prefix=(), *, root_draw=None):
-    if root_draw is None:
-        root_draw = pre.engine_state["drawPile"]
+def _evidence(pre, post, prefix=()):
     return visible_draw_transition_evidence_from_committed_transition(
         post,
-        _root_from_public(root_draw),
         list(prefix),
         pre_battle_state=pre,
     )
@@ -177,21 +162,6 @@ def test_drawpile_publication_order_is_not_evidence() -> None:
     assert first.constraints == second.constraints
 
 
-def test_stable_snapshot_order_is_not_an_answer_key() -> None:
-    played = _public("PLAYED")
-    h = _public("H")
-    a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))
-    pre = _state(hand=[played, h], draw=[a, b, c, d])
-    post = _state(hand=[h, c, b, a], draw=[d], options=[h, c, b, a])
-
-    forward_root = _evidence(pre, post, root_draw=[a, b, c, d])
-    reverse_root = _evidence(pre, post, root_draw=[d, c, b, a])
-
-    assert forward_root == reverse_root
-    assert forward_root.blocks_later_pinning is False
-    assert [card_id_from_observable_key(key) for _offset, key in forward_root.constraints] == ["C", "B", "A"]
-
-
 def test_non_preserving_pre_hand_prefix_fails_closed() -> None:
     played = _public("PLAYED")
     h = _public("H")
@@ -211,6 +181,26 @@ def test_transition_requires_exactly_one_pre_hand_card_consumed() -> None:
     pre = _state(hand=[h], draw=[a])
     post = _state(hand=[h, a], draw=[], options=[h, a])
 
+    result = _evidence(pre, post)
+    assert result.constraints == ()
+    assert result.blocks_later_pinning is True
+
+
+def test_invalid_public_card_field_types_fail_closed() -> None:
+    invalid_upgraded = _public("A")
+    invalid_upgraded["upgraded"] = "false"
+    invalid_enchantment = _public("B")
+    invalid_enchantment["enchantment"] = "not-an-object"
+    invalid_tinker = _public("C")
+    invalid_tinker["tinkerTimeType"] = 123
+
+    assert observable_card_key_from_public(invalid_upgraded) is None
+    assert observable_card_key_from_public(invalid_enchantment) is None
+    assert observable_card_key_from_public(invalid_tinker) is None
+
+    played = _public("PLAYED")
+    pre = _state(hand=[played], draw=[invalid_upgraded])
+    post = _state(hand=[_public("A")], draw=[])
     result = _evidence(pre, post)
     assert result.constraints == ()
     assert result.blocks_later_pinning is True
