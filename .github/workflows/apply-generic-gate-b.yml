@@ -1,0 +1,136 @@
+name: apply-generic-gate-b
+
+on:
+  push:
+    branches: [replay-prefix-draw-pinning-design]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay-prefix-draw-pinning-design
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply generic Gate B
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'missing replacement anchor: {label}')
+              return text.replace(old, new, 1)
+
+          path = Path('Combat/search/replay_draw_restore.py')
+          text = path.read_text()
+          text = replace_once(
+              text,
+              'from dataclasses import dataclass\nfrom typing import Any, Optional\n',
+              'from dataclasses import dataclass\nfrom functools import lru_cache\nfrom typing import Any, Optional\n',
+              'lru_cache import',
+          )
+          text = replace_once(
+              text,
+              '    constraints: VisibleDrawConstraints = ()\n    blocks_later_pinning: bool = False\n',
+              '    constraints: VisibleDrawConstraints = ()\n    blocks_later_pinning: bool = False\n    tracking_error: Optional[str] = None\n',
+              'evidence tracking_error',
+          )
+
+          start = text.index('def _is_subsequence(')
+          end = text.index('def visible_draw_transition_evidence_from_committed_transition(')
+          generic_gate_b = '''def _distinct_draw_sequences_from_options(\n    transfer: ObservableTransferEvidence,\n    *,\n    limit: int = 2,\n) -> tuple[tuple[ObservableCardKey, ...], ...]:\n    \"\"\"Enumerate at most ``limit`` distinct R-subsequences of option order.\n\n    Gate A already proved ``O = R + E``. Gate B therefore asks which ordered\n    subsequence of ``O`` can be the draw-origin multiset ``R`` after removing exactly\n    ``E`` occurrences. If multiple occurrence assignments produce the same key sequence\n    that is still unambiguous; if they produce different key sequences we fail closed.\n    \"\"\"\n    if limit <= 0:\n        return ()\n    options = transfer.option_keys\n    target_keys = tuple(sorted(transfer.removed_from_draw.keys(), key=repr))\n    target_index = {key: index for index, key in enumerate(target_keys)}\n    initial = tuple(int(transfer.removed_from_draw[key]) for key in target_keys)\n\n    @lru_cache(maxsize=None)\n    def visit(index: int, remaining: tuple[int, ...]) -> tuple[tuple[ObservableCardKey, ...], ...]:\n        if not any(remaining):\n            return ((),)\n        if index >= len(options):\n            return ()\n\n        distinct: list[tuple[ObservableCardKey, ...]] = []\n\n        def add(sequence: tuple[ObservableCardKey, ...]) -> None:\n            if sequence not in distinct and len(distinct) < limit:\n                distinct.append(sequence)\n\n        # Treat this option occurrence as E (non-draw-origin).\n        for tail in visit(index + 1, remaining):\n            add(tail)\n            if len(distinct) >= limit:\n                return tuple(distinct)\n\n        # Or consume it as one occurrence of R.\n        key = options[index]\n        slot = target_index.get(key)\n        if slot is not None and remaining[slot] > 0:\n            next_remaining = list(remaining)\n            next_remaining[slot] -= 1\n            for tail in visit(index + 1, tuple(next_remaining)):\n                add((key, *tail))\n                if len(distinct) >= limit:\n                    break\n\n        return tuple(distinct)\n\n    return visit(0, initial)\n\n\ndef ordered_draw_sequence(\n    pre_state: object,\n    post_state: object,\n    transfer: ObservableTransferEvidence,\n) -> Optional[tuple[ObservableCardKey, ...]]:\n    \"\"\"Generic Gate B: preserve the relative option order of draw-origin cards.\n\n    The contract is no longer Hand/Acrobatics-specific. Gate A identifies the draw-origin\n    multiset ``R`` and explained non-draw multiset ``E``; Gate B removes ``E`` from the\n    option sequence and accepts only when the resulting observable-key sequence is unique.\n\n    ``pre_state``/``post_state`` remain in the signature for call-site compatibility;\n    order validation against the independent Stable-root Snapshot happens in the\n    committed-transition wrapper below.\n    \"\"\"\n    del pre_state, post_state\n    sequences = _distinct_draw_sequences_from_options(transfer)\n    return sequences[0] if len(sequences) == 1 else None\n\n\ndef _stable_root_draw_slice(\n    root_snapshot: object,\n    cursor: int,\n    count: int,\n) -> Optional[tuple[ObservableCardKey, ...]]:\n    \"\"\"Independent order oracle used only to validate the generic Gate-B contract.\n\n    This is the Held Stable Snapshot, not public Observation DrawPile order. We never use\n    it to derive a different sequence when options disagree; disagreement rejects Gate B.\n    \"\"\"\n    player = getattr(root_snapshot, 'Player', None)\n    draw_pile = getattr(player, 'DrawPile', None)\n    if draw_pile is None:\n        return None\n    cards = list(draw_pile or ())\n    if cursor < 0 or count <= 0 or cursor + count > len(cards):\n        return None\n    return tuple(observable_card_key_from_snapshot(card) for card in cards[cursor:cursor + count])\n\n\ndef _order_validation_projection(key: ObservableCardKey) -> tuple:\n    # Current Snapshot lacks enchantment. Compare every mutually representable gameplay\n    # field here; enchantment remains enforced later by observable-state materialization.\n    return key[:-1]\n\n\ndef _card_ids(sequence: tuple[ObservableCardKey, ...]) -> list[str]:\n    return [card_id_from_observable_key(key) for key in sequence]\n\n\n'''
+          text = text[:start] + generic_gate_b + text[end:]
+
+          start = text.index('def visible_draw_transition_evidence_from_committed_transition(')
+          end = text.index('def visible_draw_constraints_from_committed_transition(')
+          evidence_impl = '''def visible_draw_transition_evidence_from_committed_transition(\n    post_state: object,\n    root_snapshot: object,\n    replay_prefix: list[object],\n    *,\n    triggering_action: object,\n    pre_battle_state: object,\n) -> VisibleDrawTransitionEvidence:\n    \"\"\"Return generic Gate-A+B-proven root-relative draw constraints.\n\n    Gate B derives order solely from PendingChoice option order after removing ``E``.\n    The resulting sequence is then checked against the Held Stable Snapshot at the\n    current root-relative cursor. The Snapshot is a contract sentinel, never a fallback\n    source: mismatch blocks tracking and records a diagnostic instead of silently\n    substituting Snapshot order.\n    \"\"\"\n    del triggering_action  # intentionally not a proof input\n\n    if any(bool(getattr(entry, 'visible_draw_tracking_blocked', False)) for entry in replay_prefix):\n        return VisibleDrawTransitionEvidence(\n            blocks_later_pinning=True,\n            tracking_error='draw tracking was already blocked by an earlier Replay Prefix transition',\n        )\n\n    transfer = observable_transfer_evidence(pre_battle_state, post_state)\n    if transfer is None:\n        changed = _draw_multiset_changed(pre_battle_state, post_state)\n        return VisibleDrawTransitionEvidence(\n            blocks_later_pinning=changed,\n            tracking_error=(\n                'Gate A could not explain an observed DrawPile multiset mutation'\n                if changed else None\n            ),\n        )\n\n    sequences = _distinct_draw_sequences_from_options(transfer)\n    if len(sequences) != 1:\n        return VisibleDrawTransitionEvidence(\n            blocks_later_pinning=True,\n            tracking_error=(\n                'Gate B could not uniquely separate draw-origin option occurrences from E; '\n                'draw order is ambiguous under observable card equality'\n            ),\n        )\n    sequence = sequences[0]\n\n    cursor = sum(len(getattr(entry, 'visible_draw_constraints', ()) or ()) for entry in replay_prefix)\n    expected = _stable_root_draw_slice(root_snapshot, cursor, len(sequence))\n    if expected is None:\n        return VisibleDrawTransitionEvidence(\n            blocks_later_pinning=True,\n            tracking_error=(\n                f'Gate B could not validate option-derived draw order against Held Stable '\n                f'Snapshot offsets {cursor}..{cursor + len(sequence) - 1}'\n            ),\n        )\n\n    inferred_projection = tuple(_order_validation_projection(key) for key in sequence)\n    expected_projection = tuple(_order_validation_projection(key) for key in expected)\n    if inferred_projection != expected_projection:\n        return VisibleDrawTransitionEvidence(\n            blocks_later_pinning=True,\n            tracking_error=(\n                'Gate B option-order contract rejected: option-derived draw order '\n                f'{_card_ids(sequence)!r} disagrees with Held Stable Snapshot order '\n                f'{_card_ids(expected)!r} at root offsets '\n                f'{cursor}..{cursor + len(sequence) - 1}'\n            ),\n        )\n\n    constraints = tuple((cursor + offset, key) for offset, key in enumerate(sequence))\n    return VisibleDrawTransitionEvidence(constraints=constraints)\n\n\n'''
+          text = text[:start] + evidence_impl + text[end:]
+          path.write_text(text)
+
+          path = Path('Combat/search/decision_context.py')
+          text = path.read_text()
+          text = replace_once(
+              text,
+              '    visible_draw_constraints: VisibleDrawConstraints = ()\n    visible_draw_tracking_blocked: bool = False\n',
+              '    visible_draw_constraints: VisibleDrawConstraints = ()\n    visible_draw_tracking_blocked: bool = False\n    visible_draw_tracking_error: "Optional[str]" = None\n',
+              'ReplayPrefixEntry tracking error',
+          )
+          text = replace_once(
+              text,
+              '    identity is stored. ``visible_draw_tracking_blocked`` records an intervening\n    DrawPile mutation that could not be explained safely; later transitions must not\n    invent root-relative draw offsets past that point.\n',
+              '    identity is stored. ``visible_draw_tracking_blocked`` records an intervening\n    DrawPile mutation that could not be explained safely; later transitions must not\n    invent root-relative draw offsets past that point. ``visible_draw_tracking_error``\n    retains the fail-closed Gate-A/Gate-B diagnostic so an ordering-contract regression\n    is observable rather than silently treated as an ordinary zero-draw transition.\n',
+              'ReplayPrefixEntry docstring',
+          )
+          path.write_text(text)
+
+          for filename in ('Combat/search/main_loop.py', 'API/instance_combat.py'):
+              path = Path(filename)
+              text = path.read_text()
+              anchor = '            visible_draw_tracking_blocked=(\n                draw_evidence.blocks_later_pinning if draw_evidence is not None else False\n            ),\n' if filename.startswith('Combat/') else '                    visible_draw_tracking_blocked=draw_evidence.blocks_later_pinning,\n'
+              replacement = anchor + (
+                  '            visible_draw_tracking_error=(\n                draw_evidence.tracking_error if draw_evidence is not None else None\n            ),\n'
+                  if filename.startswith('Combat/') else
+                  '                    visible_draw_tracking_error=draw_evidence.tracking_error,\n'
+              )
+              text = replace_once(text, anchor, replacement, f'{filename} evidence diagnostic')
+              path.write_text(text)
+
+          path = Path('Combat/tests/test_replay_prefix_visible_draw_pinning.py')
+          text = path.read_text()
+          text = replace_once(
+              text,
+              'def _entry(*constraints, blocked: bool = False):\n    return SimpleNamespace(\n        visible_draw_constraints=tuple(constraints),\n        visible_draw_tracking_blocked=blocked,\n    )\n',
+              'def _entry(*constraints, blocked: bool = False, error: str | None = None):\n    return SimpleNamespace(\n        visible_draw_constraints=tuple(constraints),\n        visible_draw_tracking_blocked=blocked,\n        visible_draw_tracking_error=error,\n    )\n',
+              'test entry helper',
+          )
+          text = replace_once(
+              text,
+              'def _evidence(pre, post, prefix=()):\n    return visible_draw_transition_evidence_from_committed_transition(\n        post,\n        _root([]),\n        list(prefix),\n        triggering_action=SemanticAction("card", "0:ANY_CARD"),\n        pre_battle_state=pre,\n    )\n',
+              '''def _root_from_public(cards):\n    return _root([\n        _card(\n            f"root-{index}",\n            card["id"],\n            upgraded=bool(card.get("upgraded", False)),\n            cost=int(card.get("cost", 0)),\n        )\n        for index, card in enumerate(cards)\n    ])\n\n\ndef _evidence(pre, post, prefix=(), *, root_draw=None):\n    if root_draw is None:\n        root_draw = pre.engine_state["drawPile"]\n    return visible_draw_transition_evidence_from_committed_transition(\n        post,\n        _root_from_public(root_draw),\n        list(prefix),\n        triggering_action=SemanticAction("card", "0:ANY_CARD"),\n        pre_battle_state=pre,\n    )\n''',
+              'evidence helper root snapshot',
+          )
+
+          pattern = re.compile(r'def test_drawn_only_choice_passes_gate_a_and_reuses_same_order_prover_extension_point\(\) -> None:.*?\n\n\ndef test_drawpile_publication_order_is_not_gate_a_evidence', re.S)
+          replacement = '''def test_drawn_only_choice_uses_generic_gate_b_without_mechanic_specific_prover() -> None:\n    a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))\n    h = _public("H")\n    pre = _state(hand=[h], draw=[a, b, c, d])\n    post = _state(hand=[h], draw=[d], options=[a, b, c])\n\n    transfer = observable_transfer_evidence(pre, post)\n    assert transfer is not None\n    assert transfer.removed_from_draw == Counter(\n        observable_card_key_from_public(card) for card in (a, b, c)\n    )\n    assert transfer.explained_non_draw == Counter()\n    assert [card_id_from_observable_key(key) for key in replay_draw_restore.ordered_draw_sequence(pre, post, transfer)] == ["A", "B", "C"]\n\n    result = _evidence(pre, post)\n    assert result.blocks_later_pinning is False\n    assert result.tracking_error is None\n    assert [card_id_from_observable_key(key) for _offset, key in result.constraints] == ["A", "B", "C"]\n\n\ndef test_drawpile_publication_order_is_not_gate_a_evidence'''
+          text, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit('failed to replace drawn-only test')
+
+          text = replace_once(
+              text,
+              '    first = _evidence(_state(hand=[h], draw=[a, b, c]), post)\n    second = _evidence(_state(hand=[h], draw=[b, a, c]), post)\n',
+              '    root_draw = [a, b, c]\n    first = _evidence(_state(hand=[h], draw=[a, b, c]), post, root_draw=root_draw)\n    second = _evidence(_state(hand=[h], draw=[b, a, c]), post, root_draw=root_draw)\n',
+              'public draw order test',
+          )
+
+          insertion_anchor = 'def test_unaccounted_drawpile_mutation_blocks_later_root_relative_pinning() -> None:\n'
+          new_tests = '''def test_gate_b_rejects_wrong_option_order_against_stable_root_and_records_error() -> None:\n    a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))\n    pre = _state(hand=[], draw=[a, b, c, d])\n    post = _state(hand=[], draw=[d], options=[c, b, a])\n    result = _evidence(pre, post, root_draw=[a, b, c, d])\n    assert result.constraints == ()\n    assert result.blocks_later_pinning is True\n    assert result.tracking_error is not None\n    assert 'option-order contract rejected' in result.tracking_error\n    assert "['C', 'B', 'A']" in result.tracking_error\n    assert "['A', 'B', 'C']" in result.tracking_error\n\n\ndef test_gate_b_fails_closed_when_r_and_e_occurrences_make_order_ambiguous() -> None:\n    a, b, c = (_public(name) for name in ("A", "B", "C"))\n    pre = _state(hand=[a], draw=[a, b, c])\n    post = _state(hand=[a], draw=[c], options=[a, b, a])\n    result = _evidence(pre, post, root_draw=[a, b, c])\n    assert result.constraints == ()\n    assert result.blocks_later_pinning is True\n    assert result.tracking_error is not None\n    assert 'ambiguous under observable card equality' in result.tracking_error\n\n\n'''
+          text = replace_once(text, insertion_anchor, new_tests + insertion_anchor, 'Gate B error tests')
+          path.write_text(text)
+
+          Path('Outputs/reports/replay_prefix_draw_pinning_design_20260816.md').write_text('''# Replay-prefix DrawPile restoration — current implemented design\n\nStatus: implemented in STS2_RL PR #64. Earlier exact-instance, card-allowlist, and mechanic-specific Gate-B designs are superseded.\n\n## Goal\n\nA committed Replay Prefix may already have consumed cards from DrawPile before reaching a PendingChoice. Replaying that observed prefix under another CardId-level RNG hypothesis must reproduce the already-observed draws without freezing the unobserved remainder or introducing replay-only card identity.\n\nThe implementation separates membership from order:\n\n1. **Gate A** proves which observable card states moved out of DrawPile and are represented in the PendingChoice.\n2. **Generic Gate B** extracts the relative option order of those draw-origin cards and validates that order independently against the Held Stable Snapshot.\n\nSpecial restoration is enabled only when both gates succeed.\n\n## Observable equality\n\nAll proof-side multiset operations use `observable_card_key`: CardId, type, rarity, public cost, target type, upgrade state, Tinker state, and enchantment when available. Option id, zone, list position, and physical InstanceId are excluded. `SearchHypothesisId` remains CardId-level.\n\n## Gate A — unordered transfer\n\nFor immediate public pre/post states, using multisets:\n\n```text\nD0 = pre.drawPile\nD1 = post.drawPile\nO  = post.pendingChoice.options\n\nrequire D1 ⊆ D0\nR = D0 - D1\nrequire R != ∅\nrequire R ⊆ O\n\nP_z = pre[z] ∩ post[z]   # each eligible non-DrawPile zone published in both states\nP   = Σ_z P_z\nE   = O - R\nrequire E ⊆ P\n```\n\nEquivalently, `O = R + E` with `E ⊆ P`. The current eligible zones are hand, discardPile, exhaustPile, and playPile when present in both observations. Gate A is order-independent and does not use published DrawPile list order.\n\n## Generic Gate B — option order minus E\n\nGate B no longer has an Acrobatics/Hand-specific prover. Given Gate A's `R` and `E`, it considers the PendingChoice option sequence `O` and removes exactly the `E` occurrences. The remaining subsequence is the candidate `drawn_sequence`.\n\nFormally:\n\n```text\ndrawn_sequence = unique ordered subsequence S of O\nwhere multiset(S) = R\n```\n\nIf different valid R/E occurrence assignments produce different observable-key sequences, Gate B fails closed. This matters when the same observable key occurs in both `R` and `E`. Multiple occurrence assignments are acceptable only when they collapse to the same resulting key sequence.\n\nThis single Gate B handles both:\n\n```text\nAcrobatics-like: O = surviving Hand + drawn cards\ndraw-N-choose-M: O = drawn cards, E = ∅\n```\n\nwithout card names, choice operation labels, source zone, or producer-specific code.\n\n## Independent order-contract validation\n\nThe generic rule assumes draw-origin cards preserve their relative draw order in PendingChoice options. To make a wrong assumption observable, RL validates every accepted Gate-B sequence against the **Held Stable Snapshot** at the current root-relative draw cursor:\n\n```text\noption-derived drawn_sequence\n==\nStableRoot.Player.DrawPile[cursor : cursor + len(R)]\n```\n\nThe comparison uses mutually representable observable gameplay fields. Current Snapshot lacks enchantment, so enchantment is not part of this order sentinel; full observable-state materialization still fails closed on representation mismatch later.\n\nCrucially, the Stable Snapshot is only an independent contract sentinel. RL never substitutes Snapshot order when the option-derived order disagrees. A mismatch yields no constraints, blocks later root-relative tracking, and records `visible_draw_tracking_error` describing both inferred and expected CardId sequences.\n\nThis does **not** reintroduce public DrawPile-order dependence: public Observation DrawPile is still treated only as a multiset by Gate A.\n\n## Replay Prefix accounting\n\nEach entry carries:\n\n```text\nvisible_draw_constraints: (root-relative offset, observable_card_key)*\nvisible_draw_tracking_blocked: bool\nvisible_draw_tracking_error: str | None\n```\n\nRules:\n\n```text\nGate A + unique Gate B + Stable-root validation succeed:\n    record sequence at cursor; cursor += N\n\nDrawPile multiset unchanged:\n    zero draw; cursor unchanged\n\nDrawPile changed but Gate A fails, Gate B is ambiguous,\nor option-derived order disagrees with Stable root:\n    record diagnostic; block later tracking\n```\n\nOnce blocked, later offsets are never guessed. Consumed constraints must remain one contiguous Stable-root prefix.\n\n## Materialization\n\nOnly observed `observable_card_key` values are pinned. All unobserved CardIds keep their relative candidate-hypothesis order. Concrete Snapshot InstanceIds are local restore details, never proof inputs. If one observable key corresponds to multiple hidden gameplay-relevant Snapshot states, materialization fails closed instead of choosing by InstanceId.\n\n## Deliberately not safety inputs\n\nThe decision does not depend on card-name allowlists, `ActionContinuation`, discard/select labels, source zone, pending origin metadata, triggering action identity, `rng_id`, public/internal physical card identity, raw draw history, or published DrawPile list order.\n\n## Regression coverage\n\n`Combat/tests/test_replay_prefix_visible_draw_pinning.py` covers Acrobatics-like mixed Hand, generic drawn-only choice, public DrawPile-order independence, wrong option-order detection against Stable root, R/E duplicate ambiguity, zero-draw transitions, blocking after unexplained mutations, contiguous-prefix consumption, observable-state differences, and hidden-state ambiguity.\n\nThe real-Emulator Acrobatics paired regression retains its historical filename but validates observable-state constraints rather than exact InstanceId constraints.\n\n## Cross-repo responsibility\n\n- **STS2_Emulator #25:** preserve sufficient normal public card state and PendingChoice option ordering; no replay-only identity protocol.\n- **STS2_RL #64:** own Gate A, generic Gate B, Stable-root order sentinel, Replay Prefix cursor/error accounting, and observed-prefix materialization.\n- **STS2_Training #72:** remain replay-provenance agnostic and surface replay faults for label safety.\n''')
+          PY
+
+      - name: Validate
+        run: |
+          python -m pip install pytest
+          python -m compileall -q API Combat/search
+          python -m pytest -q Combat/tests/test_replay_prefix_visible_draw_pinning.py
+
+      - name: Commit implementation and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/apply-generic-gate-b.yml
+          git add Combat/search/replay_draw_restore.py Combat/search/decision_context.py Combat/search/main_loop.py API/instance_combat.py Combat/tests/test_replay_prefix_visible_draw_pinning.py Outputs/reports/replay_prefix_draw_pinning_design_20260816.md
+          git commit -m 'Generalize replay draw order proof'
+          git push origin HEAD:replay-prefix-draw-pinning-design
