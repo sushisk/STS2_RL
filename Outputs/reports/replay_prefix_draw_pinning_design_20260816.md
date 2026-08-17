@@ -4,11 +4,11 @@ Status: implemented in STS2_RL PR #64.
 
 ## Goal
 
-Replay must reproduce cards already observed as drawn in the committed Replay Prefix while leaving future RNG CardId-level and unfrozen. The safety decision must be derivable from public observation state; hidden DrawPile order is not an answer key.
+Replay must reproduce cards already observed moving from DrawPile into Hand in the committed Replay Prefix while leaving future RNG CardId-level and unfrozen. The safety decision must come from ordinary public pre/post state; hidden DrawPile order and replay-only provenance are not answer keys.
 
-## Observable equality
+## Observable card equality
 
-Proofs use `observable_card_key`, containing public gameplay-relevant card state:
+The structural check uses public gameplay-relevant card state:
 
 ```text
 CardId, Type, Rarity, Cost, TargetType,
@@ -17,51 +17,54 @@ TinkerTimeType, TinkerTimeRider,
 enchantment
 ```
 
-Physical `InstanceId`, option id, zone and list position are excluded.
+Physical `InstanceId`, choice-local option id, zone and list position are excluded.
 
-## Gate A: unordered transfer
+## Supported public transition shape
 
-For immediate public pre/post states, using multisets:
+For one committed transition:
 
 ```text
-D0 = pre.drawPile
-D1 = post.drawPile
-O  = post.pendingChoice.options
+D0 = multiset(pre.drawPile)
+D1 = multiset(post.drawPile)
 
-require D1 ⊆ D0
+require D1 subset-of D0
 R = D0 - D1
-require R != ∅ and R ⊆ O
+require R != empty
+N = |R|
 
-P = sum(pre[z] ∩ post[z])
-    for published hand/discardPile/exhaustPile/playPile
-E = O - R
-require E ⊆ P
+H0 = ordered pre.hand
+H1 = ordered post.hand
+H1 = S + Q
+require |Q| = N
+require multiset(Q) = R
+require S == H0 with exactly one card occurrence removed
 ```
 
-So every option is explained either by a card removed from DrawPile (`R`) or by a persistent non-DrawPile card (`E`). DrawPile list order is not used.
+The last condition preserves the relative order of all surviving pre-Hand cards. `Q`, the newly appended post-Hand suffix, is the observed sequence recorded in Replay Prefix.
 
-## Gate B: generic public option-order extraction
+DrawPile list order is never consulted; only its multiset difference is used. The sequence comes from ordinary Hand ordering.
 
-Gate B accepts only one observable sequence:
+## Intentional scope
+
+This is deliberately narrower than the previous Gate A / Gate B design. There is no separate PendingChoice-origin proof and no generic option-subsequence inference.
+
+The supported shape covers real Acrobatics-style transitions:
 
 ```text
-drawn_sequence = unique ordered subsequence S of O
-where multiset(S) = R
+play one Hand card -> draw -> append drawn cards to Hand -> PendingChoice
 ```
 
-Equivalently, remove exactly `E` occurrences from the ordered options and preserve the order of the remainder. If duplicate observable keys allow two different resulting sequences, Gate B fails closed.
+The structural proof does not inspect PendingChoice at all. Choice operation/scope/source/origin metadata and option ordering are not replay-safety inputs.
 
-Gate B relies on an Emulator publication contract: when freshly removed DrawPile cards are exposed in `pendingChoice.options`, the relative order of those draw-origin occurrences preserves sequential draw order.
+Unsupported shapes fail closed when DrawPile changes, including:
 
-RL does **not** verify that premise by consulting `StableRoot.Player.DrawPile` order, public DrawPile order, raw draw history, RNG state, or physical card identity. Using any of those as a hidden answer key would violate the public-proof boundary.
+- draw-to-choice without the cards appearing as the appended Hand suffix;
+- multiple Hand removals or Hand reordering in the same transition;
+- DrawPile mutations that cannot be explained by the post-Hand suffix;
+- Tutor/reveal/direct-selection shapes that do not satisfy this Hand-transfer structure;
+- later transitions after any unexplained DrawPile mutation.
 
-## Validation boundary
-
-RL can fail closed on public evidence: unexplained DrawPile multiset mutation, ambiguous Gate B, malformed Replay Prefix offsets, or ordinary replay-signature divergence.
-
-If an Emulator producer consistently publishes draw-origin options in an order different from actual sequential draw order and no public state exposes that difference, RL cannot prove the producer wrong without hidden information. That premise therefore belongs to Emulator contract/regression testing.
-
-A future hardening step may re-derive Gate A/B during Replay Prefix execution from replayed public pre/post states and compare it with the recorded constraints. That would detect public-card-state divergence that `candidate_semantic_keys` alone may miss, while still avoiding any hidden order oracle.
+If future mechanics need another observable transition shape, add a separate structural recognizer then rather than adding replay provenance to Emulator now.
 
 ## Replay Prefix invariant
 
@@ -73,24 +76,37 @@ visible_draw_tracking_blocked: bool
 visible_draw_tracking_error: str | None
 ```
 
-Across the usable prefix, constraints must appear in generation order as exactly `0, 1, 2, ..., N-1`. The consumer does not sort or repair malformed constraints. Tracking stops at the first blocked transition.
+Across the usable prefix, constraints must appear in generation order as exactly `0, 1, 2, ..., N-1`. Tracking stops at the first blocked transition. A transition with no observable DrawPile multiset change adds no constraints and does not move the cursor.
 
 ## Materialization
 
 Observed CardIds are moved to the proven prefix positions while the unobserved candidate-hypothesis remainder keeps its relative order.
 
-Concrete Snapshot copies are selected only during restore. If observable-equal copies have different hidden gameplay-relevant Snapshot state, materialization fails closed instead of selecting by physical identity. Snapshot state is used only to materialize a public constraint safely, not to decide which draw facts were observed or in what order.
+Concrete Snapshot copies are selected only during restore. If observable-equal copies have different hidden gameplay-relevant Snapshot state, materialization fails closed instead of selecting by physical identity. Snapshot state is used only to materialize an already-proven public constraint safely.
 
-## Safety boundary
+Current `CardInstanceSnapshot` does not yet project enchantment into this equality, so observed enchanted cards fail closed until the Snapshot/restore completeness work in Emulator PR #26 is integrated on the RL side.
 
-Replay safety does not depend on card-name allowlists, choice operation labels, source-zone/origin metadata, triggering action identity, `rng_id`, public instance tokens, Snapshot `InstanceId`, raw draw history, public DrawPile ordering, or Stable Snapshot DrawPile ordering.
+## Information boundary
 
-## Validation responsibility
+Replay safety does not depend on:
 
-STS2_Emulator should lock the Gate-B publication contract with regression tests against real engine behavior: when a PendingChoice exposes cards freshly removed from DrawPile, their relative option order must preserve sequential draw order. Such tests may use engine-internal knowledge as a **test oracle**, but that information must not become a runtime RL input or replay-provenance field.
+- card-name allowlists;
+- PendingChoice option order or choice semantic metadata;
+- triggering action identity;
+- `rng_id` or raw RNG provenance;
+- public instance tokens or Snapshot `InstanceId`;
+- raw draw history;
+- public Observation DrawPile list order;
+- Stable Snapshot DrawPile list order.
+
+## Cross-repo responsibility
+
+STS2_Emulator PR #25 only protects the ordinary real-game publication behavior needed by this structural check: for Acrobatics, the played card leaves Hand, drawn cards appear as a post-Hand suffix matching the public DrawPile multiset decrease, and the later discard PendingChoice reflects the resulting Hand normally.
+
+Emulator does not publish a sequential-draw marker, draw ordinal, replay provenance DTO, or hidden order oracle for RL.
 
 ## Tests
 
-`Combat/tests/test_replay_prefix_visible_draw_pinning.py` covers generic mixed-choice and drawn-only Gate B, duplicate ambiguity, Stable Snapshot order independence, zero-draw behavior, unexplained mutation blocking, ordered contiguous-prefix enforcement, observable-state distinctions, and hidden-state ambiguity.
+`Combat/tests/test_replay_prefix_visible_draw_pinning.py` covers the supported Hand-transfer shape, PendingChoice independence, drawn-only choice fail-closed behavior, public/Stable DrawPile order independence, Hand-prefix violations, unexplained mutation blocking, contiguous-prefix enforcement, observable-state distinctions, and hidden-state ambiguity.
 
-`API/tests/test_acrobatics_exact_instance_replay_pinning.py` is the paired real-Emulator regression; its historical filename remains, but it validates observable-state pinning rather than exact instance identity.
+`API/tests/test_acrobatics_exact_instance_replay_pinning.py` remains the paired real-Emulator regression; despite its historical filename it validates observable-state replay pinning rather than exact physical identity.
