@@ -1,0 +1,148 @@
+name: Temporary generalize replay-pinning producer boundary
+on:
+  push:
+    branches: [replay-prefix-draw-pinning-design]
+permissions:
+  contents: write
+jobs:
+  refactor:
+    if: github.event.head_commit.message == 'chore: add temporary producer-boundary refactor workflow'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay-prefix-draw-pinning-design
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Isolate producer proof from common replay-pinning consumer
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected exactly one match, found {count}: {old[:80]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          decision = "Combat/search/decision_context.py"
+          replace_once(
+              decision,
+              '''@dataclass(frozen=True)\nclass ReplayPrefixEntry:\n''',
+              '''VisibleDrawConstraint = tuple[int, str, str]\nVisibleDrawConstraints = tuple[VisibleDrawConstraint, ...]\n\n\n@dataclass(frozen=True)\nclass ReplayPrefixEntry:\n''',
+          )
+          replace_once(
+              decision,
+              '''    action itself. `visible_draw_constraints` is populated only by Main/Training real\n    stepping, but only for a mechanically-audited visible draw-then-discard transition.\n    Each value is a ``(root-relative draw offset, CardId, internal Snapshot InstanceId)``\n    tuple. No new Emulator-side identity namespace is required; search-internal/\n    hypothesis steps leave it empty.\n''',
+              '''    action itself. `visible_draw_constraints` is populated only by real committed\n    stepping after a producer-specific proof establishes a root-relative visible draw\n    fact. The stored constraint shape is source-agnostic: card, relic, and potion\n    producers all feed the same ``(draw offset, CardId, internal Snapshot InstanceId)``\n    tuple to hypothesis materialization. Only audited card producers exist today;\n    unproven relic/potion paths therefore leave it empty and fail closed.\n''',
+          )
+          replace_once(
+              decision,
+              '''    visible_draw_constraints: "tuple[tuple[int, str, str], ...]" = ()\n''',
+              '''    visible_draw_constraints: VisibleDrawConstraints = ()\n''',
+          )
+          replace_once(
+              decision,
+              '''def visible_draw_constraints_from_pending_choice(\n''',
+              '''def _visible_draw_constraints_from_audited_card_pending_choice(\n''',
+          )
+          replace_once(
+              decision,
+              ''') -> "tuple[tuple[int, str, str], ...]":\n    """Return exact root-relative pins for the small mechanically-audited draw shape.\n''',
+              ''') -> VisibleDrawConstraints:\n    """Card-producer proof for the mechanically-audited draw-then-discard shape.\n''',
+          )
+          replace_once(
+              decision,
+              '''    Scope is deliberately narrow per review feedback: Acrobatics plus the structurally\n    confirmed DaggerThrow/PhotonCut target-selection two-hop. Other cards, relic-origin\n    choices, draw-pile reveal/tutor mechanics, later unknown-RNG prefix hops, and reshuffle\n    cases fail closed. The consumer remains offset-aware/multi-entry so a future audited\n    producer can add constraints without changing hypothesis materialization.\n''',
+              '''    This proof is deliberately card-specific: Acrobatics plus the structurally\n    confirmed DaggerThrow/PhotonCut target-selection two-hop. Other card shapes fail\n    closed here. Relic/potion producers do not pass through this proof; they belong in\n    separate producer functions feeding the common dispatcher below.\n''',
+          )
+          replace_once(
+              decision,
+              '''    constraints: list[tuple[int, str, str]] = []\n''',
+              '''    constraints: list[VisibleDrawConstraint] = []\n''',
+          )
+          replace_once(
+              decision,
+              '''    return tuple(constraints)\n\n\n@dataclass\nclass DecisionContext:\n''',
+              '''    return tuple(constraints)\n\n\n# Producer proofs are intentionally separate from the ReplayPrefix constraint contract.\n# Future mechanically-audited card/relic/potion proofs extend this tuple; callers and\n# hypothesis materialization stay source-agnostic.\n_VISIBLE_DRAW_CONSTRAINT_PRODUCERS = (\n    _visible_draw_constraints_from_audited_card_pending_choice,\n)\n\n\ndef visible_draw_constraints_from_committed_transition(\n    battle_state: "BattleState",\n    root_snapshot: "CombatStateSnapshot",\n    replay_prefix: "list[ReplayPrefixEntry]",\n    *,\n    triggering_action: SemanticAction,\n) -> VisibleDrawConstraints:\n    """Return one unambiguous producer-proven root-relative draw constraint set.\n\n    This dispatcher deliberately does not gate on ``triggering_action.action_type`` or\n    assume a card origin. Each producer owns its own mechanical proof and returns empty\n    when it cannot prove the transition. That keeps the commit path and hypothesis\n    consumer unchanged when audited relic or potion producers are added later. If two\n    producers ever claim the same transition, fail closed rather than combining facts\n    from ambiguous provenance.\n    """\n    matched: list[VisibleDrawConstraints] = []\n    for producer in _VISIBLE_DRAW_CONSTRAINT_PRODUCERS:\n        constraints = producer(\n            battle_state,\n            root_snapshot,\n            replay_prefix,\n            triggering_action=triggering_action,\n        )\n        if constraints:\n            matched.append(constraints)\n    return matched[0] if len(matched) == 1 else ()\n\n\n@dataclass\nclass DecisionContext:\n''',
+          )
+
+          for path in ("Combat/search/main_loop.py", "API/instance_combat.py"):
+              p = Path(path)
+              text = p.read_text()
+              old = "visible_draw_constraints_from_pending_choice"
+              if text.count(old) != 2:
+                  raise SystemExit(f"{path}: expected import+call for {old}, found {text.count(old)}")
+              p.write_text(text.replace(old, "visible_draw_constraints_from_committed_transition"))
+
+          test = "Combat/tests/test_replay_prefix_visible_draw_pinning.py"
+          replace_once(
+              test,
+              '''"""Repo-local regressions for the narrow replay-prefix draw pinning contract."""\n''',
+              '''"""Regressions for producer-specific proof and source-agnostic replay pinning."""\n''',
+          )
+          replace_once(
+              test,
+              '''from search.decision_context import SemanticAction, visible_draw_constraints_from_pending_choice\n''',
+              '''import search.decision_context as decision_context\nfrom search.decision_context import SemanticAction, visible_draw_constraints_from_committed_transition\n''',
+          )
+          p = Path(test)
+          text = p.read_text().replace(
+              "visible_draw_constraints_from_pending_choice(",
+              "visible_draw_constraints_from_committed_transition(",
+          )
+          p.write_text(text)
+          replace_once(
+              test,
+              '''def _entry(*constraints):\n    return SimpleNamespace(visible_draw_constraints=tuple(constraints))\n''',
+              '''def _entry(*constraints, action_type: str = "card"):\n    return SimpleNamespace(\n        semantic_action=SemanticAction(action_type, f"0:{action_type.upper()}_SOURCE"),\n        visible_draw_constraints=tuple(constraints),\n    )\n''',
+          )
+          replace_once(
+              test,
+              '''def test_offset_aware_consumer_retains_multi_entry_forward_compatibility() -> None:\n    root = _root([_card("i-a", "A"), _card("i-b", "B"), _card("i-c", "C")])\n    context = SimpleNamespace(\n        root_snapshot=root,\n        replay_prefix=[_entry((2, "C", "i-c")), _entry(), _entry((0, "A", "i-a"))],\n    )\n    assert _pinned_prefix_visible_draw_constraints(context) == ((0, "A", "i-a"), (2, "C", "i-c"))\n''',
+              '''def test_offset_aware_consumer_is_source_agnostic_across_card_relic_potion_entries() -> None:\n    root = _root([_card("i-a", "A"), _card("i-b", "B"), _card("i-c", "C")])\n    context = SimpleNamespace(\n        root_snapshot=root,\n        replay_prefix=[\n            _entry((2, "C", "i-c"), action_type="relic"),\n            _entry(action_type="potion"),\n            _entry((0, "A", "i-a"), action_type="card"),\n        ],\n    )\n    assert _pinned_prefix_visible_draw_constraints(context) == ((0, "A", "i-a"), (2, "C", "i-c"))\n''',
+          )
+          marker = '''def test_offset_aware_consumer_is_source_agnostic_across_card_relic_potion_entries() -> None:\n'''
+          insert = '''def test_committed_transition_dispatcher_does_not_pre_gate_relic_or_potion_producers() -> None:\n    original = decision_context._VISIBLE_DRAW_CONSTRAINT_PRODUCERS\n    seen: list[str] = []\n\n    def synthetic_non_card_producer(\n        battle_state, root_snapshot, replay_prefix, *, triggering_action\n    ):\n        seen.append(triggering_action.action_type)\n        return ((1, "B", "i-b"),)\n\n    try:\n        decision_context._VISIBLE_DRAW_CONSTRAINT_PRODUCERS = (synthetic_non_card_producer,)\n        root = _root([_card("i-a", "A"), _card("i-b", "B")])\n        state = BattleState(engine_state={}, is_terminal=False, outcome="in_progress", turn=1)\n        for action_type in ("relic", "potion"):\n            assert visible_draw_constraints_from_committed_transition(\n                state, root, [], triggering_action=SemanticAction(action_type, f"0:{action_type.upper()}_SOURCE")\n            ) == ((1, "B", "i-b"),)\n        assert seen == ["relic", "potion"]\n    finally:\n        decision_context._VISIBLE_DRAW_CONSTRAINT_PRODUCERS = original\n\n\n'''
+          replace_once(test, marker, insert + marker)
+
+          # Keep the design report aligned with the concrete code boundary.
+          report = "Outputs/reports/replay_prefix_draw_pinning_design_20260816.md"
+          rp = Path(report)
+          rtext = rp.read_text()
+          needle = "The materialization layer must not branch on whether a constraint originated from a card, relic, or potion. Producer classification belongs only in the proof/extraction layer."
+          replacement = needle + " The committed-step call sites use `visible_draw_constraints_from_committed_transition()`, which dispatches to producer-specific proofs; the currently registered proof is the audited card path, and future relic/potion proofs extend that producer list without changing ReplayPrefix or hypothesis materialization."
+          if rtext.count(needle) != 1:
+              raise SystemExit(f"{report}: design insertion anchor count={rtext.count(needle)}")
+          rp.write_text(rtext.replace(needle, replacement, 1))
+          PY
+
+          if git grep -n 'visible_draw_constraints_from_pending_choice' -- '*.py'; then
+            echo 'old card-wired extraction entrypoint remains' >&2
+            exit 1
+          fi
+      - name: Compile changed modules
+        run: python -m compileall -q API/instance_combat.py Combat/search/decision_context.py Combat/search/main_loop.py Combat/search/rng_hypothesis.py Combat/tests/test_replay_prefix_visible_draw_pinning.py
+      - name: Install hosted test dependency
+        run: python -m pip install pytest
+      - name: Run replay-pinning regressions
+        run: python -m pytest -q Combat/tests/test_replay_prefix_visible_draw_pinning.py
+      - name: Commit source refactor
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            API/instance_combat.py \
+            Combat/search/decision_context.py \
+            Combat/search/main_loop.py \
+            Combat/tests/test_replay_prefix_visible_draw_pinning.py \
+            Outputs/reports/replay_prefix_draw_pinning_design_20260816.md
+          git diff --cached --check
+          git commit -m "refactor: make replay draw pinning producer-extensible"
+          git push origin HEAD:replay-prefix-draw-pinning-design
