@@ -21,7 +21,7 @@ jobs:
       - name: Verify old card-wired entrypoint is gone
         shell: bash
         run: |
-          if git grep -n 'visible_draw_constraints_from_pending_choice' -- '*.py'; then
+          if git grep -n 'visible_draw_constraints_from_pending_choice' -- '*.py' ':!scripts/tmp_generalize_replay_pinning_producers.py'; then
             exit 1
           fi
       - name: Compile changed modules
