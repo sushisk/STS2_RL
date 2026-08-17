@@ -7,8 +7,8 @@ The core rule is deliberately split in two:
   to interpret as sequential draw order.
 
 Neither gate uses card-name allowlists, rng_id, public instance identity, or Snapshot
-InstanceId.  The output is an RL-internal sequence of root-relative offsets paired with
-observable replay-equivalence keys.  Concrete Snapshot allocation is handled separately
+InstanceId. The output is an RL-internal sequence of root-relative offsets paired with
+observable replay-equivalence keys. Concrete Snapshot allocation is handled separately
 by ``search.rng_hypothesis``.
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ ObservableCardKey = tuple[
     str,              # CardId
     str,              # Type
     str,              # Rarity
-    int,              # effective Cost
+    int,              # public/effective Cost
     str,              # TargetType
     bool,             # upgraded
     int,              # UpgradeLevel
@@ -34,13 +34,10 @@ ObservableCardKey = tuple[
 VisibleDrawConstraint = tuple[int, ObservableCardKey]
 VisibleDrawConstraints = tuple[VisibleDrawConstraint, ...]
 
+# P is the multiset sum of persistent cards from whichever ordinary card zones are
+# actually public in both the immediate pre/post observations. Missing optional zones
+# are ignored rather than treated as evidence or as a proof failure.
 _PUBLIC_NON_DRAW_ZONES = ("hand", "discardPile", "exhaustPile", "playPile")
-_SNAPSHOT_NON_DRAW_ZONES = {
-    "hand": "Hand",
-    "discardPile": "DiscardPile",
-    "exhaustPile": "ExhaustPile",
-    "playPile": "PlayPile",
-}
 
 
 @dataclass(frozen=True)
@@ -57,8 +54,8 @@ class VisibleDrawTransitionEvidence:
     """One committed transition's replay-relevant draw evidence.
 
     ``blocks_later_pinning`` is set when the public DrawPile changed but the transition
-    could not be proven as an ordered sequential draw.  Later transitions must not
-    invent root-relative offsets past such a mutation.
+    could not be proven as an ordered sequential draw. Later transitions must not
+    invent root-relative draw offsets past such a mutation.
     """
 
     constraints: VisibleDrawConstraints = ()
@@ -77,7 +74,7 @@ def observable_card_key_from_public(card: object) -> Optional[ObservableCardKey]
     """Return behavior-relevant state available on public card/choice DTOs.
 
     optionId, list position, zone and any physical-copy identity are intentionally
-    excluded.  Missing/invalid required gameplay fields fail closed instead of silently
+    excluded. Missing/invalid required gameplay fields fail closed instead of silently
     collapsing distinct cards.
     """
     if not isinstance(card, dict):
@@ -113,7 +110,7 @@ def observable_card_key_from_public(card: object) -> Optional[ObservableCardKey]
 def observable_card_key_from_snapshot(card: object) -> ObservableCardKey:
     """Project a Snapshot card into the public replay-equivalence domain.
 
-    Current ``CardInstanceSnapshot`` does not carry enchantment.  Its projection is
+    Current ``CardInstanceSnapshot`` does not carry enchantment. Its projection is
     therefore ``None`` for enchantment; an observed enchanted key will not match and
     materialization will fail closed until the Snapshot contract carries equivalent
     gameplay state.
@@ -135,7 +132,7 @@ def observable_card_key_from_snapshot(card: object) -> ObservableCardKey:
 def snapshot_card_replay_internal_key(card: object) -> tuple:
     """Detect hidden behavior differences among cards with one observable key.
 
-    Physical identity and zone are excluded.  Local cost modifiers and temporary star
+    Physical identity and zone are excluded. Local cost modifiers and temporary star
     costs remain included via ``dataclasses.asdict`` so two publicly-indistinguishable
     cards that can replay differently cause a fail-closed materialization.
     """
@@ -164,10 +161,6 @@ def _keys_from_public_cards(cards: object) -> Optional[tuple[ObservableCardKey, 
     if any(key is None for key in keys):
         return None
     return keys  # type: ignore[return-value]
-
-
-def _keys_from_snapshot_cards(cards: object) -> tuple[ObservableCardKey, ...]:
-    return tuple(observable_card_key_from_snapshot(card) for card in (cards or ()))
 
 
 def _counter_subset(left: Counter, right: Counter) -> bool:
@@ -225,6 +218,9 @@ def observable_transfer_evidence(
 
     persistent = Counter()
     for zone in _PUBLIC_NON_DRAW_ZONES:
+        # Only published zones are eligible evidence. Absence is neutral, not proof.
+        if zone not in pre_engine or zone not in post_engine:
+            continue
         pre_zone = _keys_from_public_cards(pre_engine.get(zone))
         post_zone = _keys_from_public_cards(post_engine.get(zone))
         if pre_zone is None or post_zone is None:
@@ -261,10 +257,10 @@ def _hand_append_draw_order(
 ) -> Optional[tuple[ObservableCardKey, ...]]:
     """Gate-B prover for the common draw -> append-to-Hand -> choose-from-Hand path.
 
-    This is structural, not card-specific.  It requires the published options to be the
+    This is structural, not card-specific. It requires the published options to be the
     post-transition Hand sequence, the non-draw options to form a surviving pre-Hand
-    prefix/subsequence, and the DrawPile-removed cards to be one contiguous suffix.
-    The real-game Acrobatics path satisfies exactly this engine-level ordering contract.
+    subsequence, and the DrawPile-removed cards to be one contiguous suffix. The
+    real-game Acrobatics path satisfies exactly this engine-level ordering contract.
     """
     pre_engine = getattr(pre_state, "engine_state", None)
     post_engine = getattr(post_state, "engine_state", None)
@@ -305,7 +301,7 @@ def ordered_draw_sequence(
     """Gate B: return one unambiguous engine-proven sequential draw order.
 
     New mechanics extend ``_ORDERED_DRAW_PROVERS`` at the engine-primitive/structural
-    level.  In particular, a future draw-N-choose-M path whose options contain only the
+    level. In particular, a future draw-N-choose-M path whose options contain only the
     drawn cards can reuse Gate A immediately, but should add an order prover only after
     the Emulator/game contract confirms that those option positions preserve draw order.
     """
