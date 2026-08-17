@@ -253,6 +253,13 @@ def test_consumer_stops_at_block_and_requires_contiguous_prefix() -> None:
     with pytest.raises(ValueError, match="contiguous prefix"):
         _pinned_prefix_visible_draw_constraints(invalid)
 
+    out_of_order = SimpleNamespace(
+        root_snapshot=root,
+        replay_prefix=[_entry((1, b_key), (0, a_key))],
+    )
+    with pytest.raises(ValueError, match="ordered contiguous prefix"):
+        _pinned_prefix_visible_draw_constraints(out_of_order)
+
 
 def test_observable_state_pin_distinguishes_upgraded_copy_without_instance_contract() -> None:
     root = _root([

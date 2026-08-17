@@ -364,12 +364,12 @@ def _pinned_prefix_visible_draw_constraints(
         if entry.visible_draw_tracking_blocked:
             break
 
-    ordered = tuple(sorted(constraints, key=lambda item: item[0]))
-    if [offset for offset, _key in ordered] != list(range(len(ordered))):
+    constraints_tuple = tuple(constraints)
+    if [offset for offset, _key in constraints_tuple] != list(range(len(constraints_tuple))):
         raise ValueError(
-            "visible draw constraints must form one contiguous prefix from Stable-root offset 0"
+            "visible draw constraints must form one ordered contiguous prefix from Stable-root offset 0"
         )
-    return ordered
+    return constraints_tuple
 
 
 def _reorder_hypothesis_for_visible_draw_constraints(
@@ -400,7 +400,6 @@ def _draw_pile_instances_for_hypothesis(
     ordered_card_ids: tuple[str, ...],
     pinned_observable_keys: tuple[tuple[int, ObservableCardKey], ...] = (),
 ) -> list[dict]:
-    """Allocate concrete Snapshot cards, failing closed on hidden replay ambiguity."""
     root_cards = list(root_snapshot.Player.DrawPile)
     requested = Counter(ordered_card_ids)
     available = Counter(str(card.CardId) for card in root_cards)
@@ -411,28 +410,25 @@ def _draw_pile_instances_for_hypothesis(
         )
 
     offsets = [offset for offset, _key in pinned_observable_keys]
-    if len(set(offsets)) != len(offsets):
-        raise ValueError("pinned draw constraints contain duplicate offsets")
+    if offsets != list(range(len(offsets))):
+        raise ValueError("pinned draw constraints must be an ordered contiguous prefix")
 
-    pinned_counts = Counter(key for _offset, key in pinned_observable_keys)
-    for key, count in pinned_counts.items():
+    pinned_keys = tuple(key for _offset, key in pinned_observable_keys)
+    for key, count in Counter(pinned_keys).items():
         matches = [card for card in root_cards if observable_card_key_from_snapshot(card) == key]
         if len(matches) < count:
             raise ValueError(
                 "pinned observable card state is absent from the root DrawPile in the required count"
             )
-        internal_keys = {snapshot_card_replay_internal_key(card) for card in matches}
-        if len(internal_keys) != 1:
+        if len({snapshot_card_replay_internal_key(card) for card in matches}) != 1:
             raise ValueError(
                 "pinned observable card state maps to multiple hidden gameplay states; "
                 "public evidence is insufficient for safe replay materialization"
             )
 
-    allocated: list[Optional[CardInstanceSnapshot]] = [None] * len(ordered_card_ids)
     used_instance_ids: set[str] = set()
-    for offset, key in sorted(pinned_observable_keys, key=lambda item: item[0]):
-        if offset < 0 or offset >= len(allocated):
-            raise ValueError(f"pinned draw offset {offset} is outside the root DrawPile")
+    pinned_cards: list[CardInstanceSnapshot] = []
+    for offset, key in pinned_observable_keys:
         expected_card_id = ordered_card_ids[offset]
         if card_id_from_observable_key(key) != expected_card_id:
             raise ValueError(
@@ -451,7 +447,7 @@ def _draw_pile_instances_for_hypothesis(
         if not matches:
             raise ValueError("pinned observable card state was exhausted during concrete allocation")
         chosen = matches[0]
-        allocated[offset] = chosen
+        pinned_cards.append(chosen)
         used_instance_ids.add(str(chosen.InstanceId))
 
     by_card_id: dict[str, deque[CardInstanceSnapshot]] = {}
@@ -461,18 +457,16 @@ def _draw_pile_instances_for_hypothesis(
     ):
         by_card_id.setdefault(str(card.CardId), deque()).append(card)
 
-    for offset, card_id in enumerate(ordered_card_ids):
-        if allocated[offset] is not None:
-            continue
+    tail_cards: list[CardInstanceSnapshot] = []
+    for card_id in ordered_card_ids[len(pinned_cards) :]:
         cards = by_card_id.get(card_id)
         if not cards:
             raise ValueError(
                 f"hypothesis concrete-card allocation exhausted CardId {card_id!r} after observable-state pinning"
             )
-        allocated[offset] = cards.popleft()
-    if any(card is None for card in allocated):
-        raise AssertionError("concrete DrawPile allocation left an unfilled position")
-    return [dataclasses.asdict(card) for card in allocated if card is not None]
+        tail_cards.append(cards.popleft())
+
+    return [dataclasses.asdict(card) for card in pinned_cards + tail_cards]
 
 
 def derive_substituted_snapshot(
