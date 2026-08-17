@@ -1,8 +1,7 @@
-"""Regressions for observable transfer proof and replay draw materialization."""
+"""Regressions for public Hand-transfer evidence and replay draw materialization."""
 from __future__ import annotations
 
 import sys
-from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,7 +16,6 @@ from combat_state_snapshot import CardInstanceSnapshot, LocalCostModifierSnapsho
 from search.replay_draw_restore import (
     card_id_from_observable_key,
     observable_card_key_from_public,
-    observable_transfer_evidence,
     visible_draw_transition_evidence_from_committed_transition,
 )
 from search.rng_hypothesis import (
@@ -121,7 +119,7 @@ def _evidence(pre, post, prefix=(), *, root_draw=None):
     )
 
 
-def test_acrobatics_shape_uses_generic_transfer_and_hand_append_order() -> None:
+def test_acrobatics_shape_uses_drawpile_diff_and_appended_hand_suffix() -> None:
     h = _public("NEUTRALIZE", option_id="h")
     a_up = _public("A", upgraded=True, option_id="a-up")
     a = _public("A", option_id="a")
@@ -137,88 +135,97 @@ def test_acrobatics_shape_uses_generic_transfer_and_hand_append_order() -> None:
     assert [key[5] for _offset, key in result.constraints[:2]] == [True, False]
 
 
-def test_card_allowlist_and_choice_semantics_are_not_safety_gates() -> None:
+def test_pending_choice_semantics_and_options_are_not_safety_inputs() -> None:
     h = _public("H")
     a = _public("A")
     pre = _state(hand=[_public("PREPARED"), h], draw=[a])
     post = _state(
         hand=[h, a],
         draw=[],
-        options=[h, a],
+        options=[_public("UNRELATED")],
         scope="SomethingElse",
         choiceOperation="select",
         sourceZone="mystery",
         originEntityId="NOT_PREPARED",
     )
-    result = visible_draw_transition_evidence_from_committed_transition(
-        post,
-        _root_from_public([a]),
-        [],
-        pre_battle_state=pre,
-    )
+    result = _evidence(pre, post)
+    assert result.blocks_later_pinning is False
     assert len(result.constraints) == 1
     assert card_id_from_observable_key(result.constraints[0][1]) == "A"
 
 
-def test_drawn_only_choice_uses_generic_gate_b_without_mechanic_specific_prover() -> None:
+def test_drawn_only_choice_without_hand_transfer_fails_closed() -> None:
     a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))
     h = _public("H")
     pre = _state(hand=[h], draw=[a, b, c, d])
     post = _state(hand=[h], draw=[d], options=[a, b, c])
 
-    assert observable_transfer_evidence(pre, post) is not None
-
     result = _evidence(pre, post)
-    assert result.blocks_later_pinning is False
-    assert result.tracking_error is None
-    assert [card_id_from_observable_key(key) for _offset, key in result.constraints] == ["A", "B", "C"]
+    assert result.constraints == ()
+    assert result.blocks_later_pinning is True
+    assert result.tracking_error is not None
+    assert "Hand consumption" in result.tracking_error
 
 
-def test_drawpile_publication_order_is_not_gate_a_evidence() -> None:
+def test_drawpile_publication_order_is_not_evidence() -> None:
+    played = _public("PLAYED")
     h = _public("H")
     a, b, c = (_public(name) for name in ("A", "B", "C"))
     post = _state(hand=[h, a, b], draw=[c], options=[h, a, b])
-    root_draw = [a, b, c]
-    first = _evidence(_state(hand=[h], draw=[a, b, c]), post, root_draw=root_draw)
-    second = _evidence(_state(hand=[h], draw=[b, a, c]), post, root_draw=root_draw)
+    first = _evidence(_state(hand=[played, h], draw=[a, b, c]), post)
+    second = _evidence(_state(hand=[played, h], draw=[b, a, c]), post)
     assert first.constraints == second.constraints
 
 
-def test_gate_b_does_not_use_stable_snapshot_order_as_answer_key() -> None:
+def test_stable_snapshot_order_is_not_an_answer_key() -> None:
+    played = _public("PLAYED")
+    h = _public("H")
     a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))
-    pre = _state(hand=[], draw=[a, b, c, d])
-    post = _state(hand=[], draw=[d], options=[c, b, a])
+    pre = _state(hand=[played, h], draw=[a, b, c, d])
+    post = _state(hand=[h, c, b, a], draw=[d], options=[h, c, b, a])
 
     forward_root = _evidence(pre, post, root_draw=[a, b, c, d])
     reverse_root = _evidence(pre, post, root_draw=[d, c, b, a])
 
     assert forward_root == reverse_root
     assert forward_root.blocks_later_pinning is False
-    assert forward_root.tracking_error is None
     assert [card_id_from_observable_key(key) for _offset, key in forward_root.constraints] == ["C", "B", "A"]
 
 
-def test_gate_b_fails_closed_when_r_and_e_occurrences_make_order_ambiguous() -> None:
+def test_non_preserving_pre_hand_prefix_fails_closed() -> None:
+    played = _public("PLAYED")
+    h = _public("H")
+    x = _public("X")
     a, b, c = (_public(name) for name in ("A", "B", "C"))
-    pre = _state(hand=[a], draw=[a, b, c])
-    post = _state(hand=[a], draw=[c], options=[a, b, a])
+    pre = _state(hand=[played, h, x], draw=[a, b, c])
+    post = _state(hand=[x, h, a, b], draw=[c], options=[x, h, a, b])
 
-    result = _evidence(pre, post, root_draw=[a, b, c])
+    result = _evidence(pre, post)
     assert result.constraints == ()
     assert result.blocks_later_pinning is True
-    assert result.tracking_error is not None
-    assert "ambiguous under observable card equality" in result.tracking_error
+
+
+def test_transition_requires_exactly_one_pre_hand_card_consumed() -> None:
+    h = _public("H")
+    a = _public("A")
+    pre = _state(hand=[h], draw=[a])
+    post = _state(hand=[h, a], draw=[], options=[h, a])
+
+    result = _evidence(pre, post)
+    assert result.constraints == ()
+    assert result.blocks_later_pinning is True
 
 
 def test_unaccounted_drawpile_mutation_blocks_later_root_relative_pinning() -> None:
+    played = _public("PLAYED")
     a, b = _public("A"), _public("B")
-    pre = _state(hand=[], draw=[a, b])
+    pre = _state(hand=[played], draw=[a, b])
     post = _state(hand=[], draw=[b], options=[_public("X")])
     blocked = _evidence(pre, post)
     assert blocked.constraints == ()
     assert blocked.blocks_later_pinning is True
 
-    later_pre = _state(hand=[], draw=[b])
+    later_pre = _state(hand=[played], draw=[b])
     later_post = _state(hand=[b], draw=[], options=[b])
     later = _evidence(later_pre, later_post, [_entry(blocked=True)])
     assert later.constraints == ()
@@ -227,8 +234,8 @@ def test_unaccounted_drawpile_mutation_blocks_later_root_relative_pinning() -> N
 
 def test_zero_draw_transition_does_not_block_cursor() -> None:
     a = _public("A")
-    pre = _state(hand=[], draw=[a])
-    post = _state(hand=[], draw=[a], options=[_public("X")])
+    pre = _state(hand=[_public("PLAYED"), _public("H")], draw=[a])
+    post = _state(hand=[_public("H")], draw=[a], options=[_public("X")])
     result = _evidence(pre, post)
     assert result.constraints == ()
     assert result.blocks_later_pinning is False
