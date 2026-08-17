@@ -184,18 +184,18 @@ def test_drawpile_publication_order_is_not_gate_a_evidence() -> None:
     assert first.constraints == second.constraints
 
 
-def test_gate_b_rejects_wrong_option_order_against_stable_root_and_records_error() -> None:
+def test_gate_b_does_not_use_stable_snapshot_order_as_answer_key() -> None:
     a, b, c, d = (_public(name) for name in ("A", "B", "C", "D"))
     pre = _state(hand=[], draw=[a, b, c, d])
     post = _state(hand=[], draw=[d], options=[c, b, a])
 
-    result = _evidence(pre, post, root_draw=[a, b, c, d])
-    assert result.constraints == ()
-    assert result.blocks_later_pinning is True
-    assert result.tracking_error is not None
-    assert "option-order contract rejected" in result.tracking_error
-    assert "['C', 'B', 'A']" in result.tracking_error
-    assert "['A', 'B', 'C']" in result.tracking_error
+    forward_root = _evidence(pre, post, root_draw=[a, b, c, d])
+    reverse_root = _evidence(pre, post, root_draw=[d, c, b, a])
+
+    assert forward_root == reverse_root
+    assert forward_root.blocks_later_pinning is False
+    assert forward_root.tracking_error is None
+    assert [card_id_from_observable_key(key) for _offset, key in forward_root.constraints] == ["C", "B", "A"]
 
 
 def test_gate_b_fails_closed_when_r_and_e_occurrences_make_order_ambiguous() -> None:
