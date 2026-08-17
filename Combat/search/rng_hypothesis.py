@@ -282,7 +282,10 @@ def derive_combat_start_replay_roots(
         roots.append(
             CombatStartDerivedReplayRoot(
                 hypothesis=hypothesis,
-                derived_replay_root=CombatStartReplayRoot(scenario_spec=spec),
+                derived_replay_root=CombatStartReplayRoot(
+                    scenario_spec=spec,
+                    visible_draw_constraints=combat_start_replay_root.visible_draw_constraints,
+                ),
             )
         )
     return roots
@@ -351,68 +354,54 @@ def _card_identity_key(card: CardInstanceSnapshot) -> str:
 
 def _pinned_prefix_visible_draw_constraints(
     decision_context: DecisionContext,
-) -> tuple[tuple[str, str], ...]:
-    """Return only a verified Stable-root-relative exact-instance constraint sequence.
-
-    ``visible_draw_constraints_from_pending_choice()`` records constraints only while
-    the real committed Replay Prefix is empty, so any accepted sequence is anchored to
-    root DrawPile position zero. This is consistent with the Main/API boundary contract:
-    every non-Pending Step is immediately captured as a new Stable root and resets the
-    Replay Prefix before the next normal card action. A draw-then-choose card played
-    after one or more completed cards in the same turn therefore still starts from a
-    fresh Stable root; those earlier cards are not entries in this Replay Prefix.
-
-    Keep the consumer defensive: if a malformed/future caller attaches constraints to a
-    later entry, fail closed instead of concatenating them and inventing an unknown root
-    offset. Supporting a genuinely later-Pending constraint would require an explicit
-    visibility-safe cursor/provenance contract, but normal sequential card play does not
-    create that shape in the current state machine.
-    """
+) -> tuple[tuple[int, str, str], ...]:
+    """Return verified offset-aware exact-instance constraints for a Stable root."""
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         return ()
-    if not decision_context.replay_prefix:
+    constraints = tuple(
+        constraint
+        for entry in decision_context.replay_prefix
+        for constraint in entry.visible_draw_constraints
+    )
+    if not constraints:
         return ()
 
-    first_constraints = decision_context.replay_prefix[0].visible_draw_constraints
-    if any(entry.visible_draw_constraints for entry in decision_context.replay_prefix[1:]):
+    root_cards = list(decision_context.root_snapshot.Player.DrawPile)
+    by_instance = {str(card.InstanceId): str(card.CardId) for card in root_cards}
+    if len(by_instance) != len(root_cards):
         return ()
-    if not first_constraints:
+    offsets = [offset for offset, _card_id, _instance_id in constraints]
+    instance_ids = [instance_id for _offset, _card_id, instance_id in constraints]
+    if len(set(offsets)) != len(offsets) or len(set(instance_ids)) != len(instance_ids):
         return ()
-
-    remaining = {
-        str(card.InstanceId): str(card.CardId)
-        for card in decision_context.root_snapshot.Player.DrawPile
-    }
-    if len(remaining) != len(decision_context.root_snapshot.Player.DrawPile):
+    if any(offset < 0 or offset >= len(root_cards) for offset in offsets):
         return ()
-
-    instance_ids = [instance_id for _card_id, instance_id in first_constraints]
-    if len(set(instance_ids)) != len(instance_ids):
+    if any(by_instance.get(instance_id) != card_id for _offset, card_id, instance_id in constraints):
         return ()
-    if any(remaining.get(instance_id) != card_id for card_id, instance_id in first_constraints):
-        return ()
-    return tuple(first_constraints)
+    return tuple(sorted(constraints))
 
 
 def _reorder_hypothesis_for_visible_draw_constraints(
     hypothesis: SearchHypothesisId,
-    constraints: tuple[tuple[str, str], ...],
+    constraints: tuple[tuple[int, str, str], ...],
 ) -> SearchHypothesisId:
-    """Move visible constrained CardIds to the hypothesis front, preserving its tail."""
+    """Pin visible CardIds at proven root-relative offsets, preserving other order."""
     remaining = list(hypothesis.ordered_draw_pile_card_ids)
-    pinned_card_ids = [card_id for card_id, _instance_id in constraints]
-    for card_id in pinned_card_ids:
+    ordered: list[Optional[str]] = [None] * len(remaining)
+    for offset, card_id, _instance_id in constraints:
+        if offset < 0 or offset >= len(ordered) or ordered[offset] is not None:
+            raise ValueError("invalid or duplicate visible draw offset")
         remaining.remove(card_id)
-    return dataclasses.replace(
-        hypothesis,
-        ordered_draw_pile_card_ids=tuple(pinned_card_ids) + tuple(remaining),
-    )
+        ordered[offset] = card_id
+    tail = iter(remaining)
+    resolved = tuple(next(tail) if card_id is None else card_id for card_id in ordered)
+    return dataclasses.replace(hypothesis, ordered_draw_pile_card_ids=resolved)
 
 
 def _draw_pile_instances_for_hypothesis(
     root_snapshot: CombatStateSnapshot,
     ordered_card_ids: tuple[str, ...],
-    pinned_instance_ids: tuple[str, ...] = (),
+    pinned_instances: tuple[tuple[int, str], ...] = (),
 ) -> list[dict]:
     root_cards = list(root_snapshot.Player.DrawPile)
     requested = Counter(ordered_card_ids)
@@ -426,24 +415,26 @@ def _draw_pile_instances_for_hypothesis(
     by_instance_id = {str(card.InstanceId): card for card in root_cards}
     if len(by_instance_id) != len(root_cards):
         raise ValueError("root snapshot DrawPile contains duplicate CardInstanceSnapshot.InstanceId values")
-    if len(set(pinned_instance_ids)) != len(pinned_instance_ids):
-        raise ValueError("pinned draw constraints contain duplicate cardInstanceId values")
-    if len(pinned_instance_ids) > len(ordered_card_ids):
-        raise ValueError("more pinned card instances than hypothesis DrawPile entries")
+    offsets = [offset for offset, _instance_id in pinned_instances]
+    instance_ids = [instance_id for _offset, instance_id in pinned_instances]
+    if len(set(offsets)) != len(offsets) or len(set(instance_ids)) != len(instance_ids):
+        raise ValueError("pinned draw constraints contain duplicate offsets or cardInstanceId values")
 
-    pinned_cards: list[CardInstanceSnapshot] = []
-    pinned_set = set(pinned_instance_ids)
-    for index, instance_id in enumerate(pinned_instance_ids):
+    allocated: list[Optional[CardInstanceSnapshot]] = [None] * len(ordered_card_ids)
+    pinned_set = set(instance_ids)
+    for offset, instance_id in pinned_instances:
+        if offset < 0 or offset >= len(allocated):
+            raise ValueError(f"pinned draw offset {offset} is outside the root DrawPile")
         card = by_instance_id.get(instance_id)
         if card is None:
             raise ValueError(f"pinned cardInstanceId {instance_id!r} is absent from root DrawPile")
-        expected_card_id = ordered_card_ids[index]
+        expected_card_id = ordered_card_ids[offset]
         if str(card.CardId) != expected_card_id:
             raise ValueError(
                 f"pinned cardInstanceId {instance_id!r} has CardId={card.CardId!r}, "
-                f"but hypothesis position {index} requires {expected_card_id!r}"
+                f"but hypothesis position {offset} requires {expected_card_id!r}"
             )
-        pinned_cards.append(card)
+        allocated[offset] = card
 
     by_card_id: dict[str, deque[CardInstanceSnapshot]] = {}
     for card in sorted(
@@ -452,32 +443,25 @@ def _draw_pile_instances_for_hypothesis(
     ):
         by_card_id.setdefault(str(card.CardId), deque()).append(card)
 
-    allocated = [dataclasses.asdict(card) for card in pinned_cards]
-    for card_id in ordered_card_ids[len(pinned_cards):]:
+    for offset, card_id in enumerate(ordered_card_ids):
+        if allocated[offset] is not None:
+            continue
         cards = by_card_id.get(card_id)
         if not cards:
             raise ValueError(
                 f"hypothesis concrete-card allocation exhausted CardId {card_id!r} after exact-instance pinning"
             )
-        allocated.append(dataclasses.asdict(cards.popleft()))
-    return allocated
+        allocated[offset] = cards.popleft()
+    return [dataclasses.asdict(card) for card in allocated if card is not None]
 
 
 def derive_substituted_snapshot(
     root_snapshot: CombatStateSnapshot,
     hypothesis: SearchHypothesisId,
     *,
-    pinned_draw_card_instance_ids: tuple[str, ...] = (),
+    pinned_draw_card_instances: tuple[tuple[int, str], ...] = (),
 ) -> CombatStateSnapshot:
-    """Return a Method-B derived snapshot for one hypothesis.
-
-    Scope decision: this substitutes only ``Rng.RunRng["Shuffle"]`` plus
-    ``Player.DrawPile``. The Shuffle stream is the contract's dedicated draw/reshuffle
-    RNG purpose. Other Run/Player/Monster streams are left untouched because widening
-    the substitution would mix unrelated mechanics into a DrawPile Belief hypothesis.
-    The legacy single-int ``ShuffleRngSeed`` scenario field is deliberately not used;
-    its relationship to ``RunRng["Shuffle"]`` remains an open Emulator contract question.
-    """
+    """Return a Method-B derived snapshot with optional offset-aware exact pins."""
     payload = _snapshot_plain_dict(root_snapshot)
     run_rng = payload["Rng"]["RunRng"]
     if "Shuffle" not in run_rng:
@@ -486,7 +470,7 @@ def derive_substituted_snapshot(
     payload["Player"]["DrawPile"] = _draw_pile_instances_for_hypothesis(
         root_snapshot,
         hypothesis.ordered_draw_pile_card_ids,
-        pinned_instance_ids=pinned_draw_card_instance_ids,
+        pinned_instances=pinned_draw_card_instances,
     )
     return CombatStateSnapshot.from_dict(payload)
 
@@ -556,8 +540,8 @@ def apply_hypothesis_to_context(
         root_snapshot=derive_substituted_snapshot(
             decision_context.root_snapshot,
             effective_hypothesis,
-            pinned_draw_card_instance_ids=tuple(
-                instance_id for _card_id, instance_id in constraints
+            pinned_draw_card_instances=tuple(
+                (offset, instance_id) for offset, _card_id, instance_id in constraints
             ),
         ),
     )
