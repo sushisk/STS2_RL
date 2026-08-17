@@ -1,46 +1,102 @@
-# Replay-prefix DrawPile restoration — observable transfer + ordered draw proof
+# Replay-prefix DrawPile restoration — current implemented design
 
-Status: implemented in STS2_RL PR #64. No new Emulator-visible identity/provenance protocol is required.
+Status: implemented in STS2_RL PR #64.
 
-## Problem
+This document describes the implementation currently present on the PR branch. Earlier exact-instance / card-allowlist designs are superseded.
 
-A committed Replay Prefix may consume cards from DrawPile before reaching a PendingChoice. Replaying that already-observed prefix under a different CardId-level RNG hypothesis can otherwise expose a different candidate set and produce `replay_mismatch`.
+## Goal
 
-The fix must constrain only the already-observed past. It must not turn future RNG hypotheses into physical-card hypotheses or freeze the unobserved DrawPile remainder.
+A committed Replay Prefix may already have consumed cards from DrawPile before reaching a PendingChoice. Replaying that observed prefix under another CardId-level RNG hypothesis can otherwise expose a different choice and produce `replay_mismatch`.
+
+The fix must reproduce only the already-observed sequential draws. It must not:
+
+- turn future RNG hypotheses into physical-card hypotheses;
+- freeze the unobserved DrawPile remainder;
+- depend on card-name allowlists or replay-only identity/provenance fields.
+
+The implementation therefore separates two questions:
+
+1. **Gate A:** did observable card state move from DrawPile into the current PendingChoice?
+2. **Gate B:** can the transferred cards be ordered safely as the actual sequential draw order?
+
+Special DrawPile restoration is enabled only when both gates succeed.
 
 ## Observable card equality
 
-All proof-side comparisons use an `observable_card_key`: CardId plus public gameplay-affecting state such as cost, upgrade state, Tinker state and enchantment. Physical instance identity, option id, zone and list position are excluded.
+Proof-side comparisons use `observable_card_key(card)` rather than CardId alone or physical instance identity.
+
+The current key contains:
+
+```text
+CardId
+Type
+Rarity
+Cost
+TargetType
+upgraded
+UpgradeLevel
+TinkerTimeType
+TinkerTimeRider
+enchantment(id, amount, status)
+```
+
+It deliberately excludes option id, zone, list position and `InstanceId`.
+
+The Snapshot projection currently has no equivalent enchantment field, so its enchantment component is `None`. Consequently, an observed enchanted card does not silently collapse to an unenchanted Snapshot card; materialization fails closed until equivalent Snapshot state exists.
 
 `SearchHypothesisId` remains CardId-level.
 
-## Gate A — unordered DrawPile -> Choice transfer
+## Gate A — unordered observable DrawPile -> Choice transfer
 
-For the immediate pre/post states of one committed transition, using multisets of `observable_card_key`:
+Gate A uses the immediate public pre-state and post-state of one committed transition. All equations below are multiset equations over `observable_card_key`.
+
+Define:
 
 ```text
-D0 = pre.drawPile
-D1 = post.drawPile
-O  = post.pendingChoice.options
+D0 = multiset(pre.drawPile)
+D1 = multiset(post.drawPile)
+O  = multiset(post.pendingChoice.options)
+```
 
-require D1 ⊆ D0
+Require:
+
+```text
+D1 ⊆ D0
 R = D0 - D1
-require R != ∅
-require R ⊆ O
+R != ∅
+R ⊆ O
 ```
 
-For each eligible non-DrawPile public zone that exists in both observations:
+`R` is therefore exactly the observable multiset that disappeared from DrawPile during this transition.
+
+For each eligible public non-DrawPile zone that is present in **both** observations, compute the persistent part:
 
 ```text
-P_z = pre[z] ∩ post[z]
-P   = Σ_z P_z        # multiset sum
+P_z = multiset(pre[z]) ∩ multiset(post[z])
+P   = Σ_z P_z
 ```
 
-Then:
+The implementation currently considers:
+
+```text
+hand
+discardPile
+exhaustPile
+playPile
+```
+
+A zone absent from either observation is not used as evidence. A zone present in both observations but containing an invalid/unprojectable card causes the proof to fail closed.
+
+Then define:
 
 ```text
 E = O - R
-require E ⊆ P
+```
+
+and require:
+
+```text
+E ⊆ P
 ```
 
 Equivalently:
@@ -50,57 +106,105 @@ O = R + E
 where E ⊆ P
 ```
 
-This proves that every PendingChoice option is explained either by a card removed from DrawPile in this transition (`R`) or by a card already present and persistent in another published zone (`E`).
+Meaning: every choice option must be explained either by a card removed from DrawPile in this transition (`R`) or by a card that was already present and persisted in another published zone (`E`).
 
-This gate does not use CardId allowlists, `choiceOperation`, `sourceZone`, `scope`, origin metadata, `rng_id`, InstanceId, HMAC/public card identity, raw draw history, or DrawPile publication order.
-
-### Examples
-
-Acrobatics:
+### Acrobatics example
 
 ```text
-options = surviving Hand + drawn cards
-R = drawn cards
-E = surviving Hand
+pre Hand = [ACROBATICS, H1, H2]
+pre Draw = [A, B, C, D, E]
+
+post Hand = [H1, H2, A, B, C]
+post Draw = [D, E]
+options   = [H1, H2, A, B, C]
+
+R = [A, B, C]
+E = [H1, H2]
 ```
 
-A future draw-N-choose-M mechanic that presents only the drawn cards:
+Gate A succeeds without identifying ACROBATICS, discard semantics, source-zone metadata, or a physical card instance.
+
+### Future draw-N-choose-M shape
+
+If a future mechanic removes three cards from DrawPile and presents only those cards:
 
 ```text
-options = drawn cards
-R = drawn cards
+pre Draw = [A, B, C, D, E]
+post Draw = [D, E]
+options   = [A, B, C]
+
+R = [A, B, C]
 E = ∅
 ```
 
-Both use the same Gate A.
+Gate A already supports this shape.
+
+**This does not yet mean special sequential-draw restoration is enabled for that mechanic. Gate B is still required.**
 
 ## Gate B — ordered sequential-draw proof
 
-Gate A proves transfer, not sequential draw provenance. Tutor/reveal/arbitrary DrawPile selection may create a similar multiset change and must not automatically trigger "put these cards at the DrawPile front" replay logic.
+Gate A proves membership/conservation only. It does not prove that `R` was removed by sequential drawing.
 
-Therefore sequential-draw restoration requires a second proof that an ordered subsequence corresponding to `R` is the real draw/addition order.
+Tutor, reveal, arbitrary DrawPile selection, or another mechanic could produce a similar multiset transfer. Such a path must not automatically trigger "put these cards at the DrawPile front" replay logic.
 
-Current Gate B is structural rather than card-specific. For the verified engine path used by Acrobatics it requires:
-
-```text
-pendingChoice.options == post.hand
-options == surviving/pre-existing Hand subsequence + contiguous drawn suffix
-multiset(drawn suffix) == R
-```
-
-The real-game implementation draws first, appends drawn cards to Hand, and then enumerates Hand for the choice, so the suffix order is the actual draw order.
-
-A future draw-N-choose-M path can reuse Gate A immediately. It should add a Gate-B order prover only after its common game/Emulator primitive is verified to preserve draw order in the published options.
-
-Special restoration is therefore:
+The current implementation therefore has an extensible `_ORDERED_DRAW_PROVERS` layer. At present it contains one structural prover for the verified engine path:
 
 ```text
-Gate A succeeds
-AND
-Gate B succeeds
+draw -> append to Hand -> choose from Hand
 ```
 
-## Replay Prefix draw cursor
+The current prover requires:
+
+```text
+options == post.hand
+N = |R|
+prefix = options[:-N]
+suffix = options[-N:]
+
+multiset(prefix) == E
+multiset(suffix) == R
+prefix is an order-preserving subsequence of pre.hand
+```
+
+When all conditions hold:
+
+```text
+drawn_sequence = suffix
+```
+
+For the verified real-game Acrobatics path, draw completes first, drawn cards append to the back of Hand, and the subsequent Hand choice enumerates Hand in that order. Therefore the suffix order is the actual draw order.
+
+### draw-N-choose-M extension
+
+A future mechanic whose PendingChoice contains only drawn cards can reuse Gate A immediately (`E = ∅`). To become eligible for special restoration, it still needs an engine-level Gate-B prover demonstrating that the relevant option sequence preserves actual draw order.
+
+The intended extension is to add another structural/common-primitive order prover, not a card-name allowlist.
+
+## Final transition classification
+
+For each committed transition:
+
+```text
+if an earlier Replay Prefix entry already blocked draw tracking:
+    remain blocked
+
+else if Gate A fails:
+    if DrawPile multiset changed:
+        block later root-relative draw tracking
+    else:
+        record zero draw; cursor unchanged
+
+else if Gate B fails:
+    block later root-relative draw tracking
+
+else:
+    record drawn_sequence at the current root-relative cursor
+    cursor += len(drawn_sequence)
+```
+
+This matters because once an unexplained DrawPile mutation occurs, later draws can no longer be assigned trustworthy offsets relative to the Stable root.
+
+## Replay Prefix representation
 
 `ReplayPrefixEntry.visible_draw_constraints` stores only:
 
@@ -108,57 +212,98 @@ Gate B succeeds
 (root-relative draw offset, observable_card_key)
 ```
 
-No Snapshot InstanceId is stored.
+`ReplayPrefixEntry.visible_draw_tracking_blocked` records that an unexplained DrawPile mutation prevents later root-relative inference.
 
-The cursor advances only for Gate-A+Gate-B-proven sequential draws. A transition whose DrawPile multiset does not change does not advance it. If DrawPile changes but Gate A or Gate B cannot explain the mutation, that entry marks draw tracking blocked; later root-relative offsets are not inferred past that point.
+No Snapshot `InstanceId` is stored in Replay Prefix.
 
-This replaces card-specific zero-draw allowlists with state-based accounting.
+When constraints are consumed, they must form one contiguous prefix:
+
+```text
+0, 1, 2, ..., N-1
+```
+
+The consumer stops at the first blocked entry.
 
 ## Materialization
 
-The hypothesis consumer pins the observed `observable_card_key` values at their proven root-relative offsets and preserves the candidate hypothesis order for every unobserved position.
+The consumer first rewrites only the observed CardIds at the proven offsets in the candidate CardId-level hypothesis. Required CardIds are removed from the candidate order and inserted at the observed positions; every unobserved CardId retains its relative candidate-hypothesis order.
 
-It must not copy the entire real post-step DrawPile as the candidate remainder, because that would freeze unobserved future RNG.
+The resulting effective hypothesis is still CardId-level.
 
-Concrete Snapshot instances are selected only as a local implementation detail. If one observable key maps to multiple Snapshot cards with different hidden gameplay-affecting state (for example different local cost modifier state), public evidence is insufficient and materialization fails closed rather than selecting by InstanceId.
+Concrete Snapshot allocation is then a local restore implementation detail:
 
-If the copies differ only by physical identity/zone, they are replay-equivalent and any canonical concrete allocation is acceptable.
+1. For each pinned `observable_card_key`, find matching cards in the Stable-root Snapshot DrawPile.
+2. Ignore physical identity and zone when deciding replay-equivalence.
+3. Check that all Snapshot cards sharing that observable key also share the same hidden gameplay-relevant Snapshot state.
+4. If hidden gameplay-relevant state differs, fail closed instead of choosing a copy by `InstanceId`.
+5. Otherwise choose concrete copies canonically and allocate the unpinned remainder by the existing canonical CardId allocation.
 
-Current Snapshot cards do not expose enchantment in the same representation as Observation; an observed enchanted key therefore fails closed rather than silently discarding that behavior difference.
+The hidden-state check includes Snapshot data such as local cost modifiers and temporary star costs; it excludes `InstanceId` and `Zone`.
 
-## Boundaries deliberately not used as the safety gate
+The implementation never copies the real post-transition DrawPile as the candidate remainder. Doing so would freeze unobserved future RNG.
 
-The restoration decision does not depend on:
+## What is and is not an ordering dependency
 
-- card-name/CardId allowlists;
-- `ActionContinuation`;
-- discard/select operation labels;
-- source zone or pending origin metadata;
+The safety proof does **not** use the published `pre.drawPile` list order to decide which cards were drawn. Gate A treats pre/post DrawPile as multisets.
+
+Gate B uses only a separately verified ordering contract for the relevant PendingChoice / Hand sequence in order to recover `drawn_sequence`.
+
+The materializer still uses the existing RL `ordered_draw_pile_card_ids` / root-relative position convention when constructing a restore snapshot. Therefore "DrawPile-order independent" here specifically means **public observation DrawPile order is not provenance evidence for Gate A/B**; it does not mean the search materializer has no ordered DrawPile representation.
+
+## Inputs deliberately not used as the restoration safety gate
+
+Gate A/B does not decide safety from:
+
+- card-name or CardId allowlists;
+- `scope == ActionContinuation`;
+- `choiceOperation == discard` or other operation labels;
+- `sourceZone`;
+- pending origin/source metadata;
+- `triggering_action` card identity/type;
 - `rng_id`;
-- public or internal physical card identity;
+- public `cardInstanceId`, HMAC tokens, or draw ordinals;
+- `CardInstanceSnapshot.InstanceId`;
 - raw draw history;
-- public DrawPile ordering.
+- the published DrawPile list order.
 
-Those values may remain useful for diagnostics, but they do not determine whether special restoration is safe.
+These values may remain useful for diagnostics, but they are not proof premises.
+
+## Current implemented scope
+
+Implemented today:
+
+- generic Gate A for observable DrawPile -> PendingChoice transfer;
+- Hand-append Gate B used by the verified Acrobatics engine path;
+- root-relative cursor tracking with blocking after unexplained DrawPile mutation;
+- observable-state materialization with hidden-state ambiguity rejection.
+
+Not implemented speculatively:
+
+- a Gate-B prover for draw-N-choose-M;
+- tutor/reveal/arbitrary DrawPile selection as sequential draw;
+- recovery across reshuffle or any other unexplained DrawPile mutation;
+- replay-only public card identity/provenance.
 
 ## Regression coverage
 
-`Combat/tests/test_replay_prefix_visible_draw_pinning.py` covers:
+`Combat/tests/test_replay_prefix_visible_draw_pinning.py` covers the hosted contract for:
 
 - mixed-Hand Acrobatics through generic Gate A + Hand-append Gate B;
-- no card allowlist / choice-semantic safety gate;
-- draw-N-choose-M-shaped Gate A and the Gate-B extension point;
-- DrawPile publication order independence;
+- absence of card allowlist / choice-semantic safety gates;
+- draw-N-choose-M-shaped Gate A and the Gate-B extension boundary;
+- public DrawPile-order independence of Gate A;
 - zero-draw transitions;
 - blocking after an unexplained DrawPile mutation;
 - contiguous root-relative prefix consumption;
 - same-CardId cards with different observable state;
 - fail-closed hidden gameplay-state ambiguity.
 
-`API/tests/test_acrobatics_exact_instance_replay_pinning.py` retains the paired real-Emulator filename for continuity, but now asserts observable-state constraints rather than exact physical InstanceId constraints.
+`API/tests/test_acrobatics_exact_instance_replay_pinning.py` retains its historical filename for continuity, but now validates observable-state constraints rather than exact physical-instance constraints. It is a real-Emulator paired regression and is not part of the repo-local required hosted gate.
+
+The required `rl-hosted-contract` runs compile checks plus the hosted protocol/contract tests including `Combat/tests/test_replay_prefix_visible_draw_pinning.py`.
 
 ## Cross-repo responsibility
 
-- STS2_Emulator #25: preserve sufficient public gameplay state and verified sequential-draw option ordering; no replay-only identity protocol.
-- STS2_RL #64: own Gate A, Gate B, Replay Prefix cursor accounting, and observed-prefix materialization.
-- STS2_Training #72: remain provenance-agnostic and make replay faults visible instead of silently dropping branches.
+- **STS2_Emulator #25:** expose sufficient normal gameplay state and preserve verified sequential-draw option ordering for supported engine paths; do not add a replay-only identity protocol.
+- **STS2_RL #64:** own Gate A, Gate B, Replay Prefix cursor/block accounting, and observed-prefix materialization.
+- **STS2_Training #72:** remain replay-provenance agnostic and surface replay branch faults for label safety.
