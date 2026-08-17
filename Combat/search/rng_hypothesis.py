@@ -352,9 +352,7 @@ def _card_identity_key(card: CardInstanceSnapshot) -> str:
 def _pinned_prefix_visible_draw_constraints(
     decision_context: DecisionContext,
 ) -> tuple[tuple[int, str, str], ...]:
-    """Return verified offset-aware exact-instance constraints for a Stable root."""
-    if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
-        return ()
+    """Return verified constraints, rejecting any present-but-invalid evidence."""
     constraints = tuple(
         constraint
         for entry in decision_context.replay_prefix
@@ -362,19 +360,42 @@ def _pinned_prefix_visible_draw_constraints(
     )
     if not constraints:
         return ()
+    if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
+        raise ValueError("visible draw constraints require a Stable root snapshot")
 
     root_cards = list(decision_context.root_snapshot.Player.DrawPile)
     by_instance = {str(card.InstanceId): str(card.CardId) for card in root_cards}
     if len(by_instance) != len(root_cards):
-        return ()
+        raise ValueError(
+            "root snapshot DrawPile contains duplicate CardInstanceSnapshot.InstanceId values"
+        )
+
     offsets = [offset for offset, _card_id, _instance_id in constraints]
     instance_ids = [instance_id for _offset, _card_id, instance_id in constraints]
-    if len(set(offsets)) != len(offsets) or len(set(instance_ids)) != len(instance_ids):
-        return ()
-    if any(offset < 0 or offset >= len(root_cards) for offset in offsets):
-        return ()
-    if any(by_instance.get(instance_id) != card_id for _offset, card_id, instance_id in constraints):
-        return ()
+    if len(set(offsets)) != len(offsets):
+        raise ValueError("visible draw constraints contain duplicate root-relative offsets")
+    if len(set(instance_ids)) != len(instance_ids):
+        raise ValueError("visible draw constraints reuse a Snapshot instance at multiple offsets")
+    invalid_offsets = [
+        offset for offset in offsets if offset < 0 or offset >= len(root_cards)
+    ]
+    if invalid_offsets:
+        raise ValueError(
+            "visible draw constraints contain offsets outside the Stable root DrawPile: "
+            f"{invalid_offsets!r}"
+        )
+    for _offset, card_id, instance_id in constraints:
+        root_card_id = by_instance.get(instance_id)
+        if root_card_id is None:
+            raise ValueError(
+                f"visible draw constraint Snapshot instance {instance_id!r} is absent "
+                "from the Stable root DrawPile"
+            )
+        if root_card_id != card_id:
+            raise ValueError(
+                f"visible draw constraint Snapshot instance {instance_id!r} has "
+                f"CardId={root_card_id!r}, not claimed CardId={card_id!r}"
+            )
     return tuple(sorted(constraints))
 
 
@@ -388,7 +409,13 @@ def _reorder_hypothesis_for_visible_draw_constraints(
     for offset, card_id, _instance_id in constraints:
         if offset < 0 or offset >= len(ordered) or ordered[offset] is not None:
             raise ValueError("invalid or duplicate visible draw offset")
-        remaining.remove(card_id)
+        try:
+            remaining.remove(card_id)
+        except ValueError as exc:
+            raise ValueError(
+                f"visible draw constraint requires CardId {card_id!r} that is absent "
+                "from this hypothesis multiset"
+            ) from exc
         ordered[offset] = card_id
     tail = iter(remaining)
     resolved = tuple(next(tail) if card_id is None else card_id for card_id in ordered)
@@ -513,7 +540,8 @@ def apply_hypothesis_to_context(
     instance pins come only from mechanically-audited visible Replay Prefix transitions
     whose positions are proven relative to the Stable root. They constrain concrete
     allocation in the derived snapshot but are never added to ``SearchHypothesisId`` or
-    exposed as hidden future order.
+    exposed as hidden future order. Present-but-invalid constraints reject the hypothesis
+    rather than silently restoring the old unpinned behavior.
     """
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         raise TypeError("Genesis hypotheses must use derive_combat_start_replay_roots()")
@@ -521,16 +549,9 @@ def apply_hypothesis_to_context(
     constraints = _pinned_prefix_visible_draw_constraints(decision_context)
     effective_hypothesis = hypothesis
     if constraints:
-        try:
-            effective_hypothesis = _reorder_hypothesis_for_visible_draw_constraints(
-                hypothesis, constraints
-            )
-        except ValueError:
-            # A future/stale caller may provide constraints whose CardId multiset no longer
-            # exists in this hypothesis. Falling back to the previous unpinned behavior is
-            # safer than crashing or partially applying an unverifiable exact-instance set.
-            constraints = ()
-            effective_hypothesis = hypothesis
+        effective_hypothesis = _reorder_hypothesis_for_visible_draw_constraints(
+            hypothesis, constraints
+        )
 
     context = dataclasses.replace(
         decision_context,
