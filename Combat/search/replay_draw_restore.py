@@ -37,12 +37,17 @@ class VisibleDrawTransitionEvidence:
     tracking_error: Optional[str] = None
 
 
-def _enchantment_key(value: object) -> Optional[tuple]:
+def _enchantment_key(value: object) -> tuple[bool, Optional[tuple]]:
     if value is None:
-        return None
+        return True, None
     if not isinstance(value, dict):
-        return None
-    return (value.get("id"), value.get("amount"), value.get("status"))
+        return False, None
+    key = (value.get("id"), value.get("amount"), value.get("status"))
+    try:
+        hash(key)
+    except TypeError:
+        return False, None
+    return True, key
 
 
 def observable_card_key_from_public(card: object) -> Optional[ObservableCardKey]:
@@ -58,14 +63,26 @@ def observable_card_key_from_public(card: object) -> Optional[ObservableCardKey]
     rarity = card.get("rarity")
     cost = card.get("cost")
     target_type = card.get("targetType")
+    upgraded = card.get("upgraded", False)
     upgrade_level = card.get("upgradeLevel", 0)
+    tinker_type = card.get("tinkerTimeType")
+    tinker_rider = card.get("tinkerTimeRider")
+    enchantment_ok, enchantment = _enchantment_key(card.get("enchantment"))
     if not isinstance(card_id, str) or not card_id:
         return None
     if not isinstance(card_type, str) or not isinstance(rarity, str) or not isinstance(target_type, str):
         return None
     if isinstance(cost, bool) or not isinstance(cost, int):
         return None
+    if not isinstance(upgraded, bool):
+        return None
     if isinstance(upgrade_level, bool) or not isinstance(upgrade_level, int):
+        return None
+    if tinker_type is not None and not isinstance(tinker_type, str):
+        return None
+    if tinker_rider is not None and not isinstance(tinker_rider, str):
+        return None
+    if not enchantment_ok:
         return None
     return (
         card_id,
@@ -73,11 +90,11 @@ def observable_card_key_from_public(card: object) -> Optional[ObservableCardKey]
         rarity,
         cost,
         target_type,
-        bool(card.get("upgraded", False)),
+        upgraded,
         upgrade_level,
-        card.get("tinkerTimeType"),
-        card.get("tinkerTimeRider"),
-        _enchantment_key(card.get("enchantment")),
+        tinker_type,
+        tinker_rider,
+        enchantment,
     )
 
 
@@ -208,19 +225,15 @@ def _visible_hand_draw_sequence(
 
 def visible_draw_transition_evidence_from_committed_transition(
     post_state: object,
-    root_snapshot: object,
     replay_prefix: list[object],
     *,
     pre_battle_state: object,
 ) -> VisibleDrawTransitionEvidence:
     """Return constraints for the supported public DrawPile -> Hand transition shape.
 
-    ``root_snapshot`` remains only for call-site compatibility and is deliberately not
-    consulted. Snapshot/public DrawPile list order, PendingChoice ordering, RNG state,
-    raw draw history, and physical card identity are not proof inputs.
+    Snapshot/public DrawPile list order, PendingChoice ordering, RNG state, raw draw
+    history, and physical card identity are not proof inputs.
     """
-    del root_snapshot
-
     if any(
         bool(getattr(entry, "visible_draw_tracking_blocked", False))
         for entry in replay_prefix
