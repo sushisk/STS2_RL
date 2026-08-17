@@ -31,6 +31,12 @@ from combat_state_snapshot import (
     canonical_json,
 )
 from search.decision_context import CombatStartReplayRoot, DecisionContext
+from search.replay_draw_restore import (
+    ObservableCardKey,
+    card_id_from_observable_key,
+    observable_card_key_from_snapshot,
+    snapshot_card_replay_internal_key,
+)
 
 HYPOTHESIS_SLOT_PREFIX = "rng-hyp:v1:"
 
@@ -349,38 +355,127 @@ def _card_identity_key(card: CardInstanceSnapshot) -> str:
     return canonical_json(dataclasses.asdict(card), exclude_volatile=False)
 
 
+def _pinned_prefix_visible_draw_constraints(
+    decision_context: DecisionContext,
+) -> tuple[tuple[int, ObservableCardKey], ...]:
+    constraints: list[tuple[int, ObservableCardKey]] = []
+    for entry in decision_context.replay_prefix:
+        constraints.extend(entry.visible_draw_constraints)
+        if entry.visible_draw_tracking_blocked:
+            break
+
+    constraints_tuple = tuple(constraints)
+    if [offset for offset, _key in constraints_tuple] != list(range(len(constraints_tuple))):
+        raise ValueError(
+            "visible draw constraints must form one ordered contiguous prefix from Stable-root offset 0"
+        )
+    return constraints_tuple
+
+
+def _reorder_hypothesis_for_visible_draw_constraints(
+    hypothesis: SearchHypothesisId,
+    constraints: tuple[tuple[int, ObservableCardKey], ...],
+) -> SearchHypothesisId:
+    remaining = list(hypothesis.ordered_draw_pile_card_ids)
+    pinned: list[str] = []
+    for offset, key in constraints:
+        if offset != len(pinned):
+            raise ValueError("visible draw constraints must be a contiguous prefix")
+        card_id = card_id_from_observable_key(key)
+        try:
+            remaining.remove(card_id)
+        except ValueError as exc:
+            raise ValueError(
+                f"visible draw constraint requires CardId {card_id!r} absent from the hypothesis"
+            ) from exc
+        pinned.append(card_id)
+    return dataclasses.replace(
+        hypothesis,
+        ordered_draw_pile_card_ids=tuple(pinned + remaining),
+    )
+
+
 def _draw_pile_instances_for_hypothesis(
     root_snapshot: CombatStateSnapshot,
     ordered_card_ids: tuple[str, ...],
+    pinned_observable_keys: tuple[tuple[int, ObservableCardKey], ...] = (),
 ) -> list[dict]:
-    by_card_id: dict[str, deque[CardInstanceSnapshot]] = {}
-    for card in sorted(root_snapshot.Player.DrawPile, key=_card_identity_key):
-        by_card_id.setdefault(str(card.CardId), deque()).append(card)
-
+    root_cards = list(root_snapshot.Player.DrawPile)
     requested = Counter(ordered_card_ids)
-    available = Counter({card_id: len(cards) for card_id, cards in by_card_id.items()})
+    available = Counter(str(card.CardId) for card in root_cards)
     if requested != available:
         raise ValueError(
             "hypothesis DrawPile multiset does not match root snapshot Player.DrawPile multiset: "
             f"requested={dict(sorted(requested.items()))}, available={dict(sorted(available.items()))}"
         )
 
-    return [dataclasses.asdict(by_card_id[card_id].popleft()) for card_id in ordered_card_ids]
+    offsets = [offset for offset, _key in pinned_observable_keys]
+    if offsets != list(range(len(offsets))):
+        raise ValueError("pinned draw constraints must be an ordered contiguous prefix")
+
+    pinned_keys = tuple(key for _offset, key in pinned_observable_keys)
+    for key, count in Counter(pinned_keys).items():
+        matches = [card for card in root_cards if observable_card_key_from_snapshot(card) == key]
+        if len(matches) < count:
+            raise ValueError(
+                "pinned observable card state is absent from the root DrawPile in the required count"
+            )
+        if len({snapshot_card_replay_internal_key(card) for card in matches}) != 1:
+            raise ValueError(
+                "pinned observable card state maps to multiple hidden gameplay states; "
+                "public evidence is insufficient for safe replay materialization"
+            )
+
+    used_instance_ids: set[str] = set()
+    pinned_cards: list[CardInstanceSnapshot] = []
+    for offset, key in pinned_observable_keys:
+        expected_card_id = ordered_card_ids[offset]
+        if card_id_from_observable_key(key) != expected_card_id:
+            raise ValueError(
+                f"pinned observable card has CardId={card_id_from_observable_key(key)!r}, "
+                f"but hypothesis position {offset} requires {expected_card_id!r}"
+            )
+        matches = sorted(
+            (
+                card
+                for card in root_cards
+                if str(card.InstanceId) not in used_instance_ids
+                and observable_card_key_from_snapshot(card) == key
+            ),
+            key=_card_identity_key,
+        )
+        if not matches:
+            raise ValueError("pinned observable card state was exhausted during concrete allocation")
+        chosen = matches[0]
+        pinned_cards.append(chosen)
+        used_instance_ids.add(str(chosen.InstanceId))
+
+    by_card_id: dict[str, deque[CardInstanceSnapshot]] = {}
+    for card in sorted(
+        (card for card in root_cards if str(card.InstanceId) not in used_instance_ids),
+        key=_card_identity_key,
+    ):
+        by_card_id.setdefault(str(card.CardId), deque()).append(card)
+
+    tail_cards: list[CardInstanceSnapshot] = []
+    for card_id in ordered_card_ids[len(pinned_cards) :]:
+        cards = by_card_id.get(card_id)
+        if not cards:
+            raise ValueError(
+                f"hypothesis concrete-card allocation exhausted CardId {card_id!r} after observable-state pinning"
+            )
+        tail_cards.append(cards.popleft())
+
+    return [dataclasses.asdict(card) for card in pinned_cards + tail_cards]
 
 
 def derive_substituted_snapshot(
     root_snapshot: CombatStateSnapshot,
     hypothesis: SearchHypothesisId,
+    *,
+    pinned_draw_card_keys: tuple[tuple[int, ObservableCardKey], ...] = (),
 ) -> CombatStateSnapshot:
-    """Return a Method-B derived snapshot for one hypothesis.
-
-    Scope decision: this substitutes only ``Rng.RunRng["Shuffle"]`` plus
-    ``Player.DrawPile``. The Shuffle stream is the contract's dedicated draw/reshuffle
-    RNG purpose. Other Run/Player/Monster streams are left untouched because widening
-    the substitution would mix unrelated mechanics into a DrawPile Belief hypothesis.
-    The legacy single-int ``ShuffleRngSeed`` scenario field is deliberately not used;
-    its relationship to ``RunRng["Shuffle"]`` remains an open Emulator contract question.
-    """
+    """Return a Method-B derived snapshot with optional observed-draw state pins."""
     payload = _snapshot_plain_dict(root_snapshot)
     run_rng = payload["Rng"]["RunRng"]
     if "Shuffle" not in run_rng:
@@ -389,6 +484,7 @@ def derive_substituted_snapshot(
     payload["Player"]["DrawPile"] = _draw_pile_instances_for_hypothesis(
         root_snapshot,
         hypothesis.ordered_draw_pile_card_ids,
+        pinned_observable_keys=pinned_draw_card_keys,
     )
     return CombatStateSnapshot.from_dict(payload)
 
@@ -428,17 +524,29 @@ def apply_hypothesis_to_context(
     decision_context: DecisionContext,
     hypothesis: SearchHypothesisId,
 ) -> DecisionContext:
-    """Low-level primitive shared by Search Coordinator's full-grid expansion
-    (`search_coordinator._hypothesis_work_items_with_coverage`) and Training API's
-    single-Hypothesis path (`API.combat_rng_mapping.build_single_hypothesis_work_item`):
-    substitute `decision_context.root_snapshot` with the Method-B derived root for
-    `hypothesis` (Combat-Start Pending vs ordinary Snapshot, dispatched by
-    `root_snapshot`'s type), then stamp the Phase-2 `search_hypothesis_id` slot via
-    `with_search_hypothesis`. Both callers keep their own, differing higher-level policy
-    (multi-Hypothesis grid expansion vs one requested Hypothesis) - only this two-step
-    derive+replace dance is shared.
+    """Apply a CardId-level belief plus only the already-observed draw prefix.
+
+    The hypothesis remains CardId-level. Replay constraints pin observable
+    replay-equivalent card state at proven root-relative offsets; physical InstanceId is
+    never part of the proof. Hidden gameplay-state ambiguity rejects materialization
+    rather than guessing a concrete copy.
     """
     if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
         raise TypeError("Genesis hypotheses must use derive_combat_start_replay_roots()")
-    context = dataclasses.replace(decision_context, root_snapshot=derive_substituted_snapshot(decision_context.root_snapshot, hypothesis))
-    return with_search_hypothesis(context, hypothesis)
+
+    constraints = _pinned_prefix_visible_draw_constraints(decision_context)
+    effective_hypothesis = hypothesis
+    if constraints:
+        effective_hypothesis = _reorder_hypothesis_for_visible_draw_constraints(
+            hypothesis, constraints
+        )
+
+    context = dataclasses.replace(
+        decision_context,
+        root_snapshot=derive_substituted_snapshot(
+            decision_context.root_snapshot,
+            effective_hypothesis,
+            pinned_draw_card_keys=constraints,
+        ),
+    )
+    return with_search_hypothesis(context, effective_hypothesis)

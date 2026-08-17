@@ -86,6 +86,7 @@ from search.decision_context import (
     boundary_of_battle_state,
     start_new_replay_prefix_from_stable,
 )
+from search.replay_draw_restore import visible_draw_transition_evidence_from_committed_transition
 
 if TYPE_CHECKING:
     from combat_state_snapshot import CombatStateSnapshot
@@ -458,11 +459,27 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
             target_index=planned_step.target_index,
             target_enemy_index=planned_step.target_enemy_index,
         )
+        draw_evidence = (
+            visible_draw_transition_evidence_from_committed_transition(
+                next_result,
+                loop_state.replay_prefix,
+                pre_battle_state=current_result,
+            )
+            if loop_state.held_stable_snapshot is not None
+            else None
+        )
         entry = ReplayPrefixEntry(
             semantic_action=planned_step.semantic_action,
             expected_signature=observed_signature,
             target_index=planned_step.target_index,
             target_enemy_index=planned_step.target_enemy_index,
+            visible_draw_constraints=draw_evidence.constraints if draw_evidence is not None else (),
+            visible_draw_tracking_blocked=(
+                draw_evidence.blocks_later_pinning if draw_evidence is not None else False
+            ),
+            visible_draw_tracking_error=(
+                draw_evidence.tracking_error if draw_evidence is not None else None
+            ),
         )
         loop_state.replay_prefix = append_replay_prefix_entry(loop_state.replay_prefix, entry)
         loop_state.planned_sequence = loop_state.planned_sequence[1:]

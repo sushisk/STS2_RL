@@ -47,6 +47,7 @@ from search.decision_context import (
     build_decision_context_from_held_stable,
     start_new_replay_prefix_from_stable,
 )
+from search.replay_draw_restore import visible_draw_transition_evidence_from_committed_transition
 
 from API.combat_rng_mapping import build_single_hypothesis_work_item
 from API.dto import (
@@ -284,8 +285,9 @@ class CombatInstance:
         index = view.resolve_action_id(action_id)
         chosen = view.legal_actions_raw[index]
         target_index, target_enemy_index = _target_params(chosen)
+        pre_state = self._root_state
         try:
-            next_state = self._session.step(self._root_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True)
+            next_state = self._session.step(pre_state, chosen, target_index=target_index, target_enemy_index=target_enemy_index, stop_at_pending=True)
         except Exception as exc:
             return {"status": STATUS_FAULTED, "error": str(exc), "fault_kind": FAULT_EMULATOR_ERROR}
         # The live session has already irreversibly advanced at this point (Step
@@ -309,11 +311,22 @@ class CombatInstance:
                 self._held_stable_snapshot = self._session.capture_snapshot()
                 self._replay_prefix = start_new_replay_prefix_from_stable()
             elif boundary == BOUNDARY_PENDING:
+                if self._held_stable_snapshot is None:
+                    raise RuntimeError("Pending replay prefix requires a Held Stable Snapshot")
+                semantic_action = _semantic_action_for(chosen)
+                draw_evidence = visible_draw_transition_evidence_from_committed_transition(
+                    next_state,
+                    self._replay_prefix,
+                    pre_battle_state=pre_state,
+                )
                 entry = ReplayPrefixEntry(
-                    semantic_action=_semantic_action_for(chosen),
+                    semantic_action=semantic_action,
                     expected_signature=observed_signature,
                     target_index=target_index,
                     target_enemy_index=target_enemy_index,
+                    visible_draw_constraints=draw_evidence.constraints,
+                    visible_draw_tracking_blocked=draw_evidence.blocks_later_pinning,
+                    visible_draw_tracking_error=draw_evidence.tracking_error,
                 )
                 self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
         except Exception as exc:

@@ -28,6 +28,7 @@ from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Optional
 
 from battle_emulator import BattleState, is_action_continuation_pending_choice, pending_choice_metadata
+from search.replay_draw_restore import VisibleDrawConstraints
 
 if TYPE_CHECKING:
     from combat_state_snapshot import CombatStateSnapshot
@@ -321,16 +322,15 @@ class DecisionSignature:
 
 @dataclass(frozen=True)
 class ReplayPrefixEntry:
-    """One Transition Record: (Semantic Action, Observed Post-Step Signature) - the
-    atomic unit BOTH Replay Prefix and Plan Path accumulate (DC_DEF/NOTE_PLAN_PATH).
-    `target_index`/`target_enemy_index` travel alongside the SemanticAction because
-    `LiveCombatSession.step()` takes them as separate parameters from the resolved
-    action itself."""
+    """One committed replay step plus any proven root-relative draw prefix."""
 
     semantic_action: SemanticAction
     expected_signature: DecisionSignature
     target_index: "Optional[int]" = None
     target_enemy_index: "Optional[int]" = None
+    visible_draw_constraints: VisibleDrawConstraints = ()
+    visible_draw_tracking_blocked: bool = False
+    visible_draw_tracking_error: "Optional[str]" = None
 
 
 @dataclass
