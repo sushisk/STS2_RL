@@ -1,4 +1,4 @@
-"""Infer already-observed draw order for replay-prefix reconstruction."""
+"""Infer already-observed draw order from public replay state."""
 from __future__ import annotations
 
 import dataclasses
@@ -207,7 +207,6 @@ def observable_transfer_evidence(
 
     persistent = Counter()
     for zone in _PUBLIC_NON_DRAW_ZONES:
-        # Only published zones are eligible evidence. Absence is neutral, not proof.
         if zone not in pre_engine or zone not in post_engine:
             continue
         pre_zone = _keys_from_public_cards(pre_engine.get(zone))
@@ -258,13 +257,11 @@ def _distinct_draw_sequences_from_options(
             if sequence not in results and len(results) < limit:
                 results.append(sequence)
 
-        # This option occurrence belongs to E.
         for tail in visit(index + 1, remaining):
             add(tail)
             if len(results) >= limit:
                 return tuple(results)
 
-        # This option occurrence belongs to R.
         key = options[index]
         slot = slots.get(key)
         if slot is not None and remaining[slot] > 0:
@@ -279,35 +276,6 @@ def _distinct_draw_sequences_from_options(
     return visit(0, initial)
 
 
-def _stable_root_draw_slice(
-    root_snapshot: object,
-    cursor: int,
-    count: int,
-) -> Optional[tuple[ObservableCardKey, ...]]:
-    """Independent order sentinel from Held Stable Snapshot, never a fallback source."""
-    player = getattr(root_snapshot, "Player", None)
-    draw_pile = getattr(player, "DrawPile", None)
-    if draw_pile is None:
-        return None
-    cards = list(draw_pile or ())
-    if cursor < 0 or count <= 0 or cursor + count > len(cards):
-        return None
-    return tuple(
-        observable_card_key_from_snapshot(card)
-        for card in cards[cursor : cursor + count]
-    )
-
-
-def _order_validation_projection(key: ObservableCardKey) -> tuple:
-    # Snapshot currently lacks enchantment. Compare every mutually-representable field;
-    # full materialization still rejects an enchantment representation mismatch.
-    return key[:-1]
-
-
-def _card_ids(sequence: tuple[ObservableCardKey, ...]) -> list[str]:
-    return [card_id_from_observable_key(key) for key in sequence]
-
-
 def visible_draw_transition_evidence_from_committed_transition(
     post_state: object,
     root_snapshot: object,
@@ -315,22 +283,23 @@ def visible_draw_transition_evidence_from_committed_transition(
     *,
     pre_battle_state: object,
 ) -> VisibleDrawTransitionEvidence:
-    """Return generic Gate-A+B-proven root-relative draw constraints.
+    """Return Gate-A+B-proven constraints using public state only.
 
-    Gate B derives order from PendingChoice options after removing ``E``. The inferred
-    order is independently checked against Held Stable Snapshot at the current root-
-    relative cursor. Snapshot order is never used as a fallback derivation when the two
-    disagree.
+    ``root_snapshot`` is retained temporarily for call-site compatibility but is
+    deliberately ignored. Gate B treats the unique draw-origin subsequence of ordered
+    ``pendingChoice.options`` as sequential draw order under the Emulator publication
+    contract. Snapshot DrawPile order, RNG state, raw draw history, and physical card
+    identity are not consulted as proof or validation inputs.
     """
+    del root_snapshot
+
     if any(
         bool(getattr(entry, "visible_draw_tracking_blocked", False))
         for entry in replay_prefix
     ):
         return VisibleDrawTransitionEvidence(
             blocks_later_pinning=True,
-            tracking_error=(
-                "draw tracking was already blocked by an earlier Replay Prefix transition"
-            ),
+            tracking_error="draw tracking was already blocked by an earlier Replay Prefix transition",
         )
 
     transfer = observable_transfer_evidence(pre_battle_state, post_state)
@@ -360,37 +329,9 @@ def visible_draw_transition_evidence_from_committed_transition(
         len(getattr(entry, "visible_draw_constraints", ()) or ())
         for entry in replay_prefix
     )
-    expected = _stable_root_draw_slice(root_snapshot, cursor, len(sequence))
-    if expected is None:
-        return VisibleDrawTransitionEvidence(
-            blocks_later_pinning=True,
-            tracking_error=(
-                "Gate B could not validate option-derived draw order against Held "
-                f"Stable Snapshot offsets {cursor}..{cursor + len(sequence) - 1}"
-            ),
-        )
-
-    inferred_projection = tuple(
-        _order_validation_projection(key) for key in sequence
-    )
-    stable_projection = tuple(
-        _order_validation_projection(key) for key in expected
-    )
-    if inferred_projection != stable_projection:
-        return VisibleDrawTransitionEvidence(
-            blocks_later_pinning=True,
-            tracking_error=(
-                "Gate B option-order contract rejected: option-derived draw order "
-                f"{_card_ids(sequence)!r} disagrees with Held Stable Snapshot order "
-                f"{_card_ids(expected)!r} at root offsets "
-                f"{cursor}..{cursor + len(sequence) - 1}"
-            ),
-        )
-
     return VisibleDrawTransitionEvidence(
         constraints=tuple(
             (cursor + offset, key)
             for offset, key in enumerate(sequence)
         )
     )
-
