@@ -42,12 +42,19 @@ def _enchantment_key(value: object) -> tuple[bool, Optional[tuple]]:
         return True, None
     if not isinstance(value, dict):
         return False, None
-    key = (value.get("id"), value.get("amount"), value.get("status"))
-    try:
-        hash(key)
-    except TypeError:
+    if set(value) != {"id", "amount", "status"}:
         return False, None
-    return True, key
+
+    enchantment_id = value["id"]
+    amount = value["amount"]
+    status = value["status"]
+    if not isinstance(enchantment_id, str) or not enchantment_id:
+        return False, None
+    if isinstance(amount, bool) or not isinstance(amount, int):
+        return False, None
+    if not isinstance(status, str) or not status:
+        return False, None
+    return True, (enchantment_id, amount, status)
 
 
 def observable_card_key_from_public(card: object) -> Optional[ObservableCardKey]:
