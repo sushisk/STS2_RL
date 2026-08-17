@@ -61,7 +61,7 @@ RL can fail closed on public evidence: unexplained DrawPile multiset mutation, a
 
 If an Emulator producer consistently publishes draw-origin options in an order different from actual sequential draw order and no public state exposes that difference, RL cannot prove the producer wrong without hidden information. That premise therefore belongs to Emulator contract/regression testing.
 
-As an optional additional hardening step, Replay Prefix execution can re-derive Gate A/B from replayed public pre/post states and compare it with the recorded constraints. That would detect public-card-state divergence that `candidate_semantic_keys` alone may miss, while still avoiding any hidden order oracle.
+A future hardening step may re-derive Gate A/B during Replay Prefix execution from replayed public pre/post states and compare it with the recorded constraints. That would detect public-card-state divergence that `candidate_semantic_keys` alone may miss, while still avoiding any hidden order oracle.
 
 ## Replay Prefix invariant
 
