@@ -74,6 +74,8 @@ RL can fail closed on evidence that is visible in the public state:
 
 However, if an Emulator producer **consistently** publishes draw-origin options in an order different from actual sequential draw order, and no public state exposes that difference, RL cannot prove the producer wrong without consulting hidden information. That premise must therefore be validated as an Emulator contract, not by RL runtime provenance logic.
 
+A useful additional hardening step is to re-derive Gate A/B during Replay Prefix execution from the replayed public pre/post states and compare it with the recorded constraints. That would detect public-card-state divergence that `candidate_semantic_keys` alone may miss. It still would not—and should not—act as a hidden draw-order oracle.
+
 ## Replay Prefix invariant
 
 Each entry may carry:
