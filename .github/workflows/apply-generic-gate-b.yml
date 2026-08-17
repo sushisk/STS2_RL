@@ -1,0 +1,32 @@
+name: apply-generic-gate-b
+on:
+  push:
+    branches: [replay-prefix-draw-pinning-design]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay-prefix-draw-pinning-design
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply patch
+        run: python .github/apply_generic_gate_b.py
+      - name: Validate
+        run: |
+          python -m pip install pytest
+          python -m compileall -q API Combat/search
+          python -m pytest -q Combat/tests/test_replay_prefix_visible_draw_pinning.py
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/apply_generic_gate_b.py .github/workflows/apply-generic-gate-b.yml
+          git add Combat/search/replay_draw_restore.py Combat/search/decision_context.py Combat/search/main_loop.py API/instance_combat.py Combat/tests/test_replay_prefix_visible_draw_pinning.py
+          git commit -m 'Generalize replay draw order proof'
+          git push origin HEAD:replay-prefix-draw-pinning-design
