@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 _COMBAT_DIR = Path(__file__).resolve().parents[1]
 if str(_COMBAT_DIR) not in sys.path:
     sys.path.insert(0, str(_COMBAT_DIR))
@@ -18,6 +20,7 @@ from search.rng_hypothesis import (
     _draw_pile_instances_for_hypothesis,
     _pinned_prefix_visible_draw_constraints,
     _reorder_hypothesis_for_visible_draw_constraints,
+    apply_hypothesis_to_context,
 )
 
 
@@ -66,6 +69,17 @@ def _entry(*constraints, action_type: str = "card"):
     return SimpleNamespace(
         semantic_action=SemanticAction(action_type, f"0:{action_type.upper()}_SOURCE"),
         visible_draw_constraints=tuple(constraints),
+    )
+
+
+def _context(root, *entries):
+    return decision_context.DecisionContext(
+        root_snapshot=root,
+        replay_prefix=list(entries),
+        plan_path=[],
+        current_decision_result=SimpleNamespace(),
+        current_context_signature=SimpleNamespace(),
+        search_hypothesis_id=None,
     )
 
 
@@ -183,6 +197,22 @@ def test_hypothesis_reorder_and_allocator_pin_internal_snapshot_instances_at_off
 def test_consumer_rejects_duplicate_offsets_or_mismatched_snapshot_instance() -> None:
     root = _root([_card("i-a", "A"), _card("i-b", "B")])
     duplicate = SimpleNamespace(root_snapshot=root, replay_prefix=[_entry((0, "A", "i-a"), (0, "B", "i-b"))])
-    assert _pinned_prefix_visible_draw_constraints(duplicate) == ()
+    with pytest.raises(ValueError, match="duplicate root-relative offsets"):
+        _pinned_prefix_visible_draw_constraints(duplicate)
+
     mismatch = SimpleNamespace(root_snapshot=root, replay_prefix=[_entry((0, "A", "i-b"))])
-    assert _pinned_prefix_visible_draw_constraints(mismatch) == ()
+    with pytest.raises(ValueError, match="not claimed CardId"):
+        _pinned_prefix_visible_draw_constraints(mismatch)
+
+
+def test_apply_hypothesis_rejects_constraint_that_conflicts_with_hypothesis() -> None:
+    root = _root([_card("i-a", "A"), _card("i-b", "B")])
+    context = _context(root, _entry((0, "A", "i-a")))
+    hypothesis = SearchHypothesisId(
+        rng=_rng(),
+        ordered_draw_pile_card_ids=("B", "B"),
+        hypothesis_index=3,
+    )
+
+    with pytest.raises(ValueError, match="absent from this hypothesis multiset"):
+        apply_hypothesis_to_context(context, hypothesis)
