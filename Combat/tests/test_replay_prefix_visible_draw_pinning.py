@@ -206,6 +206,32 @@ def test_invalid_public_card_field_types_fail_closed() -> None:
     assert result.blocks_later_pinning is True
 
 
+def test_valid_public_enchantment_shape_is_preserved() -> None:
+    card = _public("A")
+    card["enchantment"] = {"id": "BURNING", "amount": 2, "status": "Active"}
+
+    key = observable_card_key_from_public(card)
+    assert key is not None
+    assert key[-1] == ("BURNING", 2, "Active")
+
+
+@pytest.mark.parametrize(
+    "enchantment",
+    [
+        {},
+        {"foo": "bar"},
+        {"id": "BURNING", "amount": 1, "status": "Active", "extra": 1},
+        {"id": 1, "amount": 1, "status": "Active"},
+        {"id": "BURNING", "amount": True, "status": "Active"},
+        {"id": "BURNING", "amount": 1, "status": None},
+    ],
+)
+def test_malformed_public_enchantment_shapes_fail_closed(enchantment: object) -> None:
+    card = _public("A")
+    card["enchantment"] = enchantment
+    assert observable_card_key_from_public(card) is None
+
+
 def test_unaccounted_drawpile_mutation_blocks_later_root_relative_pinning() -> None:
     played = _public("PLAYED")
     a, b = _public("A"), _public("B")
