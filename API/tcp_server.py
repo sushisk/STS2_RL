@@ -259,6 +259,7 @@ async def run_rl_server(
     max_message_bytes: int = DEFAULT_MAX_MESSAGE_BYTES,
     combat_worker_pool_backend: str | None = None,
     combat_worker_count: int | None = None,
+    combat_request_timeout_s: float | None = None,
     combat_max_branches: int | None = None,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[1]
@@ -276,6 +277,7 @@ async def run_rl_server(
         instance_factory_kwargs=_combat_instance_factory_kwargs(
             worker_pool_backend=combat_worker_pool_backend,
             worker_count=combat_worker_count,
+            request_timeout_s=combat_request_timeout_s,
             max_branches=combat_max_branches,
         )
     )
@@ -315,6 +317,7 @@ def _combat_instance_factory_kwargs(
     *,
     worker_pool_backend: str | None = None,
     worker_count: int | None = None,
+    request_timeout_s: float | None = None,
     max_branches: int | None = None,
 ) -> dict | None:
     backend = worker_pool_backend or os.environ.get("STS2_COMBAT_BRANCH_POOL")
@@ -332,6 +335,10 @@ def _combat_instance_factory_kwargs(
         combat_kwargs["worker_pool_backend"] = backend
     if resolved_worker_count is not None:
         combat_kwargs["worker_count"] = resolved_worker_count
+    if request_timeout_s is not None:
+        if request_timeout_s <= 0:
+            raise ValueError("combat_request_timeout_s must be positive")
+        combat_kwargs["request_timeout_s"] = request_timeout_s
     if resolved_max_branches is not None:
         combat_kwargs["max_branches"] = resolved_max_branches
     if not combat_kwargs:
@@ -356,6 +363,12 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Combat branch worker_count; defaults to STS2_COMBAT_ALC_WORKERS for ALC or backend default.",
     )
     parser.add_argument(
+        "--combat-request-timeout-s",
+        type=float,
+        default=None,
+        help="Combat branch worker request timeout in seconds; defaults to 60.",
+    )
+    parser.add_argument(
         "--combat-max-branches",
         type=int,
         default=None,
@@ -374,6 +387,7 @@ def main(argv: list[str] | None = None) -> None:
                 max_message_bytes=args.max_message_bytes,
                 combat_worker_pool_backend=args.combat_worker_pool_backend,
                 combat_worker_count=args.combat_worker_count,
+                combat_request_timeout_s=args.combat_request_timeout_s,
                 combat_max_branches=args.combat_max_branches,
             )
         )
