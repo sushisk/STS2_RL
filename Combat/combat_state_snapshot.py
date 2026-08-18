@@ -119,6 +119,7 @@ class CardInstanceSnapshot:
     TargetType: str
     IsUpgraded: bool
     UpgradeLevel: int
+    LocalKeywords: "list[str] | None" = None
     LocalCostModifiers: list = field(default_factory=list)  # list[LocalCostModifierSnapshot]
     TemporaryStarCosts: list = field(default_factory=list)  # list[TemporaryStarCostSnapshot]
     Zone: "str | None" = None
@@ -131,6 +132,7 @@ class CardInstanceSnapshot:
         return cls(
             InstanceId=d["InstanceId"], CardId=d["CardId"], Type=d["Type"], Rarity=d["Rarity"], Cost=int(d["Cost"]),
             TargetType=d["TargetType"], IsUpgraded=bool(d["IsUpgraded"]), UpgradeLevel=int(d["UpgradeLevel"]),
+            LocalKeywords=list(d["LocalKeywords"]) if d.get("LocalKeywords") is not None else None,
             LocalCostModifiers=[LocalCostModifierSnapshot.from_dict(m) for m in d.get("LocalCostModifiers", [])],
             TemporaryStarCosts=[TemporaryStarCostSnapshot.from_dict(c) for c in d.get("TemporaryStarCosts", [])],
             Zone=d.get("Zone"), TinkerTimeType=d.get("TinkerTimeType"), TinkerTimeRider=d.get("TinkerTimeRider"),
