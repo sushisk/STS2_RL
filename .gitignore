@@ -111,3 +111,5 @@ Combat/profile_output_optimized.txt
 # ignored by default. ---
 !Combat/evaluation/online_eval/*.jsonl
 !Combat/evaluation/online_eval/*.json
+
+.codex
