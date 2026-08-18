@@ -28,7 +28,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-KNOWN_SCHEMA_VERSIONS = frozenset({"phase2a.1", "phase2b.1", "phase2b.2", "phase3c.3", "phase3c.4", "phase3c.5"})
+KNOWN_SCHEMA_VERSIONS = frozenset({"phase3c.6"})
 COMPLETENESS_VALUES = frozenset({"complete", "partial_known_gaps", "unsupported_state", "capture_failed"})
 CAPTURE_BOUNDARY_VALUES = frozenset({"normal_player_decision", "published_choice", "published_target", "terminal"})
 RESTORE_ELIGIBLE_CAPTURE_BOUNDARY_VALUES = frozenset({"normal_player_decision"})
@@ -110,6 +110,18 @@ class TemporaryStarCostSnapshot:
 
 
 @dataclass
+class EnchantmentSnapshot:
+    Id: str
+    Amount: int
+    Props: "dict | None" = None
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "EnchantmentSnapshot":
+        _require(d, ["Id", "Amount", "Props"], "EnchantmentSnapshot")
+        return cls(Id=str(d["Id"]), Amount=int(d["Amount"]), Props=d["Props"])
+
+
+@dataclass
 class CardInstanceSnapshot:
     InstanceId: str
     CardId: str
@@ -123,19 +135,33 @@ class CardInstanceSnapshot:
     LocalCostModifiers: list = field(default_factory=list)  # list[LocalCostModifierSnapshot]
     TemporaryStarCosts: list = field(default_factory=list)  # list[TemporaryStarCostSnapshot]
     Zone: "str | None" = None
+    PileIndex: "int | None" = None
+    HasBeenRemovedFromState: bool = False
+    Enchantment: "EnchantmentSnapshot | None" = None
+    EnchantmentStatus: "str | None" = None
     TinkerTimeType: "str | None" = None
     TinkerTimeRider: "str | None" = None
 
     @classmethod
     def from_dict(cls, d: dict) -> "CardInstanceSnapshot":
-        _require(d, ["InstanceId", "CardId", "Type", "Rarity", "Cost", "TargetType", "IsUpgraded", "UpgradeLevel"], "CardInstanceSnapshot")
+        _require(
+            d,
+            ["InstanceId", "CardId", "Zone", "PileIndex", "HasBeenRemovedFromState", "Type", "Rarity", "Cost",
+             "LocalCostModifiers", "TemporaryStarCosts", "TargetType", "IsUpgraded", "UpgradeLevel",
+             "TinkerTimeType", "TinkerTimeRider"],
+            "CardInstanceSnapshot",
+        )
         return cls(
             InstanceId=d["InstanceId"], CardId=d["CardId"], Type=d["Type"], Rarity=d["Rarity"], Cost=int(d["Cost"]),
             TargetType=d["TargetType"], IsUpgraded=bool(d["IsUpgraded"]), UpgradeLevel=int(d["UpgradeLevel"]),
             LocalKeywords=list(d["LocalKeywords"]) if d.get("LocalKeywords") is not None else None,
-            LocalCostModifiers=[LocalCostModifierSnapshot.from_dict(m) for m in d.get("LocalCostModifiers", [])],
-            TemporaryStarCosts=[TemporaryStarCostSnapshot.from_dict(c) for c in d.get("TemporaryStarCosts", [])],
-            Zone=d.get("Zone"), TinkerTimeType=d.get("TinkerTimeType"), TinkerTimeRider=d.get("TinkerTimeRider"),
+            LocalCostModifiers=[LocalCostModifierSnapshot.from_dict(m) for m in d["LocalCostModifiers"]],
+            TemporaryStarCosts=[TemporaryStarCostSnapshot.from_dict(c) for c in d["TemporaryStarCosts"]],
+            Zone=d["Zone"], PileIndex=int(d["PileIndex"]) if d["PileIndex"] is not None else None,
+            HasBeenRemovedFromState=bool(d["HasBeenRemovedFromState"]),
+            Enchantment=EnchantmentSnapshot.from_dict(d["Enchantment"]) if d.get("Enchantment") else None,
+            EnchantmentStatus=d.get("EnchantmentStatus"),
+            TinkerTimeType=d["TinkerTimeType"], TinkerTimeRider=d["TinkerTimeRider"],
         )
 
 
@@ -176,7 +202,7 @@ class PowerSnapshot:
     HasUnsupportedInternalData: bool
     ApplierInstanceId: "str | None" = None
     TargetInstanceId: "str | None" = None
-    AssociatedCard: "CardInstanceSnapshot | None" = None
+    AssociatedCardInstanceId: "str | None" = None
     # Phase 2B additions (schemaVersion "phase2b.1"): generic-reflection serialization of
     # the 17 `serialize_required` Power `_internalData` classes (contract v0.4 Power
     # classification table). `None` for the 16 `safe_to_recompute` classes (intentionally
@@ -188,14 +214,14 @@ class PowerSnapshot:
 
     @classmethod
     def from_dict(cls, d: dict) -> "PowerSnapshot":
-        _require(d, ["InstanceId", "PowerId", "Amount", "AmountOnTurnStart", "SkipNextDurationTick", "StackType", "OwnerInstanceId", "HasUnsupportedInternalData"], "PowerSnapshot")
+        _require(d, ["InstanceId", "PowerId", "Amount", "AmountOnTurnStart", "SkipNextDurationTick", "StackType", "OwnerInstanceId", "AssociatedCardInstanceId", "HasUnsupportedInternalData"], "PowerSnapshot")
         return cls(
             InstanceId=d["InstanceId"], PowerId=d["PowerId"], Amount=int(d["Amount"]),
             AmountOnTurnStart=int(d["AmountOnTurnStart"]), SkipNextDurationTick=bool(d["SkipNextDurationTick"]),
             StackType=d["StackType"], OwnerInstanceId=d["OwnerInstanceId"],
             HasUnsupportedInternalData=bool(d["HasUnsupportedInternalData"]),
             ApplierInstanceId=d.get("ApplierInstanceId"), TargetInstanceId=d.get("TargetInstanceId"),
-            AssociatedCard=CardInstanceSnapshot.from_dict(d["AssociatedCard"]) if d.get("AssociatedCard") else None,
+            AssociatedCardInstanceId=d.get("AssociatedCardInstanceId"),
             InternalData=d.get("InternalData"), InternalDataSerializerVersion=d.get("InternalDataSerializerVersion"),
         )
 
@@ -309,12 +335,7 @@ class PlayerSnapshot:
     Stars: int
     Gold: int
     OrbSlotCapacity: int
-    Hand: list
-    DrawPile: list
-    DiscardPile: list
-    ExhaustPile: list
-    PlayPile: list
-    Deck: list
+    CardInstances: list
     Relics: list
     Powers: list
     Potions: list
@@ -326,7 +347,7 @@ class PlayerSnapshot:
         _require(
             d,
             ["InstanceId", "CreatureInstanceId", "NetId", "Hp", "MaxHp", "Block", "Energy", "MaxEnergy", "Stars",
-             "Gold", "OrbSlotCapacity", "Hand", "DrawPile", "DiscardPile", "ExhaustPile", "PlayPile", "Deck",
+             "Gold", "OrbSlotCapacity", "CardInstances",
              "Relics", "Powers", "Potions", "Orbs", "Pets"],
             "PlayerSnapshot",
         )
@@ -335,17 +356,23 @@ class PlayerSnapshot:
             Hp=int(d["Hp"]), MaxHp=int(d["MaxHp"]), Block=int(d["Block"]), Energy=int(d["Energy"]),
             MaxEnergy=int(d["MaxEnergy"]), Stars=int(d["Stars"]), Gold=int(d["Gold"]),
             OrbSlotCapacity=int(d["OrbSlotCapacity"]),
-            Hand=[CardInstanceSnapshot.from_dict(c) for c in d["Hand"]],
-            DrawPile=[CardInstanceSnapshot.from_dict(c) for c in d["DrawPile"]],
-            DiscardPile=[CardInstanceSnapshot.from_dict(c) for c in d["DiscardPile"]],
-            ExhaustPile=[CardInstanceSnapshot.from_dict(c) for c in d["ExhaustPile"]],
-            PlayPile=[CardInstanceSnapshot.from_dict(c) for c in d["PlayPile"]],
-            Deck=[CardInstanceSnapshot.from_dict(c) for c in d["Deck"]],
+            CardInstances=[CardInstanceSnapshot.from_dict(c) for c in d["CardInstances"]],
             Relics=[RelicSnapshot.from_dict(r) for r in d["Relics"]],
             Powers=[PowerSnapshot.from_dict(p) for p in d["Powers"]],
             Potions=[PotionSnapshot.from_dict(p) if p is not None else None for p in d["Potions"]],
             Orbs=[OrbSnapshot.from_dict(o) for o in d["Orbs"]],
             Pets=[CreatureSnapshot.from_dict(c) for c in d["Pets"]],
+        )
+
+    def cards_in_zone(self, zone: str) -> list[CardInstanceSnapshot]:
+        """Return only current members of ``zone`` in their engine pile order.
+
+        Pile-external cards (including history-only removed instances) deliberately do
+        not appear in any Zone projection and must never leak into DrawPile beliefs.
+        """
+        return sorted(
+            (card for card in self.CardInstances if card.Zone == zone),
+            key=lambda card: card.PileIndex if card.PileIndex is not None else -1,
         )
 
 
@@ -638,15 +665,12 @@ def _collect_known_instance_ids(snapshot: "CombatStateSnapshot") -> "dict[str, l
     p = snapshot.Player
     _add(p.InstanceId, "Player.InstanceId")
     _add(p.CreatureInstanceId, "Player.CreatureInstanceId")
-    for pile_name in ("Hand", "DrawPile", "DiscardPile", "ExhaustPile", "PlayPile", "Deck"):
-        for i, c in enumerate(getattr(p, pile_name)):
-            _add(c.InstanceId, f"Player.{pile_name}[{i}].InstanceId")
+    for i, card in enumerate(p.CardInstances):
+        _add(card.InstanceId, f"Player.CardInstances[{i}].InstanceId")
     for i, r in enumerate(p.Relics):
         _add(r.InstanceId, f"Player.Relics[{i}].InstanceId")
     for i, pw in enumerate(p.Powers):
         _add(pw.InstanceId, f"Player.Powers[{i}].InstanceId")
-        if pw.AssociatedCard is not None:
-            _add(pw.AssociatedCard.InstanceId, f"Player.Powers[{i}].AssociatedCard.InstanceId")
     for i, pot in enumerate(p.Potions):
         if pot is not None:
             _add(pot.InstanceId, f"Player.Potions[{i}].InstanceId")
@@ -656,14 +680,10 @@ def _collect_known_instance_ids(snapshot: "CombatStateSnapshot") -> "dict[str, l
         _add(pet.InstanceId, f"Player.Pets[{pi}].InstanceId")
         for wi, pw in enumerate(pet.Powers):
             _add(pw.InstanceId, f"Player.Pets[{pi}].Powers[{wi}].InstanceId")
-            if pw.AssociatedCard is not None:
-                _add(pw.AssociatedCard.InstanceId, f"Player.Pets[{pi}].Powers[{wi}].AssociatedCard.InstanceId")
     for ei, e in enumerate(snapshot.Enemies):
         _add(e.InstanceId, f"Enemies[{ei}].InstanceId")
         for pi, pw in enumerate(e.Powers):
             _add(pw.InstanceId, f"Enemies[{ei}].Powers[{pi}].InstanceId")
-            if pw.AssociatedCard is not None:
-                _add(pw.AssociatedCard.InstanceId, f"Enemies[{ei}].Powers[{pi}].AssociatedCard.InstanceId")
     return ids
 
 
@@ -727,17 +747,23 @@ def validate_snapshot_references(snapshot: "CombatStateSnapshot") -> SnapshotRef
             dangling.append(DanglingReference(field_path=path, referenced_instance_id=instance_id, entry_type=None, cause="capture_bug"))
 
     for i, pw in enumerate(snapshot.Player.Powers):
+        _check_direct(pw.OwnerInstanceId, f"Player.Powers[{i}].OwnerInstanceId")
         _check_direct(pw.ApplierInstanceId, f"Player.Powers[{i}].ApplierInstanceId")
         _check_direct(pw.TargetInstanceId, f"Player.Powers[{i}].TargetInstanceId")
+        _check_direct(pw.AssociatedCardInstanceId, f"Player.Powers[{i}].AssociatedCardInstanceId")
     for pi, pet in enumerate(snapshot.Player.Pets):
         _check_direct(pet.OwnerInstanceId, f"Player.Pets[{pi}].OwnerInstanceId")
         for wi, pw in enumerate(pet.Powers):
+            _check_direct(pw.OwnerInstanceId, f"Player.Pets[{pi}].Powers[{wi}].OwnerInstanceId")
             _check_direct(pw.ApplierInstanceId, f"Player.Pets[{pi}].Powers[{wi}].ApplierInstanceId")
             _check_direct(pw.TargetInstanceId, f"Player.Pets[{pi}].Powers[{wi}].TargetInstanceId")
+            _check_direct(pw.AssociatedCardInstanceId, f"Player.Pets[{pi}].Powers[{wi}].AssociatedCardInstanceId")
     for ei, e in enumerate(snapshot.Enemies):
         for pi, pw in enumerate(e.Powers):
+            _check_direct(pw.OwnerInstanceId, f"Enemies[{ei}].Powers[{pi}].OwnerInstanceId")
             _check_direct(pw.ApplierInstanceId, f"Enemies[{ei}].Powers[{pi}].ApplierInstanceId")
             _check_direct(pw.TargetInstanceId, f"Enemies[{ei}].Powers[{pi}].TargetInstanceId")
+            _check_direct(pw.AssociatedCardInstanceId, f"Enemies[{ei}].Powers[{pi}].AssociatedCardInstanceId")
     for i, mr in enumerate(snapshot.Rng.MonsterRng):
         _check_direct(mr.OwnerInstanceId, f"Rng.MonsterRng[{i}].OwnerInstanceId")
     for i, pr in enumerate(snapshot.Rng.PlayerRng):

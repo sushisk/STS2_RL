@@ -170,8 +170,10 @@ def _generated_card_id(entry: Any, visible_instance_ids: dict[str, str]) -> Opti
 
 def compute_public_multiset(snapshot: CombatStateSnapshot) -> dict[str, int]:
     """Compute the public card-id multiset for the current hidden DrawPile by reading
-    Player.DrawPile directly - composition only, the actual order is discarded here."""
-    counts = Counter(str(card.CardId) for card in snapshot.Player.DrawPile)
+    only ``CardInstances`` whose Zone is ``draw_pile`` - composition only; the actual
+    order is discarded here. Pile-external history-only cards are intentionally excluded.
+    """
+    counts = Counter(str(card.CardId) for card in snapshot.Player.cards_in_zone("draw_pile"))
     return dict(sorted(counts.items()))
 
 
@@ -400,12 +402,12 @@ def _draw_pile_instances_for_hypothesis(
     ordered_card_ids: tuple[str, ...],
     pinned_observable_keys: tuple[tuple[int, ObservableCardKey], ...] = (),
 ) -> list[dict]:
-    root_cards = list(root_snapshot.Player.DrawPile)
+    root_cards = root_snapshot.Player.cards_in_zone("draw_pile")
     requested = Counter(ordered_card_ids)
     available = Counter(str(card.CardId) for card in root_cards)
     if requested != available:
         raise ValueError(
-            "hypothesis DrawPile multiset does not match root snapshot Player.DrawPile multiset: "
+            "hypothesis DrawPile multiset does not match root snapshot Player.CardInstances(draw_pile) multiset: "
             f"requested={dict(sorted(requested.items()))}, available={dict(sorted(available.items()))}"
         )
 
@@ -481,11 +483,19 @@ def derive_substituted_snapshot(
     if "Shuffle" not in run_rng:
         raise ValueError('root_snapshot.Rng.RunRng is missing required "Shuffle" stream')
     run_rng["Shuffle"] = _rng_to_dict(hypothesis.rng)
-    payload["Player"]["DrawPile"] = _draw_pile_instances_for_hypothesis(
+    ordered_draw_pile = _draw_pile_instances_for_hypothesis(
         root_snapshot,
         hypothesis.ordered_draw_pile_card_ids,
         pinned_observable_keys=pinned_draw_card_keys,
     )
+    replacement_by_id = {
+        str(card["InstanceId"]): {**card, "Zone": "draw_pile", "PileIndex": index}
+        for index, card in enumerate(ordered_draw_pile)
+    }
+    payload["Player"]["CardInstances"] = [
+        replacement_by_id.get(str(card["InstanceId"]), card)
+        for card in payload["Player"]["CardInstances"]
+    ]
     return CombatStateSnapshot.from_dict(payload)
 
 

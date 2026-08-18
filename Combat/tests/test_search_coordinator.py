@@ -444,7 +444,7 @@ def test_hypothesis_entries_include_public_multiset_coverage_diagnostics():
     assert diagnostics
     assert all(item["is_complete"] is True for item in diagnostics)
     assert all(item["uncertain_sources"] == [] for item in diagnostics)
-    assert all("Player.DrawPile" in item["reason"] for item in diagnostics)
+    assert all("Player.CardInstances" in item["reason"] for item in diagnostics)
 
 
 def test_passthrough_path_returns_expected_signature_from_real_worker_result():

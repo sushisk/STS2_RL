@@ -187,15 +187,15 @@ def test_reference_validator_synthetic_duplicate():
 
     d = _load_sample_dict()
     mutated = copy.deepcopy(d)
-    # Force a duplicate: make the first card in Hand carry the Player's own InstanceId.
-    if mutated["Player"]["Hand"]:
-        mutated["Player"]["Hand"][0]["InstanceId"] = mutated["Player"]["InstanceId"]
+    # Force a duplicate: make the first canonical card carry the Player's own InstanceId.
+    if mutated["Player"]["CardInstances"]:
+        mutated["Player"]["CardInstances"][0]["InstanceId"] = mutated["Player"]["InstanceId"]
         snap = CombatStateSnapshot.from_dict(mutated)
         report = css.validate_snapshot_references(snap)
         check(mutated["Player"]["InstanceId"] in report.duplicate_instance_ids,
-              "synthetic duplicate InstanceId (Hand[0] == Player.InstanceId) is detected")
+              "synthetic duplicate InstanceId (CardInstances[0] == Player.InstanceId) is detected")
     else:
-        check(False, "synthetic duplicate test requires a non-empty Hand in the sample snapshot")
+        check(False, "synthetic duplicate test requires a non-empty CardInstances array in the sample snapshot")
 
 
 def test_reference_validator_synthetic_dangling():
