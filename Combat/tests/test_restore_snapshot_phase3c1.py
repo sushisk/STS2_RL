@@ -32,9 +32,10 @@ _TEST_MODULES = (
 )
 
 # Old monolith case names that were intentionally renamed while splitting by concern.
-# The aliases point at the closest coverage-equivalent split test; bare names that did
-# not change are resolved automatically by _resolve_case().
-_LEGACY_CASE_ALIASES = {
+# Most aliases resolve to one coverage-equivalent split test. The old consolidated
+# rejection-category case expands to the individual typed rejection tests that replaced
+# it, preserving the old one-process invocation semantics for that manual --case.
+_LEGACY_CASE_ALIASES: dict[str, str | tuple[str, ...]] = {
     "test_get_restore_capabilities_hashes":
         "test_snapshot_wire_contract:test_restore_capabilities_match_snapshot_wire_contract",
     "test_object_restore_round_trip":
@@ -73,8 +74,17 @@ _LEGACY_CASE_ALIASES = {
         "test_snapshot_wire_contract:test_power_internal_data_classifications_round_trip_via_wire",
     "test_full_rng_stream_equality_across_round_trip":
         "test_snapshot_restore:test_full_rng_streams_survive_round_trip",
-    "test_rejection_categories_via_public_python_api":
-        "test_snapshot_restore_rejections:test_rejection_categories_cover_typed_dtos",
+    "test_rejection_categories_via_public_python_api": (
+        "test_snapshot_restore_rejections:test_unknown_combat_history_entry_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_dangling_combat_history_reference_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_pending_choice_capture_is_rejected_without_raw_wire_fixture",
+        "test_snapshot_restore_rejections:test_unsupported_capture_boundary_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_action_continuation_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_reference_integrity_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_rng_owner_reference_integrity_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_unsupported_internal_data_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_unknown_schema_version_rejected_from_typed_dto",
+    ),
     "test_rejected_restore_preserves_session_and_step_still_works":
         "test_snapshot_restore_rejections:test_rejected_restore_preserves_live_session_and_step_still_works",
     "test_post_teardown_failure_faults_and_all_recovery_paths_clear":
@@ -93,17 +103,19 @@ def _discover_tests() -> dict[str, tuple[str, str]]:
     return tests
 
 
-def _resolve_case(case_name: str, tests: dict[str, tuple[str, str]]) -> str:
+def _resolve_case(case_name: str, tests: dict[str, tuple[str, str]]) -> tuple[str, ...]:
     if case_name in tests:
-        return case_name
+        return (case_name,)
 
     legacy_target = _LEGACY_CASE_ALIASES.get(case_name)
     if legacy_target is not None:
-        if legacy_target not in tests:
+        targets = (legacy_target,) if isinstance(legacy_target, str) else legacy_target
+        missing = [target for target in targets if target not in tests]
+        if missing:
             raise ValueError(
-                f"legacy snapshot test alias {case_name!r} points at missing {legacy_target!r}"
+                f"legacy snapshot test alias {case_name!r} points at missing {missing!r}"
             )
-        return legacy_target
+        return targets
 
     bare_matches = [
         qualified
@@ -111,7 +123,7 @@ def _resolve_case(case_name: str, tests: dict[str, tuple[str, str]]) -> str:
         if test_name == case_name
     ]
     if len(bare_matches) == 1:
-        return bare_matches[0]
+        return (bare_matches[0],)
     if len(bare_matches) > 1:
         raise ValueError(
             f"ambiguous snapshot test case {case_name!r}; use one of {sorted(bare_matches)!r}"
@@ -121,9 +133,9 @@ def _resolve_case(case_name: str, tests: dict[str, tuple[str, str]]) -> str:
 
 def _run_case(case_name: str) -> int:
     tests = _discover_tests()
-    qualified = _resolve_case(case_name, tests)
-    module_name, test_name = tests[qualified]
-    getattr(importlib.import_module(module_name), test_name)()
+    for qualified in _resolve_case(case_name, tests):
+        module_name, test_name = tests[qualified]
+        getattr(importlib.import_module(module_name), test_name)()
     return 0
 
 
