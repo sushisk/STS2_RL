@@ -28,7 +28,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-KNOWN_SCHEMA_VERSIONS = frozenset({"phase3c.6"})
+KNOWN_SCHEMA_VERSIONS = frozenset({"phase3c.8"})
 COMPLETENESS_VALUES = frozenset({"complete", "partial_known_gaps", "unsupported_state", "capture_failed"})
 CAPTURE_BOUNDARY_VALUES = frozenset({"normal_player_decision", "published_choice", "published_target", "terminal"})
 RESTORE_ELIGIBLE_CAPTURE_BOUNDARY_VALUES = frozenset({"normal_player_decision"})
