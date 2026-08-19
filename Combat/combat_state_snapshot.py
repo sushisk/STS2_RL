@@ -308,6 +308,23 @@ class OrbSnapshot:
 
 
 @dataclass
+class TransientMoveSnapshot:
+    """Lossless RL transport for Emulator-owned runtime-created move semantics."""
+    Kind: str
+    FollowUpStateId: str
+    BehaviorId: str
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "TransientMoveSnapshot":
+        _require(d, ["Kind", "FollowUpStateId", "BehaviorId"], "TransientMoveSnapshot")
+        return cls(
+            Kind=str(d["Kind"]),
+            FollowUpStateId=str(d["FollowUpStateId"]),
+            BehaviorId=str(d["BehaviorId"]),
+        )
+
+
+@dataclass
 class EnemySnapshot:
     InstanceId: str
     Index: int
@@ -323,6 +340,7 @@ class EnemySnapshot:
     SlotName: "str | None" = None
     Intent: "dict | None" = None
     FollowUpStateId: "str | None" = None
+    TransientMove: "TransientMoveSnapshot | None" = None
 
     @classmethod
     def from_dict(cls, d: dict) -> "EnemySnapshot":
@@ -332,6 +350,7 @@ class EnemySnapshot:
             Block=int(d["Block"]), IsAlive=bool(d["IsAlive"]), Powers=[PowerSnapshot.from_dict(p) for p in d["Powers"]],
             StateLog=list(d["StateLog"]), CombatId=d.get("CombatId"), MonsterId=d.get("MonsterId"),
             SlotName=d.get("SlotName"), Intent=d.get("Intent"), FollowUpStateId=d.get("FollowUpStateId"),
+            TransientMove=TransientMoveSnapshot.from_dict(d["TransientMove"]) if d.get("TransientMove") is not None else None,
         )
 
 
