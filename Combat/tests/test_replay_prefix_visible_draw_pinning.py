@@ -81,7 +81,16 @@ def _state(*, hand, draw, options=None, **pending_overrides) -> BattleState:
 
 
 def _root(draw_cards):
-    return SimpleNamespace(Player=SimpleNamespace(DrawPile=list(draw_cards)))
+    cards = list(draw_cards)
+    for index, card in enumerate(cards):
+        card.Zone = "draw_pile"
+        card.PileIndex = index
+    player = SimpleNamespace(CardInstances=cards)
+    player.cards_in_zone = lambda zone: sorted(
+        (card for card in player.CardInstances if card.Zone == zone),
+        key=lambda card: card.PileIndex if card.PileIndex is not None else -1,
+    )
+    return SimpleNamespace(Player=player)
 
 
 def _entry(*constraints, blocked: bool = False, error: str | None = None):
