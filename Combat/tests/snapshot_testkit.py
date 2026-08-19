@@ -1,9 +1,9 @@
 """Shared helpers for tests that exercise CombatStateSnapshot restore behavior.
 
-Keep wire-shape knowledge here.  Restore-behavior tests should construct and inspect
-``combat_state_snapshot`` DTOs, then cross the Emulator JSON boundary through
-``to_emulator_payload``/``to_emulator_json`` instead of maintaining their own field
-renaming/default tables.
+Restore-behavior tests should construct and inspect ``combat_state_snapshot`` DTOs,
+then cross the Emulator JSON boundary through ``to_emulator_payload`` /
+``to_emulator_json``.  Field names and defaults come from the production DTOs; this
+module deliberately does not maintain a second wire-schema table.
 
 Schema-parser tests (raw dict -> DTO) intentionally do not use this module: those tests
 are validating the wire schema itself and should keep their direct raw-dict fixtures.
@@ -26,54 +26,26 @@ from combat_state_snapshot import (
     SnapshotMetadata,
 )
 
-# CardInstanceSnapshot remains a compatibility reader for archived fixtures, while the
-# current Emulator phase3c.8 wire contract requires these fields.  This is the only
-# test-side location allowed to know about that compatibility fill.
-_CARD_WIRE_DEFAULTS: dict[str, Any] = {
-    "DynamicVars": {},
-    "BaseReplayCount": 0,
-    "BaseStarCost": 0,
-    "LastStarsSpent": 0,
-    "ExhaustOnNextPlay": False,
-    "HasSingleTurnRetain": False,
-    "HasSingleTurnSly": False,
-    "Affliction": None,
-    "CloneOfInstanceId": None,
-    "IsDupe": False,
-    "DeckVersionInstanceId": None,
-    "FloorAddedToDeck": None,
-    "SavedProperties": None,
-    "SovereignBladeCurrentDamage": None,
-    "SovereignBladeCurrentRepeats": None,
-    "SovereignBladeCreatedThroughForge": None,
-}
-
 
 def _wire_value(node: Any) -> Any:
     if is_dataclass(node):
         return _wire_value(asdict(node))
     if isinstance(node, dict):
-        result = {
+        return {
             key: _wire_value(value)
             for key, value in node.items()
             if key != "unknown_fields"
         }
-        if "InstanceId" in result and "CardId" in result:
-            for key, value in _CARD_WIRE_DEFAULTS.items():
-                # Copy mutable defaults so one payload cannot mutate another.
-                result.setdefault(key, _wire_value(value))
-        return result
     if isinstance(node, (list, tuple)):
         return [_wire_value(value) for value in node]
     return node
 
 
 def to_emulator_payload(snapshot: CombatStateSnapshot) -> dict[str, Any]:
-    """Serialize a typed snapshot to the current Emulator wire payload.
+    """Serialize a typed snapshot using the production DTO field contract.
 
-    The production DTOs already preserve the Emulator's PascalCase field names, so no
-    field-name translation belongs in restore-behavior tests.  The only compatibility
-    adjustment is the archived-CardInstance default fill above.
+    The DTOs preserve the Emulator's PascalCase field names and own all defaults, so
+    test-side serialization only needs to remove Python-only ``unknown_fields`` buckets.
     """
     if not isinstance(snapshot, CombatStateSnapshot):
         raise TypeError(f"expected CombatStateSnapshot, got {type(snapshot).__name__}")
