@@ -7,9 +7,9 @@ and rejection/failure tests. Those responsibilities now live in:
 * ``test_snapshot_restore.py``
 * ``test_snapshot_restore_rejections.py``
 
-This file intentionally contains no tests or schema knowledge. It only preserves the
-old useful execution property: each test case runs in a fresh Python subprocess because
-the Emulator runtime owns process-wide singleton state.
+This file intentionally contains no tests or schema knowledge. It preserves the old
+useful execution property (one fresh Python subprocess per test) and accepts both the
+new qualified case names and the former monolith's bare ``--case test_name`` form.
 """
 
 from __future__ import annotations
@@ -31,6 +31,56 @@ _TEST_MODULES = (
     "test_snapshot_restore_rejections",
 )
 
+# Old monolith case names that were intentionally renamed while splitting by concern.
+# The aliases point at the closest coverage-equivalent split test; bare names that did
+# not change are resolved automatically by _resolve_case().
+_LEGACY_CASE_ALIASES = {
+    "test_get_restore_capabilities_hashes":
+        "test_snapshot_wire_contract:test_restore_capabilities_match_snapshot_wire_contract",
+    "test_object_restore_round_trip":
+        "test_snapshot_restore:test_object_restore_round_trip_uses_typed_snapshot",
+    "test_pet_object_restore_round_trip":
+        "test_snapshot_restore:test_restore_accessors_cover_player_enemies_and_pet",
+    "test_json_restore_round_trip":
+        "test_snapshot_restore:test_json_restore_round_trip_uses_shared_testkit_serializer",
+    "test_legacy_json_example_is_rejected_by_canonical_contract":
+        "test_snapshot_wire_contract:test_legacy_json_example_is_rejected_by_current_wire_contract",
+    "test_validate_restore_snapshot_json_is_pure":
+        "test_snapshot_wire_contract:test_validate_restore_snapshot_json_is_pure_for_valid_and_malformed_wire",
+    "test_invalid_json_restore_preserves_session_and_step_still_works":
+        "test_snapshot_wire_contract:test_invalid_json_restore_preserves_live_session_and_step_still_works",
+    "test_restore_snapshot_json_rejects_invalid_without_prior_validate":
+        "test_snapshot_wire_contract:test_restore_snapshot_json_rejects_malformed_wire_without_prior_validate",
+    "test_python_snapshot_object_restore_round_trip_uses_existing_dto":
+        "test_snapshot_restore:test_object_restore_round_trip_uses_typed_snapshot",
+    "test_object_vs_json_restore_equivalent":
+        "test_snapshot_restore:test_object_and_json_restore_are_equivalent",
+    "test_pet_json_restore_round_trip_matches_object_restore":
+        "test_snapshot_restore:test_restore_accessors_cover_player_enemies_and_pet",
+    "test_canonical_json_round_trip":
+        "test_snapshot_restore:test_canonical_typed_payload_round_trip",
+    "test_pet_canonical_json_round_trip":
+        "test_snapshot_restore:test_restore_accessors_cover_player_enemies_and_pet",
+    "test_combat_history_all_17_entry_types_round_trip_via_json_fixture":
+        "test_snapshot_wire_contract:test_combat_history_all_17_entry_types_round_trip_via_wire_fixture",
+    "test_validate_restore_snapshot_is_pure":
+        "test_snapshot_restore:test_validate_restore_snapshot_is_pure_for_typed_dto",
+    "test_no_power_capture_round_trip":
+        "test_snapshot_restore:test_object_restore_round_trip_uses_typed_snapshot",
+    "test_with_power_capture_round_trip":
+        "test_snapshot_wire_contract:test_basic_player_and_enemy_power_attachment_round_trip_via_wire",
+    "test_power_internal_data_classifications_round_trip_and_reject_via_json_api":
+        "test_snapshot_wire_contract:test_power_internal_data_classifications_round_trip_via_wire",
+    "test_full_rng_stream_equality_across_round_trip":
+        "test_snapshot_restore:test_full_rng_streams_survive_round_trip",
+    "test_rejection_categories_via_public_python_api":
+        "test_snapshot_restore_rejections:test_rejection_categories_cover_typed_dtos",
+    "test_rejected_restore_preserves_session_and_step_still_works":
+        "test_snapshot_restore_rejections:test_rejected_restore_preserves_live_session_and_step_still_works",
+    "test_post_teardown_failure_faults_and_all_recovery_paths_clear":
+        "test_snapshot_restore_rejections:test_post_teardown_failure_faults_session_and_recovery_paths_clear_it",
+}
+
 
 def _discover_tests() -> dict[str, tuple[str, str]]:
     tests: dict[str, tuple[str, str]] = {}
@@ -43,10 +93,35 @@ def _discover_tests() -> dict[str, tuple[str, str]]:
     return tests
 
 
-def _run_case(qualified: str) -> int:
+def _resolve_case(case_name: str, tests: dict[str, tuple[str, str]]) -> str:
+    if case_name in tests:
+        return case_name
+
+    legacy_target = _LEGACY_CASE_ALIASES.get(case_name)
+    if legacy_target is not None:
+        if legacy_target not in tests:
+            raise ValueError(
+                f"legacy snapshot test alias {case_name!r} points at missing {legacy_target!r}"
+            )
+        return legacy_target
+
+    bare_matches = [
+        qualified
+        for qualified, (_, test_name) in tests.items()
+        if test_name == case_name
+    ]
+    if len(bare_matches) == 1:
+        return bare_matches[0]
+    if len(bare_matches) > 1:
+        raise ValueError(
+            f"ambiguous snapshot test case {case_name!r}; use one of {sorted(bare_matches)!r}"
+        )
+    raise ValueError(f"unknown snapshot test case: {case_name}")
+
+
+def _run_case(case_name: str) -> int:
     tests = _discover_tests()
-    if qualified not in tests:
-        raise ValueError(f"unknown snapshot test case: {qualified}")
+    qualified = _resolve_case(case_name, tests)
     module_name, test_name = tests[qualified]
     getattr(importlib.import_module(module_name), test_name)()
     return 0
