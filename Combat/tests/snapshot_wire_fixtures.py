@@ -59,6 +59,7 @@ def model_fixtures() -> dict:
         "VigorPower",
         "PossessStrengthPower",
         "AutomationPower",
+        "DampenPower",
     }
     powers = {}
     for power in ModelDb.AllPowers:
