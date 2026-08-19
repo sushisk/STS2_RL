@@ -119,9 +119,29 @@ def _clr_snapshot_json(snapshot) -> str:
 def _snapshot_dict(snapshot) -> dict:
     payload = asdict(snapshot)
 
+    # The Python DTO intentionally remains a compatibility reader for archived
+    # fixtures.  The Emulator's phase3c.8 wire contract, however, requires all
+    # CardInstance fields.  Fill omitted compatibility fields in this test
+    # serializer so the test exercises canonical round-trip rather than an
+    # obsolete fixture shape.
+    card_defaults = {
+        "DynamicVars": {}, "BaseReplayCount": 0, "BaseStarCost": 0,
+        "LastStarsSpent": 0, "ExhaustOnNextPlay": False,
+        "HasSingleTurnRetain": False, "HasSingleTurnSly": False,
+        "Affliction": None, "CloneOfInstanceId": None, "IsDupe": False,
+        "DeckVersionInstanceId": None, "FloorAddedToDeck": None,
+        "SavedProperties": None, "SovereignBladeCurrentDamage": None,
+        "SovereignBladeCurrentRepeats": None,
+        "SovereignBladeCreatedThroughForge": None,
+    }
+
     def strip(node):
         if isinstance(node, dict):
-            return {k: strip(v) for k, v in node.items() if k != "unknown_fields"}
+            result = {k: strip(v) for k, v in node.items() if k != "unknown_fields"}
+            if "InstanceId" in result and "CardId" in result:
+                for key, value in card_defaults.items():
+                    result.setdefault(key, value)
+            return result
         if isinstance(node, list):
             return [strip(v) for v in node]
         return node
@@ -629,10 +649,10 @@ def _force_restore_failure(session: LiveCombatSession, snapshot):
 def test_get_restore_capabilities_hashes():
     session = LiveCombatSession()
     caps = session.get_restore_capabilities()
-    assert caps.restore_api_version == "phase3c.6", caps
-    assert caps.milestone == "phase3c.6", caps
+    assert caps.restore_api_version == "phase3c.8", caps
+    assert caps.milestone == "phase3c.8", caps
     assert caps.contract_version == "0.6", caps
-    assert caps.snapshot_schema_version == "phase3c.6", caps
+    assert caps.snapshot_schema_version == "phase3c.8", caps
     assert caps.snapshot_schema_sha256 == schema_sha256(), caps
 
     import hashlib
