@@ -1,12 +1,13 @@
 """Restore behavior tests for typed CombatStateSnapshot DTOs.
 
-These tests intentionally stay above the wire-schema layer.  A live capture is parsed by
+These tests intentionally stay above the wire-schema layer. A live capture is parsed by
 ``LiveCombatSession.capture_snapshot()`` into the production DTO family, and any JSON
 restore crosses the test-only boundary through ``snapshot_testkit.to_emulator_json``.
 """
 
 from __future__ import annotations
 
+import copy
 import sys
 from pathlib import Path
 
@@ -53,10 +54,27 @@ def _restorable_capture(session: LiveCombatSession) -> CombatStateSnapshot:
     return snapshot
 
 
+def _normalize_restore_boundary(node):
+    """Remove the one documented gameplay-state gap across Snapshot Restore.
+
+    Enemy Intent is derived state and SnapshotRestorer deliberately does not call the
+    fresh-start move-roll hook. A restored enemy therefore recaptures with UNSET_MOVE.
+    Session identity metadata is excluded separately by ``_gameplay_payload``.
+    """
+    if isinstance(node, dict):
+        normalized = {key: _normalize_restore_boundary(value) for key, value in node.items()}
+        if "MonsterId" in normalized and "Intent" in normalized:
+            normalized["Intent"] = "<excluded: derived enemy intent>"
+        return normalized
+    if isinstance(node, list):
+        return [_normalize_restore_boundary(value) for value in node]
+    return node
+
+
 def _gameplay_payload(snapshot: CombatStateSnapshot) -> dict:
-    """Compare restore-relevant state while ignoring newly-issued runtime metadata."""
+    """Compare restore-relevant state while ignoring runtime-only boundary differences."""
     payload = to_emulator_payload(snapshot)
-    return {
+    gameplay = {
         key: payload[key]
         for key in (
             "Player",
@@ -72,6 +90,7 @@ def _gameplay_payload(snapshot: CombatStateSnapshot) -> dict:
             "PendingChoice",
         )
     }
+    return _normalize_restore_boundary(gameplay)
 
 
 def _logical_strike(state: BattleState) -> tuple[str, str | None, str | None]:
@@ -138,6 +157,18 @@ def test_object_and_json_restore_are_equivalent():
     assert json_restored == object_restored
 
 
+def test_canonical_typed_payload_round_trip():
+    session = LiveCombatSession()
+    session.start_combat(_simple_spec())
+    snapshot = _restorable_capture(session)
+    expected = _gameplay_payload(snapshot)
+
+    session.restore_snapshot_json(to_emulator_json(snapshot))
+    captured = _restorable_capture(session)
+
+    assert _gameplay_payload(captured) == expected
+
+
 def test_restore_accessors_cover_player_enemies_and_pet():
     session = LiveCombatSession()
     session.start_combat(_simple_spec(relics=["BOUND_PHYLACTERY"]))
@@ -163,6 +194,49 @@ def test_restore_accessors_cover_player_enemies_and_pet():
     assert restored_pet.MaxHp == pet.MaxHp
     assert restored_pet.Block == pet.Block
     assert restored_pet.Powers == pet.Powers
+
+
+def test_full_rng_streams_survive_round_trip():
+    session = LiveCombatSession()
+    session.start_combat(_simple_spec())
+    snapshot = _restorable_capture(session)
+    expected_rng = copy.deepcopy(to_emulator_payload(snapshot)["Rng"])
+
+    assert len(expected_rng["RunRng"]) == 12
+    assert expected_rng["PlayerRng"]
+    assert expected_rng["MonsterRng"]
+
+    session.restore_snapshot(snapshot)
+    restored_rng = to_emulator_payload(_restorable_capture(session))["Rng"]
+
+    assert restored_rng == expected_rng
+
+
+def test_validate_restore_snapshot_is_pure_for_typed_dto():
+    session = LiveCombatSession()
+    state = session.start_combat(_simple_spec())
+    frame_before = session._current_frame  # noqa: SLF001
+    legal_before = session.get_legal_actions()
+    snapshot = _restorable_capture(session)
+    invalid = copy.deepcopy(snapshot)
+    invalid.Metadata.ContinuationStepIndex = 1
+
+    results = [session.validate_restore_snapshot(snapshot) for _ in range(3)]
+    assert all(result.eligible for result in results), results
+    assert results[0] == results[1] == results[2]
+
+    invalid_results = [session.validate_restore_snapshot(invalid) for _ in range(3)]
+    assert all(not result.eligible for result in invalid_results), invalid_results
+    assert invalid_results[0] == invalid_results[1] == invalid_results[2]
+    assert any(
+        "action_continuation_present" in code
+        for code in invalid_results[0].rejection_codes
+    )
+
+    assert session._current_frame == frame_before  # noqa: SLF001
+    assert session.get_legal_actions() == legal_before
+    logical = _logical_strike(state)
+    assert session.step(state, _find_logical_action(state, logical), target_enemy_index=0) is not None
 
 
 def test_restore_step_determinism_reselects_fresh_action():
