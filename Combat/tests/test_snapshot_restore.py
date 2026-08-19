@@ -29,7 +29,12 @@ from snapshot_testkit import (  # noqa: E402
 )
 
 
-def _simple_spec(*, relics: list[str] | None = None) -> dict:
+def _simple_spec(
+    *,
+    relics: list[str] | None = None,
+    player_powers: list[dict] | None = None,
+    enemy_powers: list[dict] | None = None,
+) -> dict:
     return {
         "character_id": "IRONCLAD",
         "player_hp": None,
@@ -38,11 +43,17 @@ def _simple_spec(*, relics: list[str] | None = None) -> dict:
         "draw_pile": [],
         "discard_pile": [],
         "exhaust_pile": [],
-        "player_powers": [],
+        "player_powers": list(player_powers or []),
         "relics": list(relics or []),
         "potions": [],
         "seed": 1,
-        "enemies": [{"monster_id": "CALCIFIED_CULTIST", "hp": 48}],
+        "enemies": [
+            {
+                "monster_id": "CALCIFIED_CULTIST",
+                "hp": 48,
+                "powers": list(enemy_powers or []),
+            }
+        ],
     }
 
 
@@ -155,6 +166,28 @@ def test_object_and_json_restore_are_equivalent():
     json_restored = _gameplay_payload(_restorable_capture(session))
 
     assert json_restored == object_restored
+
+
+def test_live_power_capture_round_trip_uses_typed_snapshot():
+    session = LiveCombatSession()
+    session.start_combat(
+        _simple_spec(
+            player_powers=[{"id": "STRENGTH", "amount": 3}],
+            enemy_powers=[{"id": "WEAK", "amount": 2}],
+        )
+    )
+    snapshot = _restorable_capture(session)
+    expected = _gameplay_payload(snapshot)
+
+    assert snapshot.Player.Powers
+    assert snapshot.Enemies[0].Powers
+    assert snapshot.Player.Powers[0].Amount == 3
+    assert snapshot.Enemies[0].Powers[0].Amount == 2
+
+    session.restore_snapshot(snapshot)
+    restored = _restorable_capture(session)
+
+    assert _gameplay_payload(restored) == expected
 
 
 def test_canonical_typed_payload_round_trip():
