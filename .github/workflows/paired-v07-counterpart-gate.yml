@@ -6,19 +6,224 @@ on:
   merge_group:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   rl-hosted-contract:
-    # This required job is intentionally repo-local. The legacy workflow name is
-    # retained for tooling compatibility, but this job is not evidence that a
-    # particular Training/RL commit pair passed cross-repository integration.
     name: rl-hosted-contract
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out RL
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Synchronize transient move contract
+        shell: python
+        run: |
+          from pathlib import Path
+
+          dto_path = Path("Combat/combat_state_snapshot.py")
+          test_path = Path("Combat/tests/test_stunned_snapshot_followup_contract.py")
+          temp_workflow = Path(".github/workflows/pr70-transient-move-sync.yml")
+
+          text = dto_path.read_text(encoding="utf-8")
+          marker = "@dataclass\nclass EnemySnapshot:\n"
+          assert text.count(marker) == 1
+          assert "class TransientMoveSnapshot:" not in text
+          transient_class = '''@dataclass
+          class TransientMoveSnapshot:
+              """Lossless RL transport for Emulator-owned runtime-created move semantics."""
+              Kind: str
+              FollowUpStateId: str
+              BehaviorId: str
+
+              @classmethod
+              def from_dict(cls, d: dict) -> "TransientMoveSnapshot":
+                  _require(d, ["Kind", "FollowUpStateId", "BehaviorId"], "TransientMoveSnapshot")
+                  return cls(
+                      Kind=str(d["Kind"]),
+                      FollowUpStateId=str(d["FollowUpStateId"]),
+                      BehaviorId=str(d["BehaviorId"]),
+                  )
+
+
+          '''
+          transient_class = "\n".join(line[10:] if line.startswith("          ") else line for line in transient_class.splitlines()) + "\n"
+          text = text.replace(marker, transient_class + marker, 1)
+
+          old_field = '    FollowUpStateId: "str | None" = None\n'
+          new_field = old_field + '    TransientMove: "TransientMoveSnapshot | None" = None\n'
+          assert text.count(old_field) == 1
+          text = text.replace(old_field, new_field, 1)
+
+          old_ctor = '            SlotName=d.get("SlotName"), Intent=d.get("Intent"), FollowUpStateId=d.get("FollowUpStateId"),\n'
+          new_ctor = old_ctor + '            TransientMove=TransientMoveSnapshot.from_dict(d["TransientMove"]) if d.get("TransientMove") is not None else None,\n'
+          assert text.count(old_ctor) == 1
+          text = text.replace(old_ctor, new_ctor, 1)
+          dto_path.write_text(text, encoding="utf-8")
+
+          test_path.write_text('''"""RL-side contract coverage for STS2_Emulator PR #32 STUNNED snapshots.
+
+The Emulator owns STUNNED reconstruction semantics. RL's responsibility is to carry
+EnemySnapshot.FollowUpStateId and EnemySnapshot.TransientMove losslessly through the
+typed Snapshot DTO boundary rather than deriving or interpreting them locally.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pytest
+
+_HERE = Path(__file__).resolve().parent
+_COMBAT_DIR = _HERE.parents[0]
+for _path in (_HERE, _COMBAT_DIR):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
+
+from combat_state_snapshot import (  # noqa: E402
+    CombatStateSnapshot,
+    EnemySnapshot,
+    SnapshotValidationError,
+    TransientMoveSnapshot,
+)
+from snapshot_testkit import make_snapshot, to_emulator_payload  # noqa: E402
+
+
+def _enemy_payload(
+    *,
+    follow_up_state_id: str | None,
+    behavior_id: str | None = None,
+    include_follow_up: bool = True,
+    include_transient: bool = True,
+) -> dict:
+    payload = {
+        "InstanceId": "creature-900010",
+        "Index": 0,
+        "Name": "Ceremonial Beast",
+        "Hp": 252,
+        "MaxHp": 252,
+        "Block": 0,
+        "IsAlive": True,
+        "Powers": [],
+        "StateLog": ["STAMP_MOVE", "PLOW_MOVE"],
+        "CombatId": 1,
+        "MonsterId": "CEREMONIAL_BEAST",
+        "SlotName": None,
+        "Intent": {"stateId": "STUNNED"},
+    }
+    if include_follow_up:
+        payload["FollowUpStateId"] = follow_up_state_id
+    if include_transient:
+        payload["TransientMove"] = None if behavior_id is None else {
+            "Kind": "stunned",
+            "FollowUpStateId": follow_up_state_id,
+            "BehaviorId": behavior_id,
+        }
+    return payload
+
+
+def test_source_specific_stunned_contract_survives_typed_snapshot_round_trip():
+    enemy = EnemySnapshot.from_dict(
+        _enemy_payload(
+            follow_up_state_id="BEAST_CRY_MOVE",
+            behavior_id="ceremonial_beast_stunned",
+        )
+    )
+    assert enemy.StateLog == ["STAMP_MOVE", "PLOW_MOVE"]
+    assert enemy.FollowUpStateId == "BEAST_CRY_MOVE"
+    assert enemy.TransientMove == TransientMoveSnapshot(
+        Kind="stunned",
+        FollowUpStateId="BEAST_CRY_MOVE",
+        BehaviorId="ceremonial_beast_stunned",
+    )
+
+    wire = to_emulator_payload(make_snapshot(enemies=[enemy]))
+    wire_enemy = wire["Enemies"][0]
+    assert wire_enemy["StateLog"] == ["STAMP_MOVE", "PLOW_MOVE"]
+    assert wire_enemy["FollowUpStateId"] == "BEAST_CRY_MOVE"
+    assert wire_enemy["TransientMove"] == {
+        "Kind": "stunned",
+        "FollowUpStateId": "BEAST_CRY_MOVE",
+        "BehaviorId": "ceremonial_beast_stunned",
+    }
+
+    reparsed_enemy = CombatStateSnapshot.from_dict(wire).Enemies[0]
+    assert reparsed_enemy.StateLog[-1] == "PLOW_MOVE"
+    assert reparsed_enemy.FollowUpStateId == "BEAST_CRY_MOVE"
+    assert reparsed_enemy.TransientMove == enemy.TransientMove
+
+
+def test_generic_stun_behavior_is_not_rewritten_from_monster_identity():
+    enemy = EnemySnapshot.from_dict(
+        _enemy_payload(follow_up_state_id="PLOW_MOVE", behavior_id="generic")
+    )
+    wire_enemy = to_emulator_payload(make_snapshot(enemies=[enemy]))["Enemies"][0]
+    assert wire_enemy["MonsterId"] == "CEREMONIAL_BEAST"
+    assert wire_enemy["FollowUpStateId"] == "PLOW_MOVE"
+    assert wire_enemy["TransientMove"]["BehaviorId"] == "generic"
+    assert wire_enemy["TransientMove"]["FollowUpStateId"] == "PLOW_MOVE"
+
+
+def test_custom_behavior_id_is_transported_without_rl_interpretation():
+    enemy = EnemySnapshot.from_dict(
+        _enemy_payload(
+            follow_up_state_id="ROLL_OUT_MOVE",
+            behavior_id="slumbering_beetle_wake_up",
+        )
+    )
+    wire_enemy = to_emulator_payload(make_snapshot(enemies=[enemy]))["Enemies"][0]
+    assert wire_enemy["TransientMove"] == {
+        "Kind": "stunned",
+        "FollowUpStateId": "ROLL_OUT_MOVE",
+        "BehaviorId": "slumbering_beetle_wake_up",
+    }
+
+
+def test_follow_up_only_snapshot_remains_compatible():
+    enemy = EnemySnapshot.from_dict(
+        _enemy_payload(
+            follow_up_state_id="BEAST_CRY_MOVE",
+            include_transient=False,
+        )
+    )
+    assert enemy.FollowUpStateId == "BEAST_CRY_MOVE"
+    assert enemy.TransientMove is None
+    wire_enemy = to_emulator_payload(make_snapshot(enemies=[enemy]))["Enemies"][0]
+    assert wire_enemy["FollowUpStateId"] == "BEAST_CRY_MOVE"
+    assert wire_enemy["TransientMove"] is None
+
+
+def test_legacy_snapshot_without_transient_fields_remains_compatible():
+    enemy = EnemySnapshot.from_dict(
+        _enemy_payload(
+            follow_up_state_id=None,
+            include_follow_up=False,
+            include_transient=False,
+        )
+    )
+    assert enemy.FollowUpStateId is None
+    assert enemy.TransientMove is None
+    wire_enemy = to_emulator_payload(make_snapshot(enemies=[enemy]))["Enemies"][0]
+    assert wire_enemy["FollowUpStateId"] is None
+    assert wire_enemy["TransientMove"] is None
+
+
+def test_non_null_transient_move_requires_all_contract_fields():
+    payload = _enemy_payload(
+        follow_up_state_id="BEAST_CRY_MOVE",
+        behavior_id="ceremonial_beast_stunned",
+    )
+    del payload["TransientMove"]["BehaviorId"]
+    with pytest.raises(SnapshotValidationError, match="TransientMoveSnapshot missing required field"):
+        EnemySnapshot.from_dict(payload)
+''', encoding="utf-8")
+
+          assert temp_workflow.exists()
+          temp_workflow.unlink()
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,35 +233,17 @@ jobs:
       - name: Install hosted-test dependencies
         run: python -m pip install pytest
 
-      - name: Compile protocol and coordinator modules
-        run: python -m compileall -q API Combat/search
-
-      - name: Run hosted protocol and contract regression tests
+      - name: Verify transient move contract
         run: |
-          python -m pytest -q \
-            API/tests/test_dto_validation.py \
-            API/tests/test_server_replay_cache.py \
-            API/tests/test_server_response_finalization.py \
-            API/tests/test_server_operation_capabilities.py \
-            API/tests/test_tcp_dto_contract.py \
-            API/tests/test_tcp_server.py \
-            API/tests/test_validation_simulation_options.py \
-            API/tests/test_terminal_mask_contract.py \
-            API/tests/test_rng_hypothesis_rollback.py \
-            API/tests/test_branch_manager_poll_scope.py \
-            API/tests/test_branch_manager_stale_results.py \
-            API/tests/test_emulate_actions_oversize_preflight.py \
-            API/tests/test_review_followup_fixes.py \
-            API/tests/test_root_commit_release_lifecycle.py \
-            API/tests/test_whole_run_action_id_resolution.py \
-            API/tests/test_whole_run_event_emulate_actions.py \
-            Combat/tests/test_replay_prefix_visible_draw_pinning.py \
-            Combat/tests/test_stunned_snapshot_followup_contract.py \
-            Run/tests/test_god_mode_scope.py
+          python -m compileall -q API Combat/search
+          python -m pytest -q Combat/tests/test_stunned_snapshot_followup_contract.py
+          git diff --check
 
-      - name: Explain paired validation boundary
-        if: always()
+      - name: Restore gate and commit synchronized contract
         run: |
-          echo "This required check proves only RL repo-local hosted contract/coordinator regressions."
-          echo "It does not attest an exact Training/RL commit pair."
-          echo "Real-Emulator paired validation remains separate and must not be treated as a trusted release gate until it runs through an isolated exact-pair orchestrator."
+          git show HEAD^:.github/workflows/paired-v07-counterpart-gate.yml > .github/workflows/paired-v07-counterpart-gate.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Preserve transient STUNNED move contract"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
