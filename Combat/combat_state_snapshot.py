@@ -122,6 +122,18 @@ class EnchantmentSnapshot:
 
 
 @dataclass
+class AfflictionSnapshot:
+    Id: str
+    Amount: int
+    Props: "dict | None" = None
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "AfflictionSnapshot":
+        _require(d, ["Id", "Amount", "Props"], "AfflictionSnapshot")
+        return cls(Id=str(d["Id"]), Amount=int(d["Amount"]), Props=d["Props"])
+
+
+@dataclass
 class CardInstanceSnapshot:
     InstanceId: str
     CardId: str
@@ -141,6 +153,24 @@ class CardInstanceSnapshot:
     EnchantmentStatus: "str | None" = None
     TinkerTimeType: "str | None" = None
     TinkerTimeRider: "str | None" = None
+    # Phase 3c.8 fields.  Keep defaults for archived snapshot compatibility,
+    # but preserve the values whenever they are present on the wire.
+    DynamicVars: dict[str, float] = field(default_factory=dict)
+    BaseReplayCount: int = 0
+    BaseStarCost: int = 0
+    LastStarsSpent: int = 0
+    ExhaustOnNextPlay: bool = False
+    HasSingleTurnRetain: bool = False
+    HasSingleTurnSly: bool = False
+    Affliction: "AfflictionSnapshot | None" = None
+    CloneOfInstanceId: "str | None" = None
+    IsDupe: bool = False
+    DeckVersionInstanceId: "str | None" = None
+    FloorAddedToDeck: "int | None" = None
+    SavedProperties: "dict | None" = None
+    SovereignBladeCurrentDamage: "float | None" = None
+    SovereignBladeCurrentRepeats: "float | None" = None
+    SovereignBladeCreatedThroughForge: "bool | None" = None
 
     @classmethod
     def from_dict(cls, d: dict) -> "CardInstanceSnapshot":
@@ -162,6 +192,22 @@ class CardInstanceSnapshot:
             Enchantment=EnchantmentSnapshot.from_dict(d["Enchantment"]) if d.get("Enchantment") else None,
             EnchantmentStatus=d.get("EnchantmentStatus"),
             TinkerTimeType=d["TinkerTimeType"], TinkerTimeRider=d["TinkerTimeRider"],
+            DynamicVars={str(k): float(v) for k, v in (d.get("DynamicVars") or {}).items()},
+            BaseReplayCount=int(d.get("BaseReplayCount", 0)),
+            BaseStarCost=int(d.get("BaseStarCost", 0)),
+            LastStarsSpent=int(d.get("LastStarsSpent", 0)),
+            ExhaustOnNextPlay=bool(d.get("ExhaustOnNextPlay", False)),
+            HasSingleTurnRetain=bool(d.get("HasSingleTurnRetain", False)),
+            HasSingleTurnSly=bool(d.get("HasSingleTurnSly", False)),
+            Affliction=AfflictionSnapshot.from_dict(d["Affliction"]) if d.get("Affliction") else None,
+            CloneOfInstanceId=d.get("CloneOfInstanceId"),
+            IsDupe=bool(d.get("IsDupe", False)),
+            DeckVersionInstanceId=d.get("DeckVersionInstanceId"),
+            FloorAddedToDeck=int(d["FloorAddedToDeck"]) if d.get("FloorAddedToDeck") is not None else None,
+            SavedProperties=d.get("SavedProperties"),
+            SovereignBladeCurrentDamage=float(d["SovereignBladeCurrentDamage"]) if d.get("SovereignBladeCurrentDamage") is not None else None,
+            SovereignBladeCurrentRepeats=float(d["SovereignBladeCurrentRepeats"]) if d.get("SovereignBladeCurrentRepeats") is not None else None,
+            SovereignBladeCreatedThroughForge=bool(d["SovereignBladeCreatedThroughForge"]) if d.get("SovereignBladeCreatedThroughForge") is not None else None,
         )
 
 
