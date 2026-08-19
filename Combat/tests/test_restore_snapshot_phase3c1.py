@@ -33,8 +33,8 @@ _TEST_MODULES = (
 
 # Old monolith case names that were intentionally renamed while splitting by concern.
 # Most aliases resolve to one coverage-equivalent split test. The old consolidated
-# rejection-category case expands to the individual typed rejection tests that replaced
-# it, preserving the old one-process invocation semantics for that manual --case.
+# rejection-category case expands to the individual rejection tests that replaced it,
+# preserving the old one-process invocation semantics for that manual --case.
 _LEGACY_CASE_ALIASES: dict[str, str | tuple[str, ...]] = {
     "test_get_restore_capabilities_hashes":
         "test_snapshot_wire_contract:test_restore_capabilities_match_snapshot_wire_contract",
@@ -76,7 +76,7 @@ _LEGACY_CASE_ALIASES: dict[str, str | tuple[str, ...]] = {
         "test_snapshot_restore:test_full_rng_streams_survive_round_trip",
     "test_rejection_categories_via_public_python_api": (
         "test_snapshot_restore_rejections:test_unknown_combat_history_entry_rejected_from_typed_dto",
-        "test_snapshot_restore_rejections:test_dangling_combat_history_reference_rejected_from_typed_dto",
+        "test_snapshot_restore_rejections:test_dangling_combat_history_reference_rejected_from_clr_object_contract",
         "test_snapshot_restore_rejections:test_pending_choice_capture_is_rejected_without_raw_wire_fixture",
         "test_snapshot_restore_rejections:test_unsupported_capture_boundary_rejected_from_typed_dto",
         "test_snapshot_restore_rejections:test_action_continuation_rejected_from_typed_dto",
