@@ -173,6 +173,7 @@ def test_restore_accessors_cover_player_enemies_and_pet():
     session = LiveCombatSession()
     session.start_combat(_simple_spec(relics=["BOUND_PHYLACTERY"]))
     snapshot = _restorable_capture(session)
+    expected = _gameplay_payload(snapshot)
 
     assert player_creature(snapshot) is snapshot.Player
     assert creature_by_id(snapshot, snapshot.Player.CreatureInstanceId) is snapshot.Player
@@ -184,16 +185,32 @@ def test_restore_accessors_cover_player_enemies_and_pet():
     pet = snapshot.Player.Pets[0]
     assert creature_by_id(snapshot, pet.InstanceId) is pet
 
-    session.restore_snapshot_json(to_emulator_json(snapshot))
-    restored = _restorable_capture(session)
-    restored_pet = creature_by_id(restored, pet.InstanceId)
+    object_state = session.restore_snapshot(snapshot)
+    object_restored = _restorable_capture(session)
+    object_pet = creature_by_id(object_restored, pet.InstanceId)
 
-    assert restored_pet.MonsterId == pet.MonsterId
-    assert restored_pet.OwnerInstanceId == restored.Player.InstanceId
-    assert restored_pet.Hp == pet.Hp
-    assert restored_pet.MaxHp == pet.MaxHp
-    assert restored_pet.Block == pet.Block
-    assert restored_pet.Powers == pet.Powers
+    assert isinstance(object_state, BattleState)
+    assert _gameplay_payload(object_restored) == expected
+    assert object_pet.MonsterId == pet.MonsterId
+    assert object_pet.OwnerInstanceId == object_restored.Player.InstanceId
+    assert object_pet.Hp == pet.Hp
+    assert object_pet.MaxHp == pet.MaxHp
+    assert object_pet.Block == pet.Block
+    assert object_pet.Powers == pet.Powers
+
+    json_state = session.restore_snapshot_json(to_emulator_json(snapshot))
+    json_restored = _restorable_capture(session)
+    json_pet = creature_by_id(json_restored, pet.InstanceId)
+
+    assert isinstance(json_state, BattleState)
+    assert _gameplay_payload(json_restored) == expected
+    assert _gameplay_payload(json_restored) == _gameplay_payload(object_restored)
+    assert json_pet.MonsterId == pet.MonsterId
+    assert json_pet.OwnerInstanceId == json_restored.Player.InstanceId
+    assert json_pet.Hp == pet.Hp
+    assert json_pet.MaxHp == pet.MaxHp
+    assert json_pet.Block == pet.Block
+    assert json_pet.Powers == pet.Powers
 
 
 def test_full_rng_streams_survive_round_trip():
