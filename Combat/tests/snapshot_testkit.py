@@ -2,7 +2,7 @@
 
 Restore-behavior tests should construct and inspect ``combat_state_snapshot`` DTOs,
 then cross the Emulator JSON boundary through ``to_emulator_payload`` /
-``to_emulator_json``.  Field names and defaults come from the production DTOs; this
+``to_emulator_json``. Field names and defaults come from the production DTOs; this
 module deliberately does not maintain a second wire-schema table.
 
 Schema-parser tests (raw dict -> DTO) intentionally do not use this module: those tests
@@ -11,7 +11,6 @@ are validating the wire schema itself and should keep their direct raw-dict fixt
 
 from __future__ import annotations
 
-import json
 from dataclasses import asdict, is_dataclass
 from typing import Any
 
@@ -24,6 +23,7 @@ from combat_state_snapshot import (
     PowerSnapshot,
     RngSnapshotSet,
     SnapshotMetadata,
+    canonical_json,
 )
 
 
@@ -42,10 +42,11 @@ def _wire_value(node: Any) -> Any:
 
 
 def to_emulator_payload(snapshot: CombatStateSnapshot) -> dict[str, Any]:
-    """Serialize a typed snapshot using the production DTO field contract.
+    """Return the Emulator wire payload for a typed Python snapshot.
 
-    The DTOs preserve the Emulator's PascalCase field names and own all defaults, so
-    test-side serialization only needs to remove Python-only ``unknown_fields`` buckets.
+    Production DTOs preserve the Emulator's PascalCase field names and own all field
+    defaults. The only Python-only state removed here is ``unknown_fields``; no schema
+    name/default table is duplicated in tests.
     """
     if not isinstance(snapshot, CombatStateSnapshot):
         raise TypeError(f"expected CombatStateSnapshot, got {type(snapshot).__name__}")
@@ -53,12 +54,8 @@ def to_emulator_payload(snapshot: CombatStateSnapshot) -> dict[str, Any]:
 
 
 def to_emulator_json(snapshot: CombatStateSnapshot) -> str:
-    return json.dumps(
-        to_emulator_payload(snapshot),
-        sort_keys=False,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    )
+    """Serialize with the same canonical JSON utility used by the production bridge."""
+    return canonical_json(to_emulator_payload(snapshot), exclude_volatile=False)
 
 
 def make_power(
