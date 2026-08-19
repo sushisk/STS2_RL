@@ -210,9 +210,7 @@ def test_pending_choice_capture_is_rejected_without_raw_wire_fixture():
     snapshot = session.capture_snapshot()
 
     assert snapshot.PendingChoice is not None
-    validation = session.validate_restore_snapshot(snapshot)
-    assert validation.eligible is False, validation
-    assert any("pending_choice_present" in code for code in validation.rejection_codes), validation.rejection_codes
+    _assert_rejected(snapshot, "pending_choice_present")
 
 
 def test_typed_and_json_rejection_report_same_schema_error():
