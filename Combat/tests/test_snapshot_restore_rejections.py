@@ -1,8 +1,9 @@
 """Restore rejection/failure tests expressed through typed snapshot DTOs.
 
 Malformed-wire tests belong in ``test_snapshot_wire_contract.py``. This module mutates
-production DTO objects; the only CLR reflection here is the test-only failure injection
-hook, which is runtime behavior rather than wire-schema knowledge.
+production DTO objects. Two narrowly-scoped CLR fixtures remain here where the runtime
+object shape is itself part of the behavior under test: post-teardown failure injection
+and the legacy dangling CombatHistory reference-integrity contract.
 """
 
 from __future__ import annotations
@@ -172,21 +173,42 @@ def test_unknown_combat_history_entry_rejected_from_typed_dto():
     _assert_rejected(snapshot, "unknown_combat_history_entry_type:SyntheticUnknownEntry")
 
 
-def test_dangling_combat_history_reference_rejected_from_typed_dto():
-    snapshot = _fresh_snapshot()
-    snapshot.CombatHistory.Entries = [
-        CombatHistoryEntrySnapshot(
-            EntryType="CardDrawnEntry",
-            RoundNumber=snapshot.RoundNumber,
-            CurrentSide=snapshot.CurrentSide,
-            PlayerTurnNumbers={},
-            Fields={
-                "cardInstanceId": "SYNTHETIC_DANGLING_DRAWN_CARD",
-                "fromHandDraw": True,
-            },
-        )
-    ]
-    validation = LiveCombatSession().validate_restore_snapshot(snapshot)
+def test_dangling_combat_history_reference_rejected_from_clr_object_contract():
+    """Preserve the original Phase 3C.1 direct-CLR reference-integrity fixture.
+
+    ``CombatHistoryEntrySnapshot.Fields`` is ``Dictionary[str, object]`` on the CLR
+    contract. Passing a Python DTO through JSON changes those runtime values to
+    deserialized JSON objects, so it is not equivalent to the original object-API test.
+    Keep this one case on the exact CLR shape instead of pretending it is typed-DTO
+    coverage.
+    """
+    ensure_loaded()
+    from System import Array, Int32, Object, String
+    from System.Collections.Generic import Dictionary
+    from Sts2Emulator.Dto.Snapshot import (
+        CombatHistoryEntrySnapshot as ClrCombatHistoryEntrySnapshot,
+        UnsupportedSnapshotField as ClrUnsupportedSnapshotField,
+    )
+
+    session = LiveCombatSession()
+    session.start_combat(_simple_spec())
+    snapshot = session._game.CaptureSnapshot()  # noqa: SLF001 - exact CLR object contract fixture
+    snapshot.Metadata.Completeness = "complete"
+    snapshot.Metadata.UnsupportedFields = Array[ClrUnsupportedSnapshotField]([])
+    snapshot.CombatHistory.Entries = Array[ClrCombatHistoryEntrySnapshot]([])
+
+    dangling_draw = ClrCombatHistoryEntrySnapshot()
+    dangling_draw.EntryType = "CardDrawnEntry"
+    dangling_draw.RoundNumber = snapshot.RoundNumber
+    dangling_draw.CurrentSide = snapshot.CurrentSide
+    dangling_draw.PlayerTurnNumbers = Dictionary[String, Int32]()
+    fields = Dictionary[String, Object]()
+    fields["cardInstanceId"] = "SYNTHETIC_DANGLING_DRAWN_CARD"
+    fields["fromHandDraw"] = True
+    dangling_draw.Fields = fields
+    snapshot.CombatHistory.Entries = Array[ClrCombatHistoryEntrySnapshot]([dangling_draw])
+
+    validation = session.validate_restore_snapshot(snapshot)
     assert validation.eligible is False, validation
     assert any("reference_integrity" in code for code in validation.rejection_codes)
     assert not any("pet_count" in code for code in validation.rejection_codes)
