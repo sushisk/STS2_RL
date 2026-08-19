@@ -250,7 +250,7 @@ def _hypothesis_work_items_with_coverage(
     coverage = CoverageAssessment(
         is_complete=True,
         uncertain_sources=(),
-        reason="PUBLIC_MULTISET is read directly from Player.DrawPile or naturally dealt from CombatScenario.Seed",
+        reason="PUBLIC_MULTISET is read from Player.CardInstances where Zone=draw_pile or naturally dealt from CombatScenario.Seed",
     )
     if is_combat_start:
         derived_roots = derive_combat_start_replay_roots(

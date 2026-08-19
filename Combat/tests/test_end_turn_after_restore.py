@@ -11,7 +11,7 @@ that `SnapshotRestorer` never re-established a restored enemy's current Move
 Confirmed fixed (empirically, via this file's own two Branch Worker tests, which flipped
 from a fast-fail to `BRANCH_STATUS_SUCCESS` the moment the Emulator change landed - no
 other RL-side change was needed): the Emulator's `SnapshotRestorer.ApplyEnemyMoves()`
-(schema/milestone bumped to `"phase3c.5"`, see `Combat/combat_state_snapshot.py`'s
+(schema/milestone bumped to `"phase3c.6"`, see `Combat/combat_state_snapshot.py`'s
 `KNOWN_SCHEMA_VERSIONS`) now restores each enemy's `Intent.stateId`/`StateLog` via the
 same `MonsterModel.SetMoveImmediate()`/`MonsterMoveStateMachine.ForceCurrentState()` the
 `ResetFromScenario` path already used for its own `ForcedMove` field - deterministic, no

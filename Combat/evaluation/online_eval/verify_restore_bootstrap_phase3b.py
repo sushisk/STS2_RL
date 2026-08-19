@@ -79,6 +79,15 @@ def _snapshot_sig(snapshot):
     def card_sig(c):
         return (c.InstanceId, c.CardId, c.Zone, c.IsUpgraded, c.UpgradeLevel, c.Cost)
 
+    def cards_in_zone(zone):
+        # ``snapshot`` is a CLR DTO here, whereas the Python mirror offers
+        # PlayerSnapshot.cards_in_zone().  Keep this verifier usable for both
+        # representations while making Zone/PileIndex the sole pile projection.
+        return sorted(
+            (card for card in p.CardInstances if card.Zone == zone),
+            key=lambda card: card.PileIndex if card.PileIndex is not None else -1,
+        )
+
     def relic_sig(r):
         return (r.InstanceId, r.RelicId, r.StackCount, r.Status, r.IsWax, r.IsMelted, r.HasBeenRemovedFromState)
 
@@ -99,12 +108,12 @@ def _snapshot_sig(snapshot):
     return {
         "player_core": (p.InstanceId, p.CreatureInstanceId, p.Hp, p.MaxHp, p.Block, p.Energy, p.MaxEnergy,
                         p.Stars, p.Gold, p.OrbSlotCapacity),
-        "hand": [card_sig(c) for c in p.Hand],
-        "draw": [card_sig(c) for c in p.DrawPile],
-        "discard": [card_sig(c) for c in p.DiscardPile],
-        "exhaust": [card_sig(c) for c in p.ExhaustPile],
-        "play": [card_sig(c) for c in p.PlayPile],
-        "deck": [card_sig(c) for c in p.Deck],
+        "hand": [card_sig(c) for c in cards_in_zone("hand")],
+        "draw": [card_sig(c) for c in cards_in_zone("draw_pile")],
+        "discard": [card_sig(c) for c in cards_in_zone("discard_pile")],
+        "exhaust": [card_sig(c) for c in cards_in_zone("exhaust_pile")],
+        "play": [card_sig(c) for c in cards_in_zone("play_pile")],
+        "deck": [card_sig(c) for c in cards_in_zone("deck")],
         "relics": [relic_sig(r) for r in p.Relics],
         "player_powers": [power_sig(pw) for pw in p.Powers],
         "enemies": [(e.InstanceId, e.Index, e.MonsterId, e.Hp, e.MaxHp, e.Block, e.IsAlive) for e in snapshot.Enemies],
@@ -374,9 +383,9 @@ def case_reject_duplicate_id_mutated():
     source = _fresh_source_game()
     snapshot = _make_eligible(source.CaptureSnapshot())
     # Force the first hand card's InstanceId to collide with the Player's own InstanceId.
-    if len(snapshot.Player.Hand) == 0:
+    if len(snapshot.Player.CardInstances) == 0:
         raise AssertionError("fixture needs a non-empty Hand for this case")
-    snapshot.Player.Hand[0].InstanceId = snapshot.Player.InstanceId
+    snapshot.Player.CardInstances[0].InstanceId = snapshot.Player.InstanceId
     return _assert_rejects("duplicate_stable_id (Hand[0].InstanceId == Player.InstanceId)", snapshot, "reference_integrity")
 
 

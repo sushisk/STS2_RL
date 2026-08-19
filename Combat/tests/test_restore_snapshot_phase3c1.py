@@ -82,6 +82,7 @@ _SAFE_TO_RECOMPUTE_POWER_CLASSES = {
     "AfterimagePower",
     "CalamityPower",
     "CurlUpPower",
+    "GigantificationPower",
     "GravityPower",
     "ImitationLearningPower",
     "MonologuePower",
@@ -92,9 +93,10 @@ _SAFE_TO_RECOMPUTE_POWER_CLASSES = {
     "StormPower",
     "StranglePower",
     "SubroutinePower",
+    "VigorPower",
 }
 
-_UNSUPPORTED_UNKNOWN_POWER_CLASSES = {"GigantificationPower", "VigorPower"}
+_UNSUPPORTED_UNKNOWN_POWER_CLASSES = set()
 
 
 def _simple_spec(hand=None, enemy_hp=48):
@@ -117,9 +119,29 @@ def _clr_snapshot_json(snapshot) -> str:
 def _snapshot_dict(snapshot) -> dict:
     payload = asdict(snapshot)
 
+    # The Python DTO intentionally remains a compatibility reader for archived
+    # fixtures.  The Emulator's phase3c.8 wire contract, however, requires all
+    # CardInstance fields.  Fill omitted compatibility fields in this test
+    # serializer so the test exercises canonical round-trip rather than an
+    # obsolete fixture shape.
+    card_defaults = {
+        "DynamicVars": {}, "BaseReplayCount": 0, "BaseStarCost": 0,
+        "LastStarsSpent": 0, "ExhaustOnNextPlay": False,
+        "HasSingleTurnRetain": False, "HasSingleTurnSly": False,
+        "Affliction": None, "CloneOfInstanceId": None, "IsDupe": False,
+        "DeckVersionInstanceId": None, "FloorAddedToDeck": None,
+        "SavedProperties": None, "SovereignBladeCurrentDamage": None,
+        "SovereignBladeCurrentRepeats": None,
+        "SovereignBladeCreatedThroughForge": None,
+    }
+
     def strip(node):
         if isinstance(node, dict):
-            return {k: strip(v) for k, v in node.items() if k != "unknown_fields"}
+            result = {k: strip(v) for k, v in node.items() if k != "unknown_fields"}
+            if "InstanceId" in result and "CardId" in result:
+                for key, value in card_defaults.items():
+                    result.setdefault(key, value)
+            return result
         if isinstance(node, list):
             return [strip(v) for v in node]
         return node
@@ -137,6 +159,13 @@ def _official_example_dict() -> dict:
 
 def _official_example_json_text() -> str:
     return _OFFICIAL_EXAMPLE_PATH.read_text(encoding="utf-8")
+
+
+def _canonical_fixture_dict() -> dict:
+    """Return a current-schema fixture, rather than treating the archived v3c.4
+    example as a restore input after the deliberately breaking v3c.6 migration."""
+    source = _fresh_source_game()
+    return json.loads(_clr_snapshot_json(_make_eligible(source.CaptureSnapshot())))
 
 
 def _eligible_snapshot(seed=123):
@@ -269,11 +298,7 @@ def _model_fixtures() -> dict:
 
 
 def _all_card_dicts(snapshot_dict: dict) -> list[dict]:
-    player = snapshot_dict["Player"]
-    cards = []
-    for pile_name in ("Hand", "DrawPile", "DiscardPile", "ExhaustPile", "PlayPile", "Deck"):
-        cards.extend(player[pile_name])
-    return cards
+    return list(snapshot_dict["Player"]["CardInstances"])
 
 
 def _damage_result_fields(receiver_id: str, props: str = "Move") -> dict:
@@ -330,7 +355,7 @@ def _power_fixture(
     amount_on_turn_start: int = 3,
     applier_id: str | None = None,
     target_id: str | None = None,
-    associated_card: dict | None = None,
+    associated_card_instance_id: str | None = None,
 ) -> dict:
     model = _model_fixtures()["powers"][class_name]
     return {
@@ -343,7 +368,7 @@ def _power_fixture(
         "OwnerInstanceId": owner_id,
         "ApplierInstanceId": applier_id,
         "TargetInstanceId": target_id,
-        "AssociatedCard": associated_card,
+        "AssociatedCardInstanceId": associated_card_instance_id,
         "HasUnsupportedInternalData": False,
         "InternalData": internal_data,
         "InternalDataSerializerVersion": "generic-reflection-v1" if internal_data is not None else None,
@@ -452,7 +477,7 @@ def _combat_history_entries_fixture(snapshot_dict: dict) -> list[dict]:
 
 
 def _history_fixture_snapshot_dict(*, entries: list[dict] | None = None) -> dict:
-    snapshot = _add_history_support_objects(_official_example_dict())
+    snapshot = _add_history_support_objects(_canonical_fixture_dict())
     snapshot["CombatHistory"]["Entries"] = entries if entries is not None else _combat_history_entries_fixture(snapshot)
     return snapshot
 
@@ -612,7 +637,7 @@ def _force_restore_failure(session: LiveCombatSession, snapshot):
         assert exc.context.restore_phase == "restore_snapshot", exc.context
         assert exc.context.combat_session_id is not None, exc.context
         assert exc.context.schema_version is not None, exc.context
-        assert exc.context.contract_version == "0.5", exc.context
+        assert exc.context.contract_version == "0.6", exc.context
         assert exc.context.snapshot_id is not None, exc.context
         assert exc.context.original_exception_type is not None, exc.context
         assert exc.__cause__ is not None
@@ -624,10 +649,10 @@ def _force_restore_failure(session: LiveCombatSession, snapshot):
 def test_get_restore_capabilities_hashes():
     session = LiveCombatSession()
     caps = session.get_restore_capabilities()
-    assert caps.restore_api_version == "phase3c.5", caps
-    assert caps.milestone == "phase3c.5", caps
-    assert caps.contract_version == "0.5", caps
-    assert caps.snapshot_schema_version == "phase3c.5", caps
+    assert caps.restore_api_version == "phase3c.8", caps
+    assert caps.milestone == "phase3c.8", caps
+    assert caps.contract_version == "0.6", caps
+    assert caps.snapshot_schema_version == "phase3c.8", caps
     assert caps.snapshot_schema_sha256 == schema_sha256(), caps
 
     import hashlib
@@ -692,31 +717,11 @@ def test_json_restore_round_trip():
     assert _capture_sig(session) == sig_a
 
 
-def test_official_json_example_validates_successfully():
+def test_legacy_json_example_is_rejected_by_canonical_contract():
     session = LiveCombatSession()
     result = session.validate_restore_snapshot_json(_official_example_json_text())
-    assert result.eligible is True, result
-    assert result.rejection_codes == []
-
-
-def test_official_json_example_restores_successfully():
-    session = LiveCombatSession()
-    original = _official_example_dict()
-    state = session.restore_snapshot_json(_official_example_json_text())
-    assert isinstance(state, BattleState)
-    captured = session.capture_snapshot()
-    assert captured.Metadata.SchemaVersion == "phase3c.5"
-    # The official example fixture on disk (`combat_state_snapshot_example.v0.8.json`)
-    # now ships with 10 real CombatHistory entries (a Round-1 draw + one card play) -
-    # NOT an empty history, which this assertion used to (incorrectly, as of whenever
-    # the fixture was last regenerated) assume. Confirmed by reading the raw fixture
-    # file directly: `CombatHistory.Entries` has 10 elements, matching
-    # combat_state_contract.v0.8.md §9-D's own recommendation that Emulator担当 update
-    # the example to include representative history - which it evidently has since.
-    # The actually-meaningful assertion is that Restore preserves that history exactly,
-    # which this checks via the same `_history_sig_from_dict` round-trip signature the
-    # rest of this file's CombatHistory tests already use.
-    assert _history_sig_from_dict(_snapshot_dict(captured)) == _history_sig_from_dict(original)
+    assert result.eligible is False, result
+    assert "unknown_schema_version:phase3c.4" in result.rejection_codes
 
 
 def test_validate_restore_snapshot_json_is_pure():
@@ -724,8 +729,10 @@ def test_validate_restore_snapshot_json_is_pure():
     state = session.start_combat(_simple_spec())
     frame_before = session._current_frame  # noqa: SLF001
     legal_before = session.get_legal_actions()
-    valid_json = _official_example_json_text()
-    invalid = _official_example_dict()
+    # Do not construct a sibling GameInstance for fixture creation: the imported
+    # engine owns process-wide singletons, so that would supersede ``session``.
+    valid_json = session._game.CaptureSnapshotJson()  # noqa: SLF001
+    invalid = json.loads(valid_json)
     del invalid["Player"]["Pets"]
     invalid_json = _json_text(invalid)
 
@@ -772,7 +779,7 @@ def test_restore_snapshot_json_rejects_invalid_without_prior_validate():
     session = LiveCombatSession()
     state = session.start_combat(_simple_spec())
     frame_before = session._current_frame  # noqa: SLF001
-    invalid = _official_example_dict()
+    invalid = json.loads(session._game.CaptureSnapshotJson())  # noqa: SLF001
     del invalid["CombatHistory"]
     try:
         session.restore_snapshot_json(_json_text(invalid))
@@ -990,7 +997,7 @@ def test_with_power_capture_round_trip():
 
 
 def test_power_internal_data_classifications_round_trip_and_reject_via_json_api():
-    base = _official_example_dict()
+    base = _canonical_fixture_dict()
     player_creature_id = base["Player"]["CreatureInstanceId"]
     enemy_id = base["Enemies"][0]["InstanceId"]
 
@@ -1021,24 +1028,14 @@ def test_power_internal_data_classifications_round_trip_and_reject_via_json_api(
     assert restored_afterimage["InternalData"] is None
     assert restored_afterimage["InternalDataSerializerVersion"] is None
 
-    unsupported = json.loads(_json_text(base))
-    unsupported["Player"]["Powers"] = [
-        _power_fixture(unsupported, "VigorPower", "power-940003", player_creature_id, None)
+    vigor = json.loads(_json_text(base))
+    vigor["Player"]["Powers"] = [
+        _power_fixture(vigor, "VigorPower", "power-940003", player_creature_id, None, amount=3)
     ]
-    session = LiveCombatSession()
-    state = session.start_combat(_simple_spec())
-    frame_before = session._current_frame  # noqa: SLF001
-    validation = session.validate_restore_snapshot_json(_json_text(unsupported))
-    assert validation.eligible is False, validation
-    assert any("unsupported_internal_data:" in r for r in validation.rejection_codes), validation.rejection_codes
-    try:
-        session.restore_snapshot_json(_json_text(unsupported))
-        raise AssertionError("expected SnapshotRestoreRejectedError")
-    except SnapshotRestoreRejectedError as exc:
-        assert any("unsupported_internal_data:" in r for r in exc.rejection_codes), exc.rejection_codes
-    assert session._session_faulted is False  # noqa: SLF001
-    assert session._current_frame == frame_before  # noqa: SLF001
-    assert session.step(state, _strike_action(state), target_enemy_index=0) is not None
+    restored_vigor = _restore_capture_json(vigor)
+    restored_vigor_power = next(p for p in _all_power_dicts(restored_vigor) if p["InstanceId"] == "power-940003")
+    assert restored_vigor_power["Amount"] == 3
+    assert restored_vigor_power["InternalData"] is None
 
     enemy_owned = json.loads(_json_text(base))
     enemy_owned["Enemies"][0]["Powers"] = [
@@ -1154,7 +1151,7 @@ def test_rejection_categories_via_public_python_api():
     _assert_rejected(base, "action_continuation_present")
 
     base = _make_eligible(_fresh_source_game().CaptureSnapshot())
-    base.Player.Hand[0].InstanceId = base.Player.InstanceId
+    base.Player.CardInstances[0].InstanceId = base.Player.InstanceId
     _assert_rejected(base, "reference_integrity")
 
     base = _make_eligible(_fresh_source_game().CaptureSnapshot())

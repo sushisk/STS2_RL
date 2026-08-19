@@ -79,10 +79,10 @@ def cross_check(env: CombatEnv) -> list[dict]:
     check("stars", raw_state.get("stars"), rl_state.get("stars"), snapshot.Player.Stars)
     check("gold", raw_state.get("gold"), rl_state.get("gold"), snapshot.Player.Gold)
 
-    for pile_key, snap_attr in (("hand", "Hand"), ("drawPile", "DrawPile"), ("discardPile", "DiscardPile"), ("exhaustPile", "ExhaustPile"), ("playPile", "PlayPile")):
+    for pile_key, zone in (("hand", "hand"), ("drawPile", "draw_pile"), ("discardPile", "discard_pile"), ("exhaustPile", "exhaust_pile"), ("playPile", "play_pile")):
         raw_ids = [c.get("id") for c in (raw_state.get(pile_key) or [])]
         rl_ids = [c.get("id") for c in (rl_state.get(pile_key) or [])]
-        snap_ids = [c.CardId for c in getattr(snapshot.Player, snap_attr)]
+        snap_ids = [c.CardId for c in snapshot.Player.cards_in_zone(zone)]
         check(f"pile:{pile_key}", raw_ids, rl_ids, snap_ids)
 
     raw_relics = sorted(r.get("id") for r in (raw_state.get("relics") or []))

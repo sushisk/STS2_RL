@@ -116,6 +116,10 @@ def _pile_card_ids(cards) -> list[str]:
     return [str(card.CardId) for card in cards]
 
 
+def _zone_cards(snapshot, zone: str):
+    return snapshot.Player.cards_in_zone(zone)
+
+
 def test_compute_public_multiset_from_real_captured_snapshot():
     session = LiveCombatSession()
     session.start_combat(_simple_spec())
@@ -193,13 +197,13 @@ def test_compute_public_multiset_reads_draw_pile_after_real_primal_force_transfo
 
     removals = snapshot.CombatHistory.InferredCardRemovals
     assert Counter(removal.CardId for removal in removals) == Counter({"STRIKE_IRONCLAD": 2}), removals
-    assert got == Counter(card.CardId for card in snapshot.Player.DrawPile), got
+    assert got == Counter(card.CardId for card in _zone_cards(snapshot, "draw_pile")), got
     assert "STRIKE_IRONCLAD" not in got, got
 
     hypotheses = generate_belief_hypotheses(got, count=2, rng_seed_source=_rng)
     for hypothesis in hypotheses:
         derived = derive_substituted_snapshot(snapshot, hypothesis)
-        assert Counter(card.CardId for card in derived.Player.DrawPile) == got
+        assert Counter(card.CardId for card in _zone_cards(derived, "draw_pile")) == got
 
 
 def test_consume_check_passthrough_mode_independent_and_true_rng_ok():
@@ -233,7 +237,7 @@ def test_derive_substituted_snapshot_restore_round_trip_changes_draw_behavior_on
     session = LiveCombatSession()
     session.start_combat(_simple_spec(hand=["DEFEND_IRONCLAD"], draw_pile=["BASH", "DEFEND_IRONCLAD", "STRIKE_IRONCLAD"]))
     root = _without_history(session.capture_snapshot())
-    original_order = _pile_card_ids(root.Player.DrawPile)
+    original_order = _pile_card_ids(_zone_cards(root, "draw_pile"))
     hypothesis = SearchHypothesisId(
         rng=_rng(11),
         ordered_draw_pile_card_ids=tuple(reversed(original_order)),
@@ -241,11 +245,11 @@ def test_derive_substituted_snapshot_restore_round_trip_changes_draw_behavior_on
     )
 
     derived = derive_substituted_snapshot(root, hypothesis)
-    assert _pile_card_ids(derived.Player.DrawPile) == list(reversed(original_order))
+    assert _pile_card_ids(_zone_cards(derived, "draw_pile")) == list(reversed(original_order))
     assert derived.Rng.RunRng["Shuffle"] == hypothesis.rng
-    assert derived.Player.Hand == root.Player.Hand
-    assert derived.Player.DiscardPile == root.Player.DiscardPile
-    assert derived.Player.ExhaustPile == root.Player.ExhaustPile
+    assert _zone_cards(derived, "hand") == _zone_cards(root, "hand")
+    assert _zone_cards(derived, "discard_pile") == _zone_cards(root, "discard_pile")
+    assert _zone_cards(derived, "exhaust_pile") == _zone_cards(root, "exhaust_pile")
     assert derived.Player.Hp == root.Player.Hp
     assert derived.Player.Relics == root.Player.Relics
 
@@ -264,7 +268,7 @@ def test_derive_substituted_snapshot_restore_round_trip_changes_draw_behavior_on
 
 def test_apply_hypothesis_to_context_matches_manual_replace_plus_with_search_hypothesis():
     context, _pipeline = _context_and_pipeline()
-    original_order = _pile_card_ids(context.root_snapshot.Player.DrawPile)
+    original_order = _pile_card_ids(_zone_cards(context.root_snapshot, "draw_pile"))
     hypothesis = SearchHypothesisId(
         rng=_rng(11),
         ordered_draw_pile_card_ids=tuple(reversed(original_order)),

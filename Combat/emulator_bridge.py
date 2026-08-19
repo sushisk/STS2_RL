@@ -15,11 +15,13 @@ package, shadowing the CLR-backed "Sts2Emulator.Api" module the clr importer pro
 
 from __future__ import annotations
 
+import os
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
 
 DEFAULT_REPO_ROOT = Path(r"C:\STS2_Emulator")
+_EMULATOR_REPO_ROOT_ENV = "STS2_EMULATOR_REPO_ROOT"
 
 _types: dict[str, Any] | None = None
 _shared_instance = None
@@ -35,7 +37,11 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
     if _types is not None:
         return _types
 
-    root = repo_root or DEFAULT_REPO_ROOT
+    # Integration callers can point every spawned RL worker at an isolated Emulator
+    # build without replacing the ordinary Debug output (which may be in use by a
+    # separate long-running Python process).  An explicit function argument remains
+    # authoritative for callers that already supply one.
+    root = repo_root or Path(os.environ.get(_EMULATOR_REPO_ROOT_ENV, DEFAULT_REPO_ROOT))
     cli_output_dir = root / "Sts2Emulator.Cli" / "bin" / "Debug" / "net8.0"
     dll_path = cli_output_dir / "Sts2Emulator.dll"
     runtime_config_path = cli_output_dir / "Sts2Emulator.Cli.runtimeconfig.json"
