@@ -21,7 +21,12 @@ for _path in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env"):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
-from combat_state_snapshot import CardInstanceSnapshot, EnemySnapshot, schema_sha256  # noqa: E402
+from combat_state_snapshot import (  # noqa: E402
+    CardInstanceSnapshot,
+    CombatStateSnapshot,
+    EnemySnapshot,
+    schema_sha256,
+)
 from live_combat_session import LiveCombatSession, SnapshotRestoreRejectedError  # noqa: E402
 from snapshot_testkit import (  # noqa: E402
     active_enemies,
@@ -35,10 +40,8 @@ from snapshot_testkit import (  # noqa: E402
 )
 from snapshot_wire_fixtures import (  # noqa: E402
     COMBAT_HISTORY_ENTRY_TYPES,
-    add_history_support_objects,
     add_osty_pet,
     all_power_payloads,
-    combat_history_entries,
     history_fixture_payload,
     history_signature,
     internal_data_for,
@@ -228,7 +231,6 @@ def test_to_emulator_payload_uses_production_dto_field_names():
     card = payload["Player"]["CardInstances"][0]
     assert card["InstanceId"] == "card-900000"
     assert card["CardId"] == "STRIKE_IRONCLAD"
-    # These are production DTO defaults, not a second test-side schema table.
     assert card["DynamicVars"] == {}
     assert card["BaseReplayCount"] == 0
     assert card["SavedProperties"] is None
@@ -239,37 +241,24 @@ def test_to_emulator_json_matches_shared_payload():
     assert json.loads(to_emulator_json(snapshot)) == to_emulator_payload(snapshot)
 
 
-def test_testkit_builders_return_typed_dtos():
+def test_testkit_builders_and_accessors_use_typed_dtos():
     power = make_power(
         instance_id="power-900001",
-        owner_instance_id="creature-900001",
+        owner_instance_id="creature-900012",
         amount=3,
     )
     pet = make_creature(
-        instance_id="creature-900001",
+        instance_id="creature-900012",
         owner_instance_id="player-900000",
         powers=[power],
         monster_id="OSTY",
     )
-    snapshot = make_snapshot()
-    snapshot.Player.Pets = [pet]
-
-    assert snapshot.Player.Pets[0] is pet
-    assert pet.Powers[0] is power
-    assert power.Amount == 3
-
-
-def test_creature_accessors_hide_player_enemy_pet_storage_shape():
     alive = _enemy("creature-900010", alive=True)
     dead = _enemy("creature-900011", alive=False)
-    pet = make_creature(
-        instance_id="creature-900012",
-        owner_instance_id="player-900000",
-        monster_id="OSTY",
-    )
     snapshot = make_snapshot(enemies=[alive, dead])
     snapshot.Player.Pets = [pet]
 
+    assert power.Amount == 3
     assert active_enemies(snapshot) == [alive]
     assert player_creature(snapshot) is snapshot.Player
     assert creature_by_id(snapshot, snapshot.Player.CreatureInstanceId) is snapshot.Player
@@ -278,18 +267,15 @@ def test_creature_accessors_hide_player_enemy_pet_storage_shape():
 
 
 def test_creature_by_id_rejects_unknown_id():
-    snapshot = make_snapshot()
     try:
-        creature_by_id(snapshot, "creature-999999")
+        creature_by_id(make_snapshot(), "creature-999999")
         raise AssertionError("expected KeyError")
     except KeyError as exc:
         assert exc.args == ("creature-999999",)
 
 
 def test_restore_capabilities_match_snapshot_wire_contract():
-    session = LiveCombatSession()
-    caps = session.get_restore_capabilities()
-
+    caps = LiveCombatSession().get_restore_capabilities()
     assert caps.restore_api_version == "phase3c.8", caps
     assert caps.milestone == "phase3c.8", caps
     assert caps.contract_version == "0.6", caps
@@ -323,8 +309,9 @@ def test_restore_capabilities_match_snapshot_wire_contract():
 
 
 def test_legacy_json_example_is_rejected_by_current_wire_contract():
-    session = LiveCombatSession()
-    result = session.validate_restore_snapshot_json(_OFFICIAL_EXAMPLE_PATH.read_text(encoding="utf-8"))
+    result = LiveCombatSession().validate_restore_snapshot_json(
+        _OFFICIAL_EXAMPLE_PATH.read_text(encoding="utf-8")
+    )
     assert result.eligible is False, result
     assert "unknown_schema_version:phase3c.4" in result.rejection_codes
 
@@ -414,6 +401,11 @@ def test_combat_history_all_17_entry_types_round_trip_via_wire_fixture():
     payload = history_fixture_payload(_current_wire_payload())
     assert [entry["EntryType"] for entry in payload["CombatHistory"]["Entries"]] == COMBAT_HISTORY_ENTRY_TYPES
 
+    parsed = CombatStateSnapshot.from_dict(payload)
+    assert parsed.CombatHistory.Entries[0].PlayerTurnNumbers == {
+        str(payload["Player"]["NetId"]): payload["TurnNumber"]
+    }
+
     restored = _restore_capture_payload(payload)
     assert [entry["EntryType"] for entry in restored["CombatHistory"]["Entries"]] == COMBAT_HISTORY_ENTRY_TYPES
     assert history_signature(restored) == history_signature(payload)
@@ -437,33 +429,20 @@ def test_combat_history_player_turn_numbers_and_cardplay_resources_preserved():
         elif entry["EntryType"] == "BlockGainedEntry":
             resources_by_type[entry["EntryType"]] = fields["cardPlay"]["resources"]
 
+    expected = {"energySpent": 1, "energyValue": 2, "starsSpent": 3, "starValue": 4}
     assert resources_by_type == {
-        "CardPlayStartedEntry": {
-            "energySpent": 1,
-            "energyValue": 2,
-            "starsSpent": 3,
-            "starValue": 4,
-        },
-        "CardPlayFinishedEntry": {
-            "energySpent": 1,
-            "energyValue": 2,
-            "starsSpent": 3,
-            "starValue": 4,
-        },
-        "BlockGainedEntry": {
-            "energySpent": 1,
-            "energyValue": 2,
-            "starsSpent": 3,
-            "starValue": 4,
-        },
+        "CardPlayStartedEntry": expected,
+        "CardPlayFinishedEntry": expected,
+        "BlockGainedEntry": expected,
     }
 
 
 def test_restore_step_determinism_with_non_empty_combat_history():
-    base = history_fixture_payload(_current_wire_payload())
-    entries = base["CombatHistory"]["Entries"]
+    wire_base = _current_wire_payload()
+    all_entries_payload = history_fixture_payload(wire_base)
+    entries = all_entries_payload["CombatHistory"]["Entries"]
     payload = history_fixture_payload(
-        _current_wire_payload(),
+        wire_base,
         entries=[entries[0], entries[9], entries[14]],
     )
     json_text = _json_text(payload)
@@ -490,28 +469,21 @@ def test_basic_player_and_enemy_power_attachment_round_trip_via_wire():
     enemy_id = payload["Enemies"][0]["InstanceId"]
     payload["Player"]["Powers"] = [
         power_fixture(
-            "StrengthPower",
-            "power-940010",
-            player_creature_id,
-            None,
-            amount=3,
-            amount_on_turn_start=0,
+            "StrengthPower", "power-940010", player_creature_id, None,
+            amount=3, amount_on_turn_start=0,
         )
     ]
     payload["Enemies"][0]["Powers"] = [
         power_fixture(
-            "StrengthPower",
-            "power-940011",
-            enemy_id,
-            None,
-            amount=2,
-            amount_on_turn_start=0,
+            "StrengthPower", "power-940011", enemy_id, None,
+            amount=2, amount_on_turn_start=0,
         )
     ]
 
-    restored = _restore_capture_payload(payload)
-    powers = {power["InstanceId"]: power for power in all_power_payloads(restored)}
-
+    powers = {
+        power["InstanceId"]: power
+        for power in all_power_payloads(_restore_capture_payload(payload))
+    }
     assert powers["power-940010"]["OwnerInstanceId"] == player_creature_id
     assert powers["power-940010"]["Amount"] == 3
     assert powers["power-940011"]["OwnerInstanceId"] == enemy_id
@@ -532,9 +504,8 @@ def test_power_internal_data_classifications_round_trip_via_wire():
             internal_data_for("FeralPower", serialize_required),
         )
     ]
-    restored = _restore_capture_payload(serialize_required)
     restored_feral = next(
-        power for power in all_power_payloads(restored)
+        power for power in all_power_payloads(_restore_capture_payload(serialize_required))
         if power["InstanceId"] == "power-940001"
     )
     assert restored_feral["InternalData"] == {"zeroCostAttacksPlayed": 4}
@@ -543,17 +514,12 @@ def test_power_internal_data_classifications_round_trip_via_wire():
     safe = copy.deepcopy(base)
     safe["Player"]["Powers"] = [
         power_fixture(
-            "AfterimagePower",
-            "power-940002",
-            player_creature_id,
-            None,
-            amount=6,
-            amount_on_turn_start=4,
+            "AfterimagePower", "power-940002", player_creature_id, None,
+            amount=6, amount_on_turn_start=4,
         )
     ]
-    restored_safe = _restore_capture_payload(safe)
     restored_afterimage = next(
-        power for power in all_power_payloads(restored_safe)
+        power for power in all_power_payloads(_restore_capture_payload(safe))
         if power["InstanceId"] == "power-940002"
     )
     assert restored_afterimage["Amount"] == 6
@@ -565,13 +531,12 @@ def test_power_internal_data_classifications_round_trip_via_wire():
     vigor["Player"]["Powers"] = [
         power_fixture("VigorPower", "power-940003", player_creature_id, None, amount=3)
     ]
-    restored_vigor = _restore_capture_payload(vigor)
-    restored_vigor_power = next(
-        power for power in all_power_payloads(restored_vigor)
+    restored_vigor = next(
+        power for power in all_power_payloads(_restore_capture_payload(vigor))
         if power["InstanceId"] == "power-940003"
     )
-    assert restored_vigor_power["Amount"] == 3
-    assert restored_vigor_power["InternalData"] is None
+    assert restored_vigor["Amount"] == 3
+    assert restored_vigor["InternalData"] is None
 
     enemy_owned = copy.deepcopy(base)
     enemy_owned["Enemies"][0]["Powers"] = [
@@ -582,13 +547,12 @@ def test_power_internal_data_classifications_round_trip_via_wire():
             internal_data_for("PossessStrengthPower", enemy_owned),
         )
     ]
-    restored_enemy = _restore_capture_payload(enemy_owned)
-    restored_enemy_power = next(
-        power for power in all_power_payloads(restored_enemy)
+    restored_enemy = next(
+        power for power in all_power_payloads(_restore_capture_payload(enemy_owned))
         if power["InstanceId"] == "power-940004"
     )
-    assert restored_enemy_power["OwnerInstanceId"] == enemy_id
-    assert restored_enemy_power["InternalData"] == {
+    assert restored_enemy["OwnerInstanceId"] == enemy_id
+    assert restored_enemy["InternalData"] == {
         "stolenStrength": {player_creature_id: -3}
     }
 
@@ -602,10 +566,9 @@ def test_power_internal_data_classifications_round_trip_via_wire():
             internal_data_for("AutomationPower", pet_owned),
         )
     ]
-    restored_pet = _restore_capture_payload(pet_owned)
-    restored_pet_power = next(
-        power for power in all_power_payloads(restored_pet)
+    restored_pet = next(
+        power for power in all_power_payloads(_restore_capture_payload(pet_owned))
         if power["InstanceId"] == "power-940005"
     )
-    assert restored_pet_power["OwnerInstanceId"] == pet_id
-    assert restored_pet_power["InternalData"] == {"cardsLeft": 7}
+    assert restored_pet["OwnerInstanceId"] == pet_id
+    assert restored_pet["InternalData"] == {"cardsLeft": 7}
