@@ -172,17 +172,15 @@ def test_live_power_capture_round_trip_uses_typed_snapshot():
     session = LiveCombatSession()
     session.start_combat(
         _simple_spec(
-            player_powers=[{"id": "STRENGTH", "amount": 3}],
-            enemy_powers=[{"id": "WEAK", "amount": 2}],
+            player_powers=[{"id": "STRENGTH_POWER", "amount": 3}],
+            enemy_powers=[{"id": "WEAK_POWER", "amount": 2}],
         )
     )
     snapshot = _restorable_capture(session)
     expected = _gameplay_payload(snapshot)
 
-    assert snapshot.Player.Powers
-    assert snapshot.Enemies[0].Powers
-    assert snapshot.Player.Powers[0].Amount == 3
-    assert snapshot.Enemies[0].Powers[0].Amount == 2
+    assert any(power.Amount == 3 for power in snapshot.Player.Powers)
+    assert any(power.Amount == 2 for power in snapshot.Enemies[0].Powers)
 
     session.restore_snapshot(snapshot)
     restored = _restorable_capture(session)
