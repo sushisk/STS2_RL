@@ -322,6 +322,7 @@ class EnemySnapshot:
     MonsterId: "str | None" = None
     SlotName: "str | None" = None
     Intent: "dict | None" = None
+    FollowUpStateId: "str | None" = None
 
     @classmethod
     def from_dict(cls, d: dict) -> "EnemySnapshot":
@@ -330,7 +331,7 @@ class EnemySnapshot:
             InstanceId=d["InstanceId"], Index=int(d["Index"]), Name=d["Name"], Hp=int(d["Hp"]), MaxHp=int(d["MaxHp"]),
             Block=int(d["Block"]), IsAlive=bool(d["IsAlive"]), Powers=[PowerSnapshot.from_dict(p) for p in d["Powers"]],
             StateLog=list(d["StateLog"]), CombatId=d.get("CombatId"), MonsterId=d.get("MonsterId"),
-            SlotName=d.get("SlotName"), Intent=d.get("Intent"),
+            SlotName=d.get("SlotName"), Intent=d.get("Intent"), FollowUpStateId=d.get("FollowUpStateId"),
         )
 
 
