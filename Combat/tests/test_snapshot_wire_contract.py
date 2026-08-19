@@ -17,7 +17,7 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 _COMBAT_DIR = _HERE.parents[0]
 _OFFICIAL_EXAMPLE_PATH = Path(r"C:\STS2_Emulator\docs\contracts\combat_state_snapshot_example.v0.8.json")
-for _path in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env"):
+for _path in (_HERE, _COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env"):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
