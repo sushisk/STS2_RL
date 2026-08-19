@@ -69,7 +69,7 @@ _LEGACY_CASE_ALIASES: dict[str, str | tuple[str, ...]] = {
     "test_no_power_capture_round_trip":
         "test_snapshot_restore:test_object_restore_round_trip_uses_typed_snapshot",
     "test_with_power_capture_round_trip":
-        "test_snapshot_wire_contract:test_basic_player_and_enemy_power_attachment_round_trip_via_wire",
+        "test_snapshot_restore:test_live_power_capture_round_trip_uses_typed_snapshot",
     "test_power_internal_data_classifications_round_trip_and_reject_via_json_api":
         "test_snapshot_wire_contract:test_power_internal_data_classifications_round_trip_via_wire",
     "test_full_rng_stream_equality_across_round_trip":
