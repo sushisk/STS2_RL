@@ -88,13 +88,12 @@ def new_session() -> WholeRunSession:
 def inject_relic(snapshot_json: str, relic_id: str) -> str:
     """Appends `relic_id` to player 0's relics in a Map Boundary snapshot's JSON.
 
-    `SerializableRelic` fields are `id` (a `{Category, Entry}` ModelId, confirmed via a
-    real captured snapshot - the Whole Run API reference documents the field names but
-    not this nested shape) and `floor_added_to_deck`.
+    `SerializableRelic.id` is a ModelId on the CLR side, but the run-save JSON wire
+    format uses ModelIdRunSaveConverter's `CATEGORY.ENTRY` string representation.
     """
     data = json.loads(snapshot_json)
     data["Run"]["Run"]["players"][0]["relics"].append(
-        {"id": {"Category": "RELIC", "Entry": relic_id}, "floor_added_to_deck": 1}
+        {"id": f"RELIC.{relic_id}", "floor_added_to_deck": 1}
     )
     return json.dumps(data)
 
