@@ -199,7 +199,7 @@ def active_enemies(snapshot: CombatStateSnapshot) -> list[EnemySnapshot]:
 
 
 def player_creature(snapshot: CombatStateSnapshot) -> PlayerSnapshot:
-    """Return the player-side creature view without exposing wire nesting details."""
+    """Return the flattened player-side creature view stored on ``PlayerSnapshot``."""
     return snapshot.Player
 
 
@@ -207,8 +207,13 @@ def creature_by_id(
     snapshot: CombatStateSnapshot,
     instance_id: str,
 ) -> PlayerSnapshot | EnemySnapshot | CreatureSnapshot:
+    """Resolve a creature stable ID across player, enemies, and pets.
+
+    ``PlayerSnapshot.InstanceId`` identifies the player entity, not its creature. The
+    player-side creature is therefore resolved only through ``CreatureInstanceId``.
+    """
     player = snapshot.Player
-    if instance_id in (player.InstanceId, player.CreatureInstanceId):
+    if instance_id == player.CreatureInstanceId:
         return player
     for enemy in snapshot.Enemies:
         if enemy.InstanceId == instance_id:
