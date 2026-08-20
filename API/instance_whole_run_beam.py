@@ -33,8 +33,9 @@ from API.instance_whole_run import (
     require_terminal_outcome,
     wr_derive_context_id,
 )
-from API.masking import mask_public_fragment
+from API.masking import mask_legal_actions, mask_public_fragment
 from API.validation import RequestRejected
+from legal_action_identity import legal_action_semantic_key_text
 
 _COMBAT_BOUNDARIES = frozenset({STABLE, PENDING_CHOICE})
 _COMBAT_ACTION_TYPES = frozenset(
@@ -50,8 +51,90 @@ _COMBAT_ACTION_TYPES = frozenset(
 )
 
 
+_PUBLIC_FAULT_DIAGNOSTIC_KEYS = (
+    "fault_kind",
+    "message",
+    "expected_boundary",
+    "actual_boundary",
+    "actual_choice_scope",
+    "actual_choice_kind",
+    "actual_room_context",
+)
+
+
+def _public_fault_diagnostics(diagnostics: dict) -> dict:
+    """Publish a faulted replay's landing state through the normal masking path.
+
+    The worker's diagnostics are raw on purpose - they never leave RL by themselves - but
+    `actual_observation` is `session.get_observation()`, which carries the run seed and the
+    hidden pile order. Everything else crossing this wire is masked, so the observation is
+    replaced here by the same masked DTO the successful path publishes, built by the same
+    two functions, rather than by a second masking rule that could drift from the first.
+
+    The remaining keys are already public fields of that DTO (`boundary`, `choiceScope`,
+    `pendingChoice.choiceType`, `room_context`) and cross unchanged. Full detail stays in
+    the server log; see `_finalize_combat_branch`.
+    """
+
+    public = {key: diagnostics[key] for key in _PUBLIC_FAULT_DIAGNOSTIC_KEYS if key in diagnostics}
+    observation = diagnostics.get("actual_observation")
+    legal_actions = diagnostics.get("actual_legal_actions")
+    masked_legal_actions = (
+        mask_legal_actions(legal_actions) if isinstance(legal_actions, list) else None
+    )
+    if isinstance(observation, dict):
+        public["actual_masked_emulator_dto"] = build_masked_emulator_dto(
+            observation.get("state") or {},
+            extra=(
+                {"legal_actions": masked_legal_actions}
+                if masked_legal_actions is not None
+                else None
+            ),
+        )
+    elif masked_legal_actions is not None:
+        public["actual_legal_actions"] = masked_legal_actions
+    return public
+
+
+def _semantic_key_and_ordinal(legal_actions: list, chosen_action_id: Any) -> tuple:
+    """Semantic identity of the chosen action, plus which same-key copy it is.
+
+    An opaque ``action_id`` is only valid at the decision it came from, so a replayed
+    state has to re-resolve it. `legal_action_semantic_key_text` identifies the action by
+    its visible semantics; identical copies of a card share that key, and no card instance
+    id is published to break the tie, so the copy is identified by how many same-key
+    actions precede it in the parent's ordering.
+
+    Counting over `legal_actions` as given - unavailable entries included - is what makes
+    the ordinal comparable: the worker matches against the same raw
+    ``session.get_legal_actions()`` list.
+    """
+
+    index = next(
+        (
+            position
+            for position, action in enumerate(legal_actions)
+            if action["action_id"] == chosen_action_id
+        ),
+        None,
+    )
+    if index is None:
+        raise RuntimeError(
+            f"chosen action_id {chosen_action_id!r} is not among the parent's legal actions"
+        )
+    key = legal_action_semantic_key_text(legal_actions[index])
+    ordinal = sum(
+        1 for action in legal_actions[:index] if legal_action_semantic_key_text(action) == key
+    )
+    return key, ordinal
+
+
 def _is_combat_view(view: object) -> bool:
     if getattr(view, "boundary", None) not in _COMBAT_BOUNDARIES:
+        return False
+
+    room_context = getattr(view, "room_context", None)
+    if not isinstance(room_context, dict) or room_context.get("room_type") != "CombatRoom":
         return False
 
     legal_actions = getattr(view, "legal_actions_raw", None)
@@ -370,6 +453,10 @@ class WholeRunInstance(_BaseWholeRunInstance):
             choice_type=parent_view.choice_type,
             relic_injection=None,
         )
+        resolve_action_semantic_key, resolve_action_ordinal = _semantic_key_and_ordinal(
+            parent_view.legal_actions_raw,
+            spec.chosen_action_id,
+        )
         work_item = ChoiceWorkItem(
             work_id=f"{spec.branch_id}-{spec.rng_id}",
             context_id=context_id,
@@ -381,6 +468,8 @@ class WholeRunInstance(_BaseWholeRunInstance):
             target_boundary=parent_view.boundary,
             work_kind=WORK_KIND_SUB_BRANCH,
             resolve_action_id=spec.chosen_action_id,
+            resolve_action_semantic_key=resolve_action_semantic_key,
+            resolve_action_ordinal=resolve_action_ordinal,
             event_rng_plan=None,
         )
 
@@ -402,10 +491,20 @@ class WholeRunInstance(_BaseWholeRunInstance):
         if result.status != "success":
             book.status = STATUS_FAULTED
             diagnostics = result.diagnostics or {}
+            # Full, unmasked detail goes to the server log, which is where an operator
+            # reads it; `branch=` correlates it with the Training-side fault record. The
+            # wire only ever carries masked state.
+            print(
+                f"[FAULT] branch={spec.branch_id} parent={spec.parent_branch_id} "
+                f"rng={spec.rng_id} decision_point={spec.decision_point_id} "
+                f"diagnostics={diagnostics!r}",
+                flush=True,
+            )
             return _faulted_branch_result(
                 spec,
                 error=diagnostics.get("message") or "branch execution faulted",
                 fault_kind=diagnostics.get("fault_kind") or FAULT_EMULATOR_ERROR,
+                diagnostics=_public_fault_diagnostics(diagnostics),
             )
 
         step = result.step

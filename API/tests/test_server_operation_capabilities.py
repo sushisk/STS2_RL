@@ -36,12 +36,28 @@ class _WholeRunStub:
         return {"status": STATUS_COMPLETED, "branch_results": {}}
 
 
-def _view(*actions: dict, boundary: str = "stable") -> SimpleNamespace:
-    return SimpleNamespace(boundary=boundary, legal_actions_raw=list(actions))
+def _view(
+    *actions: dict,
+    boundary: str = "stable",
+    room_type: str = "CombatRoom",
+) -> SimpleNamespace:
+    """A Whole Run view stub.
+
+    `room_context` is a declared field of the real view and is part of what decides
+    whether a view is a Combat view: a rest site's smith prompt and a card reward publish
+    `choice_card` / `choice_confirm` / `choice_skip`, which are combat action types, so
+    boundary and action type alone cannot tell them apart from combat.
+    """
+    return SimpleNamespace(
+        boundary=boundary,
+        room_context={"room_type": room_type},
+        legal_actions_raw=list(actions),
+    )
 
 
 class _CombatView:
     boundary = "stable"
+    room_context = {"room_type": "CombatRoom"}
     map_snapshot = "{}"
     room_id = 1
     action_prefix = ()
@@ -343,6 +359,18 @@ def test_non_combat_boundary_stays_out_of_scope_even_with_combat_action_types() 
             {"action_id": 1, "action_type": "choice_confirm", "is_available": True},
             {"action_id": 2, "action_type": "choice_skip", "is_available": True},
             boundary="event_choice",
+        )
+    )
+
+
+def test_a_non_combat_room_stays_out_of_scope_with_combat_action_types() -> None:
+    """A rest site's smith prompt publishes only `choice_card`, a combat action type."""
+    assert not _is_combat_view(
+        _view(
+            {"action_id": 1, "action_type": "choice_card", "is_available": True},
+            {"action_id": 2, "action_type": "choice_confirm", "is_available": True},
+            boundary="pending_choice",
+            room_type="RestSiteRoom",
         )
     )
 

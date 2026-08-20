@@ -181,8 +181,9 @@ def _faulted_branch_result(
     *,
     error: str,
     fault_kind: str,
+    diagnostics: Optional[dict] = None,
 ) -> dict:
-    return {
+    result = {
         "status": STATUS_FAULTED,
         "branch_id": spec.branch_id,
         "parent_branch_id": spec.parent_branch_id,
@@ -190,6 +191,9 @@ def _faulted_branch_result(
         "error": error or "branch execution faulted",
         "fault_kind": fault_kind or FAULT_EMULATOR_ERROR,
     }
+    if diagnostics:
+        result["diagnostics"] = diagnostics
+    return result
 
 
 class WholeRunInstance:

@@ -171,6 +171,8 @@ class ChoiceWorkItem:
     target_boundary: str
     work_kind: str
     resolve_action_id: "int | None" = None
+    resolve_action_semantic_key: "str | None" = None
+    resolve_action_ordinal: int = 0
     event_rng_plan: "EventRngReplayPlan | None" = None
     """`None` means no Active Event RNG Hypothesis override applies to this replay
     (unchanged behavior). See `EventRngReplayPlan` for field-level detail."""
@@ -556,6 +558,11 @@ class _WorkerRuntime:
                         "fault_kind": "replay_mismatch",
                         "expected_boundary": work_item.target_boundary,
                         "actual_boundary": reach.boundary,
+                        "actual_choice_scope": reach.choice_scope,
+                        "actual_choice_kind": reach.choice_kind,
+                        "actual_legal_actions": reach.legal_actions,
+                        "actual_room_context": reach.room_context,
+                        "actual_observation": reach.observation,
                     },
                 )
 
@@ -606,13 +613,30 @@ class _WorkerRuntime:
                     discovered_action_prefix=discovered_prefix,
                 )
 
+            resolve_action_id = work_item.resolve_action_id
+            if resolve_action_id is not None and work_item.resolve_action_semantic_key:
+                matches = [
+                    action["action_id"]
+                    for action in reach.legal_actions
+                    if legal_action_semantic_key_text(action)
+                    == work_item.resolve_action_semantic_key
+                ]
+                if not 0 <= work_item.resolve_action_ordinal < len(matches):
+                    raise RuntimeError(
+                        "replay action semantic key ordinal did not resolve: "
+                        f"key={work_item.resolve_action_semantic_key!r}, "
+                        f"ordinal={work_item.resolve_action_ordinal}, matches={matches!r}, "
+                        f"legal_actions={reach.legal_actions!r}"
+                    )
+                resolve_action_id = matches[work_item.resolve_action_ordinal]
+
             if work_item.choice_type == "map":
                 # Map's visible action is ChooseRoom(roomId). Preserve its raw result, then
                 # treat the entered room as a NEW frontier where trivial reward transport
                 # is allowed. The resulting hidden suffix belongs to the new room prefix.
-                entered = self.session.choose_room(work_item.resolve_action_id)
+                entered = self.session.choose_room(resolve_action_id)
                 step_result = {
-                    "action_id": work_item.resolve_action_id,
+                    "action_id": resolve_action_id,
                     "observation": self.session.get_observation(),
                     "room_context": self.session.get_room_context(),
                     "transition": None,
@@ -620,7 +644,7 @@ class _WorkerRuntime:
                     "room_enter_result": entered,
                 }
             else:
-                step_result = self.session.step(work_item.resolve_action_id)
+                step_result = self.session.step(resolve_action_id)
 
             auto = drain_trivial_reward_frontier(self.session)
             settled_observation = self.session.get_observation()
