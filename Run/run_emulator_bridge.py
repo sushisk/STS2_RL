@@ -7,12 +7,11 @@ This is the Whole-Run counterpart of `Combat/emulator_bridge.py`. It targets
 `C:\\STS2_Emulator\\docs\\api\\whole_run_api_reference_20260803.md` (baseline commit
 `87a0962`).
 
-Kept deliberately independent from `Combat/emulator_bridge.py` (no import of it):
-that module's `shared_game_instance()` enforces a single shared `GameInstance` per
-process for Combat-only use. The Whole Run layer instead constructs exactly one
-`GameInstance` per OS process itself (see `WholeRunSession`) - the same
-one-instance-per-process discipline, just owned by this module instead of shared
-with Combat's.
+The DTO conversion layer remains independent from `Combat/emulator_bridge.py` (no
+import of it).  Game acquisition no longer is: both wrappers now ask the neutral
+process-wide `game_access` module for the one shared `GameInstance`.  That closes the
+old split where Whole Run and Combat could each construct a CLR instance and overwrite
+the process-global RunManager/CombatManager state when they coexisted.
 
 IMPORTANT: never run from a working directory inside the emulator's own repo
 (C:\\STS2_Emulator) and never add that repo root to sys.path - see
@@ -65,16 +64,14 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
 
 
 def new_game_instance(repo_root: Path | None = None):
-    """A fresh `GameInstance` for the current OS process.
+    """The process-wide shared `GameInstance`, retained for existing callers.
 
-    Constructing/resetting a second `GameInstance` in the same process tears down
-    the first's active engine singleton state (`RunManager.Instance` /
-    `CombatManager.Instance` are process-wide statics - see the Whole Run API
-    reference's "GameInstance singleton 依存" section). Callers that need two live
-    runs at once must use two OS processes, each calling this once.
+    Constructing a second CLR instance tears down process-global engine state, so the
+    neutral GameAccess owner memoizes the first instance instead.
     """
-    types = ensure_loaded(repo_root)
-    return types["GameInstance"]()
+    from game_access import process_game_access
+
+    return process_game_access(lambda: ensure_loaded(repo_root)["GameInstance"]()).observation_game()
 
 
 def to_plain(value: Any) -> Any:

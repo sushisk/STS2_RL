@@ -1,8 +1,7 @@
 """Thin, plain-data wrapper around a single `GameInstance` for Whole Run connectivity.
 
-One `WholeRunSession` owns exactly one CLR `GameInstance` (see
-`run_emulator_bridge.new_game_instance` for the one-instance-per-process
-constraint). Every method here returns/accepts plain Python dict/list/str/int data,
+One `WholeRunSession` uses the process-wide CLR `GameInstance` owned by
+`game_access`. Every method here returns/accepts plain Python dict/list/str/int data,
 never a live CLR object - this is what makes a `WholeRunSession` safe to use as the
 per-worker-process handle in `choice_branch_runner.py`'s multiprocessing pool.
 
@@ -36,6 +35,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from game_access import GameAccessError, GameLease, LeaseState, process_game_access
 import run_emulator_bridge as bridge
 
 MODE_EXTERNAL_CONTROL = "external_control"
@@ -61,18 +61,33 @@ TRANSITION_KIND_COMBAT_COMPLETED = "combat_completed"
 
 class WholeRunSession:
     def __init__(self, repo_root: Path | None = None):
-        self._game = bridge.new_game_instance(repo_root)
+        self._access = process_game_access(lambda: bridge.ensure_loaded(repo_root)["GameInstance"]())
+        self._game = self._access.observation_game()
+        self._lease_holder = object()
+        self._lease: GameLease | None = None
 
-    @property
-    def raw_game_instance(self):
-        """Escape hatch for callers that need direct CLR access (e.g. EnableGodModeForTesting)."""
-        return self._game
+    def _mutating_game(self):
+        if self._lease is None:
+            self._lease = self._access.claim(self._lease_holder, LeaseState.RUN)
+        return self._access.mutating_game(self._lease)
+
+    def close(self) -> None:
+        """Deterministically releases this session's current lease, if it still owns it."""
+        lease, self._lease = self._lease, None
+        if lease is None:
+            return
+        try:
+            self._access.release(lease)
+        except GameAccessError:
+            # A newer instance may have superseded this session.  Its lease must not
+            # be released by cleanup of this stale session.
+            pass
 
     def enable_god_mode_for_testing(self) -> None:
-        self._game.EnableGodModeForTesting()
+        self._mutating_game().EnableGodModeForTesting()
 
     def start_run(self, seed: int | str, character_id: str, ascension: int) -> dict:
-        result = self._game.StartRun(seed, character_id, ascension)
+        result = self._mutating_game().StartRun(seed, character_id, ascension)
         return bridge.run_reset_result_to_dict(result)
 
     def get_observation(self) -> dict:
@@ -88,10 +103,10 @@ class WholeRunSession:
         return bridge.map_room_options_to_list(self._game.GetMapRooms())
 
     def choose_room(self, room_id: int) -> dict:
-        return bridge.room_enter_result_to_dict(self._game.ChooseRoom(room_id))
+        return bridge.room_enter_result_to_dict(self._mutating_game().ChooseRoom(room_id))
 
     def step(self, action_id: int) -> dict:
-        return bridge.step_result_to_dict(self._game.Step(action_id))
+        return bridge.step_result_to_dict(self._mutating_game().Step(action_id))
 
     def get_run_state(self) -> dict:
         return bridge.run_state_summary_to_dict(self._game.GetRunState())
@@ -103,7 +118,7 @@ class WholeRunSession:
         return str(self._game.SaveState())
 
     def load_state(self, snapshot_json: str) -> None:
-        self._game.LoadState(snapshot_json)
+        self._mutating_game().LoadState(snapshot_json)
 
     def capture_combat_snapshot(self) -> str:
         """Capture the combat-only state; the run's map position does not survive restore."""
@@ -111,7 +126,7 @@ class WholeRunSession:
 
     def restore_combat_snapshot(self, snapshot_json: str) -> None:
         """Restore a combat-only snapshot; the run's map position does not survive restore."""
-        self._game.RestoreSnapshotJson(snapshot_json)
+        self._mutating_game().RestoreSnapshotJson(snapshot_json)
 
     def get_event_rng_state(self) -> dict:
         return bridge.event_rng_snapshot_to_dict(self._game.GetEventRngState())
@@ -123,7 +138,8 @@ class WholeRunSession:
         the same stream keys as `event_rng_snapshot_to_dict`'s output
         (`event_rng`/`player_rewards_rng`/`player_shops_rng`/`player_transformations_rng`).
         """
-        snapshot = self._game.GetEventRngState()
+        game = self._mutating_game()
+        snapshot = game.GetEventRngState()
         stream_by_key = {
             "event_rng": snapshot.EventRng,
             "player_rewards_rng": snapshot.PlayerRewardsRng,
@@ -132,7 +148,7 @@ class WholeRunSession:
         }
         for key, rng_overrides in overrides.items():
             bridge.apply_rng_overrides(stream_by_key[key], rng_overrides)
-        self._game.SetEventRngState(snapshot)
+        game.SetEventRngState(snapshot)
 
 
 def combat_just_concluded(step_result: dict) -> bool:

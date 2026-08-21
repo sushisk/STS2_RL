@@ -544,8 +544,13 @@ class WholeRunInstance:
         if self._closed:
             return
         self._closed = True
-        self._event_rng_registry.release_all()
-        self._pool.close()
+        try:
+            self._event_rng_registry.release_all()
+        finally:
+            try:
+                self._pool.close()
+            finally:
+                self._session.close()
 
     # -- shared Branch lifecycle primitives ------------------------------------------
 

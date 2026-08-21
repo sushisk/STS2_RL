@@ -560,7 +560,10 @@ class CombatInstance:
         try:
             self._branch_manager.close_all()
         finally:
-            self._pool.close()
+            try:
+                self._pool.close()
+            finally:
+                self._session.close()
 
     def _internal_id_or_reject(self, public_branch_id: str) -> str:
         if public_branch_id == ROOT_BRANCH_ID:

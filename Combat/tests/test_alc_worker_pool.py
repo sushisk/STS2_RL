@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from API.instance_combat import DEFAULT_ALC_WORKER_COUNT, CombatInstance  # noqa: E402
 import emulator_bridge  # noqa: E402
+import game_access  # noqa: E402
 from search.alc_worker_pool import AlcBranchWorkerPool  # noqa: E402
 from search.branch_manager import BranchManager  # noqa: E402
 from search.branch_worker_pool import (  # noqa: E402
@@ -150,8 +151,8 @@ def test_alc_pool_bootstrap_steps_sibling_branches_on_independent_sessions():
 def test_alc_pool_parallel_execute_keeps_results_on_their_own_isolated_sessions():
     """Drives raw pool.execute() from concurrent Python threads.
 
-    The shared/default-ALC GameInstance guard is a proxy: after the main-thread context
-    is built, this test replaces emulator_bridge._shared_instance with a sentinel. ALC
+    The process-wide GameAccess guard is a proxy: after the main-thread context
+    is built, this test replaces game_access._process_game_access with a sentinel. ALC
     worker execution should use IsolatedGameSession objects only, so the sentinel must
     remain untouched while every result comes back with its own combat_session_id.
     """
@@ -175,8 +176,8 @@ def test_alc_pool_parallel_execute_keeps_results_on_their_own_isolated_sessions(
     ]
 
     sentinel = object()
-    old_shared_instance = emulator_bridge._shared_instance  # noqa: SLF001
-    emulator_bridge._shared_instance = sentinel  # noqa: SLF001
+    old_process_game_access = game_access._process_game_access  # noqa: SLF001
+    game_access._process_game_access = sentinel  # noqa: SLF001
     try:
         with AlcBranchWorkerPool(worker_count=4, request_timeout_s=120.0) as pool:
             with ThreadPoolExecutor(max_workers=4) as executor:
@@ -190,8 +191,8 @@ def test_alc_pool_parallel_execute_keeps_results_on_their_own_isolated_sessions(
                 ]
                 results = [future.result() for future in as_completed(futures)]
     finally:
-        assert emulator_bridge._shared_instance is sentinel  # noqa: SLF001
-        emulator_bridge._shared_instance = old_shared_instance  # noqa: SLF001
+        assert game_access._process_game_access is sentinel  # noqa: SLF001
+        game_access._process_game_access = old_process_game_access  # noqa: SLF001
 
     assert len(results) == 4
     assert {r.status for r in results} == {BRANCH_STATUS_SUCCESS}, [r.diagnostics for r in results]

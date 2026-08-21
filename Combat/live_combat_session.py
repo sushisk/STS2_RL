@@ -46,6 +46,7 @@ import re
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from game_access import GameAccess, GameAccessError, GameLease, LeaseState, process_game_access
 from battle_emulator import (
     BattleEmulator,
     BattleState,
@@ -60,7 +61,6 @@ from emulator_bridge import (
     legal_actions_to_list,
     restore_snapshot as bridge_restore_snapshot,
     restore_snapshot_json as bridge_restore_snapshot_json,
-    shared_game_instance,
     to_plain,
     validate_restore_snapshot as bridge_validate_restore_snapshot,
     validate_restore_snapshot_json as bridge_validate_restore_snapshot_json,
@@ -455,7 +455,10 @@ class LiveCombatSession:
         ensure_loaded(repo_root)
         self._repo_root = repo_root
         self._emulator = BattleEmulator(repo_root=repo_root, use_legal_action_cache=use_legal_action_cache)
-        self._game = None
+        self._access: GameAccess | None = None
+        self._game = self._initial_game()
+        self._lease_holder = object()
+        self._lease: GameLease | None = None
         self._current_frame: "DecisionFrame | None" = None
         self.last_step_resynchronized: bool = False
         self.resynchronize_count: int = 0
@@ -466,6 +469,29 @@ class LiveCombatSession:
         # the C# design exactly: "Resetが試みられた"ではなく"Resetが成功した"でのみ解除).
         self._session_faulted: bool = False
         self.last_fault_context: "ActionFaultContext | None" = None
+
+    def _mutating_game(self):
+        assert self._access is not None
+        if self._lease is None:
+            self._lease = self._access.claim(self._lease_holder, LeaseState.COMBAT)
+        return self._access.mutating_game(self._lease)
+
+    def _initial_game(self):
+        self._access = process_game_access(lambda: ensure_loaded(self._repo_root)["GameInstance"]())
+        return self._access.observation_game()
+
+    def close(self) -> None:
+        """Deterministically releases this session's current lease, if it still owns it."""
+        lease, self._lease = self._lease, None
+        if lease is None:
+            return
+        try:
+            assert self._access is not None
+            self._access.release(lease)
+        except GameAccessError:
+            # A newer instance may have superseded this session.  Its lease must not
+            # be released by cleanup of this stale session.
+            pass
 
     def _ensure_session_not_faulted(self) -> None:
         if self._session_faulted:
@@ -483,7 +509,7 @@ class LiveCombatSession:
         call this again for the same episode; use `step()` for every subsequent
         decision."""
         scenario = build_scenario_from_spec(scenario_spec)
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         try:
             reset_result = self._game.ResetFromScenario(scenario)
         except _quiescent_exception_type() as exc:  # noqa: BLE001 - re-raised as our own type below
@@ -501,18 +527,22 @@ class LiveCombatSession:
 
     def validate_restore_snapshot(self, snapshot) -> RestoreValidationResult:
         """Side-effect-free Restore dry run through the public CLR API."""
-        game = self._game or shared_game_instance(self._repo_root)
+        game = self._game or self._observation_game()
         return _restore_validation_result_from_clr(bridge_validate_restore_snapshot(game, snapshot))
 
     def validate_restore_snapshot_json(self, json_text: str) -> RestoreValidationResult:
         """Side-effect-free Restore dry run through the public CLR JSON API."""
-        game = self._game or shared_game_instance(self._repo_root)
+        game = self._game or self._observation_game()
         return _restore_validation_result_from_clr(bridge_validate_restore_snapshot_json(game, json_text))
 
     def get_restore_capabilities(self) -> RestoreCapabilities:
         """Returns the live CLR Restore capability contract as a Python dataclass."""
-        game = self._game or shared_game_instance(self._repo_root)
+        game = self._game or self._observation_game()
         return _restore_capabilities_from_clr(bridge_get_restore_capabilities(game))
+
+    def _observation_game(self):
+        assert self._access is not None
+        return self._access.observation_game()
 
     def _wrap_restore_result(self, result) -> BattleState:
         obs = result.Observation
@@ -554,7 +584,7 @@ class LiveCombatSession:
         `CombatStateSnapshot` DTOs are converted by the bridge through the existing
         canonical JSON serializer rather than a second parser.
         """
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         try:
             result = bridge_restore_snapshot(self._game, snapshot)
         except _snapshot_restore_rejected_exception_type() as exc:  # noqa: BLE001
@@ -568,7 +598,7 @@ class LiveCombatSession:
 
     def restore_snapshot_json(self, json_text: str) -> BattleState:
         """Restores from canonical Snapshot JSON through the public CLR JSON API."""
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         try:
             result = bridge_restore_snapshot_json(self._game, json_text)
         except _snapshot_restore_rejected_exception_type() as exc:  # noqa: BLE001
@@ -598,7 +628,7 @@ class LiveCombatSession:
         episode-start call is a follow-up, not attempted in this pass, per this task's
         own note against adding cleverness to a correctness-critical path without
         separate verification."""
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         scenario = build_scenario_from_state(battle_state.engine_state, battle_state.shuffle_rng_seed)
         try:
             self._game.ResetFromScenario(scenario)
@@ -690,7 +720,7 @@ class LiveCombatSession:
         it. See module docstring - a deliberate, counted fallback, not a silent one."""
         scenario = build_scenario_from_state(battle_state.engine_state, battle_state.shuffle_rng_seed)
         try:
-            self._game.ResetFromScenario(scenario)
+            self._mutating_game().ResetFromScenario(scenario)
         except _quiescent_exception_type() as exc:  # noqa: BLE001
             raise QuiescentBoundaryViolation(str(exc)) from exc
         self.last_step_resynchronized = True
@@ -774,12 +804,13 @@ class LiveCombatSession:
                 raise SnapshotRestoreMissingMoveError(missing)
 
         self.last_step_resynchronized = False
+        game = self._mutating_game()
         if not self._is_still_current():
             self._resynchronize(battle_state)
 
         try:
             next_state = self._emulator.step_live_action(
-                self._game, battle_state, action, target_index=target_index, target_enemy_index=target_enemy_index
+                game, battle_state, action, target_index=target_index, target_enemy_index=target_enemy_index
             )
         except _quiescent_exception_type() as exc:  # noqa: BLE001
             raise QuiescentBoundaryViolation(str(exc)) from exc
@@ -798,9 +829,9 @@ class LiveCombatSession:
             if continuation_steps > MAX_CONTINUATION_STEPS:
                 raise RuntimeError("ActionContinuation did not resolve within 50 continuation steps.")
             legal = self._emulator.enumerate_legal_actions(next_state)
-            continuation_action = resolver(self._game, next_state, legal, continuation_deadline)
+            continuation_action = resolver(game, next_state, legal, continuation_deadline)
             try:
-                next_state = self._emulator.step_live_action(self._game, next_state, continuation_action)
+                next_state = self._emulator.step_live_action(game, next_state, continuation_action)
             except _quiescent_exception_type() as exc:  # noqa: BLE001
                 raise QuiescentBoundaryViolation(str(exc)) from exc
             except _action_faulted_exception_type() as exc:  # noqa: BLE001

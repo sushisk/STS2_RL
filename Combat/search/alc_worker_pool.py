@@ -122,10 +122,18 @@ class IsolatedLiveCombatSession(LiveCombatSession):
     """``LiveCombatSession`` facade over one thread-affine ``IsolatedGameSession``."""
 
     def __init__(self, isolated_session, repo_root: Any | None = None, use_legal_action_cache: bool = True) -> None:
-        super().__init__(repo_root=repo_root, use_legal_action_cache=use_legal_action_cache)
         self._isolated_session = isolated_session
-        self._game = isolated_session
+        super().__init__(repo_root=repo_root, use_legal_action_cache=use_legal_action_cache)
         self._emulator = BattleEmulator(repo_root=repo_root, use_legal_action_cache=use_legal_action_cache)
+
+    def _initial_game(self):
+        return self._isolated_session
+
+    def _mutating_game(self):
+        return self._isolated_session
+
+    def _observation_game(self):
+        return self._isolated_session
 
     def start_combat(self, scenario_spec: dict):
         scenario = self._isolated_session.DeserializeCombatScenario(_scenario_json_for_isolated_session(scenario_spec))
