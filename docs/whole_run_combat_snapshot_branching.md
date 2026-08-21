@@ -40,12 +40,16 @@ Emulator は開始・終了それぞれに単一の明示フラグを出す。�
 
 ```
 choose_room() → is_combat == True
-  → Whole Run セッションへ CaptureSnapshot を要求
-  → CombatInstance を用意し、その snapshot を「今の戦闘」として渡す
+  → CombatInstance を用意し、live な戦闘を adopt させる（restore はしない）
+  → root が stable に達したら CombatInstance が自分でアンカーを張る
   → 戦闘境界の emulate_actions を CombatInstance へ委譲
   → step() の transition.kind == "combat_completed"
   → CombatInstance を畳む
 ```
+
+**アンカーはコントローラが張るのではない。** `CombatInstance.commit_action` は
+コミット後の boundary が `stable` なら自分で `capture_snapshot()` して再アンカーする
+（2.4）。戦闘に入った時点で無理に capture する必要はなく、してはならない（2.8）。
 
 ### 2.2 コントローラは restore しない（最重要）
 
@@ -138,10 +142,25 @@ branch_log・history を所有し、`CombatInstance` も同じライフサイク
 
 ### 2.8 開始条件と終端の publish 形
 
-**開始**: `choose_room().is_combat == True` を検出した時点で、Whole Run セッションが
-`stable` にいることを確認して capture する。`pending_choice` の snapshot は restore できない
-（`unsupported_capture_boundary:published_target`）。戦闘の初手は必ず `stable` なので、
-入場直後の capture は常に有効である。
+**開始**: 戦闘の最初の決定は `stable` とは限らない。`GAMBLING_CHIPS` は
+`AfterPlayerTurnStart` でターン 1 に手札選択を要求するため
+（`MegaCrit.Sts2.Core.Models.Relics/GamblingChip.cs:16-26`）、**戦闘が
+`pending_choice` で始まる**。`pending_choice` の snapshot は restore できないので
+（`unsupported_capture_boundary:published_target`）、この戦闘には開始時点で
+restore 可能なアンカーが存在しない。
+
+したがって**入場時に capture してアンカーを立てようとしてはならない**。
+`CombatInstance` を adopt で立て、アンカーは root が最初の `stable` に達したときに
+`CombatInstance` 自身が張る。それまでの間、戦闘分岐の要求は**明示的な理由を付けて拒否する**。
+
+これは `CombatInstance` 側の既知の未対応事項と同じものである
+（`API/instance_combat.py:85-88` の `_START_PENDING_UNSUPPORTED`:
+"does not yet support a Start-of-Combat Pending root"）。委譲によって新たに作り込む
+欠陥ではなく、既存の制約をそのまま引き継ぐ。§5 に既知の限界として記載する。
+
+拒否は握りつぶさない。Training 側は beam が actionable な結果を得られず、その 1 決定だけ
+heuristic fallback に落ちる。拒否理由は `emulate_actions_rejected:<detail>` として
+search trace に残るので、**後から件数を数えられる**。影響が想定より大きければ気づける。
 
 **終端**: `CombatInstance` は自分の終端を `terminal: true, outcome: victory/defeat` で表す
 （`API/instance_combat.py:516-530`）。**これをそのまま publish してはならない。**
@@ -187,6 +206,85 @@ Emulator 側で既に解消されており、docstring だけが残っていた�
 Training の `turn_boundary_scoring` は全 leaf を強制 End Turn で採点するため、
 **この点を誤読すると設計全体が成立しないと判断してしまう。**
 
+### 2.11 完成形
+
+**プロセスと所有関係**
+
+```
+  RL サーバプロセス（コントローラ）
+  ┌──────────────────────────────────────────────────────────────┐
+  │ WholeRunInstance                                             │
+  │   ├─ WholeRunSession ──────┐                                 │
+  │   │    （root を step する唯一の実行者）                     │
+  │   ├─ 公開 branch 台帳       │  1 つの GameInstance を共有     │
+  │   │    branch_id → 実体側   │  （プロセスに 1 つだけ・2.3）   │
+  │   ├─ DecisionPointRegistry ─┼──┐                             │
+  │   ├─ WholeRunWorkerPool     │  │ 注入                        │
+  │   │    （map/event/reward の分岐）                            │
+  │   └─ CombatInstance ◄───────┘  │  戦闘中だけ存在             │
+  │        ├─ LiveCombatSession ◄──┘（adopt。restore しない）     │
+  │        ├─ _held_stable_snapshot  アンカー                    │
+  │        ├─ _replay_prefix         アンカーからの行動列        │
+  │        └─ BranchWorkerPool ──────┐                           │
+  └──────────────────────────────────┼───────────────────────────┘
+                                     │ snapshot + rng_id
+  ┌──────────────────────────────────▼───────────────────────────┐
+  │ branch worker プロセス（複数）                               │
+  │   restore_snapshot(anchor, rng_id) → replay → 分岐 action    │
+  │   ここだけが restore する                                    │
+  └──────────────────────────────────────────────────────────────┘
+```
+
+**戦闘 1 回の流れ**
+
+```
+Training            WholeRunInstance          CombatInstance        branch worker
+   │                       │                        │                     │
+   │  commit_action(map)   │                        │                     │
+   ├──────────────────────►│ choose_room()          │                     │
+   │                       │ is_combat == True      │                     │
+   │                       ├───── adopt ───────────►│  live をそのまま     │
+   │                       │                        │  引き受ける          │
+   │                       │                        │                     │
+   │  ── 戦闘が pending_choice で始まった場合 ──                          │
+   │  emulate_actions      │                        │                     │
+   ├──────────────────────►│───────────────────────►│ アンカー未確立      │
+   │◄── RequestRejected ───┤◄───────────────────────┤ → 拒否（2.8）       │
+   │                       │                        │                     │
+   │  commit_action(card)  │                        │                     │
+   ├──────────────────────►│ session.step()         │                     │
+   │                       │  ※ root を進めるのは   │                     │
+   │                       │    Whole Run だけ      │                     │
+   │                       ├─ 位置を反映 ──────────►│ stable なら         │
+   │                       │                        │ capture して再アンカー│
+   │                       │                        │                     │
+   │  emulate_actions      │                        │                     │
+   ├──────────────────────►│───────────────────────►│ アンカー + rng_id   │
+   │                       │                        ├────────────────────►│
+   │                       │                        │                     │ restore
+   │                       │                        │                     │ → replay
+   │                       │                        │◄────────────────────┤ → step
+   │◄─ Whole Run 形の DTO ─┤◄── branch_results ─────┤                     │
+   │      （2.9 で整形）    │                        │                     │
+   │                       │                        │                     │
+   │  commit_action(...)   │ step() の transition    │                     │
+   ├──────────────────────►│  .kind == "combat_completed"                 │
+   │                       ├───── 畳む ────────────►│ branch を解放       │
+```
+
+**変更されるクラスと、加わるもの**
+
+| クラス | 加わるもの |
+|---|---|
+| `WholeRunSession` | `capture_combat_snapshot()` / `restore_combat_snapshot()`（S1・完了） |
+| `LiveCombatSession` | GameInstance を注入で受け取る（S2a）。start / restore / validate / resume の**全取得箇所** |
+| `CombatInstance` | GameInstance と `DecisionPointRegistry` を注入で受け取る（S2b）。live を adopt する入口（S3） |
+| `WholeRunInstance` | 戦闘ライフサイクルの管理（S4）。公開 branch 台帳と容量（S5） |
+| `WholeRunInstance`（beam） | 戦闘境界の `emulate_actions` を委譲、DTO を Whole Run の形に整形（S5） |
+
+**変更しないもの**: `Run/worker_pool.py` の分岐機構、`rng_hypothesis`、`replay_draw_restore`、
+非戦闘の分岐経路、Training 側。
+
 ## 3. 実装手順
 
 各手順は独立にレビュー・テスト可能であること。手順をまたいで先回りしないこと。
@@ -215,9 +313,12 @@ Training の `turn_boundary_scoring` は全 leaf を強制 End Turn で採点す
 現在の入口は `start_combat(scenario_spec)` だけである。**既に live な戦闘をそのまま
 引き受ける入口**を足す。restore はしない（2.2）。
 
-- adopt 後は `start_combat` の後と同じ不変条件が立つこと。すなわち
+- adopt する盤面が `stable` なら、`start_combat` の後と同じ不変条件が立つこと。すなわち
   `_held_stable_snapshot` と `_replay_prefix` が stable アンカーとして確立されること
-- アンカー用の snapshot はコントローラが capture したものを使う
+- adopt する盤面が `pending_choice` なら、**アンカー未確立のまま立てられること**（2.8）。
+  この状態で分岐を要求されたら明示的な理由を付けて拒否する。既存の
+  `_held_stable_snapshot is None` チェック（`API/instance_combat.py:218`）が
+  その状態を既に表現している
 - 2 つの入口は**不変条件を確立する 1 箇所**に収束させる。同じ処理を 2 つ書かない
 
 **scenario から戦闘を開始してはならない。** 敵の初手が RNG 依存の場合、scenario 開始では
@@ -264,6 +365,13 @@ Training の `turn_boundary_scoring` は全 leaf を強制 End Turn で採点す
 
 ## 5. 今後の課題
 
+- **戦闘がプレイヤーの選択で始まる場合、最初の `stable` まで分岐できない（既知の限界）。**
+  `GAMBLING_CHIPS` のような開始時効果があると戦闘が `pending_choice` で始まり、
+  restore 可能なアンカーが無い。`CombatInstance` 側の
+  `_START_PENDING_UNSUPPORTED`（`API/instance_combat.py:85-88`）と同一の制約であり、
+  そこに解法の在り処も書かれている（`main_loop.py` の `CombatStartReplayRoot` の扱い）。
+  本仕様ではこの期間の分岐を拒否し、`emulate_actions_rejected` として観測できるようにする。
+  件数が問題になるなら、その機構を Whole Run にも通す
 - **戦闘中は Whole Run のワーカープールが遊ぶ。** プールそのものは共有できない。
   Combat の `WorkItem` は `DecisionContext` / `PipelineCandidateRef` を持ち、Whole Run の
   `ChoiceWorkItem` は `map_snapshot` / `room_id` / `action_prefix` を持つ別物で、
