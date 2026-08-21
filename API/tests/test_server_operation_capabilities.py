@@ -58,6 +58,7 @@ def _view(
 class _CombatView:
     boundary = "stable"
     room_context = {"room_type": "CombatRoom"}
+    observation = {"state": {"stepIndex": 7, "totalFloor": 3, "hp": 60, "energy": 3}}
     map_snapshot = "{}"
     room_id = 1
     action_prefix = ()

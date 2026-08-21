@@ -218,6 +218,31 @@ def test_legal_actions_are_masked_even_without_an_observation():
     assert [action["label"] for action in public["actual_legal_actions"]] == ["STRIKE_IRONCLAD"]
 
 
+def test_the_intended_position_crosses_with_the_reached_one():
+    """A faulted rebuild reported only where it landed.
+
+    That cannot separate "the replay diverged" from "the replay ran past the point it was
+    asked for": in the field the same fault covered both. `expected_position` is public
+    because every field in it is already published as part of a normal decision.
+    """
+    raw = _raw_diagnostics()
+    raw["expected_position"] = {
+        "prefix_length": 9,
+        "room_id": 4,
+        "boundary": "stable",
+        "stepIndex": 110,
+        "totalFloor": 15,
+        "hp": 71,
+        "energy": 1,
+        "turnNumber": 1,
+    }
+
+    public = _public_fault_diagnostics(raw)
+
+    assert public["expected_position"]["prefix_length"] == 9
+    assert public["expected_position"]["stepIndex"] == 110
+
+
 def test_diagnostics_without_state_are_passed_through_safely():
     public = _public_fault_diagnostics({"fault_kind": "task_timeout"})
 

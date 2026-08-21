@@ -59,7 +59,36 @@ _PUBLIC_FAULT_DIAGNOSTIC_KEYS = (
     "actual_choice_scope",
     "actual_choice_kind",
     "actual_room_context",
+    "expected_position",
 )
+
+
+def _expected_position(spec: _BranchSpec) -> dict:
+    """Where the rebuild is supposed to stop, taken from the view it branches off.
+
+    A faulted rebuild only ever reported where it *landed*, which cannot distinguish
+    "the replay diverged" from "the replay ran past the point it was asked for". Both were
+    observed in the field with the same fault, and telling them apart needs the intended
+    position next to the reached one: if `prefix_length` covers more of the run than the
+    parent had consumed, the prefix itself is wrong; if the lengths agree and the state is
+    still further on, the rebuild is.
+    """
+
+    # Never raise from here: this runs while a fault is already being reported, and a
+    # diagnostic that crashes turns a recoverable branch fault into a lost request.
+    view = spec.parent_view
+    observation = getattr(view, "observation", None)
+    state = (observation or {}).get("state") or {}
+    return {
+        "prefix_length": len(getattr(view, "action_prefix", ()) or ()),
+        "room_id": getattr(view, "room_id", None),
+        "boundary": getattr(view, "boundary", None),
+        "stepIndex": state.get("stepIndex"),
+        "totalFloor": state.get("totalFloor"),
+        "hp": state.get("hp"),
+        "energy": state.get("energy"),
+        "turnNumber": state.get("turnNumber"),
+    }
 
 
 def _public_fault_diagnostics(diagnostics: dict) -> dict:
@@ -490,7 +519,8 @@ class WholeRunInstance(_BaseWholeRunInstance):
     ) -> dict:
         if result.status != "success":
             book.status = STATUS_FAULTED
-            diagnostics = result.diagnostics or {}
+            diagnostics = dict(result.diagnostics or {})
+            diagnostics["expected_position"] = _expected_position(spec)
             # Full, unmasked detail goes to the server log, which is where an operator
             # reads it; `branch=` correlates it with the Training-side fault record. The
             # wire only ever carries masked state.
