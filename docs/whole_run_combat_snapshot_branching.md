@@ -59,20 +59,52 @@ def restore_combat_snapshot(self, json: str)  # GameInstance.RestoreSnapshotJson
 
 **受け入れ**: 戦闘中に capture → restore して観測が §2 の表どおりに戻ること。
 
-### S2. 戦闘分岐の work item に combat snapshot を載せる
+### S2. snapshot を「作って運ぶ」
 
-`API/instance_whole_run_beam.py` の `_prepare_combat_branch`:
+**分岐の 85% は親がルートではない。** 実トラフィックの `emulate_actions` items 7,130 件の
+うち、`parent_branch_id == "root"` は 1,051 件で、残り 6,079 件は別の branch を親に持つ。
 
-- `parent_view` が戦闘中なら、その場で `capture_combat_snapshot()` して
-  `ChoiceWorkItem` に載せる
-- 同じ decision から複数の branch を作るときは **capture は 1 回**にして使い回す
-  （26 KB が branch ごとに `multiprocessing.Queue` を渡るのを避ける）
-- `map_snapshot` / `room_id` / `action_prefix` は戦闘 work item では**使わない**
+これが設計を決める。API プロセスのライブセッションは**常にルートの位置**にあり、
+branch の盤面は worker プロセスにしか存在しない。したがってライブセッションから capture
+できるのはルート親の場合だけで、それ以外で同じことをすると**全く別の盤面**を渡すことになる。
+現行の prefix 方式が深さ 2 以上でも動いていたのは、`_build_child_view` が経路全体を
+prefix にエンコードしているからであり、snapshot にはその性質が無い。
 
-`Run/worker_pool.py` の `ChoiceWorkItem` に `combat_snapshot: "str | None" = None` を追加。
-IPC purity 契約（JSON-safe primitive のみ）は文字列なので満たす。
+**snapshot は連鎖させる。**
 
-**受け入れ**: 戦闘 work item に snapshot が載り、非戦闘 work item は無変更であること。
+```
+ルート親の branch : API のライブセッションから capture
+branch を親とする : その親 branch を実行した worker が、実行直後に capture したものを使う
+```
+
+構造としては次の 4 点。
+
+| 置き場所 | 追加するもの | 役割 |
+|---|---|---|
+| `ChoiceWorkItem`（`Run/worker_pool.py`） | `combat_snapshot: "str \| None" = None` | **どこから組み立てるか**。設定時は `map_snapshot` / `room_id` / `action_prefix` を使わない |
+| `ChoiceStepResult`（同上） | `settled_combat_snapshot: "str \| None" = None` | **その branch の実行後の盤面**。worker が `drain_trivial_reward_frontier` の直後、`settled_observation` を取るのと同じ場所で capture する |
+| `_BranchBookkeeping`（`API/instance_whole_run.py`） | `combat_snapshot` | 上を branch ごとに保持し、子 branch が引ける状態にする |
+| `_prepare_combat_branch`（`API/instance_whole_run_beam.py`） | 取得元の分岐 | 親がルートならライブセッションから capture、そうでなければ親 branch の bookkeeping から引く |
+
+**capture できない場合は fault にする。フォールバックを作らない。**
+戦闘が終わった branch は `EnsureCombatActive()` を満たさず capture できないので
+`settled_combat_snapshot` は `None` になる。その branch を親にした子 branch の要求は
+拒否してよい。Training は戦闘終了を terminal として扱うので、そこから先へ分岐する必要が無い。
+
+**同一決定の兄弟では capture を 1 回だけにする。** `emulate_actions` は同じ親決定から
+複数の兄弟をまとめてディスパッチする。branch ごとに capture すると同一内容の 26 KB が
+兄弟の数だけ `multiprocessing.Queue` を通る。バッチ内で親決定ごとに 1 回に抑える。
+キャッシュ用のクラスや抽象は作らない。
+
+この手順では **worker はまだ `combat_snapshot` を消費しない**。運ぶだけで、
+組み立て方を変えるのは S3。
+
+**受け入れ**:
+- ルート親の戦闘 work item に非空の `combat_snapshot` が載る
+- 1 つの親決定の兄弟が同じ capture を共有する（兄弟ごとに capture しない）
+- branch を親とする戦闘 work item は、その親 branch の実行結果由来の snapshot を載せる
+- 非戦闘（map / event / reward）の work item は無変更
+- worker の挙動は無変更
 
 ### S3. worker を snapshot 復元にする
 
