@@ -209,6 +209,7 @@ def _old_path_restore_compatible_state(battle_state):
         shuffle_rng_seed=battle_state.shuffle_rng_seed,
         _cached_legal_actions=copy.deepcopy(battle_state._cached_legal_actions),  # noqa: SLF001
         decision_frame=battle_state.decision_frame,
+        combat_completion=battle_state.combat_completion,
     )
 
 

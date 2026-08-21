@@ -451,10 +451,19 @@ class LiveCombatSession:
     every real (committed) decision. Construct one per episode (mirrors CombatEnv's own
     per-episode lifetime), not one per process."""
 
-    def __init__(self, repo_root: "Any | None" = None, use_legal_action_cache: bool = True) -> None:
+    def __init__(
+        self,
+        repo_root: "Any | None" = None,
+        use_legal_action_cache: bool = True,
+        whole_run_mode: bool = False,
+    ) -> None:
         ensure_loaded(repo_root)
         self._repo_root = repo_root
-        self._emulator = BattleEmulator(repo_root=repo_root, use_legal_action_cache=use_legal_action_cache)
+        self._emulator = BattleEmulator(
+            repo_root=repo_root,
+            use_legal_action_cache=use_legal_action_cache,
+            whole_run_mode=whole_run_mode,
+        )
         self._access: GameAccess | None = None
         self._game = self._initial_game()
         self._lease_holder = object()

@@ -55,6 +55,22 @@ class DecisionFrame:
 
 
 @dataclass
+class CombatCompletion:
+    """Run-level handoff emitted with a concluded combat.
+
+    `BattleState` remains the final combat snapshot.  These are the separate live facts
+    from the same StepResult: the post-step run observation and its transition.  They
+    are plain data so a BattleState remains safe to deepcopy, send to a worker, or put
+    in a wire response; never retain live CLR handles here.
+    """
+
+    live_observation_state: dict = field(repr=False)
+    live_observation_is_terminal: bool
+    live_observation_outcome: str
+    transition_kind: str
+
+
+@dataclass
 class BattleState:
     """Our own snapshot of a board position - the thing passed between BattleEmulator calls."""
 
@@ -80,6 +96,10 @@ class BattleState:
     # restore-based search) carries an accurate frame - purely additive, no existing
     # behavior changes since nothing previously read this field.
     decision_frame: "DecisionFrame | None" = field(default=None, repr=False)
+    # Non-null only for the StepResult that concluded combat.  Keep this handoff separate
+    # from engine_state: on a whole run, engine_state is the final combat snapshot while
+    # live_observation is already the settled reward/map frame.
+    combat_completion: "CombatCompletion | None" = field(default=None, repr=False)
 
 
 def state_has_living_enemies(engine_state: dict) -> bool:
@@ -701,12 +721,20 @@ def build_scenario_from_spec(spec: dict):
 class BattleEmulator:
     """Wraps the shared GameInstance; see module docstring for why this is stateless."""
 
-    def __init__(self, repo_root: Path | None = None, use_legal_action_cache: bool = True):
+    def __init__(
+        self,
+        repo_root: Path | None = None,
+        use_legal_action_cache: bool = True,
+        whole_run_mode: bool = False,
+    ):
         ensure_loaded(repo_root)
         self._repo_root = repo_root
         # Off switch exists only for controlled A/B/C performance comparisons - always
         # leave this True in normal use, it is an exact (non-approximating) cache.
         self.use_legal_action_cache = use_legal_action_cache
+        # This is deliberately declared by the caller, not inferred from HasMap or an
+        # observation.  Default preserves the legacy ResetFromScenario contract.
+        self.whole_run_mode = whole_run_mode
 
     def _game(self):
         return shared_game_instance(self._repo_root)
@@ -718,6 +746,7 @@ class BattleEmulator:
         enemy_max_hps: dict,
         shuffle_rng_seed: "int | None" = None,
         legal_actions: "list[dict] | None" = None,
+        combat_completion: "CombatCompletion | None" = None,
     ) -> BattleState:
         # EnemyScenario has no MaxHp field (only Hp) - every ResetFromScenario therefore
         # treats whatever Hp we pass as that enemy's fresh 100%, so the engine's own
@@ -773,6 +802,7 @@ class BattleEmulator:
                 combat_session_id=getattr(obs, "CombatSessionId", None),
                 step_index=int(getattr(obs, "StepIndex", 0) or 0),
             ),
+            combat_completion=combat_completion,
         )
 
     def with_shuffle_seed(self, battle_state: BattleState, shuffle_rng_seed: "int | None") -> BattleState:
@@ -795,6 +825,7 @@ class BattleEmulator:
             # it's pinned to (that only affects FUTURE reshuffles) - safe to carry over.
             _cached_legal_actions=battle_state._cached_legal_actions,
             decision_frame=battle_state.decision_frame,
+            combat_completion=battle_state.combat_completion,
         )
 
     def initialize(self, scenario_spec: dict) -> BattleState:
@@ -823,6 +854,7 @@ class BattleEmulator:
             shuffle_rng_seed=battle_state.shuffle_rng_seed,
             _cached_legal_actions=battle_state._cached_legal_actions,
             decision_frame=battle_state.decision_frame,
+            combat_completion=battle_state.combat_completion,
         )
 
     def _restore(self, battle_state: BattleState):
@@ -895,17 +927,24 @@ class BattleEmulator:
             # would mean this translation and the Emulator's own legacy-mode contract have
             # diverged, which existing Search/Main Loop/Shadow/endurance code implicitly
             # depends on via obs.IsTerminal elsewhere in this file.
-            assert bool(result.Observation.IsTerminal), (
-                "StepResult.Transition.Kind == 'combat_completed' but "
-                "StepResult.Observation.IsTerminal is False - legacy no-map mode's "
-                "run_terminal-on-combat-conclusion contract no longer holds."
-            )
+            if not self.whole_run_mode:
+                assert bool(result.Observation.IsTerminal), (
+                    "StepResult.Transition.Kind == 'combat_completed' but "
+                    "StepResult.Observation.IsTerminal is False - legacy no-map mode's "
+                    "run_terminal-on-combat-conclusion contract no longer holds."
+                )
             return self._wrap(
                 transition.FinalObservation,
                 turn=next_turn,
                 enemy_max_hps=battle_state.enemy_max_hps,
                 shuffle_rng_seed=battle_state.shuffle_rng_seed,
                 legal_actions=legal_actions_to_list(result.LegalActions),
+                combat_completion=CombatCompletion(
+                    live_observation_state=to_plain(result.Observation.State),
+                    live_observation_is_terminal=bool(result.Observation.IsTerminal),
+                    live_observation_outcome=str(result.Observation.Outcome),
+                    transition_kind=str(transition.Kind),
+                ),
             )
 
         return self._wrap(
