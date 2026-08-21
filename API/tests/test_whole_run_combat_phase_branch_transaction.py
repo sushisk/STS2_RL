@@ -68,6 +68,10 @@ class _Phase:
             result = SimpleNamespace(
                 status="success",
                 result_signature=SimpleNamespace(boundary="terminal"),
+                # A terminal branch must say how the combat ended: the wire contract
+                # requires an outcome wherever `terminal` is set, and combat_completed
+                # alone does not answer that.
+                terminal_result=SimpleNamespace(outcome="victory"),
             )
         else:
             result = SimpleNamespace(
@@ -164,7 +168,14 @@ def test_combat_terminal_is_combat_completed_leaf_and_never_falls_back_to_prefix
     assert branch["status"] == "completed"
     dto = branch["masked_emulator_dto"]
     assert dto["transition"]["kind"] == "combat_completed"
-    assert "outcome" not in dto
+    # The wire contract requires an outcome wherever `terminal` is set, and checks it
+    # against the combat outcomes when `run_terminal` is absent (Training-side
+    # src/sts2_training/api/contract.py). This assertion originally said the opposite,
+    # and a live run rejected every response until it was corrected: combat_completed
+    # says the combat ended, not how it ended. What must stay absent is run_terminal -
+    # the run continues into reward and map after this leaf.
+    assert dto["outcome"] == "victory"
+    assert "run_terminal" not in dto
     with pytest.raises(RequestRejected, match="combat_completed branches are leaves"):
         instance.emulate_action(
             parent_branch_id="leaf",

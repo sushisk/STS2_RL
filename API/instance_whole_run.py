@@ -540,6 +540,10 @@ class WholeRunInstance:
                             {},
                             extra={
                                 "terminal": True,
+                                "outcome": require_terminal_outcome(
+                                    book.outcome,
+                                    context=f"combat branch {branch_id!r}",
+                                ),
                                 "transition": {"kind": "combat_completed"},
                             },
                         ),
@@ -1389,6 +1393,17 @@ class WholeRunInstance:
                 if result.status != "success":
                     book.status = STATUS_FAULTED
                     diagnostics = result.diagnostics or {}
+                    # The delegated combat path needs the same operator-facing detail the
+                    # prefix path has had since the AllBranchesFaultedError hunt
+                    # (instance_whole_run_beam.py). Without it a faulted combat branch
+                    # reaches Training as a bare message and the cause is unreadable -
+                    # which is exactly what happened on the first live run after S7.
+                    # Full detail to the server log; the wire still carries only masked state.
+                    logger.error(
+                        "[FAULT] branch=%s parent=%s rng=%s decision_point=%s phase=combat diagnostics=%r",
+                        item["branch_id"], item["parent_branch_id"], item["rng_id"],
+                        item["decision_point_id"], diagnostics,
+                    )
                     branch_results[item["branch_id"]] = _faulted_branch_result(
                         _BranchSpec(None, item["parent_branch_id"], item["branch_id"], item["rng_id"], item["decision_point_id"], item["action_id"], None),
                         error=diagnostics.get("message", "branch execution faulted"),
@@ -1399,13 +1414,26 @@ class WholeRunInstance:
                 self._decision_points.issue(item["branch_id"])
                 if next_view is None:
                     book.terminal = True
+                    # A combat-terminal DTO still has to say how the combat ended: the
+                    # wire contract requires an outcome whenever `terminal` is set, and
+                    # `combat_completed` alone does not answer that.  Same shape as
+                    # CombatInstance's own terminal branch result.
+                    book.outcome = require_terminal_outcome(
+                        result.terminal_result.outcome if result.terminal_result else None,
+                        context=f"combat branch {item['branch_id']!r}",
+                    )
                     branch_results[item["branch_id"]] = {
                         "status": STATUS_COMPLETED, "branch_id": item["branch_id"],
                         "parent_branch_id": item["parent_branch_id"], "rng_id": item["rng_id"],
                         "decision_point_id": self._decision_points.current(item["branch_id"]),
                         "branch_log": branch_log,
                         "masked_emulator_dto": build_masked_emulator_dto(
-                            {}, extra={"terminal": True, "transition": {"kind": "combat_completed"}}
+                            {},
+                            extra={
+                                "terminal": True,
+                                "outcome": book.outcome,
+                                "transition": {"kind": "combat_completed"},
+                            },
                         ),
                     }
                     continue
