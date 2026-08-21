@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 _ROOT = Path(__file__).resolve().parents[2]
 for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
     if str(_p) not in sys.path:
@@ -20,6 +22,7 @@ from API.dto import (  # noqa: E402
     STATUS_FAULTED,
     request_id_for,
 )
+from API.instance_whole_run import _View  # noqa: E402
 from API.instance_whole_run_beam import WholeRunInstance, _is_combat_view  # noqa: E402
 from API.server import RLApiServer  # noqa: E402
 from API.validation import RequestRejected  # noqa: E402
@@ -194,6 +197,47 @@ def _combat_instance(pool) -> WholeRunInstance:
     return instance
 
 
+def _event_instance(pool) -> WholeRunInstance:
+    instance = object.__new__(WholeRunInstance)
+    instance.max_branches = 8
+    instance._branch_ids = _BranchIds()  # noqa: SLF001
+    instance._decision_points = _DecisionPoints()  # noqa: SLF001
+    instance._bookkeeping = {}  # noqa: SLF001
+    instance._root_history = _History()  # noqa: SLF001
+    instance._root_branch_log = []  # noqa: SLF001
+    instance._lease_registry = object()  # noqa: SLF001
+    instance._pool = pool  # noqa: SLF001
+    instance._faulted = False  # noqa: SLF001
+    instance._combat_phase = None  # noqa: SLF001
+    instance._event_rng_registry = SimpleNamespace(  # noqa: SLF001
+        prepare_state=lambda key, state, rng_id: dict(state),
+        commit_branch=lambda key, state, branch_id: None,
+        release_branch=lambda key, branch_id: None,
+        snapshot_generations=lambda keys: {},
+        restore_generations=lambda snapshot: None,
+    )
+    instance._session = SimpleNamespace(  # noqa: SLF001
+        get_observation=lambda: {"boundary": "event_choice"}
+    )
+    event_view = _View(
+        legal_actions_raw=[
+            {"action_id": 1, "action_type": "choice_event", "is_available": True},
+            {"action_id": 2, "action_type": "choice_event", "is_available": True},
+        ],
+        boundary="event_choice",
+        observation={"boundary": "event_choice", "state": {}},
+        room_context={"room_type": "EventRoom"},
+        map_snapshot="event-map-snapshot",
+        room_id=1,
+        action_prefix=(),
+        choice_type="event_choice",
+        chain_blocked=False,
+        event_rng_state={"event": 1},
+    )
+    instance._view_for = lambda branch_id: event_view  # type: ignore[method-assign]  # noqa: SLF001
+    return instance
+
+
 def _combat_items() -> list[dict]:
     return [
         {
@@ -250,33 +294,53 @@ def test_emulate_actions_against_whole_run_is_dispatched() -> None:
     assert stub.calls == [{"items": items, "simulation_options": None}]
 
 
-def test_whole_run_combat_batch_uses_one_worker_pool_dispatch() -> None:
+def test_whole_run_combat_prefix_batch_is_refused_without_an_adopted_phase() -> None:
     pool = _Pool()
     instance = _combat_instance(pool)
 
+    with pytest.raises(RequestRejected, match="requires an active CombatPhase"):
+        instance.emulate_actions(items=_combat_items(), simulation_options=None)
+
+    assert pool.calls == []
+
+
+def test_whole_run_combat_prefix_timeout_path_is_not_a_fallback() -> None:
+    instance = _combat_instance(_TimeoutPool())
+
+    with pytest.raises(RequestRejected, match="requires an active CombatPhase"):
+        instance.emulate_actions(items=_combat_items(), simulation_options=None)
+
+
+def test_whole_run_event_batch_timeout_faults_every_branch() -> None:
+    instance = _event_instance(_TimeoutPool())
+
     response = instance.emulate_actions(items=_combat_items(), simulation_options=None)
 
     assert response["status"] == STATUS_COMPLETED
     assert set(response["branch_results"]) == {"branch-1", "branch-2"}
-    assert len(pool.calls) == 1
-    assert len(pool.calls[0]) == 2
+    for branch_id in ("branch-1", "branch-2"):
+        branch = response["branch_results"][branch_id]
+        assert branch["status"] == STATUS_FAULTED
+        assert branch["fault_kind"] == FAULT_TASK_TIMEOUT
+        assert branch["error"] == "worker batch timed out"
 
 
-def test_whole_run_combat_timeout_is_reported_per_branch() -> None:
+def test_whole_run_single_combat_prefix_path_is_not_a_fallback() -> None:
     instance = _combat_instance(_TimeoutPool())
 
-    response = instance.emulate_actions(items=_combat_items(), simulation_options=None)
+    with pytest.raises(RequestRejected, match="requires an active CombatPhase"):
+        instance.emulate_action(
+            parent_branch_id="root",
+            branch_id="branch-1",
+            rng_id=1,
+            decision_point_id="decision-1",
+            action_id="1",
+            simulation_options=None,
+        )
 
-    assert response["status"] == STATUS_COMPLETED
-    assert set(response["branch_results"]) == {"branch-1", "branch-2"}
-    for result in response["branch_results"].values():
-        assert result["status"] == STATUS_FAULTED
-        assert result["fault_kind"] == FAULT_TASK_TIMEOUT
-        assert result["error"] == "worker batch timed out"
 
-
-def test_whole_run_single_combat_timeout_keeps_branch_fault_semantics() -> None:
-    instance = _combat_instance(_TimeoutPool())
+def test_whole_run_single_event_timeout_faults_its_branch() -> None:
+    instance = _event_instance(_TimeoutPool())
 
     response = instance.emulate_action(
         parent_branch_id="root",
@@ -293,29 +357,21 @@ def test_whole_run_single_combat_timeout_keeps_branch_fault_semantics() -> None:
     assert response["error"] == "worker batch timed out"
 
 
-def test_whole_run_combat_completion_transition_is_preserved_and_masked() -> None:
+def test_whole_run_combat_completion_cannot_be_reached_by_prefix_replay() -> None:
     instance = _combat_instance(_CombatCompletionPool())
 
-    response = instance.emulate_action(
-        parent_branch_id="root",
-        branch_id="branch-1",
-        rng_id=1,
-        decision_point_id="decision-1",
-        action_id="1",
-        simulation_options=None,
-    )
-
-    dto = response["masked_emulator_dto"]
-    assert response["status"] == STATUS_COMPLETED
-    assert dto["boundary"] == "reward_select"
-    assert dto["transition"]["kind"] == "combat_completed"
-    assert dto["transition"]["victory"] is True
-    assert "combat_session_id" not in dto["transition"]
-    assert "seed" not in dto["transition"]["final_observation"]
-    assert dto["legal_actions"][0]["action_type"] == "choice_reward_card"
+    with pytest.raises(RequestRejected, match="requires an active CombatPhase"):
+        instance.emulate_action(
+            parent_branch_id="root",
+            branch_id="branch-1",
+            rng_id=1,
+            decision_point_id="decision-1",
+            action_id="1",
+            simulation_options=None,
+        )
 
 
-def test_unavailable_whole_run_combat_action_is_rejected_before_dispatch() -> None:
+def test_unavailable_whole_run_combat_prefix_action_is_never_dispatched() -> None:
     pool = _Pool()
     instance = _combat_instance(pool)
     view = instance._view_for("root")  # noqa: SLF001
@@ -331,7 +387,7 @@ def test_unavailable_whole_run_combat_action_is_rejected_before_dispatch() -> No
             simulation_options=None,
         )
     except RequestRejected as exc:
-        assert "not currently available" in exc.error
+        assert "requires an active CombatPhase" in exc.error
     else:
         raise AssertionError("unavailable combat action must be rejected")
 

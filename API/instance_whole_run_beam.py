@@ -209,6 +209,20 @@ class WholeRunInstance(_BaseWholeRunInstance):
         action_id: str,
         simulation_options: Optional[dict],
     ) -> dict:
+        if getattr(self, "_combat_phase", None) is not None:
+            response = self._emulate_combat_phase_actions(
+                items=[
+                    {
+                        "parent_branch_id": parent_branch_id,
+                        "branch_id": branch_id,
+                        "rng_id": rng_id,
+                        "decision_point_id": decision_point_id,
+                        "action_id": action_id,
+                    }
+                ],
+                simulation_options=simulation_options,
+            )
+            return response["branch_results"][branch_id]
         if self._parent_boundary(parent_branch_id) == EVENT_CHOICE:
             return super().emulate_action(
                 parent_branch_id=parent_branch_id,
@@ -219,36 +233,9 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 simulation_options=simulation_options,
             )
 
-        self._validate_stop_condition(simulation_options)
-        spec = self._validate_combat_branch(
-            parent_branch_id=parent_branch_id,
-            branch_id=branch_id,
-            rng_id=rng_id,
-            decision_point_id=decision_point_id,
-            action_id=action_id,
+        raise RequestRejected(
+            "combat branching requires an active CombatPhase; Whole Run will not replay a room prefix"
         )
-        if self.active_branch_count() >= self.max_branches:
-            raise RequestRejected(
-                f"active Branch count would exceed max_branches={self.max_branches}"
-            )
-
-        work_item, book = self._prepare_combat_branch(spec)
-        self._commit_prepared_branch(spec, book)
-        try:
-            result = self._pool.dispatch_choice_work_items(
-                [work_item], self._lease_registry
-            )[0]
-        except TimeoutError as exc:
-            book.status = STATUS_FAULTED
-            return _faulted_branch_result(
-                spec,
-                error=str(exc) or "Whole Run branch execution timed out",
-                fault_kind=FAULT_TASK_TIMEOUT,
-            )
-        except Exception:
-            book.status = STATUS_FAULTED
-            raise
-        return self._finalize_combat_branch(spec, book, result)
 
     def emulate_actions(
         self,
@@ -287,6 +274,11 @@ class WholeRunInstance(_BaseWholeRunInstance):
                     "emulate_actions items may only use parents that existed before the batch"
                 )
 
+        if getattr(self, "_combat_phase", None) is not None:
+            return self._emulate_combat_phase_actions(
+                items=items, simulation_options=simulation_options
+            )
+
         parent_views: dict[str, Any] = {}
         for item in items:
             parent_branch_id = item["parent_branch_id"]
@@ -294,21 +286,13 @@ class WholeRunInstance(_BaseWholeRunInstance):
                 parent_views[parent_branch_id] = self._view_for(parent_branch_id)
 
         event_batch = self._is_event_batch(parent_views)
-        validator = (
-            self._validate_event_branch
-            if event_batch
-            else self._validate_combat_branch
-        )
-        preparer = (
-            self._prepare_event_branch
-            if event_batch
-            else self._prepare_combat_branch
-        )
-        finalizer = (
-            self._finalize_event_branch
-            if event_batch
-            else self._finalize_combat_branch
-        )
+        if not event_batch:
+            raise RequestRejected(
+                "combat branching requires an active CombatPhase; Whole Run will not replay a room prefix"
+            )
+        validator = self._validate_event_branch
+        preparer = self._prepare_event_branch
+        finalizer = self._finalize_event_branch
 
         specs: list[_BranchSpec] = []
         for item in items:

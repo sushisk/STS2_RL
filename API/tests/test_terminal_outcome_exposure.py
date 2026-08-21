@@ -395,8 +395,10 @@ def _whole_run_stub_instance(outcome: object) -> WholeRunInstance:
     inst._pool = _FakeWholeRunPool(outcome)  # noqa: SLF001
     inst._lease_registry = object()  # noqa: SLF001
     # This stub bypasses __init__, so every attribute the exercised code path reads has
-    # to be set here by hand. _faulted gates every mutating operation.
+    # to be set here by hand. _faulted gates every mutating operation, and _combat_phase
+    # decides whether a branch is delegated to an adopted CombatPhase.
     inst._faulted = False  # noqa: SLF001
+    inst._combat_phase = None  # noqa: SLF001
     parent_view = _View(
         legal_actions_raw=[{"action_id": 7}],
         boundary="event_choice",

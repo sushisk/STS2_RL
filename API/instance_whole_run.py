@@ -40,6 +40,7 @@ from API.dto import (
     STATUS_RELEASED,
 )
 from API.combat_phase import CombatPhase
+from API.combat_phase import DEFAULT_MAX_TIME_MS, ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
 from API.history_builder import HistoryBuilder
 from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
 from API.masking import build_masked_emulator_dto, mask_legal_actions
@@ -151,6 +152,7 @@ class _BranchBookkeeping:
         "outcome",
         "rng_id",
         "event_rng_plan",
+        "internal_id",
     )
 
     def __init__(
@@ -169,6 +171,39 @@ class _BranchBookkeeping:
         self.terminal = False
         self.outcome: "str | None" = None
         self.event_rng_plan: "EventRngReplayPlan | None" = None
+        # Whole Run normally owns worker Branches directly.  During an adopted Combat
+        # phase this is the phase-local BranchManager id; retaining it is what lets the
+        # public tombstone release the worker before the phase is folded.
+        self.internal_id: "str | None" = None
+
+
+class _CombatPhaseView:
+    """Combat decision state held by a Whole Run speculative Branch.
+
+    This deliberately is not a ``_View``: it contains a combat snapshot and replay
+    context, not a map snapshot/run position.  Treating it as a normal Whole Run view
+    was the old prefix-replay bug in disguise.
+    """
+
+    __slots__ = ("legal_actions_raw", "decision_context", "battle_state", "boundary")
+
+    def __init__(self, legal_actions_raw: list, decision_context: Any, boundary: str, battle_state: Any) -> None:
+        self.legal_actions_raw = legal_actions_raw
+        self.decision_context = decision_context
+        self.battle_state = battle_state
+        self.boundary = boundary
+
+    def resolve_action_id(self, public_action_id: str) -> int:
+        matches = [
+            index
+            for index, action in enumerate(self.legal_actions_raw)
+            if str(action.get("action_id", index)) == public_action_id
+        ]
+        if not matches:
+            raise RequestRejected(f"action_id {public_action_id!r} is not among current legal actions")
+        if len(matches) != 1:
+            raise RequestRejected(f"action_id {public_action_id!r} is ambiguous among current legal actions")
+        return matches[0]
 
 
 @dataclass(frozen=True)
@@ -257,6 +292,10 @@ class WholeRunInstance:
         self._root_history = HistoryBuilder()
         self._bookkeeping: dict[str, _BranchBookkeeping] = {}
         self._combat_phase: CombatPhase | None = None
+        # A combat public Branch owns both this reservation and a phase-local worker
+        # record until release.  This is the whole-run-wide admission limit; do not
+        # infer capacity from BranchManager's queued/running count after work finishes.
+        self._combat_branch_reservations: set[str] = set()
         self._last_combat_completion: CombatCompletion | None = None
         self._faulted = False
         self._closed = False
@@ -441,6 +480,13 @@ class WholeRunInstance:
 
     def _poison_combat_transaction(self, phase: CombatPhase | None) -> None:
         self._faulted = True
+        # The public owners and their global reservations must be retired while the
+        # adopted phase can still release its internal worker records.
+        if self._combat_phase is not None:
+            try:
+                self._cancel_and_release_all_branches()
+            except Exception:
+                logger.exception("failed to release combat Branches while poisoning whole-run transaction")
         self._combat_phase = None
         self._session.poison_mutations()
         if phase is not None:
@@ -484,6 +530,20 @@ class WholeRunInstance:
             if book.status != STATUS_COMPLETED:
                 return {"status": book.status, "branch_id": branch_id}
             if book.terminal:
+                if book.internal_id is not None:
+                    return {
+                        "status": STATUS_COMPLETED,
+                        "branch_id": branch_id,
+                        "decision_point_id": self._decision_points.current(branch_id),
+                        "branch_log": list(book.branch_log),
+                        "masked_emulator_dto": build_masked_emulator_dto(
+                            {},
+                            extra={
+                                "terminal": True,
+                                "transition": {"kind": "combat_completed"},
+                            },
+                        ),
+                    }
                 return {
                     "status": STATUS_COMPLETED,
                     "branch_id": branch_id,
@@ -498,6 +558,16 @@ class WholeRunInstance:
                                 valid_outcomes=VALID_WHOLE_RUN_TERMINAL_OUTCOMES,
                             ),
                         }
+                    ),
+                }
+            if isinstance(book.view, _CombatPhaseView):
+                return {
+                    "status": STATUS_COMPLETED,
+                    **self._phase_decision_response_fields(
+                        branch_id,
+                        book.view,
+                        branch_log=list(book.branch_log),
+                        history=book.history,
                     ),
                 }
             return {
@@ -654,6 +724,20 @@ class WholeRunInstance:
         simulation_options: Optional[dict],
     ) -> dict:
         """Execute one Active Event Branch through shared validate/prepare/finalize logic."""
+        if self._combat_phase is not None:
+            response = self._emulate_combat_phase_actions(
+                items=[
+                    {
+                        "parent_branch_id": parent_branch_id,
+                        "branch_id": branch_id,
+                        "rng_id": rng_id,
+                        "decision_point_id": decision_point_id,
+                        "action_id": action_id,
+                    }
+                ],
+                simulation_options=simulation_options,
+            )
+            return response["branch_results"][branch_id]
         self._ensure_mutable()
         self._validate_stop_condition(simulation_options)
         spec = self._validate_event_branch(
@@ -688,6 +772,20 @@ class WholeRunInstance:
             raise
         return self._finalize_event_branch(spec, book, result)
 
+    def emulate_actions(self, *, items: list, simulation_options: Optional[dict]) -> dict:
+        """Batch combat delegation for the non-Beam facade.
+
+        Event batching remains the Beam-specific optimization; an inactive phase has
+        no safe combat replay fallback in either facade.
+        """
+        if self._combat_phase is None:
+            raise RequestRejected(
+                "combat branching requires an active CombatPhase; Whole Run will not replay a room prefix"
+            )
+        return self._emulate_combat_phase_actions(
+            items=items, simulation_options=simulation_options
+        )
+
     def cancel_branches(self, branch_ids: list) -> dict:
         self._ensure_mutable()
         for bid in branch_ids:
@@ -695,6 +793,11 @@ class WholeRunInstance:
             book = self._bookkeeping.get(bid)
             if book is None:
                 raise RequestRejected(f"unknown branch_id {bid!r}")
+            if book.internal_id is not None and book.status not in (STATUS_CANCELLED, STATUS_RELEASED):
+                phase = self._combat_phase
+                if phase is None:
+                    raise RuntimeError("combat Branch outlived its active CombatPhase")
+                phase.cancel([book.internal_id])
             if book.status not in (STATUS_CANCELLED, STATUS_RELEASED):
                 book.status = STATUS_CANCELLED
                 book.view = None
@@ -711,6 +814,12 @@ class WholeRunInstance:
             book = self._bookkeeping.get(bid)
             if book is None:
                 raise RequestRejected(f"unknown branch_id {bid!r}")
+            if book.internal_id is not None and book.status != STATUS_RELEASED:
+                phase = self._combat_phase
+                if phase is None:
+                    raise RuntimeError("combat Branch outlived its active CombatPhase")
+                phase.release([book.internal_id])
+                self._combat_branch_reservations.discard(bid)
             if book.status != STATUS_RELEASED:
                 book.status = STATUS_RELEASED
                 book.view = None
@@ -727,6 +836,19 @@ class WholeRunInstance:
             book = self._bookkeeping.get(bid)
             if book is None:
                 raise RequestRejected(f"unknown branch_id {bid!r}")
+            if book.internal_id is not None and book.status != STATUS_RELEASED:
+                phase = self._combat_phase
+                if phase is None:
+                    raise RuntimeError("combat Branch outlived its active CombatPhase")
+                translated = phase.branch_status(book.internal_id)
+                book.status = {
+                    "queued": "queued",
+                    "running": "running",
+                    "completed": STATUS_COMPLETED,
+                    "cancelled": STATUS_CANCELLED,
+                    "faulted": STATUS_FAULTED,
+                    "released": STATUS_RELEASED,
+                }.get(translated, translated)
             statuses[bid] = book.status
         return {"status": STATUS_COMPLETED, "branch_statuses": statuses}
 
@@ -735,9 +857,15 @@ class WholeRunInstance:
             return
         self._closed = True
         try:
-            phase, self._combat_phase = self._combat_phase, None
+            phase = self._combat_phase
             if phase is not None:
-                phase.close()
+                # ``phase.close`` only knows its internal ids.  Preserve the public
+                # release tombstones and free global capacity first.
+                try:
+                    self._cancel_and_release_all_branches()
+                finally:
+                    phase.close()
+                    self._combat_phase = None
         finally:
             try:
                 self._event_rng_registry.release_all()
@@ -1068,9 +1196,236 @@ class WholeRunInstance:
             book.event_rng_plan = None
 
     def _cancel_and_release_all_branches(self) -> None:
+        # Phase branches have a second owner (CombatPhase) and therefore must be
+        # released while it is still live.  Tombstone public records before callers
+        # fold the phase, so in-flight status queries never observe an unknown id.
+        phase = self._combat_phase
+        phase_internal_ids = [
+            book.internal_id
+            for book in self._bookkeeping.values()
+            if book.internal_id is not None and book.status != STATUS_RELEASED
+        ]
+        if phase_internal_ids:
+            if phase is None:
+                raise RuntimeError("combat Branch outlived its active CombatPhase")
+            phase.release(phase_internal_ids)
         for bid, book in self._bookkeeping.items():
             if book.status not in (STATUS_CANCELLED, STATUS_RELEASED):
                 book.status = STATUS_RELEASED
             book.view = None
             self._decision_points.clear(bid)
+            self._combat_branch_reservations.discard(bid)
         self._event_rng_registry.release_all()
+
+    # -- adopted CombatPhase branch transaction ---------------------------------------
+
+    def _combat_phase_view_for(self, public_branch_id: str) -> _CombatPhaseView:
+        phase = self._combat_phase
+        if phase is None:
+            raise RequestRejected(
+                "combat branching requires an active CombatPhase; Whole Run will not replay a room prefix"
+            )
+        if public_branch_id == ROOT_BRANCH_ID:
+            legal, context, boundary = phase.root_decision()
+            return _CombatPhaseView(legal, context, boundary, phase.root_state)
+        book = self._bookkeeping.get(public_branch_id)
+        if book is None:
+            raise RequestRejected(f"parent_branch_id {public_branch_id!r} does not exist")
+        if book.status in (STATUS_CANCELLED, STATUS_RELEASED, STATUS_FAULTED):
+            raise RequestRejected(
+                f"parent_branch_id {public_branch_id!r} is {book.status} and cannot be extended"
+            )
+        if book.terminal:
+            raise RequestRejected(
+                f"parent_branch_id {public_branch_id!r} ended at the combat boundary; "
+                "combat_completed branches are leaves because combat snapshots carry no run position"
+            )
+        if not isinstance(book.view, _CombatPhaseView):
+            raise RequestRejected(
+                f"parent_branch_id {public_branch_id!r} is not owned by the active CombatPhase"
+            )
+        return book.view
+
+    def _reserve_combat_branch_capacity(self, branch_ids: list[str]) -> None:
+        if len(self._combat_branch_reservations) + len(branch_ids) > self.max_branches:
+            raise RequestRejected(
+                f"submitting {len(branch_ids)} Branch(es) would exceed max_branches="
+                f"{self.max_branches} (currently {len(self._combat_branch_reservations)} reserved)"
+            )
+        self._combat_branch_reservations.update(branch_ids)
+
+    def _release_combat_branch_capacity(self, branch_ids: list[str]) -> None:
+        self._combat_branch_reservations.difference_update(branch_ids)
+
+    def _phase_decision_response_fields(
+        self, public_branch_id: str, view: _CombatPhaseView, *, branch_log: list, history: HistoryBuilder
+    ) -> dict:
+        # Normalize combat output into the Whole Run public envelope.  In particular,
+        # boundary/legal/context/history live inside the masked DTO, never beside it.
+        room_context = self._session.get_room_context()
+        history.observe_room_context(room_context)
+        engine_state = dict(getattr(view.battle_state, "engine_state", {}) or {})
+        return {
+            "branch_id": public_branch_id,
+            "decision_point_id": self._decision_points.current(public_branch_id),
+            "branch_log": branch_log,
+            "masked_emulator_dto": build_masked_emulator_dto(
+                engine_state,
+                extra={
+                    "boundary": view.boundary,
+                    "legal_actions": mask_legal_actions(view.legal_actions_raw),
+                    "room_context": room_context,
+                    "history": history.to_public_list(),
+                },
+            ),
+        }
+
+    def _phase_view_from_result(self, result: Any) -> _CombatPhaseView | None:
+        # Keep Combat replay semantics inside CombatPhase: the context below is built
+        # from its anchor snapshot/replay prefix result, never from a Whole Run prefix.
+        from search.decision_context import (
+            BOUNDARY_PENDING,
+            BOUNDARY_STABLE,
+            BOUNDARY_TERMINAL,
+            DecisionContext,
+        )
+
+        boundary = result.result_signature.boundary
+        if boundary == BOUNDARY_PENDING:
+            context = result.pending_decision_context
+            battle_state = context.current_decision_result
+            return _CombatPhaseView(
+                list(battle_state._cached_legal_actions or []), context, boundary, battle_state
+            )
+        if boundary == BOUNDARY_STABLE:
+            context = DecisionContext.from_main_stable_capture(
+                result.child_snapshot, result.next_decision_result, result.result_signature
+            )
+            return _CombatPhaseView(
+                list(result.next_legal_actions or []), context, boundary, result.next_decision_result
+            )
+        if boundary == BOUNDARY_TERMINAL:
+            return None
+        raise RuntimeError(f"unexpected combat branch boundary: {boundary!r}")
+
+    def _emulate_combat_phase_actions(self, *, items: list, simulation_options: Optional[dict]) -> dict:
+        """Admit, register, dispatch, and retire adopted-combat Branches as one unit."""
+        self._ensure_mutable()
+        self._validate_stop_condition(simulation_options)
+        if not isinstance(items, list) or not items:
+            raise RequestRejected("emulate_actions.items must be a non-empty list")
+        if len(items) > self.max_branches:
+            raise RequestRejected(
+                f"emulate_actions batch size {len(items)} exceeds max batch size {self.max_branches}; chunk the frontier into multiple requests"
+            )
+        phase = self._combat_phase
+        if phase is None:
+            raise RequestRejected(
+                "combat branching requires an active CombatPhase; Whole Run will not replay a room prefix"
+            )
+        seen: set[str] = set()
+        admitted: list[tuple[dict, _CombatPhaseView, dict]] = []
+        for item in items:
+            branch_id = item["branch_id"]
+            if branch_id in seen:
+                raise RequestRejected(f"branch_id {branch_id!r} is duplicated within this batch")
+            seen.add(branch_id)
+            if self._branch_ids.is_known(branch_id):
+                raise RequestRejected(f"branch_id {branch_id!r} already used (branch IDs are never reusable)")
+            if item["parent_branch_id"] in seen:
+                raise RequestRejected("emulate_actions items may only use parents that existed before the batch")
+            parent_id = item["parent_branch_id"]
+            view = self._combat_phase_view_for(parent_id)
+            if view.decision_context is None:
+                raise RequestRejected(ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR)
+            if parent_id != ROOT_BRANCH_ID:
+                parent_book = self._bookkeeping[parent_id]
+                if item["rng_id"] != parent_book.rng_id:
+                    raise RequestRejected(
+                        f"non-root parent_branch_id {parent_id!r} requires rng_id={parent_book.rng_id!r} "
+                        f"(its own lineage rng_id), got {item['rng_id']!r}"
+                    )
+            self._decision_points.validate(parent_id, item["decision_point_id"])
+            chosen = self._resolve_chosen_action(view, item["action_id"])
+            admitted.append((item, view, chosen))
+
+        # Reserve before asking CombatPhase to allocate a work item/worker.  Any error
+        # after this point unwinds both this reservation and every phase record it made.
+        branch_ids = [item["branch_id"] for item, _, _ in admitted]
+        self._reserve_combat_branch_capacity(branch_ids)
+        rng_snapshot = phase.snapshot_rng_hypotheses()
+        internal_ids: list[str] = []
+        registered: list[str] = []
+        try:
+            prepared: list[tuple[dict, _CombatPhaseView, dict, Any, str | None, list, HistoryBuilder]] = []
+            for item, view, chosen in admitted:
+                parent_id = item["parent_branch_id"]
+                parent_internal_id = None if parent_id == ROOT_BRANCH_ID else self._bookkeeping[parent_id].internal_id
+                parent_history = self._root_history if parent_id == ROOT_BRANCH_ID else self._bookkeeping[parent_id].history
+                parent_log = list(self._root_branch_log) if parent_id == ROOT_BRANCH_ID else list(self._bookkeeping[parent_id].branch_log)
+                branch_log = parent_log + [{
+                    "depth": len(parent_log), "decision_point_id": item["decision_point_id"],
+                    "action_id": item["action_id"], "rng_id": item["rng_id"],
+                }]
+                work_item = phase.build_work_item(view.decision_context, chosen, parent_id, item["decision_point_id"], item["rng_id"])
+                prepared.append((item, view, chosen, work_item, parent_internal_id, branch_log, parent_history.fork()))
+            internal_ids = list(phase.submit_many([(work, parent) for _, _, _, work, parent, _, _ in prepared]))
+            for entry, internal_id in zip(prepared, internal_ids, strict=True):
+                item, _, _, _, _, branch_log, history = entry
+                book = _BranchBookkeeping(item["parent_branch_id"], branch_log, history, item["rng_id"])
+                book.internal_id = internal_id
+                self._branch_ids.register(item["branch_id"])
+                registered.append(item["branch_id"])
+                self._bookkeeping[item["branch_id"]] = book
+            timeout_s = (simulation_options or {}).get("max_time_ms", DEFAULT_MAX_TIME_MS) / 1000.0
+            results = phase.poll(timeout=timeout_s, branch_ids=internal_ids)
+            branch_results: dict[str, dict] = {}
+            for entry, internal_id in zip(prepared, internal_ids, strict=True):
+                item, _, _, _, _, branch_log, _ = entry
+                book = self._bookkeeping[item["branch_id"]]
+                result = results.get(internal_id)
+                if result is None:
+                    raise RuntimeError(f"CombatPhase.poll() returned no result for Branch {internal_id}")
+                if result.status != "success":
+                    book.status = STATUS_FAULTED
+                    diagnostics = result.diagnostics or {}
+                    branch_results[item["branch_id"]] = _faulted_branch_result(
+                        _BranchSpec(None, item["parent_branch_id"], item["branch_id"], item["rng_id"], item["decision_point_id"], item["action_id"], None),
+                        error=diagnostics.get("message", "branch execution faulted"),
+                        fault_kind=diagnostics.get("fault_kind", FAULT_EMULATOR_ERROR),
+                    )
+                    continue
+                next_view = self._phase_view_from_result(result)
+                self._decision_points.issue(item["branch_id"])
+                if next_view is None:
+                    book.terminal = True
+                    branch_results[item["branch_id"]] = {
+                        "status": STATUS_COMPLETED, "branch_id": item["branch_id"],
+                        "parent_branch_id": item["parent_branch_id"], "rng_id": item["rng_id"],
+                        "decision_point_id": self._decision_points.current(item["branch_id"]),
+                        "branch_log": branch_log,
+                        "masked_emulator_dto": build_masked_emulator_dto(
+                            {}, extra={"terminal": True, "transition": {"kind": "combat_completed"}}
+                        ),
+                    }
+                    continue
+                book.view = next_view
+                branch_results[item["branch_id"]] = {
+                    "status": STATUS_COMPLETED,
+                    **self._phase_decision_response_fields(item["branch_id"], next_view, branch_log=branch_log, history=book.history),
+                    "parent_branch_id": item["parent_branch_id"], "rng_id": item["rng_id"],
+                }
+            return {"status": STATUS_COMPLETED, "branch_results": branch_results}
+        except Exception:
+            if internal_ids:
+                try:
+                    phase.cancel(internal_ids)
+                finally:
+                    phase.release(internal_ids)
+            for branch_id in registered:
+                self._bookkeeping.pop(branch_id, None)
+                self._decision_points.clear(branch_id)
+                self._branch_ids.rollback_registration(branch_id)
+            phase.restore_rng_hypotheses(rng_snapshot)
+            self._release_combat_branch_capacity(branch_ids)
+            raise

@@ -25,7 +25,7 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from API.instance_whole_run import WholeRunInstance  # noqa: E402
+from API.instance_whole_run_beam import WholeRunInstance  # noqa: E402
 
 
 def _pick(legal: list) -> str:
@@ -45,6 +45,7 @@ def test_a_live_run_plays_through_whole_combats_without_faulting():
         decision = instance.start_instance_response()
         combats_completed = 0
         was_in_combat = False
+        combat_branch_checked = False
 
         for step in range(120):
             dto = decision.get("masked_emulator_dto")
@@ -57,6 +58,34 @@ def test_a_live_run_plays_through_whole_combats_without_faulting():
                 combats_completed += 1
             was_in_combat = in_combat
 
+            # This is intentionally a real adopted CombatPhase with real workers, not
+            # the transaction fakes used by the unit tests.  A successful response must
+            # be usable through the ordinary public branch endpoints.
+            if in_combat and not combat_branch_checked:
+                legal = dto.get("legal_actions") or []
+                if legal:
+                    branch_id = "live-combat-branch"
+                    emulated = instance.emulate_actions(
+                        items=[
+                            {
+                                "parent_branch_id": "root",
+                                "branch_id": branch_id,
+                                "rng_id": 0,
+                                "decision_point_id": decision["decision_point_id"],
+                                "action_id": _pick(legal),
+                            }
+                        ],
+                        simulation_options={"stop_condition": "next_decision"},
+                    )
+                    branch = emulated["branch_results"][branch_id]
+                    assert branch["status"] == "completed"
+                    usable = instance.get_decision(branch_id)
+                    assert usable["status"] == "completed"
+                    assert usable["branch_id"] == branch_id
+                    instance.release_branches([branch_id])
+                    assert instance.get_branch_status([branch_id])["branch_statuses"][branch_id] == "released"
+                    combat_branch_checked = True
+
             legal = dto.get("legal_actions") or []
             if not legal:
                 break
@@ -66,5 +95,6 @@ def test_a_live_run_plays_through_whole_combats_without_faulting():
             "expected the run to enter and leave at least two combats; "
             f"only {combats_completed} completed"
         )
+        assert combat_branch_checked, "expected at least one real CombatPhase branch"
     finally:
         instance.close()
