@@ -485,9 +485,73 @@ class LiveCombatSession:
             self._lease = self._access.claim(self._lease_holder, LeaseState.COMBAT)
         return self._access.mutating_game(self._lease)
 
+    @property
+    def lease_holder(self) -> object:
+        """The opaque holder used when a transfer commits this session to COMBAT."""
+        return self._lease_holder
+
+    def accept_transferred_lease(self, lease: GameLease) -> None:
+        """Install the COMBAT lease made by ``GameAccess.commit`` without claiming.
+
+        Adoption is intentionally possible while the access state is TRANSFERRING.  The
+        session receives no mutable capability until this method is given the committed
+        COMBAT lease, so no caller can supersede the hand-off by calling ``claim``.
+        """
+        assert self._access is not None
+        if lease.state is not LeaseState.COMBAT or lease.holder is not self._lease_holder:
+            raise GameAccessError("LiveCombatSession received a lease for the wrong holder/state")
+        self._access.mutating_game(lease)
+        self._lease = lease
+
+    def begin_lease_transfer(self) -> GameLease:
+        """Withdraw the current COMBAT lease before returning control to Whole Run."""
+        assert self._access is not None
+        if self._lease is None:
+            raise GameAccessError("LiveCombatSession has no COMBAT lease to transfer")
+        transfer = self._access.begin(self._lease)
+        self._lease = None
+        return transfer
+
     def _initial_game(self):
         self._access = process_game_access(lambda: ensure_loaded(self._repo_root)["GameInstance"]())
         return self._access.observation_game()
+
+    def adopt_current_combat(self) -> BattleState:
+        """Observe the live whole-run combat without reset/restore or a lease claim."""
+        self._game = self._initial_game()
+        obs = self._game.GetObservation()
+        state = to_plain(obs.State)
+        enemy_max_hps = {
+            enemy["index"]: enemy["maxHp"]
+            for enemy in state.get("enemies") or []
+            if enemy.get("index") is not None and enemy.get("maxHp") is not None
+        }
+        legal_actions = legal_actions_to_list(self._game.GetLegalActions())
+        try:
+            turn_number = state["turnNumber"]
+        except KeyError as exc:
+            raise RuntimeError(
+                "cannot adopt current combat: adopted state has no turnNumber "
+                f"(state keys: {sorted(state)})"
+            ) from exc
+        if turn_number is None:
+            # Null turnNumber is the schema's marker for a non-combat observation, so this
+            # names what was adopted instead of dumping the whole board: engine_state
+            # carries the full hand, piles and enemies and runs to several KB.
+            raise RuntimeError(
+                "cannot adopt current combat: adopted state has a null turnNumber, which "
+                "the combat state schema uses for a non-combat observation "
+                f"(state keys: {sorted(state)})"
+            )
+        turn = int(turn_number)
+        battle_state = self._emulator._wrap(  # noqa: SLF001 - established live-session boundary
+            obs,
+            turn=turn,
+            enemy_max_hps=enemy_max_hps,
+            legal_actions=legal_actions,
+        )
+        self._current_frame = battle_state.decision_frame
+        return battle_state
 
     def close(self) -> None:
         """Deterministically releases this session's current lease, if it still owns it."""

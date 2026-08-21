@@ -140,6 +140,10 @@ class CombatPhase:
     def max_branches(self) -> int:
         return self._branch_manager.max_branches
 
+    def begin_lease_transfer(self):
+        """Begin transfer of this phase's COMBAT lease back to Whole Run."""
+        return self._session.begin_lease_transfer()
+
     def root_decision(self) -> tuple[list, DecisionContext | None, str]:
         legal = list(self._root_state._cached_legal_actions or [])
         if self._root_state.is_terminal:

@@ -71,6 +71,44 @@ class WholeRunSession:
             self._lease = self._access.claim(self._lease_holder, LeaseState.RUN)
         return self._access.mutating_game(self._lease)
 
+    @property
+    def lease_holder(self) -> object:
+        """The opaque holder used when a transfer returns this session to RUN."""
+        return self._lease_holder
+
+    def begin_lease_transfer(self) -> GameLease:
+        """Temporarily withdraw this session's RUN lease for a phase hand-off."""
+        if self._lease is None:
+            self._lease = self._access.claim(self._lease_holder, LeaseState.RUN)
+        transfer = self._access.begin(self._lease)
+        self._lease = None
+        return transfer
+
+    def commit_lease_transfer(
+        self, transfer: GameLease, target: LeaseState, holder: object
+    ) -> GameLease:
+        """Complete a transfer through the one shared GameAccess state machine."""
+        return self._access.commit(transfer, target, holder)
+
+    def rollback_lease_transfer(self, transfer: GameLease) -> None:
+        """Restore this session's RUN lease after a pre-commit hand-off failure."""
+        lease = self._access.rollback(transfer)
+        if lease.state is not LeaseState.RUN or lease.holder is not self._lease_holder:
+            raise GameAccessError("transfer rollback did not return the WholeRunSession RUN lease")
+        self._lease = lease
+
+    def accept_transferred_lease(self, lease: GameLease) -> None:
+        """Install a RUN lease created by ``GameAccess.commit``; never claim here."""
+        if lease.state is not LeaseState.RUN or lease.holder is not self._lease_holder:
+            raise GameAccessError("WholeRunSession received a lease for the wrong holder/state")
+        self._access.mutating_game(lease)
+        self._lease = lease
+
+    def poison_mutations(self) -> None:
+        """Make this run permanently non-mutating after an unrecoverable hand-off error."""
+        self._lease = None
+        self._access.poison()
+
     def close(self) -> None:
         """Deterministically releases this session's current lease, if it still owns it."""
         lease, self._lease = self._lease, None

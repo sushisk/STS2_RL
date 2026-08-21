@@ -9,9 +9,13 @@ boundaries either use deterministic replay in the Beam subclass or reject branch
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 from typing import Any, Optional
 
 import run_emulator_bridge as bridge
+from battle_emulator import CombatCompletion
+from game_access import LeaseState
+from live_combat_session import LiveCombatSession
 from reward_auto_progress import drain_trivial_reward_frontier
 from whole_run_session import EVENT_CHOICE, MAP_SELECT, RUN_TERMINAL, WholeRunSession
 from worker_pool import (
@@ -35,12 +39,16 @@ from API.dto import (
     STATUS_FAULTED,
     STATUS_RELEASED,
 )
+from API.combat_phase import CombatPhase
 from API.history_builder import HistoryBuilder
 from API.identifiers import BranchIdRegistry, DecisionPointRegistry, RngHypothesisTable
 from API.masking import build_masked_emulator_dto, mask_legal_actions
 from API.terminal_outcome import VALID_WHOLE_RUN_TERMINAL_OUTCOMES, require_terminal_outcome
 from API.validation import RequestRejected
 from API.whole_run_event_rng import EventRngHypothesisRegistry
+
+
+logger = logging.getLogger(__name__)
 
 
 def _map_rooms_as_legal_actions(session: WholeRunSession) -> list:
@@ -239,6 +247,8 @@ class WholeRunInstance:
         self._rng_table = RngHypothesisTable()
         self._event_rng_registry = EventRngHypothesisRegistry()
         self.max_branches = max_branches
+        self._combat_worker_count = branch_worker_count
+        self._request_timeout_s = request_timeout_s
 
         self._map_snapshot: Optional[str] = None
         self._room_id: Optional[int] = None
@@ -246,6 +256,9 @@ class WholeRunInstance:
         self._root_branch_log: list = []
         self._root_history = HistoryBuilder()
         self._bookkeeping: dict[str, _BranchBookkeeping] = {}
+        self._combat_phase: CombatPhase | None = None
+        self._last_combat_completion: CombatCompletion | None = None
+        self._faulted = False
         self._closed = False
 
         initial_auto = drain_trivial_reward_frontier(self._session)
@@ -348,7 +361,102 @@ class WholeRunInstance:
 
     # -- operations -------------------------------------------------------------------
 
+    def enter_combat_phase(self) -> CombatPhase:
+        """Atomically hand the live board from Whole Run to an adopted CombatPhase."""
+        self._ensure_mutable()
+        if self._combat_phase is not None:
+            raise RequestRejected("a combat phase is already active for this whole-run instance")
+
+        transfer = self._session.begin_lease_transfer()
+        prior_decision = self._decision_points.current(ROOT_BRANCH_ID)
+        phase: CombatPhase | None = None
+        committed = False
+        try:
+            live_session = LiveCombatSession(whole_run_mode=True)
+            root_state = live_session.adopt_current_combat()
+            phase = CombatPhase.adopt(
+                live_session,
+                root_state,
+                worker_count=self._combat_worker_count,
+                request_timeout_s=self._request_timeout_s,
+                max_branches=self.max_branches,
+                worker_pool_backend=None,
+            )
+            # This is deliberately before the lease commit: adoption and the first
+            # published root decision become visible together only after commit succeeds.
+            self._decision_points.issue(ROOT_BRANCH_ID)
+            lease = self._session.commit_lease_transfer(
+                transfer, LeaseState.COMBAT, live_session.lease_holder
+            )
+            committed = True
+            live_session.accept_transferred_lease(lease)
+            self._combat_phase = phase
+            return phase
+        except Exception:
+            if committed:
+                self._poison_combat_transaction(phase)
+            else:
+                if phase is not None:
+                    phase.close()
+                self._decision_points.restore_current(ROOT_BRANCH_ID, prior_decision)
+                self._session.rollback_lease_transfer(transfer)
+            raise
+
+    def leave_combat_phase(self, completion: CombatCompletion) -> None:
+        """Atomically retire an adopted phase and return its settled run to Whole Run."""
+        self._ensure_mutable()
+        phase = self._combat_phase
+        if phase is None:
+            raise RequestRejected("no active combat phase to leave")
+
+        transfer = phase.begin_lease_transfer()
+        phase_folded = False
+        try:
+            # Preserve the hand-off fact before retiring the component that produced it.
+            self._last_combat_completion = completion
+            # Public branch tombstones must survive phase teardown.  S7 will add the
+            # phase-branch mapping here; these are the currently public Whole Run branches.
+            self._cancel_and_release_all_branches()
+            phase.close()
+            phase_folded = True
+            self._combat_phase = None
+            auto = drain_trivial_reward_frontier(self._session)
+            self._action_prefix = list(auto.auto_action_ids)
+            self._maybe_capture_map_snapshot()
+            lease = self._session.commit_lease_transfer(
+                transfer, LeaseState.RUN, self._session.lease_holder
+            )
+            self._session.accept_transferred_lease(lease)
+        except Exception:
+            # A combat-completion Step has already changed the physical game.  Once any
+            # following record/publication/normalization work fails, RUN is no longer a
+            # truthful recovery point; poison instead of inventing one from a snapshot.
+            self._poison_combat_transaction(None if phase_folded else phase)
+            raise
+
+    def _poison_combat_transaction(self, phase: CombatPhase | None) -> None:
+        self._faulted = True
+        self._combat_phase = None
+        self._session.poison_mutations()
+        if phase is not None:
+            try:
+                phase.close()
+            except Exception:
+                logger.exception("failed to close combat phase while poisoning whole-run transaction")
+        pool = self._pool
+        if pool is not None:
+            try:
+                pool.close()
+            except Exception:
+                logger.exception("failed to close whole-run worker pool while poisoning combat transaction")
+
+    def _ensure_mutable(self) -> None:
+        if self._faulted:
+            raise RequestRejected("whole-run instance is faulted; close it explicitly before reuse")
+
     def start_instance_response(self) -> dict:
+        if self._faulted:
+            return {"status": STATUS_FAULTED, "instance_id": self.instance_id}
         view = self._root_view()
         return {
             "status": STATUS_COMPLETED,
@@ -362,6 +470,8 @@ class WholeRunInstance:
         }
 
     def get_decision(self, branch_id: str) -> dict:
+        if self._faulted:
+            return {"status": STATUS_FAULTED, "branch_id": branch_id}
         if branch_id != ROOT_BRANCH_ID and not self._branch_ids.is_known(branch_id):
             raise RequestRejected(f"unknown branch_id {branch_id!r}")
         if branch_id != ROOT_BRANCH_ID:
@@ -406,6 +516,7 @@ class WholeRunInstance:
         }
 
     def commit_action(self, decision_point_id: str, action_id: str) -> dict:
+        self._ensure_mutable()
         self._decision_points.validate(ROOT_BRANCH_ID, decision_point_id)
         view = self._root_view()
         if view.boundary == RUN_TERMINAL:
@@ -467,6 +578,7 @@ class WholeRunInstance:
         simulation_options: Optional[dict],
     ) -> dict:
         """Execute one Active Event Branch through shared validate/prepare/finalize logic."""
+        self._ensure_mutable()
         self._validate_stop_condition(simulation_options)
         spec = self._validate_event_branch(
             parent_branch_id=parent_branch_id,
@@ -501,6 +613,7 @@ class WholeRunInstance:
         return self._finalize_event_branch(spec, book, result)
 
     def cancel_branches(self, branch_ids: list) -> dict:
+        self._ensure_mutable()
         for bid in branch_ids:
             self._reject_if_root(bid)
             book = self._bookkeeping.get(bid)
@@ -516,6 +629,7 @@ class WholeRunInstance:
         }
 
     def release_branches(self, branch_ids: list) -> dict:
+        self._ensure_mutable()
         for bid in branch_ids:
             self._reject_if_root(bid)
             book = self._bookkeeping.get(bid)
@@ -545,12 +659,17 @@ class WholeRunInstance:
             return
         self._closed = True
         try:
-            self._event_rng_registry.release_all()
+            phase, self._combat_phase = self._combat_phase, None
+            if phase is not None:
+                phase.close()
         finally:
             try:
-                self._pool.close()
+                self._event_rng_registry.release_all()
             finally:
-                self._session.close()
+                try:
+                    self._pool.close()
+                finally:
+                    self._session.close()
 
     # -- shared Branch lifecycle primitives ------------------------------------------
 
