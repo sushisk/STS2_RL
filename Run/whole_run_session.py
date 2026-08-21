@@ -105,6 +105,14 @@ class WholeRunSession:
     def load_state(self, snapshot_json: str) -> None:
         self._game.LoadState(snapshot_json)
 
+    def capture_combat_snapshot(self) -> str:
+        """Capture the combat-only state; the run's map position does not survive restore."""
+        return str(self._game.CaptureSnapshotJson())
+
+    def restore_combat_snapshot(self, snapshot_json: str) -> None:
+        """Restore a combat-only snapshot; the run's map position does not survive restore."""
+        self._game.RestoreSnapshotJson(snapshot_json)
+
     def get_event_rng_state(self) -> dict:
         return bridge.event_rng_snapshot_to_dict(self._game.GetEventRngState())
 
