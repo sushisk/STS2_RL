@@ -1,9 +1,10 @@
-# Whole Run の戦闘分岐を Combat snapshot 復元へ移す
+# Whole Run の戦闘分岐を Combat Instance へ委譲する
 
 ## 0. 文章の目的
 
 Whole Run の Combat branch を、Map snapshot + action prefix の再生から
-`CombatStateSnapshot` の復元へ移すための実装仕様。手順ごとに分けて実装する前提で書く。
+**`CombatInstance` への委譲**へ移すための実装仕様。実装するのは境界処理であり、
+分岐そのものの再実装ではない。
 
 ## 1. なぜ変えるか
 
@@ -16,150 +17,172 @@ for action_id in action_prefix:
     session.step(action_id)          # 戦闘の頭から打ち直す
 ```
 
-Combat Instance 側（`CombatScenario` / `CombatStateSnapshot` / `battle_emulator`）は
-Whole Run から一切 import されていない。完全に別実装であり、Combat 側の修正はここに効かない。
+`CombatScenario` / `CombatStateSnapshot` / `battle_emulator` を Whole Run 側は 1 つも
+import していない。完全に別実装であり、**Combat Instance 側の修正はここに効かない。**
 
-この方式には 2 つの問題がある。
+### 1.1 観測されたバグと、その本当の説明
 
-- **再現性**: 戦闘の再現が prefix 再生の忠実性に完全依存する。途中 1 箇所のズレで以降すべてが
-  狂う。実際に `AllBranchesFaultedError` が発生し、調査の結果「同じ部屋・同じ戦闘を最後まで
-  進めた状態に着地」していた（stepIndex +8、HP 71→39、敵全滅）。しかも 12 回のリトライ
-  すべてで同一。敵 RNG・action_id の解釈違い・prefix の長さは実測で否定済み
-- **速度**: 深いターンほど再生量が線形に増える
+Whole Run 評価で `AllBranchesFaultedError` が 2 件発生した。fault 診断は
+
+```
+expected_boundary = stable        root  : floor 15, turn 1, 敵 117 HP 睡眠中, HP 71, stepIndex 110
+actual_boundary   = reward_select replay: 同じ floor・同じ部屋, 敵全滅, HP 39, stepIndex 118
+```
+
+を報告していた。**同じ部屋の同じ戦闘を、最後まで戦って勝った状態**である。
+
+消去できた仮説（すべて実測）:
+
+| 仮説 | 判定 |
+|---|---|
+| 敵の move 選択の乱数 | 否定。`rng_id` 1〜4 で手札まで完全一致し、intent 列も `BygoneEffigy` の宣言どおり |
+| prefix の数値 action_id が別カードを指す | 否定。replay 先の id 2/3/4 が親と一致。欠けていたのは唯一コスト 3 のカードで、`CanPlay()` の絞り込み（＝エネルギー不足）で説明できる |
+| prefix が長すぎる（蓄積バグ） | 否定。失敗した決定の prefix は **1 手** |
+| `auto_action_ids` の二重適用 | 否定。契約とコードで root/replay が対称 |
+
+残ったのは、**設計の前提そのもの**だった。
+
+branch は **root と異なる RNG でシミュレートする**のが仕様である。RNG はゲーム情報として
+与えられない（RNG を知ってプレイするのは盤面予測ではない）。同じ action_id 列を新しい RNG で
+再生すれば、ドローが変わり、打つカードが変わり、与ダメージが変わる。
+**部屋全体ぶんの再生窓に対してこれを行えば、別のゲームになる。**
+
+これで観測がすべて説明できる。
+
+- 12 回のリトライが同一だったのは `rng_id` 354〜357 を使い回すため。**同じ rng_id なら同じ盤面**
+- `BYGONE_EFFIGY` に集中していたのは、起床時 Strength +10 が乖離を増幅し boundary が
+  変わる閾値に届きやすいため。原因ではなく**可視化装置**
+- 同一プロセスで prefix を再生した私の検証が bit 一致したのは、**rng_id を振っていなかった**ため。
+  検証方法が誤っていた
+
+**replay 機構の不具合ではなく、RNG 規律に対して再生窓が長すぎることが原因。**
 
 ## 2. 事前調査の結果（実測済み）
 
 | 項目 | 結果 |
 |---|---|
-| `pending_choice` からの `CaptureSnapshotJson()` | **可能**（26,422 bytes）。`stable` も可能（26,428 bytes） |
+| `CaptureSnapshotJson()` at `stable` | 可能（26,428 bytes）。restore まで通る |
+| `CaptureSnapshotJson()` at `pending_choice` | capture は**通る**が、その snapshot の **restore は拒否**: `unsupported_capture_boundary:published_target` |
 | capture → restore の戦闘状態 | hp / energy / block / gold / relics / deck / 敵 / 手札 / legal actions **すべて一致** |
-| capture → restore の run 位置 | `totalFloor` / `actFloor` / `currentActIndex` / `currentRoomType` が **`None` になる**。capture 位置で即 restore しても同じ |
-| `RestoreSnapshotJson` の拒否 | `SnapshotRestoreRejectedException`。`invalid_json_required_field:$.Metadata` 等の構造化コード。復元前に検証 |
-| `combat_session_id` | 復元で変わる。ただし `Lease.is_valid_for()` は比較に使わず、`masking.py` が publish も禁止しているため**無害** |
-| **復元した戦闘に勝ったとき** | **`boundary = run_terminal` / `outcome = victory`**（HP 生存、敵全滅）。地図の文脈が無いため戦闘終了がラン終了として報告される |
+| capture → restore の run 位置 | `totalFloor` / `actFloor` / `currentActIndex` / `currentRoomType` が `None` になる |
+| `RestoreSnapshotJson` の拒否 | `SnapshotRestoreRejectedException` + 構造化コード。復元前に検証 |
+| `combat_session_id` | 復元で変わる。`Lease.is_valid_for()` は比較に使わず `masking.py` が publish も禁止しているため無害 |
+| 復元した戦闘に勝ったとき | `boundary = run_terminal` / `outcome = victory`（地図の文脈が無いため） |
 | snapshot サイズ | 26〜29 KB |
 
-## 3. 実装手順
+`GameInstance.DetermineCaptureBoundary()` は capture 時の boundary を
+`normal_player_decision` / `published_target` / `published_choice` / `terminal` に分類し、
+**restore できるのは `normal_player_decision`（= `stable`）だけ**である。
+
+## 3. 委譲先には必要なものが既にある
+
+`CombatInstance.__init__`（`API/instance_combat.py:159`）:
+
+```python
+self._session = LiveCombatSession()
+self._root_state = self._session.start_combat(scenario_spec)
+self._held_stable_snapshot: Optional[CombatStateSnapshot] = None   # stable アンカー
+self._replay_prefix: list[ReplayPrefixEntry] = []                  # アンカーからの行動列
+root_boundary = boundary_of_battle_state(self._root_state)
+if root_boundary == BOUNDARY_STABLE:
+    self._held_stable_snapshot = self._session.capture_snapshot()
+    self._replay_prefix = start_new_replay_prefix_from_stable()
+elif root_boundary == BOUNDARY_PENDING:
+    raise RuntimeError(_START_PENDING_UNSUPPORTED)
+```
+
+**アンカー + 行動列も、`pending_choice` から開始できない制約も、既に実装されている。**
+さらに `API/combat_rng_mapping.py` が `rng_id` → 単一のドロー順序仮説を与え、
+`Combat/search/replay_draw_restore.py` が `pending_choice` までに観測済みのドローを固定する。
+
+したがって **これらを下位から呼び直してはならない。** 3 つ目の分岐実装が生まれるだけである。
+
+## 4. 実装する経路
+
+```
+戦闘開始を検出
+  → CombatInstance を作成
+  → Whole Run セッションへ CaptureSnapshot を要求
+  → その snapshot を CombatInstance へ反映
+  → 戦闘境界の emulate_actions を CombatInstance へ委譲
+```
+
+**scenario から戦闘を開始してはならない。** 敵の初手が RNG 依存の場合、
+scenario 開始では実際のゲーム状態と乖離しうる。snapshot 反映なら忠実である。
+
+root の進行（`commit_action`）は従来どおり Whole Run セッションが行う。
+`CombatInstance` は分岐のためだけに存在し、root の現在位置を映す。
+
+## 5. 実装手順
 
 各手順は独立にレビュー・テスト可能であること。手順をまたいで先回りしないこと。
 
-### S1. `WholeRunSession` に capture / restore を公開する
+### S1. `WholeRunSession` に capture / restore を公開する（完了）
 
-`Run/whole_run_session.py` は `save_state` / `load_state`（run 級）しか持たない。
-`Run/run_emulator_bridge.py` 経由で次を追加する。
+`capture_combat_snapshot()` / `restore_combat_snapshot()`。
+ラウンドトリップのテストが `totalFloor` の欠落も pin している。
 
-```python
-def capture_combat_snapshot(self) -> str      # GameInstance.CaptureSnapshotJson()
-def restore_combat_snapshot(self, json: str)  # GameInstance.RestoreSnapshotJson(json)
-```
+### S2. `CombatInstance` に snapshot からの起動口を作る
 
-- 命名は run 級の `save_state` / `load_state` と紛れないこと
-- `Combat/emulator_bridge.py` の `restore_snapshot_json` と同じ形にする
-- CLR 例外はそのまま伝播させる。ここで握りつぶさない
+現在の入口は `start_combat(scenario_spec)` だけで、`BOUNDARY_PENDING` を拒否する。
+**snapshot を反映して同じ不変条件を確立する入口**を足す。
 
-**受け入れ**: 戦闘中に capture → restore して観測が §2 の表どおりに戻ること。
+- `LiveCombatSession.restore_snapshot_json()` は既にある
+- 反映後は `start_combat` の後と同じ状態になること。すなわち `_held_stable_snapshot` と
+  `_replay_prefix` が `stable` アンカーとして確立されること
+- `stable` 以外の snapshot は拒否する（restore 自体が拒否するので素通しでよい）
 
-### S2. snapshot を「作って運ぶ」
+**やらないこと**: 既存の scenario 入口を壊すこと。分岐ロジックに触ること。
 
-**分岐の 85% は親がルートではない。** 実トラフィックの `emulate_actions` items 7,130 件の
-うち、`parent_branch_id == "root"` は 1,051 件で、残り 6,079 件は別の branch を親に持つ。
+**受け入れ**: snapshot から起こした `CombatInstance` が `start_instance_response()` で
+親と同じ盤面を返し、`emulate_actions` が動くこと。
 
-これが設計を決める。API プロセスのライブセッションは**常にルートの位置**にあり、
-branch の盤面は worker プロセスにしか存在しない。したがってライブセッションから capture
-できるのはルート親の場合だけで、それ以外で同じことをすると**全く別の盤面**を渡すことになる。
-現行の prefix 方式が深さ 2 以上でも動いていたのは、`_build_child_view` が経路全体を
-prefix にエンコードしているからであり、snapshot にはその性質が無い。
+### S3. Whole Run が戦闘境界で `CombatInstance` を保持する
 
-**snapshot は連鎖させる。**
+- root が戦闘境界に入ったら `CombatInstance` を作り、Whole Run セッションから capture した
+  snapshot を反映する
+- root が戦闘内で進むたびに、その位置を `CombatInstance` へ反映し直す
+- 戦闘が終わったら畳む
 
-```
-ルート親の branch : API のライブセッションから capture
-branch を親とする : その親 branch を実行した worker が、実行直後に capture したものを使う
-```
+**やらないこと**: 非戦闘（map / event / reward / rest / shop）の経路に触ること。
 
-構造としては次の 4 点。
+**受け入れ**: 戦闘中は `CombatInstance` が root と同じ盤面を保つこと。
 
-| 置き場所 | 追加するもの | 役割 |
-|---|---|---|
-| `ChoiceWorkItem`（`Run/worker_pool.py`） | `combat_snapshot: "str \| None" = None` | **どこから組み立てるか**。設定時は `map_snapshot` / `room_id` / `action_prefix` を使わない |
-| `ChoiceStepResult`（同上） | `settled_combat_snapshot: "str \| None" = None` | **その branch の実行後の盤面**。worker が `drain_trivial_reward_frontier` の直後、`settled_observation` を取るのと同じ場所で capture する |
-| `_BranchBookkeeping`（`API/instance_whole_run.py`） | `combat_snapshot` | 上を branch ごとに保持し、子 branch が引ける状態にする |
-| `_prepare_combat_branch`（`API/instance_whole_run_beam.py`） | 取得元の分岐 | 親がルートならライブセッションから capture、そうでなければ親 branch の bookkeeping から引く |
+### S4. 戦闘境界の `emulate_actions` を委譲する
 
-**capture できない場合は fault にする。フォールバックを作らない。**
-戦闘が終わった branch は `EnsureCombatActive()` を満たさず capture できないので
-`settled_combat_snapshot` は `None` になる。その branch を親にした子 branch の要求は
-拒否してよい。Training は戦闘終了を terminal として扱うので、そこから先へ分岐する必要が無い。
+- 戦闘境界の分岐要求を `CombatInstance.emulate_actions()` へ回す
+- **`branch_id` / `decision_point_id` の名前空間を対応付ける。** Training は Whole Run が
+  発行した id で分岐を指すので、両者の対応表が要る
+- 非戦闘の分岐は従来どおり Whole Run の worker pool
 
-**同一決定の兄弟では capture を 1 回だけにする。** `emulate_actions` は同じ親決定から
-複数の兄弟をまとめてディスパッチする。branch ごとに capture すると同一内容の 26 KB が
-兄弟の数だけ `multiprocessing.Queue` を通る。バッチ内で親決定ごとに 1 回に抑える。
-キャッシュ用のクラスや抽象は作らない。
+**やらないこと**: 旧 prefix 経路へのフォールバック。静かに落ちると乖離がまた見えなくなる。
 
-この手順では **worker はまだ `combat_snapshot` を消費しない**。運ぶだけで、
-組み立て方を変えるのは S3。
+**受け入れ**: 戦闘分岐が `load_state` / `choose_room` / 部屋全体の prefix 再生を
+一度も行わないこと。
 
-**受け入れ**:
-- ルート親の戦闘 work item に非空の `combat_snapshot` が載る
-- 1 つの親決定の兄弟が同じ capture を共有する（兄弟ごとに capture しない）
-- branch を親とする戦闘 work item は、その親 branch の実行結果由来の snapshot を載せる
-- 非戦闘（map / event / reward）の work item は無変更
-- worker の挙動は無変更
+### S5. publish する DTO を Whole Run の形に揃える
 
-### S3. worker を snapshot 復元にする
+`CombatInstance` の DTO には run 級の情報が無い
+（`totalFloor` / `actFloor` / `currentActIndex` / `currentRoomType`）。親 view の値で補う。
+戦闘中に floor は変わらないので引き継いで問題ない。
 
-`Run/worker_pool.py` の `_bootstrap_reach`:
+終端の形も確認する。Training は `transition.kind == "combat_completed"` を解釈できる
+（`decision/value.py:233-247`）。`outcome: "victory"` をそのまま publish すると
+**ラン勝利（+100,000）として評価される**ので、戦闘勝利は `combat_completed` で publish する。
 
-- `work_item.combat_snapshot` があれば `restore_combat_snapshot()` **1 回だけ**行い、
-  `load_state` / `choose_room` / prefix 再生は**行わない**
-- 復元に失敗したら fault。**旧経路へのフォールバックは作らない**。静かに落ちると
-  今回のような乖離がまた見えなくなる
-- 非戦闘（map / event / reward）の work item は現状の経路のまま
+## 6. テスト
 
-`resolve_action_semantic_key` による最終行動の再解決は**そのまま残す**が、
-役割は「解決」ではなく「検証」に近い。復元が正しければ親と同じ ID になるはず。
+- S2: snapshot から起こした `CombatInstance` が親と同じ盤面を返すこと
+- S3: root が戦闘内で進むと `CombatInstance` が追随すること
+- S4: 戦闘分岐で `choose_room` / prefix 再生が呼ばれないこと（fake で呼び出しを観測）
+- S5: branch DTO の run 位置フィールドが親と一致し、戦闘勝利が `combat_completed` として
+  publish され `outcome: "victory"` が出ないこと
+- 全体: `python -m pytest -q` が既存 504 件を維持すること
 
-**受け入れ**: 戦闘分岐が prefix を 1 手も再生せず、復元 1 回で親と同じ盤面に立つこと。
-
-### S4. 戦闘終了の publish 形を現状に合わせる（最重要）
-
-**これを落とすと探索が静かに壊れる。**
-
-復元した戦闘に勝つと、セッションは `boundary = run_terminal` / `outcome = victory` を返す。
-Training 側 `decision/value.py:233-237` は `outcome in ("victory","defeat")` を
-そのまま terminal 扱いし、`DamageRaceValueFunction` が `+100,000`（＝ラン勝利）を返す。
-**戦闘に勝っただけの leaf がすべてラン勝利として評価される。**
-
-したがって RL のアダプタ層で変換する。
-
-- 復元由来の branch が戦闘終了に達したら、publish する DTO は
-  **現在の経路と同じ `transition` 形**にする（`kind = "combat_completed"` と勝敗）
-- `run_terminal` / `outcome: "victory"` を**そのまま publish しない**
-- 敗北（プレイヤー死亡）は現状どおりで良い
-
-**Training 側は無変更で済むこと**が受け入れ条件。`_terminal_outcome()` は
-`transition.kind == "combat_completed"` を既に解釈できる。
-
-### S5. run 位置フィールドの欠落を埋める
-
-復元後は `totalFloor` / `actFloor` / `currentActIndex` / `currentRoomType` が `None` になる。
-branch の DTO と root の DTO で食い違うため、**親 view の値で補う**。
-
-- 戦闘中に floor は変わらないので、親から引き継いで問題ない
-- Training の combat beam はこれらを読まないが、DTO の一貫性のために埋める
-
-## 4. テスト
-
-- S1: capture / restore のラウンドトリップ（`API/tests/`。pytest 収集対象）
-- S3: 戦闘分岐が `choose_room` / prefix 再生を行わないこと（fake session で呼び出しを観測）
-- S4: **復元 branch の戦闘勝利が `combat_completed` として publish され、
-  `outcome: "victory"` が publish されないこと**。回帰したら探索が壊れるので必須
-- S5: branch DTO の run 位置フィールドが親と一致すること
-- 全体: `python -m pytest -q` が既存 503 件を維持すること
-
-## 5. やらないこと
+## 7. やらないこと
 
 - 旧 prefix 経路へのフォールバック
-- 非戦闘（map / event / reward）分岐の変更
+- `rng_hypothesis` / `replay_draw_restore` を下位から呼び直すこと（`CombatInstance` に委譲する）
+- 非戦闘（map / event / reward / rest / shop）分岐の変更
 - Training 側の変更
 - `combat_session_id` の維持（無害と確認済み）
