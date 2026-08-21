@@ -239,14 +239,19 @@ class SnapshotRestoreMissingMoveError(RuntimeError):
     still the Emulator's own `UNSET_MOVE` sentinel - i.e. this state descends from a
     Snapshot Restore whose enemies never got a Move established.
 
-    Root cause (confirmed empirically, not speculative): `SnapshotRestorer` deliberately
-    never touches `Intent`/calls `RollMove()` (a Restore fresh-start hook it must never
-    invoke - see `Combat/tests/test_restore_snapshot_phase3c1.py::
-    _strip_known_restore_boundary_diffs`'s own docstring), so EVERY Snapshot restored
-    through `restore_snapshot()`/`restore_snapshot_json()` currently comes back with
-    every enemy's Move unset, and it stays unset through any further card-play Steps
-    from that same branch (nothing else in this engine sets it either). Actually ending
-    such a turn makes the underlying C# monster-move state machine hang inside
+    **The "EVERY restore comes back unset" claim this docstring used to make is no
+    longer true.** Measured 2026-08-21 against the current Emulator: capture at a stable
+    Combat decision, restore, and the enemies come back with exactly the Intents they had
+    (`TACKLE_MOVE`/4, `STICKY_SHOT`, `TACKLE_MOVE`/3 - identical before and after), no
+    living enemy with an unset Move, and End Turn on the restored board succeeds and
+    advances the turn normally (hp 80 -> 73, turn 1 -> 2, enemies rolling on to their next
+    Moves). Whatever gap produced the original finding has since been closed on the
+    Emulator side.
+
+    The check is kept as a fail-fast guard for the case it describes, because that case
+    is genuinely unrecoverable and expensive: if a living enemy's Move IS the Emulator's
+    `UNSET_MOVE` sentinel, ending the turn makes the C# monster-move state machine hang
+    inside
     `GameInstance.WaitUntilChoiceOrSettled()` for ~15s before surfacing only as a generic
     `TimeoutException` ("Timed out waiting for the next decision point or settlement") -
     the real cause (`InvalidOperationException("No move has been set for the monster")`,
@@ -255,13 +260,13 @@ class SnapshotRestoreMissingMoveError(RuntimeError):
     with the actual cause and the specific enemies affected - instead of a caller (e.g. a
     Branch Worker) burning a full `request_timeout_s` discovering it the hard way.
 
-    This is a genuine Emulator (`SnapshotRestorer`) scope gap, not something the RL side
-    can fix by itself - only detect and report clearly. Fixing it for real (making
-    Restore establish a real Move, or exposing a supported RL-callable re-roll) requires
-    Emulator-side work; see `docs/contracts/combat_state_contract.v0.5.md`'s
-    known-limitations section. The engine itself is never touched by this check (raised
-    before any CLR call), so unlike an actual engine fault this does NOT mark the session
-    faulted - `battle_state` remains valid for any non-End-Turn action.
+    The engine itself is never touched by this check (raised before any CLR call), so
+    unlike an actual engine fault this does NOT mark the session faulted - `battle_state`
+    remains valid for any non-End-Turn action.
+
+    Do not read this class as "restored boards cannot end their turn". They can; that is
+    measured above. Reading the old wording that way is what nearly sank the Whole Run
+    combat-branching design, whose leaves are scored by forcing exactly this action.
     """
 
     fault_kind = "snapshot_restore_missing_monster_move"
@@ -529,15 +534,13 @@ class LiveCombatSession:
         """Shared tail of `restore_snapshot()`/`restore_snapshot_json()`: wraps the CLR
         restore result and commits it as this session's current frame.
 
-        Deliberately does NOT check for `SnapshotRestoreMissingMoveError` here - per that
-        exception's own docstring, `Intent`/Move is unconditionally absent on EVERY
-        Snapshot Restore result (a Restore-wide Emulator gap, not specific to any one
-        Snapshot), so checking at Restore time would reject every restore outright,
-        including the overwhelming majority that never end the turn from this exact
-        state (card-play evaluation, Branch Worker candidate scoring, etc.) and are
-        entirely unaffected by it. The check instead runs in `step()`, gated on the
-        specific action that actually triggers the hang (`action_type == "system"`,
-        i.e. End Turn) - see `step()`'s own docstring.
+        Deliberately does NOT check for `SnapshotRestoreMissingMoveError` here. Restored
+        boards come back with their Intents intact (measured; see that exception's own
+        docstring), and even if one did not, rejecting at Restore time would reject the
+        restores that never end the turn from this exact state - card-play evaluation,
+        Branch Worker candidate scoring - along with it. The check instead runs in
+        `step()`, gated on the one action that could trigger the hang
+        (`action_type == "system"`, i.e. End Turn).
         """
         battle_state = self._wrap_restore_result(result)
         self._current_frame = battle_state.decision_frame
