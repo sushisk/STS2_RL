@@ -24,7 +24,12 @@ from search.decision_context import (
     DecisionSignature,
 )
 
-from API.combat_phase import CombatPhase, DEFAULT_MAX_TIME_MS
+from API.combat_phase import (
+    CombatPhase,
+    DEFAULT_MAX_TIME_MS,
+    ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR,
+    START_PENDING_UNSUPPORTED,
+)
 from API.dto import (
     FAULT_EMULATOR_ERROR,
     ROOT_BRANCH_ID,
@@ -47,11 +52,21 @@ _AMBIGUOUS_ACTION_INDEX = -1
 
 
 class _DecisionView:
-    __slots__ = ("legal_actions_raw", "decision_context", "boundary", "public_id_by_index")
+    __slots__ = ("legal_actions_raw", "decision_context", "battle_state", "boundary", "public_id_by_index")
 
-    def __init__(self, legal_actions_raw: list, decision_context: DecisionContext, boundary: str) -> None:
+    def __init__(
+        self,
+        legal_actions_raw: list,
+        decision_context: DecisionContext | None,
+        boundary: str,
+        battle_state=None,
+    ) -> None:
         self.legal_actions_raw = legal_actions_raw
         self.decision_context = decision_context
+        self.battle_state = (
+            battle_state if battle_state is not None
+            else (decision_context.current_decision_result if decision_context is not None else None)
+        )
         self.boundary = boundary
         public_id_by_index = {}
         for i, action in enumerate(legal_actions_raw):
@@ -118,6 +133,10 @@ class CombatInstance:
             worker_pool_backend=worker_pool_backend,
             max_branches=max_branches,
         )
+        if self._phase.root_branching_unavailable_reason is not None:
+            # The phase has already created its worker pool; close it on this rejected path.
+            self._phase.close()
+            raise RuntimeError(START_PENDING_UNSUPPORTED)
         self._branch_ids = BranchIdRegistry()
         self._decision_points = DecisionPointRegistry()
         self._root_branch_log: list = []
@@ -131,8 +150,8 @@ class CombatInstance:
             raise RequestRejected("combat instance is closed after an unrecoverable cleanup failure")
 
     def _root_view(self) -> _DecisionView:
-        legal, context = self._phase.root_decision()
-        return _DecisionView(legal, context, context.current_context_signature.boundary)
+        legal, context, boundary = self._phase.root_decision()
+        return _DecisionView(legal, context, boundary, self._phase.root_state)
 
     def _view_for(self, public_branch_id: str) -> _DecisionView:
         if public_branch_id == ROOT_BRANCH_ID:
@@ -143,7 +162,7 @@ class CombatInstance:
         return book.view
 
     def _decision_response_fields(self, public_branch_id: str, view: _DecisionView, *, branch_log: list) -> dict:
-        battle_state = view.decision_context.current_decision_result
+        battle_state = view.battle_state
         engine_state = dict(battle_state.engine_state)
         extra: dict[str, Any] = {"legal_actions": mask_legal_actions(view.legal_actions_raw)}
         if battle_state.is_terminal:
@@ -226,6 +245,7 @@ class CombatInstance:
         self._decision_points.validate(parent_branch_id, decision_point_id)
         self._branch_ids.register(branch_id)
         parent_view = self._view_for(parent_branch_id)
+        self._require_branchable(parent_view)
         index = parent_view.resolve_action_id(action_id)
         chosen = parent_view.legal_actions_raw[index]
         rng_snapshot = self._phase.snapshot_rng_hypotheses()
@@ -286,6 +306,7 @@ class CombatInstance:
                 raise RequestRejected(f"non-root parent_branch_id {parent_branch_id!r} requires rng_id={parent_rng_id!r} (its own lineage rng_id), got {rng_id!r}")
         self._decision_points.validate(parent_branch_id, decision_point_id)
         parent_view = self._view_for(parent_branch_id)
+        self._require_branchable(parent_view)
         index = parent_view.resolve_action_id(action_id)
         chosen = parent_view.legal_actions_raw[index]
         return _AdmittedItem(parent_branch_id, branch_id, rng_id, decision_point_id, action_id, parent_view, chosen)
@@ -372,10 +393,15 @@ class CombatInstance:
             return {"status": STATUS_FAULTED, "branch_id": branch_id, "parent_branch_id": parent_branch_id, "rng_id": rng_id, "error": diagnostics.get("message", "branch execution faulted"), "fault_kind": diagnostics.get("fault_kind", FAULT_EMULATOR_ERROR)}
         boundary = result.result_signature.boundary
         if boundary == BOUNDARY_PENDING:
-            next_view = _DecisionView(list(result.pending_decision_context.current_decision_result._cached_legal_actions or []), result.pending_decision_context, boundary)
+            next_view = _DecisionView(
+                list(result.pending_decision_context.current_decision_result._cached_legal_actions or []),
+                result.pending_decision_context,
+                boundary,
+                result.pending_decision_context.current_decision_result,
+            )
         elif boundary == BOUNDARY_STABLE:
             next_context = DecisionContext.from_main_stable_capture(result.child_snapshot, result.next_decision_result, result.result_signature)
-            next_view = _DecisionView(list(result.next_legal_actions or []), next_context, boundary)
+            next_view = _DecisionView(list(result.next_legal_actions or []), next_context, boundary, result.next_decision_result)
         elif boundary == BOUNDARY_TERMINAL:
             terminal_outcome = require_terminal_outcome(
                 result.terminal_result.outcome if result.terminal_result else None,
@@ -429,6 +455,11 @@ class CombatInstance:
         if book is None:
             raise RequestRejected(f"unknown branch_id {public_branch_id!r}")
         return book.internal_id
+
+    @staticmethod
+    def _require_branchable(view: _DecisionView) -> None:
+        if view.decision_context is None:
+            raise RequestRejected(ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR)
 
     def _compact_bookkeeping_for_release(self, public_branch_id: str) -> None:
         """Retain only the lightweight public-to-internal tombstone for a released Branch."""

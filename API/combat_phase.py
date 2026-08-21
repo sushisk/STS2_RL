@@ -30,9 +30,12 @@ from API.identifiers import RngHypothesisTable
 
 DEFAULT_MAX_TIME_MS = 20_000
 DEFAULT_ALC_WORKER_COUNT = 8
-_START_PENDING_UNSUPPORTED = (
+START_PENDING_UNSUPPORTED = (
     "CombatInstance does not yet support a Start-of-Combat Pending root - "
     "see main_loop.py's CombatStartReplayRoot handling for the mechanism this would need"
+)
+ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR = (
+    "root is not branchable: no stable snapshot anchor is established"
 )
 
 
@@ -64,16 +67,57 @@ class CombatPhase:
         max_branches: int,
         worker_pool_backend: str | None,
     ) -> None:
-        self._session = LiveCombatSession()
-        self._root_state = self._session.start_combat(scenario_spec)
+        session = LiveCombatSession()
+        root_state = session.start_combat(scenario_spec)
+        self._initialize_live_combat(
+            session,
+            root_state,
+            worker_count=worker_count,
+            request_timeout_s=request_timeout_s,
+            max_branches=max_branches,
+            worker_pool_backend=worker_pool_backend,
+        )
+
+    @classmethod
+    def adopt(
+        cls,
+        session: LiveCombatSession,
+        root_state,
+        *,
+        worker_count: int | None,
+        request_timeout_s: float,
+        max_branches: int,
+        worker_pool_backend: str | None,
+    ) -> "CombatPhase":
+        """Take ownership of an already-live combat without reconstructing its board."""
+        phase = cls.__new__(cls)
+        phase._initialize_live_combat(
+            session,
+            root_state,
+            worker_count=worker_count,
+            request_timeout_s=request_timeout_s,
+            max_branches=max_branches,
+            worker_pool_backend=worker_pool_backend,
+        )
+        return phase
+
+    def _initialize_live_combat(
+        self,
+        session: LiveCombatSession,
+        root_state,
+        *,
+        worker_count: int | None,
+        request_timeout_s: float,
+        max_branches: int,
+        worker_pool_backend: str | None,
+    ) -> None:
+        self._session = session
+        self._root_state = root_state
         self._held_stable_snapshot: Optional[CombatStateSnapshot] = None
         self._replay_prefix: list[ReplayPrefixEntry] = []
         root_boundary = boundary_of_battle_state(self._root_state)
         if root_boundary == BOUNDARY_STABLE:
-            self._held_stable_snapshot = self._session.capture_snapshot()
-            self._replay_prefix = start_new_replay_prefix_from_stable()
-        elif root_boundary == BOUNDARY_PENDING:
-            raise RuntimeError(_START_PENDING_UNSUPPORTED)
+            self._establish_stable_anchor()
         # Reserved for future true/root draw-hypothesis bookkeeping; current branch
         # decision logic still uses Training-provided rng_id mappings exclusively.
         self.true_draw_hypothesis_index = 0
@@ -88,22 +132,37 @@ class CombatPhase:
         self._rng_table = RngHypothesisTable()
         self._root_commit_advanced = False
 
+    def _establish_stable_anchor(self) -> None:
+        self._held_stable_snapshot = self._session.capture_snapshot()
+        self._replay_prefix = start_new_replay_prefix_from_stable()
+
     @property
     def max_branches(self) -> int:
         return self._branch_manager.max_branches
 
-    def root_decision(self) -> tuple[list, DecisionContext]:
+    def root_decision(self) -> tuple[list, DecisionContext | None, str]:
         legal = list(self._root_state._cached_legal_actions or [])
         if self._root_state.is_terminal:
             legal = []
         elif not legal:
             raise RuntimeError("non-terminal combat state has no cached legal actions")
+        boundary = boundary_of_battle_state(self._root_state)
         if self._held_stable_snapshot is None:
-            raise RuntimeError(_START_PENDING_UNSUPPORTED)
+            return legal, None, boundary
         context = build_decision_context_from_held_stable(
             self._held_stable_snapshot, self._replay_prefix, self._root_state
         )
-        return legal, context
+        return legal, context, boundary
+
+    @property
+    def root_state(self):
+        return self._root_state
+
+    @property
+    def root_branching_unavailable_reason(self) -> str | None:
+        if self._held_stable_snapshot is None:
+            return ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
+        return None
 
     def commit_root_action(self, chosen: dict) -> None:
         self._root_commit_advanced = False
@@ -127,24 +186,22 @@ class CombatPhase:
         )
         boundary = boundary_of_battle_state(next_state)
         if boundary == BOUNDARY_STABLE:
-            self._held_stable_snapshot = self._session.capture_snapshot()
-            self._replay_prefix = start_new_replay_prefix_from_stable()
+            self._establish_stable_anchor()
         elif boundary == BOUNDARY_PENDING:
-            if self._held_stable_snapshot is None:
-                raise RuntimeError("Pending replay prefix requires a Held Stable Snapshot")
-            draw_evidence = visible_draw_transition_evidence_from_committed_transition(
-                next_state, self._replay_prefix, pre_battle_state=pre_state,
-            )
-            entry = ReplayPrefixEntry(
-                semantic_action=_semantic_action_for(chosen),
-                expected_signature=observed_signature,
-                target_index=target_index,
-                target_enemy_index=target_enemy_index,
-                visible_draw_constraints=draw_evidence.constraints,
-                visible_draw_tracking_blocked=draw_evidence.blocks_later_pinning,
-                visible_draw_tracking_error=draw_evidence.tracking_error,
-            )
-            self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
+            if self._held_stable_snapshot is not None:
+                draw_evidence = visible_draw_transition_evidence_from_committed_transition(
+                    next_state, self._replay_prefix, pre_battle_state=pre_state,
+                )
+                entry = ReplayPrefixEntry(
+                    semantic_action=_semantic_action_for(chosen),
+                    expected_signature=observed_signature,
+                    target_index=target_index,
+                    target_enemy_index=target_enemy_index,
+                    visible_draw_constraints=draw_evidence.constraints,
+                    visible_draw_tracking_blocked=draw_evidence.blocks_later_pinning,
+                    visible_draw_tracking_error=draw_evidence.tracking_error,
+                )
+                self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
 
     def root_commit_advanced(self) -> bool:
         return self._root_commit_advanced
