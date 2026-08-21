@@ -31,17 +31,21 @@ branch は仕様上 root と異なる RNG でシミュレートされる。RNG �
 
 これは方針ではなく前提であり、**強制する**。
 
-現在の `API/server.py` は上限も相互排他も持たない。
+現在の `API/server.py` は**セッション単位の制約は持っている**。
 
 ```python
-self._instances: dict[str, Any] = {}          # :67
-instance = CombatInstance(...) / WholeRunInstance(...)   # :240-248
-self._instances[instance_id] = instance       # :256   何個でも入る
+# :149-154  同一セッションが 2 つ目のインスタンスを持つことは拒否される
+if ledger.active_instance_id is not None:
+    raise RequestRejected(..., fault_kind=FAULT_SESSION_INSTANCE_CONFLICT)
+# :65  セッション数の上限もある
+self._max_sessions = max_sessions
 ```
 
-`start_instance` を 2 回呼べば 2 つ目の `GameInstance` が生まれ、1 つ目が supersede される。
-`EnsureNotSuperseded()` が不透明な `InvalidOperationException` で落ちるだけで、
-**原因を示さない。** これは今回の設計に限った穴ではなく、現状すでに存在する。
+**持っていないのはセッションをまたぐ制約である。** 危険なのは「無制限」ではなく、
+別セッションが 2 つ目の `GameInstance` を作ったときに、CLR のプロセスグローバルな
+`RunManager.Instance` / `CombatManager.Instance` が奪われることである。
+そのとき 1 つ目は `EnsureNotSuperseded()` の不透明な `InvalidOperationException` で落ち、
+**原因を示さない。** これは今回の設計が作る穴ではなく、現状すでに存在する。
 
 `GameAccess` が game を所有する（2.2）ため、**2 つ目の game 所有インスタンスの生成は
 意味のあるエラーで拒否する**。将来複数戦闘を扱う可能性はあるが、
@@ -74,6 +78,13 @@ GameAccess が持つもの
   `WholeRunInstance` の仕事である。`GameAccess` が知るのは「今誰が触ってよいか」だけで、
   ランの状態機械まで抱え込まない
 - ただし遷移の**開始・確定・巻き戻し**は `GameAccess` が知る（2.4）
+
+**エスケープハッチを塞がなければ lease は飾りである。** `WholeRunSession` は
+`raw_game_instance`（`Run/whole_run_session.py:65-69`）で生の `GameInstance` を公開し、
+`start_run` / `choose_room` / `step` / `load_state` / `restore_combat_snapshot`
+（`:74-114`）を直接のミューテータとして持つ。`GameAccess` を**隣に置くだけでは
+何も強制されない。** これらを private にするか `GameAccess` 経由に付け替えることが、
+lease の成立条件である。
 
 **規律で守ってはならない。** 戦闘中に共有 game を動かしうる経路は次のとおりで、
 禁止リストは呼び出し箇所が増えるたびに破れる。
@@ -257,6 +268,38 @@ restore できない（`unsupported_capture_boundary:published_target`）ため�
 これは `CombatInstance` 側の既知の未対応事項と同じである
 （`API/instance_combat.py:85-88`、解法の在り処も併記）。
 
+### 2.9b 分岐は戦闘境界で終端する（制約）
+
+戦闘スナップショットにはラン位置が入っていない（`totalFloor` などが `None`。2.14）。
+したがって **worker で復元した分岐は、その分岐が戦闘を終わらせた場合、
+その先（報酬・地図・ラン終了）を生成できない。**
+
+これは現行の prefix 方式にはできていたことであり、**到達範囲の縮小である。**
+明記せずに進めてはならない。
+
+受け入れられる理由は、Training が既にその先を使っていないからである。beam は
+`transition.kind == "combat_completed"` を terminal として扱い、戦闘外へ出た branch は
+`branches_out_of_scope` として捨てている（実測 160 件・112 件）。
+**作れなくなるのは、もともと捨てられているものだけである。**
+
+**したがって分岐は戦闘境界で終端する。** 戦闘を終わらせた分岐は leaf であり、
+そこから先へ分岐する要求は受け付けない。
+
+### 2.9c 意思決定の情報源を混線させない（将来の要件）
+
+上の制約は「今は要らないから返さない」であって、
+**「Whole Run が別経路で補えばよい」ではない。**
+
+将来、地図上のどこにいるかを戦闘の意思決定に混ぜるようになったとき、
+**戦闘の意思決定に使う情報はすべて Combat Instance から渡されなければならない。**
+一部を Combat から、一部を Whole Run から取る形にすると、
+**同じ決定のための情報に 2 つの出所ができる。** そうなった時点で、
+どちらが正かを決める規則が要り、ずれたときに気づけなくなる。
+
+したがって将来の作業は「Whole Run 側で floor を継ぎ足す」ではなく、
+**ラン状態を保ったまま戦闘を復元できる checkpoint を用意し、Combat Instance が
+run 級の情報も一次情報として持つ**方向に取る。§5 に記載する。
+
 ### 2.10 branch は 1 つのトランザクションとして扱う
 
 公開 branch は**所有者と容量予約の両方が揃って初めて coherent** であり、
@@ -266,10 +309,12 @@ restore できない（`unsupported_capture_boundary:published_target`）ため�
 - **容量**: 上限は Whole Run インスタンス全体でグローバル。Training は `start_instance` 応答の
   `max_emulate_actions_items` を**一度だけ**読む。`CombatPhase` を呼ぶ**前に**予約し、
   失敗・close の全経路で解放する。バッチ内の競合でも広告値を超えない
-- **退役**: 単に台帳から消してはならない。`BranchIdRegistry` は id を恒久的に既知として保つ
-  （`API/identifiers.py:80-102`）一方、ライフサイクル呼び出し側は bookkeeping の存在を
-  前提にする（`API/instance_whole_run.py:364-395, 503-541`）。**tombstone にする。
-  id は再利用しない**
+- **退役**: **tombstone は新設しない。既にある。** `release_branches` は bookkeeping を
+  消さず、`status` を `released` にして `view` を落とす（`API/instance_whole_run.py:524-527`）。
+  `get_branch_status` はその後も `unknown` ではなく `released` を返す。
+  `BranchIdRegistry` も id を恒久的に既知として保つ（`API/identifiers.py:80-102`）。
+  **この既存の形をそのまま使い、phase の branch にも同じ扱いを適用する。**
+  id は再利用しない
 - **順序**: 公開 branch をすべて解放・tombstone 化してから phase を畳む。
   逆にすると進行中の要求に一貫した status を返せない
 - `WholeRunInstance._cancel_and_release_all_branches()`（`:445`）は自分の branch しか
@@ -286,11 +331,15 @@ restore できない（`unsupported_capture_boundary:published_target`）ため�
 
 ### 2.11 DTO は正規化してから publish する
 
-Whole Run の decision 応答は boundary / legal actions / room_context / history を必ず含む
-（`API/instance_whole_run.py:317-347`）。`CombatPhase` が返すのは戦闘の状態である。
+Whole Run の decision 応答のトップレベルは `branch_id` / `decision_point_id` /
+`branch_log` / `masked_emulator_dto` である（`API/instance_whole_run.py:317-347`）。
+boundary / legal actions / room_context / history は**その中に入れ子で入る**。
+`CombatPhase` が返すのは戦闘の状態であり、この形ではない。
 
 **浅いマージをしてはならない。** Training から見えるスキーマと branch history の意味論が
-変わりうる。公開 API を越える前に **Whole Run の decision 応答と同じ形へ正規化する。**
+変わりうる。公開 API を越える前に、**上記のトップレベル 4 項目と、その中の
+masked DTO の内容の両方**を Whole Run の形へ正規化する。
+「同じ形」が何を指すかを実装前に確定させること。
 
 終端は `CombatInstance` の `terminal: true, outcome: victory/defeat`
 （`API/instance_combat.py:506-530`）を**そのまま publish してはならない。**
@@ -482,6 +531,11 @@ adopted モードで `ResetFromScenario` が一度も呼ばれない。
 
 - **同時に複数の戦闘**。本仕様は「同時に 1 戦闘」を不変条件とし、2 回目の adopt を拒否する。
   将来必要になったら lease を複数フェーズへ拡張する
+- **ラン状態を保ったまま戦闘を復元できる checkpoint。** 本仕様は分岐を戦闘境界で
+  終端させることで回避しているが（2.9b）、地図上の位置を戦闘の意思決定に使うようになったら、
+  **その情報も Combat Instance が一次情報として持たなければならない**（2.9c）。
+  Whole Run 側で継ぎ足す形にすると、同じ決定のための情報に出所が 2 つできる。
+  Emulator 側の対応が要る見込み
 - **戦闘がプレイヤーの選択で始まる場合、最初の `stable` まで分岐できない**（2.9）。
   `CombatInstance` 側の `_START_PENDING_UNSUPPORTED` と同一の制約で、解法の在り処も
   そこに書かれている
