@@ -1,13 +1,12 @@
-# Whole Run の戦闘分岐を Combat Instance へ委譲する
+# Whole Run の戦闘分岐を Combat Phase へ委譲する
 
 ## 0. 文章の目的
 
 Whole Run の Combat branch を、Map snapshot + action prefix の再生から
-**`CombatInstance` への委譲**へ移すための実装仕様である。
+**戦闘の意味論を持つ内部コンポーネント（`CombatPhase`）への委譲**へ移すための実装仕様である。
 
-実装するのは **2 つのインスタンス型をつなぐ境界処理**であり、分岐ロジックの再実装ではない。
-分岐に必要なもの（stable アンカー、行動列、`rng_id` からのドロー順序仮説、観測ドローの固定）は
-すべて `CombatInstance` に既にある。
+再利用するのは分岐アルゴリズムであって、公開インスタンスではない。
+`CombatInstance` は単体用の公開ファサードとして独立したまま残る。
 
 ## 1. 概要
 
@@ -20,49 +19,64 @@ branch は仕様上 root と異なる RNG でシミュレートされる。RNG �
 これを行えば別のゲームになる。** 実際に評価が 2 戦 `AllBranchesFaultedError` で落ち、
 診断は「同じ部屋の同じ戦闘を最後まで戦って勝った状態」を示していた。
 
-**戦闘に入ったら handle の所有権を `CombatInstance` へ移す。** 戦闘中は Combat が実行者、
-Whole Run が観測者になる。再生窓は「部屋全体」から
+変更後は、プロセスに 1 つの **`GameAccess`** が唯一の `GameInstance` と lease を持ち、
+戦闘中は `CombatPhase` が lease を借りて実行者になる。再生窓は「部屋全体」から
 「stable アンカー + 1 マクロ行動」に縮む。
 
 ## 2. 設計
 
-### 2.1 戦闘中は Combat が実行し、Whole Run が観測する
+### 2.1 プロセスモデル
 
-状態を持つ側が実行者であり、状態を持たない側が観測者である。逆にしてはならない。
+**1 プロセス = 1 ラン。同時に入る戦闘は 1 つ。**
 
-| | 保持する状態 | 陳腐化するか |
-|---|---|---|
-| `WholeRunSession` | `_game` **のみ**（`Run/whole_run_session.py:62-69`） | **しない**。キャッシュを持たないので観測は常に真 |
-| `LiveCombatSession` | `_current_frame` / `_session_faulted` / `step_count` / `resynchronize_count` / `last_fault_context` | **する**。他者が下の `GameInstance` を進めると全部ずれる |
+これは方針ではなく前提であり、**強制する**。
 
-逆に置くと、**ラン全体を破壊する経路が開く**。
+現在の `API/server.py` は上限も相互排他も持たない。
 
 ```python
-# Combat/live_combat_session.py:776-778  ← step() の中
-if not self._is_still_current():
-    self._resynchronize(battle_state)
-# :686-696
-    self._game.ResetFromScenario(scenario)   # 共有 GameInstance を戦闘 scenario で上書き
+self._instances: dict[str, Any] = {}          # :67
+instance = CombatInstance(...) / WholeRunInstance(...)   # :240-248
+self._instances[instance_id] = instance       # :256   何個でも入る
 ```
 
-`_is_still_current()` は `(CombatSessionId, StepIndex)` の比較なので、Whole Run が root を
-1 手進めれば必ず false になり、次の `commit_action()` がランの地図ごと消す。
-`_resynchronize` は共有インスタンスを前提にした親切な機構だが、
-**Whole Run 文脈ではその親切さが破壊になる。**
+`start_instance` を 2 回呼べば 2 つ目の `GameInstance` が生まれ、1 つ目が supersede される。
+`EnsureNotSuperseded()` が不透明な `InvalidOperationException` で落ちるだけで、
+**原因を示さない。** これは今回の設計に限った穴ではなく、現状すでに存在する。
 
-実行者を Combat 側にすると、戦闘中に `GameInstance` を進めるのが `LiveCombatSession` だけに
-なるので `_is_still_current()` は常に true であり、この経路は**発火しない**。
+`GameAccess` が game を所有する（2.2）ため、**2 つ目の game 所有インスタンスの生成は
+意味のあるエラーで拒否する**。将来複数戦闘を扱う可能性はあるが、
+本仕様では「同時に 1 戦闘」を不変条件とし、2 回目の adopt を拒否する（再入・入れ子は不可）。
 
-情報の粒度も同じ向きを支持する。`step_live_action` は `game.Step()` に加えて
-`choice_target` の継続まで解決する（`Combat/battle_emulator.py:858-875`）。
-Whole Run 側の `step()` はこの解決を持たない。**細かい側から荒い側へ渡す。**
+### 2.2 `GameAccess` — プロセスに 1 つの lease
 
-### 2.2 handle の所有権を移す（設計の中心）
+共有 `GameInstance` は**プロセスグローバルな資源**である。したがって所有権を
+「`WholeRunSession` と `CombatPhase` の二者間の約束」として表現しても守れない。
+`WholeRunSession` は直接のミューテータと raw game のエスケープハッチを公開しており、
+第三者のインスタンスは合意の外にいる。
 
-2.1 を成立させるには、戦闘中に Whole Run が共有 game を動かさないことが条件になる。
-これを**禁止リストで守ってはならない。**
+**決定**: 共有 game への唯一のアクセスファサードとして `GameAccess` を置く。**薄く保つ。**
 
-コントローラプロセスで共有 game を動かしうる経路は次のとおりで、規律で守るには多すぎる。
+```
+GameAccess が持つもの
+  ├ 唯一の GameInstance
+  └ lease 状態機械（世代トークン付き）
+       RUN          Whole Run が mutating できる
+       COMBAT       CombatPhase が mutating できる
+       TRANSFERRING 遷移中。誰も mutating できない
+       POISONED     恒久的に不可。明示 close まで
+```
+
+- **mutating 操作はすべて `GameAccess` を通り、lease と世代を検査する。**
+  非所有者・古い世代は拒否する
+- **観測は所有権に関係なく許す。** `get_observation` / `get_legal_actions` /
+  `get_room_context` / `save_state` / `CaptureSnapshotJson` は game を進めない
+- **フェーズのライフサイクルは持たない。** `CombatPhase` を作る・畳むのは
+  `WholeRunInstance` の仕事である。`GameAccess` が知るのは「今誰が触ってよいか」だけで、
+  ランの状態機械まで抱え込まない
+- ただし遷移の**開始・確定・巻き戻し**は `GameAccess` が知る（2.4）
+
+**規律で守ってはならない。** 戦闘中に共有 game を動かしうる経路は次のとおりで、
+禁止リストは呼び出し箇所が増えるたびに破れる。
 
 | 呼び出し | 場所 |
 |---|---|
@@ -74,56 +88,131 @@ Whole Run 側の `step()` はこの解決を持たない。**細かい側から�
 | `drain_trivial_reward_frontier` | `API/instance_whole_run.py:421-422, 426-427` |
 
 最後の 1 つは特に見落としやすい。root の mutating 経路に同居しているので、
-**戦闘中に走ってはならない**（`combat_completed` を受けて委譲を畳み、Whole Run が実行権を
-取り戻した後にのみ許される）。
+**戦闘中に走ってはならない**（フェーズを出る処理の一部として扱う。2.5）。
 
-**決定**: handle は**同時に 1 人しか持てない所有物**として扱う。
+### 2.3 `CombatPhase` — 公開インスタンスを入れ子にしない
+
+再利用したいのは**戦闘の意味論**である。stable アンカー、アンカーからの行動列、
+`rng_id` からのドロー順序仮説、`pending_choice` までの観測ドローの固定。
+
+`CombatInstance` はライブラリではない。**独自の root ライフサイクル、branch manager、
+識別子レジストリ、終端 DTO 契約、scenario を開始するコンストラクタを持つ公開インスタンス**である。
+これを入れ子にすると `WholeRunInstance` が**ルータ・識別子ブローカー・容量ブローカー・
+DTO 翻訳者・後始末係**になる。複雑さは配管ではなく、入れ子にしたこと自体から来る。
+
+**決定**: 意味論を `CombatPhase` として切り出す。
+
+| | 持つもの |
+|---|---|
+| **`CombatPhase`**（内部） | `LiveCombatSession` / `_held_stable_snapshot` / 行動列 / rng 仮説 / ドロー固定 / branch worker pool と branch manager |
+| **`CombatInstance`**（公開・据え置き） | 単体用ファサード。`CombatPhase` を standalone モードで使う。公開 API・識別子・DTO 整形は従来どおり |
+| **`WholeRunInstance`** | `CombatPhase` を adopted モードで使う。**公開 API は 1 つだけ**なので、台帳・id ブローカー・DTO 翻訳は要らない |
+
+**公開ライフサイクルが 1 つになることが、この切り出しの主な利得である。**
+
+### 2.4 戦闘の出入りは 1 トランザクション
+
+「adopt して」「所有権を渡して」「使い始める」を別々の手順にすると、**中間状態が不正になる**。
+adopt 済みだが非所有者の `CombatPhase` は無効であり、フェーズ初期化前に mutating を手放した
+`WholeRunInstance` も無効である。
+
+**決定**: `enter_combat_phase` / `leave_combat_phase` をそれぞれ**単一のトランザクション**にする。
 
 ```
-戦闘外 : 所有者 = WholeRunSession
-戦闘中 : 所有者 = CombatInstance（LiveCombatSession）
+enter_combat_phase
+  1. GameAccess: RUN → TRANSFERRING
+  2. CombatPhase を adopt で構築（非破壊）。アンカーが張れるなら張る
+  3. root decision をちょうど 1 回発行する
+  4. GameAccess: TRANSFERRING → COMBAT（確定）
+  ※ 4 の前に失敗したら巻き戻して RUN へ戻す。副作用を残さない
+
+leave_combat_phase
+  1. GameAccess: COMBAT → TRANSFERRING
+  2. 戦闘終了レコード（2.6）を取り込む
+  3. 公開 branch を解放・tombstone 化 → その後に phase を畳む（順序は逆にしない）
+  4. Whole Run の root を正規化。drain_trivial_reward_frontier はここで走る
+  5. GameAccess: TRANSFERRING → RUN（確定）
 ```
 
-- 所有権を持たない側からの **mutating 呼び出しはオブジェクト自身が拒否する**
-- 観測（`get_observation` / `get_legal_actions` / `get_room_context` / `save_state` /
-  `CaptureSnapshotJson`）は所有権に関係なく許す。これらは game を進めない
-- **持っていないものは誤用できない。** 禁止リストは呼び出し箇所が増えるたびに破れるが、
-  所有権はコードが担保する
+**物理的な `Step` は成功したが記帳・publish 前に失敗した場合**は、上のどちらでもない。
+lease を返せばランが未分類の状態から再開し、保持すれば死んだランが漏れる。
 
-これは `close()` や解放の順序（2.9）とも一貫する。**所有者が畳む順序を決める。**
+**決定**: `POISONED` へ落とす。以後すべての mutating を拒否し、worker を解放し、
+`WholeRunInstance` を terminal/faulted にして明示 close を待つ。
+**戦闘 snapshot からの暗黙の回復はできない**（ラン位置が戻らない。2.7）。
 
-### 2.3 GameInstance を `shared_game_instance()` に一本化する
+### 2.5 戦闘中は Combat が実行し、Whole Run が観測する
 
-`RunManager.Instance` / `CombatManager.Instance` はプロセス全体の static であり、
-2 つ目の `GameInstance` を作ると 1 つ目が supersede され `EnsureNotSuperseded()` が落とす。
+状態を持つ側が実行者であり、状態を持たない側が観測者である。逆にしてはならない。
+
+| | 保持する状態 | 陳腐化するか |
+|---|---|---|
+| `WholeRunSession` | `_game` **のみ**（`Run/whole_run_session.py:62-69`） | **しない**。観測は常に真 |
+| `LiveCombatSession` | `_current_frame` / `_session_faulted` / `step_count` / … | **する** |
+
+逆に置くと破壊経路が開く。
 
 ```python
-# Combat/emulator_bridge.py:112
-def shared_game_instance(repo_root=None):
-    """The one and only live GameInstance for this process."""
+# Combat/live_combat_session.py:776-778  ← step() の中
+if not self._is_still_current():
+    self._resynchronize(battle_state)
+# :686-696
+    self._game.ResetFromScenario(scenario)   # 共有 GameInstance を戦闘 scenario で上書き
 ```
 
-Whole Run 側だけが独自に作っており、その理由も明記されている。
+`_is_still_current()` は `(CombatSessionId, StepIndex)` の比較なので、Whole Run が root を
+1 手進めれば必ず false になり、次の commit がランの地図ごと消す。
+実行者を Combat 側にすれば、戦闘中に game を進めるのが `LiveCombatSession` だけになるので
+**この経路は発火しない。**
 
-```
-# Run/run_emulator_bridge.py の docstring
-Kept deliberately independent from `Combat/emulator_bridge.py` (no import of it):
-... the same one-instance-per-process discipline, just owned by this module
-instead of shared with Combat's.
-```
+情報の粒度も同じ向きを支持する。`step_live_action` は `game.Step()` に加えて
+`choice_target` の継続まで解決する（`Combat/battle_emulator.py:858-875`）。
+**細かい側から荒い側へ渡す。**
 
-**「同じ規律を、別々に所有しているだけ」**である。同居しない前提でのみ成立していた独立性なので、
-`WholeRunSession` が `shared_game_instance()` から取るようにする。
+### 2.6 戦闘終了は 1 つのレコードとして引き渡す
 
-**注入という仕掛けは要らない。** ただし `run_emulator_bridge` の変換層
-（`observation_to_dict` などの Run 固有の DTO 変換）は**そのまま残す**。
-置き換えるのは GameInstance の取得経路だけである。
+戦闘終了時には**真実が 2 つある**。
 
-### 2.4 コントローラは restore しない
+1. **戦闘としての最終状態** — 戦闘の意味論に使う
+2. **step 後の live な run 観測 / room_context / transition** — 引き渡しに使う
 
-プロセス内に live な `GameInstance` は 1 つしかない（2.3）。**コントローラプロセスで
-snapshot を restore すると、ランを保持している唯一の GameInstance が
-戦闘専用状態で上書きされる。**
+`BattleState` に `transition` を足すだけでは原子的な引き渡しにならない。
+**引き渡しレコードとして両方を明示的に保持する。** 最終戦闘 snapshot を
+「共有 game の現在フレーム」と偽ってはならない。
+
+契約として決めること。
+
+- 何を、lease 解放の**どの時点で**読むか
+- `drain_trivial_reward_frontier` は `leave_combat_phase` の一部である（2.4 の 4）
+- 敗北と通常終了がそれぞれどう run-terminal になるか
+
+さもないと**戦闘後の最初の決定で、古い戦闘ビューと live なランビューが混ざる。**
+
+実装上の注意。`step_live_action` は `game.Step()` の `Transition` を既に受け取りながら
+捨てている（`Combat/battle_emulator.py:858`）。`BattleState` への追加は
+`with_shuffle_seed()` / `clone_state()` / `_wrap()`
+（`:787-798, 817-826`）の**伝播も揃えないと静かに消える**。
+
+**継承は採らない。** `Combat → Run` と `Run → Combat` の import は現在**双方向に 0 件**で
+完全に独立している。戦闘終了通知 1 点のために相互依存を作る代償に見合わない。
+
+### 2.7 Whole Run モードは明示フラグで宣言する
+
+`Combat/battle_emulator.py:890-902` は `combat_completed` のとき
+`result.Observation.IsTerminal` が真であることを assert する。根拠は
+`!HasMap => 戦闘終了 == ラン終了` という**地図なしモードの契約**である。
+
+フルランでは戦闘が終わっても次の settled 状態（報酬・地図）へ進むだけなので、
+**adopt したフルランの戦闘が終わった最初の瞬間にこの assert が落ちる。**
+
+**地図の有無は必要条件だが十分条件ではない。** `LoadState` でラン snapshot を読んだ
+combat-only インスタンスなど、推論が崩れる余地がある。**adopt 時に
+「Whole Run から使われている」という明示フラグを渡し、推論をやめて宣言にする。**
+
+### 2.8 コントローラは restore しない
+
+`GameAccess` が持つ game は 1 つだけである。**コントローラで snapshot を restore すると、
+ランを保持している唯一の game が戦闘専用状態で上書きされる。**
 
 実測: 復元後は `totalFloor` / `actFloor` / `currentActIndex` / `currentRoomType` が
 `None` になり、その戦闘に勝つと `boundary = run_terminal` / `outcome = victory` を返す。
@@ -135,216 +224,111 @@ snapshot を restore すると、ランを保持している唯一の GameInstan
 | **branch worker（別プロセス）** | snapshot を restore する。元々ここが復元の場所である |
 
 worker がコントローラの game に触れないことは確認済みである。worker は
-`multiprocessing.get_context("spawn")` の別プロセスで、各自 `WholeRunSession` を
-プロセス開始時に 1 つ作り、プロセスローカルなオブジェクトに対して
-`LoadState` / `ChooseRoom` / `Step` を行う（`Run/worker_pool.py:513-523, 400-430`）。
+`multiprocessing.get_context("spawn")` の別プロセスで、各自 `WholeRunSession` を 1 つ作り、
+プロセスローカルなオブジェクトを操作する（`Run/worker_pool.py:513-523, 400-430`）。
 **CLR の static は共有されない。** ここに guard は不要。
 
-### 2.5 Whole Run モードは明示フラグで宣言する
-
-`Combat/battle_emulator.py:890-902` は `combat_completed` のとき
-`result.Observation.IsTerminal` が真であることを assert する。根拠は
-`!HasMap => 戦闘終了 == ラン終了` という**地図なしモードの契約**である。
-
-```python
-assert bool(result.Observation.IsTerminal), (
-    "... legacy no-map mode's run_terminal-on-combat-conclusion contract no longer holds."
-)
-```
-
-フルランでは戦闘が終わっても次の settled 状態（報酬・地図）へ進むだけなので、
-**adopt したフルランの戦闘が終わった最初の瞬間にこの assert が落ちる。**
-
-**地図の有無は Whole Run モードの必要条件だが十分条件ではない。**
-`LoadState` でラン snapshot を読んだ combat-only インスタンスなど、
-推論が崩れる余地がある。**adopt 時に「Whole Run から使われている」という明示フラグを渡し、
-推論をやめて宣言にする。**
-
-フルランモードでの `combat_completed` は 2 つの事実を別々に保つ。
-
-1. **戦闘としての最終状態** — 戦闘の意味論に使う
-2. **step 後の live な run 観測と transition** — 引き渡しに使う
-
-最終戦闘 snapshot を「共有 game の現在フレーム」と偽ってはならない。
-
-### 2.6 戦闘終了を `BattleState` に載せる
-
-実行者が Combat になると、Whole Run は `WholeRunSession.step()` の戻り値を受け取らないため、
-run 級の `transition` を見られない。必要な情報は**既に手元にある**。
-
-```python
-# Combat/battle_emulator.py:858
-result = game.Step(action["action_id"])     # result.Transition を持っているが捨てている
-```
-
-`BattleState` は dataclass で、「purely additive」な拡張の前例がある
-（`_cached_legal_actions`、DecisionFrame）。同じ形で既定 `None` の追加フィールドとして載せる。
-
-**フィールドを足すだけでは足りない。** `with_shuffle_seed()` と `clone_state()`
-（`Combat/battle_emulator.py:787-798, 817-826`）は現在の全フィールドをコピーするので、
-**伝播も面倒を見ないと静かに消える。** `_wrap()` も含めて経路を揃えること。
-
-**継承は採らない。** `Combat → Run` と `Run → Combat` の import は現在**双方向に 0 件**で
-完全に独立している。戦闘終了通知 1 点のために相互依存を作る代償に見合わない。
-将来構造化が必要になったら、継承ではなくコールバック（合成）を採る。
-
-### 2.7 root の「プレイ可否」と「分岐可否」を分ける
+### 2.9 root の「プレイ可否」と「分岐可否」を分け、状態として公開する
 
 `CombatInstance._root_view()` は `_held_stable_snapshot is None` のとき
-`_START_PENDING_UNSUPPORTED` を投げる（`API/instance_combat.py:208-223`）。
-そして `commit_action()` / `start_instance_response()` / `get_decision()` は
-**すべて `_root_view()` を通る**（`:245-290`）。
+`_START_PENDING_UNSUPPORTED` を投げ（`API/instance_combat.py:208-223`）、
+`commit_action()` / `start_instance_response()` / `get_decision()` は
+**すべてそこを通る**（`:245-290`）。したがって `pending_choice` で adopt すると
+**観測もコミットもできず、最初の stable に永久に到達しない。**
 
-したがって `pending_choice` で adopt すると**観測もコミットもできず、最初の stable に
-永久に到達しない。** 「アンカー未確立のまま立てて stable で張る」は、
-現状のゲートのままでは成立しない。
-
-**決定**: 2 つを分離する。
+**決定**: 分離する。
 
 ```
 root がプレイ可能か  ← アンカー不要。観測とコミットはできなければならない
-root が分岐可能か    ← アンカー必須。ここだけ明示的な理由を付けて拒否する
+root が分岐可能か    ← アンカー必須
 ```
 
-拒否するのは `emulate_action(s)` だけである。
+**そして「まだ分岐できない」を root 応答の状態として公開する。**
+拒否トレースだけにしてはならない。サーバが評価できないと分かっているフロンティアを
+クライアントが投げ続けることになり、容量・branch ライフサイクルに
+「まだ分岐できない」をエラーとして表現させることになる。
 
-### 2.8 戦闘のライフサイクル
+該当するのは、戦闘がプレイヤーの選択で始まる場合である。`GAMBLING_CHIPS` は
+`AfterPlayerTurnStart` でターン 1 に手札選択を要求する
+（`MegaCrit.Sts2.Core.Models.Relics/GamblingChip.cs:16-26`）。`pending_choice` の snapshot は
+restore できない（`unsupported_capture_boundary:published_target`）ため、
+開始時点で restore 可能なアンカーが無い。
 
-| | signal | 出所 |
-|---|---|---|
-| **開始** | `choose_room()` の戻り値の `is_combat == True` | `Run/run_emulator_bridge.py:242` |
-| **終了** | 戦闘 step の結果に載る `transition.kind == "combat_completed"` | 2.6 |
+これは `CombatInstance` 側の既知の未対応事項と同じである
+（`API/instance_combat.py:85-88`、解法の在り処も併記）。
 
-`step_result["done"]` は**ラン**の終了であって戦闘の終了ではない。混同しないこと。
+### 2.10 branch は 1 つのトランザクションとして扱う
 
-```
-choose_room() → is_combat == True
-  → CombatInstance を adopt で立て、handle の所有権を渡す（2.2）
-  → 戦闘中の root commit を CombatInstance が実行する
-  → root が stable に達したら CombatInstance が自分でアンカーを張る
-  → 戦闘境界の emulate_actions を CombatInstance へ委譲
-  → transition.kind == "combat_completed"
-  → 公開 branch を解放・tombstone 化（2.9）→ CombatInstance を畳む
-  → handle の所有権を Whole Run へ戻す
-```
+公開 branch は**所有者と容量予約の両方が揃って初めて coherent** であり、
+**両方を解放しないと正しく退役できない**。admission / registration / dispatch / retirement を
+別々の関心事にしない。
 
-**アンカーはコントローラが張るのではない。** `CombatInstance.commit_action` は
-コミット後の boundary が `stable` なら自分で `capture_snapshot()` して再アンカーする。
-実行者を Combat 側にしたことで、この既存の仕組みがそのまま使える。
-
-### 2.9 branch ライフサイクルの所有者と tombstone
-
-`emulate_actions` だけ委譲すると、公開エンドポイントが 2 つのインスタンスに分裂する。
-
-**決定**: Whole Run インスタンスが**唯一の公開ライフサイクル所有者**であり続ける。
-
-- 公開 `branch_id` ごとに「どちらが実体を持つか」を Whole Run 側の台帳に記録する
-- `get_decision` / `get_branch_status` / `cancel_branches` / `release_branches` は
-  Whole Run が受け、台帳を見て実体側へ回す
-
-**台帳から単に消してはならない。** `BranchIdRegistry` は id を恒久的に既知として保つ
-（`API/identifiers.py:80-102`）一方、ライフサイクル呼び出し側は bookkeeping の存在を
-前提にする（`API/instance_whole_run.py:364-395, 503-541`）。消すと後続の
-`get_decision` / status / cancel が `unknown` や `KeyError` で不整合になり、
-branch_id の再利用も起こりうる。
-
-したがって**終了時は tombstone にする**。
-
-- 戦闘終了後、その戦闘の公開 branch は `released` を返す
-- **id は再利用しない**
-- **順序**: 公開 branch をすべて解放・tombstone 化してから `CombatInstance.close()` を呼ぶ。
-  `close()` はワーカープールごと落とす（`API/instance_combat.py:556-563`）ので、
-  先に閉じると進行中の要求に一貫した status を返せなくなる
+- **容量**: 上限は Whole Run インスタンス全体でグローバル。Training は `start_instance` 応答の
+  `max_emulate_actions_items` を**一度だけ**読む。`CombatPhase` を呼ぶ**前に**予約し、
+  失敗・close の全経路で解放する。バッチ内の競合でも広告値を超えない
+- **退役**: 単に台帳から消してはならない。`BranchIdRegistry` は id を恒久的に既知として保つ
+  （`API/identifiers.py:80-102`）一方、ライフサイクル呼び出し側は bookkeeping の存在を
+  前提にする（`API/instance_whole_run.py:364-395, 503-541`）。**tombstone にする。
+  id は再利用しない**
+- **順序**: 公開 branch をすべて解放・tombstone 化してから phase を畳む。
+  逆にすると進行中の要求に一貫した status を返せない
 - `WholeRunInstance._cancel_and_release_all_branches()`（`:445`）は自分の branch しか
-  知らない。**台帳経由で Combat 側にも配ること。** さもないと次の root commit で
-  Combat のワーカー作業が生き残り、容量が漏れる
+  知らない。**phase の branch にも届かせること。** さもないと次の root commit で
+  worker 作業が生き残り、容量が漏れる
 
-`branch_id` は Training が発行する client 指定であり、`CombatInstance.emulate_actions()` も
-client 指定を受け取るので、**そのまま素通しでよい**。対応表は不要。
+`branch_id` は Training が発行する client 指定なので**そのまま素通しでよい**。
 
-### 2.10 decision id の発行は 1 回ずつ
+`decision_point_id` は発行元を 1 つにする（`API/identifiers.py:111` のカウンタは
+レジストリごとに 1 から始まり、両者が持つと衝突する）。**同じレジストリを渡すだけでは
+足りない**。両者とも初期化時とコミット後に root id を発行するので
+（`API/instance_whole_run.py:254, 445-447`、`API/instance_combat.py:202, 335-338`）、
+**adopt 時に 1 回、委譲 commit ごとに 1 回**と決める。
 
-`decision_point_id` は両者が別レジストリを持つと衝突する（`API/identifiers.py:111` の
-カウンタはレジストリごとに 1 から始まり、どちらも `d-root-000001` を発行する）。
-**レジストリを 1 つにする。**
-
-**同じレジストリを渡すだけでは足りない。** 現在、両者とも初期化時
-（`API/instance_whole_run.py:254`、`API/instance_combat.py:202`）と
-コミット後（`:445-447`、`:335-338`）に root id を発行する。切り替え・畳み込みの順序を
-決めないと、有効な client id が stale になったり余分な id が出たりする。
-
-**決定**: **adopt 時に 1 回、委譲した commit ごとに 1 回**だけ発行する。
-
-### 2.11 容量は予約してから配る
-
-`max_branches` は Whole Run / Combat とも既定 64 だが、**値を揃えても合計 64 にはならない。**
-Whole Run は `active_branch_count()` と自前の bookkeeping で数え
-（`API/instance_whole_run.py:478-501`、Beam `:327-365`）、Combat は自分の `BranchManager` で
-数える（`API/instance_combat.py:429-448`）。Training は `start_instance` 応答の
-`max_emulate_actions_items` を**一度だけ**読み、それを単一の上限として使う。
-
-**決定**: 上限は Whole Run インスタンス全体でグローバルとする。台帳側が
-**Combat を呼ぶ前に atomically 予約し、Combat の失敗・close の全経路で解放する**。
-バッチ内の競合も含めて、広告した 64 を超えないこと。
-
-### 2.12 DTO は正規化してから publish する
+### 2.11 DTO は正規化してから publish する
 
 Whole Run の decision 応答は boundary / legal actions / room_context / history を必ず含む
-（`API/instance_whole_run.py:317-347`）。`CombatInstance` の応答はマスク済みエンジンデータと
-legal actions だけである（`API/instance_combat.py:233-243`）。
+（`API/instance_whole_run.py:317-347`）。`CombatPhase` が返すのは戦闘の状態である。
 
 **浅いマージをしてはならない。** Training から見えるスキーマと branch history の意味論が
-変わりうる。委譲した結果は、公開 API を越える前に
-**Whole Run の decision 応答と同じ形へ正規化する。**
+変わりうる。公開 API を越える前に **Whole Run の decision 応答と同じ形へ正規化する。**
 
-### 2.13 終端の publish 形
-
-`CombatInstance` は自分の終端を `terminal: true, outcome: victory/defeat` で表す
-（`API/instance_combat.py:506-530`）。**これをそのまま publish してはならない。**
+終端は `CombatInstance` の `terminal: true, outcome: victory/defeat`
+（`API/instance_combat.py:506-530`）を**そのまま publish してはならない。**
 Training の `decision/value.py:233-247` は `outcome in ("victory","defeat")` を
 ラン勝敗と解釈し `±100,000` を返すため、戦闘に勝っただけの leaf がすべてラン勝利になる。
-
 戦闘の終端は `transition: {"kind": "combat_completed", ...}` として publish する。
 
-### 2.14 戦闘が選択で始まる場合（既知の限界）
+### 2.12 save / load の立場を決める
 
-`GAMBLING_CHIPS` は `AfterPlayerTurnStart` でターン 1 に手札選択を要求するため
-（`MegaCrit.Sts2.Core.Models.Relics/GamblingChip.cs:16-26`）、**戦闘が `pending_choice` で
-始まる**。`pending_choice` の snapshot は restore できないので
-（`unsupported_capture_boundary:published_target`）、開始時点で restore 可能なアンカーが無い。
+戦闘中の `save_state` を観測として許す一方、コントローラでの復元は禁じている（2.8）。
+**この 2 つは、そのままでは概念的に不整合である。**
 
-2.7 の分離により、root のプレイは進む。分岐だけが最初の `stable` まで拒否される。
-拒否理由は `emulate_actions_rejected:<detail>` として search trace に残るので、
-**後から件数を数えられる**。Training は beam が actionable な結果を得られず、
-その 1 決定だけ heuristic fallback に落ちる。
+**決定**: 戦闘中の run save は**診断専用**とし、耐久チェックポイントとして広告しない。
+戦闘中に取った save から再開する経路は本仕様では提供しない
+（フェーズ、アンカー、行動列、decision の世代を作り直す必要があり、
+戦闘 snapshot はラン位置を持たないのでこの穴を埋められない）。
 
-これは `CombatInstance` 側の既知の未対応事項と同じものである
-（`API/instance_combat.py:85-88` の `_START_PENDING_UNSUPPORTED`、解法の在り処も併記）。
+サーバ再起動をまたぐ復元も同様に対象外とする（session 台帳は元々再起動を越えない）。
 
-### 2.15 wrapper は統合しない
+### 2.13 wrapper は統合しない
 
-`WholeRunSession`（227 行・17 メソッド）は GameInstance への薄いファサードで、独自の状態を
-持たない。`LiveCombatSession`（811 行・24 メソッド）は決定フレーム、再同期追跡、
-フォールト規律、restore 検証といった**戦闘固有の意味論**を持つ。
+`WholeRunSession`（227 行・17 メソッド）は薄いファサードで独自の状態を持たない。
+`LiveCombatSession`（811 行・24 メソッド）は決定フレーム、再同期追跡、フォールト規律、
+restore 検証という**戦闘固有の意味論**を持つ。**層が違うので統合しない。**
+この非対称性こそが 2.5 の根拠でもある。
 
-**層が違うので統合しない。** 統一するのは GameInstance の取得経路だけである（2.3）。
-そしてこの非対称性こそが 2.1 の根拠でもある。
-
-### 2.16 実測値
+### 2.14 実測値
 
 | 項目 | 結果 |
 |---|---|
 | `CaptureSnapshotJson()` at `stable` | 可能（26,428 bytes）。restore まで通る |
-| `CaptureSnapshotJson()` at `pending_choice` | capture は通るが **restore は拒否**: `unsupported_capture_boundary:published_target` |
+| `CaptureSnapshotJson()` at `pending_choice` | capture は通るが **restore は拒否** |
 | capture → restore の戦闘状態 | hp / energy / block / gold / relics / deck / 敵 / 手札 / legal actions **すべて一致** |
 | capture → restore の run 位置 | `totalFloor` / `actFloor` / `currentActIndex` / `currentRoomType` が `None` |
 | **復元盤面からの End Turn** | **成功する**（下記） |
-| `combat_session_id` | 復元で変わる。`Lease.is_valid_for()` は比較に使わず `masking.py` が publish も禁止しているため無害 |
 | snapshot サイズ | 26〜29 KB |
 
 **復元盤面から End Turn できないという記述は誤りだった。**
-`SnapshotRestoreMissingMoveError` の docstring が「すべての restore で Intent が欠落する」と
-断定していたが、実測では
 
 ```
 復元前 intent: TACKLE_MOVE(4) / STICKY_SHOT / TACKLE_MOVE(3)
@@ -357,171 +341,164 @@ Emulator 側で既に解消されており docstring だけが残っていた（
 Training の `turn_boundary_scoring` は全 leaf を強制 End Turn で採点するため、
 **この点を誤読すると設計全体が成立しないと判断してしまう。**
 
-### 2.17 完成形
+### 2.15 完成形
 
 ```
-  RL サーバプロセス（コントローラ）
-  ┌────────────────────────────────────────────────────────────────┐
-  │ WholeRunInstance                                               │
-  │   ├─ WholeRunSession        戦闘外の所有者 / 戦闘中は観測のみ  │
-  │   ├─ 公開 branch 台帳       branch_id → 実体側 + tombstone     │
-  │   ├─ グローバル容量         予約してから配る（2.11）           │
-  │   ├─ DecisionPointRegistry ──┐ 共有・発行は 1 回ずつ（2.10）   │
-  │   ├─ WholeRunWorkerPool      │ map/event/reward の分岐         │
-  │   └─ CombatInstance ◄────────┘ 戦闘中だけ存在                  │
-  │        ├─ LiveCombatSession    戦闘中の handle 所有者（2.2）   │
-  │        ├─ _held_stable_snapshot  アンカー                      │
-  │        └─ BranchWorkerPool ──────┐                             │
-  │   shared_game_instance() が返す唯一の GameInstance             │
-  └──────────────────────────────────┼─────────────────────────────┘
-                                     │ snapshot + rng_id
-  ┌──────────────────────────────────▼─────────────────────────────┐
-  │ branch worker プロセス（複数）                                 │
-  │   restore(anchor, rng_id) → replay → 分岐 action               │
-  │   **ここだけが restore する**。コントローラの game には触れない │
-  └────────────────────────────────────────────────────────────────┘
+  RL サーバプロセス（1 プロセス = 1 ラン）
+  ┌────────────────────────────────────────────────────────────┐
+  │ GameAccess（プロセスに 1 つ・薄い）                        │
+  │   唯一の GameInstance + lease 状態機械（世代トークン付き）  │
+  │   RUN / COMBAT / TRANSFERRING / POISONED                   │
+  │   mutating は全部ここを通る。観測は素通し                  │
+  └───────┬────────────────────────────┬───────────────────────┘
+          │ 借りる                     │ 借りる
+  ┌───────▼──────────────┐   ┌─────────▼───────────────────────┐
+  │ WholeRunInstance     │   │ CombatPhase（内部）             │
+  │  ラン進行・公開 API  │──►│  live 戦闘 / アンカー / 行動列  │
+  │  branch トランザクション  │  rng 仮説 / ドロー固定          │
+  │  （所有者 + 容量）    │   │  BranchWorkerPool ───┐          │
+  └──────────────────────┘   └──────────────────────┼──────────┘
+                                                    │
+    CombatInstance（公開・独立のまま）              │ snapshot + rng_id
+      └ 同じ CombatPhase を standalone で使う       │
+  ┌─────────────────────────────────────────────────▼──────────┐
+  │ branch worker プロセス（複数）                             │
+  │   restore(anchor, rng_id) → replay → 分岐 action           │
+  │   **ここだけが restore する**。コントローラの game に触れない│
+  └────────────────────────────────────────────────────────────┘
 ```
 
 ```
-Training            WholeRunInstance          CombatInstance        branch worker
-   │  commit_action(map)   │                        │                     │
-   ├──────────────────────►│ choose_room()          │                     │
-   │                       │ is_combat == True      │                     │
-   │                       ├── adopt + handle 移譲 ►│ 非破壊に引き受ける   │
-   │                       │  （以後 Whole Run の    │                     │
-   │                       │    mutating は拒否）    │                     │
-   │  emulate_actions      │                        │                     │
-   ├──────────────────────►│───────────────────────►│ アンカー未確立なら   │
-   │◄── RequestRejected ───┤◄───────────────────────┤ 分岐のみ拒否（2.7）  │
-   │  commit_action(card)  │                        │                     │
-   ├──────────────────────►├─── 委譲 ──────────────►│ LiveCombatSession   │
-   │                       │◄── BattleState ────────┤  .step() ← 実行者    │
-   │                       │   (+ transition)       │ stable なら再アンカー │
-   │  emulate_actions      │                        │                     │
-   ├──────────────────────►│ 容量を予約 ───────────►│ アンカー + rng_id   │
-   │                       │                        ├────────────────────►│
-   │◄─ 正規化した DTO ─────┤◄── branch_results ─────┤◄────────────────────┤
-   │  commit_action(...)   │ transition.kind ==     │                     │
-   ├──────────────────────►│  "combat_completed"    │                     │
-   │                       ├─ 解放 → tombstone ────►│                     │
-   │                       ├─ close() ─────────────►│                     │
-   │                       │ handle を取り戻す       │                     │
+Training          WholeRunInstance        GameAccess         CombatPhase
+   │ commit(map)      │                       │                   │
+   ├─────────────────►│ choose_room()         │                   │
+   │                  │ is_combat == True     │                   │
+   │                  ├── enter_combat_phase ─┤                   │
+   │                  │   RUN → TRANSFERRING ►│                   │
+   │                  │   adopt（非破壊）─────┼──────────────────►│
+   │                  │   root decision を 1 回発行               │
+   │                  │   TRANSFERRING → COMBAT（確定）           │
+   │                  │   ※確定前の失敗は巻き戻して RUN へ        │
+   │ emulate_actions  │                       │                   │
+   ├─────────────────►│ アンカー未確立なら分岐のみ拒否            │
+   │◄─ 状態として公開 ┤ （root 応答に「まだ分岐できない」を出す） │
+   │ commit(card)     │                       │                   │
+   ├─────────────────►├── 委譲 ───────────────┼──────────────────►│ step（実行者）
+   │                  │◄─ 引き渡しレコード ───┼───────────────────┤ stable なら再アンカー
+   │ emulate_actions  │ 容量を予約してから配る│                   │
+   ├─────────────────►├───────────────────────┼──────────────────►│ ──► worker
+   │◄─ 正規化した DTO ┤                       │                   │
+   │ commit(...)      │ transition == combat_completed            │
+   ├─────────────────►├── leave_combat_phase ─┤                   │
+   │                  │   COMBAT → TRANSFERRING                   │
+   │                  │   branch を解放 → tombstone → phase を畳む│
+   │                  │   root を正規化・drain を実行             │
+   │                  │   TRANSFERRING → RUN（確定）              │
 ```
 
 ## 3. 実装手順
 
+継ぎ目は「大きさ」ではなく「その時点でシステムが一貫しているか」で置く。
+
 ### S1. `WholeRunSession` に capture / restore を公開する（完了・コミット済み）
 
-**注記**: 実行者反転により委譲経路では使われない見込み。テストが記録している制約には
-価値があるので残すが、完了時点で未使用なら削除を検討する。
+**注記**: 委譲経路では使われない見込み。テストが記録している制約には価値があるので残すが、
+完了時点で未使用なら削除を検討する。
 
-### S2. GameInstance を `shared_game_instance()` に一本化する
+### S2. `GameAccess` と lease 状態機械を置く
 
-`WholeRunSession` が `Combat/emulator_bridge.shared_game_instance()` から取る。
-`run_emulator_bridge` の **DTO 変換層はそのまま残す**（置き換えるのは取得経路だけ）。
-docstring の「意図的に独立」は理由ごと書き換える（なぜ変わったかを残す）。
+- プロセスに 1 つの `GameAccess`。唯一の `GameInstance` を保持し、
+  `shared_game_instance()` に一本化する（`run_emulator_bridge` の **DTO 変換層は残す**）
+- lease 状態機械（`RUN` / `COMBAT` / `TRANSFERRING` / `POISONED`）と世代トークン
+- mutating は全部ここを通し、非所有者・古い世代を拒否する。観測は素通し
+- `API/server.py` で **2 つ目の game 所有インスタンスを意味のあるエラーで拒否する**（2.1）
 
-**受け入れ**: 同一プロセスで両 wrapper を立てても supersede しない。既存経路が動く。
+**受け入れ**: 非所有者の mutating が拒否される。2 つ目の `start_instance` が
+`EnsureNotSuperseded` ではなく意味のあるエラーで落ちる。既存の単体経路が動く。
 
-### S3. 戦闘終了を `BattleState` に載せ、フルランの assert を直す
+### S3. 戦闘終了の引き渡しレコードと、明示的な Whole Run モード
 
-- `step_live_action` が `Transition` を `BattleState` へ載せる
-- `with_shuffle_seed()` / `clone_state()` / `_wrap()` の**伝播も揃える**（2.6）
-- `combat_completed` の assert を**明示フラグ依存に直す**（2.5）。フルランでは
-  `IsTerminal` が偽で正常。フルランでは戦闘最終状態と live 観測を別々に保つ
+- `step_live_action` が `Transition` を捨てずに引き渡しレコードへ載せる。
+  `with_shuffle_seed()` / `clone_state()` / `_wrap()` の**伝播も揃える**（2.6）
+- 戦闘の最終状態と live な run 観測を**別々に保つ**
+- `combat_completed` の assert を**明示フラグ依存に直す**（2.7）
 
-**受け入れ**: 戦闘終了 action で `combat_completed` が載る。コピーでも落ちない。
-フルランモードで assert が落ちない。
+**受け入**: フルランモードで assert が落ちない。コピーで `transition` が消えない。
 
-### S4a. 非破壊の adopt 構築と、pending root のプレイ可能性
+### S4. `CombatPhase` を切り出す
 
-- `CombatInstance.adopt_live(...)` を名前付きファクトリとして足す。既存コンストラクタの
-  start 経路を通らない。共有 `DecisionPointRegistry` を受け取る
-  （nullable な scenario 引数にしない。破壊的初期化を事故で呼びやすい）
-- `_game` を設定し、現在の観測と legal actions から `BattleState` を作り
-  `_current_frame` を設定する。**reset も restore も呼ばない**
-- **root のプレイ可否と分岐可否を分ける**（2.7）。アンカー未確立でも観測とコミットはできる
+- 戦闘の意味論（live session / アンカー / 行動列 / rng 仮説 / ドロー固定 /
+  branch pool と manager）を `CombatPhase` へ移す
+- `CombatInstance` は `CombatPhase` を standalone モードで使う公開ファサードとして残す。
+  **公開 API・識別子・DTO 整形は従来どおり**
+- adopted モードを持つ。**非破壊**（reset も restore もしない）。
+  root のプレイ可否と分岐可否を分ける（2.9）
 
-**受け入れ**: pending で adopt しても root が進み、最初の stable でアンカーが張られる。
+**受け入**: `CombatInstance` の既存テストが無変更で通る。
+adopted モードで `ResetFromScenario` が一度も呼ばれない。
 
-### S4b. adopt モードの handle 所有権と fail closed
+### S5. `enter_combat_phase` / `leave_combat_phase` を 1 トランザクションにする
 
-- handle を「同時に 1 人しか持てない所有物」にする（2.2）
-- 非所有者からの mutating 呼び出しを拒否する。観測は許す
-- adopt モードでは `start_combat` / `resume_from` / `restore_snapshot*` /
-  自動 `_resynchronize` を到達不能にする
+- 2.4 のとおり実装する。**確定前のロールバック地点を明示する**
+- `Step` 成功後・記帳前の失敗は `POISONED`
+- `drain_trivial_reward_frontier` は `leave` の一部
+- 「まだ分岐できない」を root 応答の状態として公開する（2.9）
 
-**受け入れ**: 戦闘中に Whole Run 側の mutating を呼ぶと拒否される。
-コントローラ経路で `ResetFromScenario` が一度も呼ばれない。
+**受け入**: enter/leave の途中で失敗しても、`RUN` に戻るか `POISONED` になるかのどちらかで、
+中間状態が観測されない。
 
-### S5a. 戦闘ライフサイクルと委譲された root commit
+### S6. root commit を phase へ通し、root 応答を正規化する
 
-- `is_combat` で adopt し所有権を渡す。`combat_completed` で畳み所有権を戻す
-- 戦闘中の root commit を `CombatInstance` が実行し、Whole Run は結果を観測して記帳する
-- `drain_trivial_reward_frontier` は所有権を取り戻した後にのみ走る（2.2）
+- 戦闘中の root commit を `CombatPhase` が実行し、Whole Run は結果を観測して記帳する
+- 応答を Whole Run の形へ正規化（2.11）。decision id は adopt 時 1 回、commit ごと 1 回（2.10）
 
-**受け入れ**: 戦闘中に `WholeRunSession.step()` が呼ばれない。畳んだ後の非戦闘進行が動く。
+**受け入**: 戦闘中に `WholeRunSession` の mutating が呼ばれない。root 応答の形が従来と一致。
 
-### S5b. root 応答と decision id の publish
+### S7. branch トランザクションと分岐の委譲
 
-- 委譲した結果を Whole Run の decision 応答へ正規化する（2.12）
-- decision id は adopt 時 1 回、委譲 commit ごと 1 回（2.10）
-
-**受け入れ**: 戦闘中の root 応答が従来と同じ形。id が余分にも stale にもならない。
-
-### S6a. 公開 owner 台帳と tombstone
-
-- 公開 `branch_id` → 実体側の台帳。`get_decision` / status / cancel / release を回す
-- 終了時は tombstone。id は再利用しない。**解放してから `close()`**（2.9）
-- `_cancel_and_release_all_branches()` を台帳経由で Combat にも配る
-
-**受け入れ**: 戦闘終了後も全エンドポイントが一貫した応答を返す。容量が漏れない。
-
-### S6b. グローバル容量の予約
-
-Combat を呼ぶ前に予約し、失敗・close の全経路で解放する（2.11）。
-
-**受け入れ**: 広告した上限を超えない。バッチ内競合でも超えない。
-
-### S6c. 戦闘境界の `emulate_actions` 委譲
-
-- 戦闘境界の `emulate_actions` を `CombatInstance` へ回す。`branch_id` は素通し
-- DTO を正規化（2.12）、終端は `combat_completed`（2.13）
+- admission（容量予約）/ registration（所有者）/ dispatch / retirement（tombstone）を
+  **1 つのトランザクション**として実装する（2.10）
+- 戦闘境界の `emulate_actions` を `CombatPhase` へ回す。`branch_id` は素通し
+- DTO を正規化、終端は `combat_completed`（2.11）
 - **旧 prefix 経路へのフォールバックを作らない**
 
 **受け入**: 戦闘分岐が `load_state` / `choose_room` / 部屋全体の prefix 再生を行わない。
+戦闘終了後も全エンドポイントが一貫した応答を返す。広告した上限を超えない。
 
 ## 4. テスト
 
-- S2: 両 wrapper を同一プロセスで立てても supersede しない
-- S3: `combat_completed` が載り、コピーでも保たれる。フルランで assert が落ちない
-- S4a: pending adopt から root が進み、最初の stable でアンカーが張られる
-- S4b: 非所有者の mutating が拒否される。`ResetFromScenario` が呼ばれない（fake で観測）
-- S5a: `is_combat` で立ち、`combat_completed` で畳まれる。戦闘中に `WholeRunSession.step()` が呼ばれない
-- S5b: root 応答の形が従来と一致。id の発行回数
-- S6a: 戦闘終了後の全エンドポイントの一貫性。tombstone
-- S6b: 上限を超えない
-- S6c: 分岐で prefix 再生が呼ばれない。DTO が Whole Run の形。
+- S2: 非所有者 mutating の拒否。2 つ目のインスタンスの拒否。世代の古い呼び出しの拒否
+- S3: フルランで assert が落ちない。コピーで `transition` が保たれる
+- S4: `CombatInstance` の既存テストが無変更で通る。adopted で `ResetFromScenario` が
+  呼ばれない（fake で観測）。pending adopt でも root が進む
+- S5: enter/leave の各段階での失敗注入。中間状態が観測されないこと。`POISONED` の到達
+- S6: 戦闘中に `WholeRunSession` の mutating が呼ばれない。root 応答の形。id の発行回数
+- S7: 上限を超えない。tombstone 後の全エンドポイントの一貫性。
   戦闘勝利が `combat_completed` で publish され `outcome: "victory"` が出ない
 - 全体: `python -m pytest -q` が既存 504 件を維持する
 - Whole Run 実機評価: `AllBranchesFaultedError` が出ない
 
 ## 5. 今後の課題
 
-- **戦闘がプレイヤーの選択で始まる場合、最初の `stable` まで分岐できない**（2.14）。
-  件数は `emulate_actions_rejected` として観測できる
+- **同時に複数の戦闘**。本仕様は「同時に 1 戦闘」を不変条件とし、2 回目の adopt を拒否する。
+  将来必要になったら lease を複数フェーズへ拡張する
+- **戦闘がプレイヤーの選択で始まる場合、最初の `stable` まで分岐できない**（2.9）。
+  `CombatInstance` 側の `_START_PENDING_UNSUPPORTED` と同一の制約で、解法の在り処も
+  そこに書かれている
 - **戦闘中は Whole Run のワーカープールが遊ぶ。** プールそのものは共有できない
   （`WorkItem` の型が別物で、`Run/worker_pool.py` の docstring が共通基底化を警告している）。
   プロセス予算の配分は調整できる
+- **戦闘中の run save からの再開**（2.12）。現状は診断専用と決めた
 - S1 の `capture_combat_snapshot()` / `restore_combat_snapshot()` が未使用なら削除を検討
 
 ## 6. やらないこと
 
 - 旧 prefix 経路へのフォールバック
+- 公開 `CombatInstance` を `WholeRunInstance` に入れ子にすること（2.3）
 - `rng_hypothesis` / `replay_draw_restore` を下位から呼び直すこと
-- `WholeRunSession` と `LiveCombatSession` の統合（2.15）
+- `WholeRunSession` と `LiveCombatSession` の統合（2.13）
 - `Combat → Run` の依存を作ること（2.6）
-- `run_emulator_bridge` の変換層の置き換え（2.3）
-- worker pool そのものの共有
+- `run_emulator_bridge` の変換層の置き換え（S2）
+- 戦闘の再入・入れ子（2.1）
 - 非戦闘（map / event / reward / rest / shop）分岐の変更
 - Training 側の変更
