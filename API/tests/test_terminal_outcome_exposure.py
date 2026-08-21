@@ -12,7 +12,9 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+import API.combat_phase as phase_module  # noqa: E402
 import API.instance_combat as combat_module  # noqa: E402
+from API.combat_phase import CombatPhase  # noqa: E402
 from API.history_builder import HistoryBuilder  # noqa: E402
 from API.identifiers import BranchIdRegistry, DecisionPointRegistry  # noqa: E402
 from API.instance_combat import (  # noqa: E402
@@ -111,8 +113,8 @@ def test_combat_non_terminal_decision_has_no_terminal_key():
 def test_combat_empty_legal_actions_non_terminal_is_invariant_failure():
     inst = CombatInstance("c-empty-legal", _victory_combat_config(), worker_count=1)
     try:
-        assert not inst._root_state.is_terminal  # noqa: SLF001
-        inst._root_state._cached_legal_actions = []  # noqa: SLF001
+        assert not inst._phase._root_state.is_terminal  # noqa: SLF001
+        inst._phase._root_state._cached_legal_actions = []  # noqa: SLF001
         try:
             inst._root_view()  # noqa: SLF001
         except RuntimeError as exc:
@@ -126,9 +128,9 @@ def test_combat_empty_legal_actions_non_terminal_is_invariant_failure():
 def test_combat_terminal_root_discards_stale_cached_legal_actions():
     inst = CombatInstance("c-terminal-stale-legal", _victory_combat_config(), worker_count=1)
     try:
-        assert inst._root_state._cached_legal_actions  # noqa: SLF001
-        inst._root_state.is_terminal = True  # noqa: SLF001
-        inst._root_state.outcome = "victory"  # noqa: SLF001
+        assert inst._phase._root_state._cached_legal_actions  # noqa: SLF001
+        inst._phase._root_state.is_terminal = True  # noqa: SLF001
+        inst._phase._root_state.outcome = "victory"  # noqa: SLF001
         view = inst._root_view()  # noqa: SLF001
         assert view.legal_actions_raw == []
     finally:
@@ -141,7 +143,8 @@ def test_combat_terminal_branch_get_decision_preserves_outcome():
     inst._branch_ids = BranchIdRegistry()  # noqa: SLF001
     inst._decision_points = DecisionPointRegistry()  # noqa: SLF001
     inst._bookkeeping = {}  # noqa: SLF001
-    inst._branch_manager = SimpleNamespace(  # noqa: SLF001
+    inst._phase = object.__new__(CombatPhase)  # noqa: SLF001
+    inst._phase._branch_manager = SimpleNamespace(  # noqa: SLF001
         get_branch_status=lambda ids: {ids[0]: "completed"}
     )
     book = _CombatBranchBookkeeping("internal-b1", "root", [], HistoryBuilder(), 1)
@@ -227,8 +230,9 @@ def test_combat_single_emulate_action_cleans_up_when_finalization_raises():
     inst._bookkeeping = {}  # noqa: SLF001
     inst._root_history = HistoryBuilder()  # noqa: SLF001
     inst._root_branch_log = []  # noqa: SLF001
-    inst._rng_table = _FakeCombatRngTable()  # noqa: SLF001
-    inst._branch_manager = _FakeCombatBranchManager()  # noqa: SLF001
+    inst._phase = object.__new__(CombatPhase)  # noqa: SLF001
+    inst._phase._rng_table = _FakeCombatRngTable()  # noqa: SLF001
+    inst._phase._branch_manager = _FakeCombatBranchManager()  # noqa: SLF001
     parent_view = SimpleNamespace(
         legal_actions_raw=[{"action_id": 7, "action_type": "system", "parameters": {}}],
         resolve_action_id=lambda action_id: 0,
@@ -240,29 +244,27 @@ def test_combat_single_emulate_action_cleans_up_when_finalization_raises():
         raise RuntimeError("finalization failed")
 
     inst._finalize_branch_result = _raise_finalize  # type: ignore[method-assign]  # noqa: SLF001
-    original_builder = combat_module.build_single_hypothesis_work_item
-    combat_module.build_single_hypothesis_work_item = lambda *args, **kwargs: object()
+    original_builder = phase_module.build_single_hypothesis_work_item
+    phase_module.build_single_hypothesis_work_item = lambda *args, **kwargs: object()
     try:
-        try:
-            inst.emulate_action(
-                parent_branch_id="root",
-                branch_id="b1",
-                rng_id=1,
-                decision_point_id=inst._decision_points.current("root"),  # noqa: SLF001
-                action_id="0",
-                simulation_options=None,
-            )
-        except RuntimeError as exc:
-            assert "finalization failed" in str(exc)
-        else:
-            raise AssertionError("finalization failure must propagate")
+        inst.emulate_action(
+            parent_branch_id="root",
+            branch_id="b1",
+            rng_id=1,
+            decision_point_id=inst._decision_points.current("root"),  # noqa: SLF001
+            action_id="0",
+            simulation_options=None,
+        )
+    except RuntimeError as exc:
+        assert "finalization failed" in str(exc)
+    else:
+        raise AssertionError("finalization failure must propagate")
     finally:
-        combat_module.build_single_hypothesis_work_item = original_builder
-
+        phase_module.build_single_hypothesis_work_item = original_builder
     assert "b1" not in inst._bookkeeping  # noqa: SLF001
-    assert inst._branch_manager.cancelled == ["internal-b1"]  # noqa: SLF001
-    assert inst._branch_manager.released == ["internal-b1"]  # noqa: SLF001
-    assert inst._rng_table.restored == {"rng": "before"}  # noqa: SLF001
+    assert inst._phase._branch_manager.cancelled == ["internal-b1"]  # noqa: SLF001
+    assert inst._phase._branch_manager.released == ["internal-b1"]  # noqa: SLF001
+    assert inst._phase._rng_table.restored == {"rng": "before"}  # noqa: SLF001
 
 
 def _whole_run_config() -> dict:

@@ -43,12 +43,12 @@ def test_acrobatics_replay_prefix_pins_observable_state_without_instance_identit
         candidates = [a for a in _legal_actions(pending) if a["action_type"] == "choice_card"]
         assert len(candidates) == 4, candidates
 
-        constraints = inst._replay_prefix[0].visible_draw_constraints
+        constraints = inst._phase._replay_prefix[0].visible_draw_constraints
         assert [offset for offset, _key in constraints] == [0, 1, 2]
         defend_keys = [key for _offset, key in constraints if key[0] == "DEFEND_SILENT"]
         assert len(defend_keys) == 2
         assert {bool(key[5]) for key in defend_keys} == {False, True}
-        assert inst._replay_prefix[0].visible_draw_tracking_blocked is False
+        assert inst._phase._replay_prefix[0].visible_draw_tracking_blocked is False
 
         for rng_id in range(1, 9):
             candidate = candidates[(rng_id - 1) % len(candidates)]

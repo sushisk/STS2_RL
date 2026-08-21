@@ -52,7 +52,7 @@ def _root_items(start: dict, count: int, *, prefix: str = "b") -> list[dict]:
 
 def test_phase_b_submit_failure_restores_rng_and_leaves_no_partial_state() -> None:
     inst = CombatInstance("review-submit-fault", _combat_config(), worker_count=2)
-    original_submit_many = inst._branch_manager.submit_many  # noqa: SLF001
+    original_submit_many = inst._phase._branch_manager.submit_many  # noqa: SLF001
 
     def _failing_submit_many(entries):
         assert len(entries) == 2
@@ -60,7 +60,7 @@ def test_phase_b_submit_failure_restores_rng_and_leaves_no_partial_state() -> No
 
     try:
         start = inst.start_instance_response()
-        inst._branch_manager.submit_many = _failing_submit_many  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.submit_many = _failing_submit_many  # type: ignore[method-assign]  # noqa: SLF001
         try:
             inst.emulate_actions(items=_root_items(start, 2), simulation_options=None)
         except RuntimeError as exc:
@@ -69,26 +69,26 @@ def test_phase_b_submit_failure_restores_rng_and_leaves_no_partial_state() -> No
             raise AssertionError("synthetic submit failure must propagate")
 
         assert inst._bookkeeping == {}  # noqa: SLF001
-        assert inst._branch_manager.active_branch_count() == 0  # noqa: SLF001
-        assert inst._rng_table._index_by_key == {}  # noqa: SLF001
-        assert inst._rng_table._next_index_by_parent_decision == {}  # noqa: SLF001
+        assert inst._phase._branch_manager.active_branch_count() == 0  # noqa: SLF001
+        assert inst._phase._rng_table._index_by_key == {}  # noqa: SLF001
+        assert inst._phase._rng_table._next_index_by_parent_decision == {}  # noqa: SLF001
         assert not inst._branch_ids.is_known("b0")  # noqa: SLF001
         assert not inst._branch_ids.is_known("b1")  # noqa: SLF001
     finally:
-        inst._branch_manager.submit_many = original_submit_many  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.submit_many = original_submit_many  # type: ignore[method-assign]  # noqa: SLF001
         inst.close()
 
 
 def test_phase_b_poll_failure_quarantines_internal_branches() -> None:
     inst = CombatInstance("review-poll-fault", _combat_config(), worker_count=2)
-    original_poll = inst._branch_manager.poll  # noqa: SLF001
+    original_poll = inst._phase._branch_manager.poll  # noqa: SLF001
 
     def _failing_poll(*args, **kwargs):
         raise RuntimeError("synthetic coordinator failure")
 
     try:
         start = inst.start_instance_response()
-        inst._branch_manager.poll = _failing_poll  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.poll = _failing_poll  # type: ignore[method-assign]  # noqa: SLF001
         try:
             inst.emulate_actions(items=_root_items(start, 2, prefix="q"), simulation_options=None)
         except RuntimeError as exc:
@@ -96,14 +96,14 @@ def test_phase_b_poll_failure_quarantines_internal_branches() -> None:
         else:
             raise AssertionError("synthetic coordinator failure must propagate")
         finally:
-            inst._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
+            inst._phase._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
 
         assert inst._bookkeeping == {}  # noqa: SLF001
-        assert inst._rng_table._index_by_key == {}  # noqa: SLF001
-        assert inst._rng_table._next_index_by_parent_decision == {}  # noqa: SLF001
-        assert inst._branch_manager.active_branch_count() == 0  # noqa: SLF001
-        assert len(inst._branch_manager._records) == 2  # noqa: SLF001
-        assert {record.state for record in inst._branch_manager._records.values()} == {"released"}  # noqa: SLF001
+        assert inst._phase._rng_table._index_by_key == {}  # noqa: SLF001
+        assert inst._phase._rng_table._next_index_by_parent_decision == {}  # noqa: SLF001
+        assert inst._phase._branch_manager.active_branch_count() == 0  # noqa: SLF001
+        assert len(inst._phase._branch_manager._records) == 2  # noqa: SLF001
+        assert {record.state for record in inst._phase._branch_manager._records.values()} == {"released"}  # noqa: SLF001
 
         # Public IDs may remain permanently burned, but they are quarantined rather than
         # usable. A later poll must have no queued leftovers to execute.
@@ -123,7 +123,7 @@ def test_batch_capacity_boundary_is_explicitly_64_then_65_rejects() -> None:
     inst = CombatInstance(
         "review-batch-capacity", _combat_config(), worker_count=2, max_branches=64
     )
-    original_submit_many = inst._branch_manager.submit_many  # noqa: SLF001
+    original_submit_many = inst._phase._branch_manager.submit_many  # noqa: SLF001
     observed_sizes: list[int] = []
 
     class _ReachedSubmit(RuntimeError):
@@ -136,7 +136,7 @@ def test_batch_capacity_boundary_is_explicitly_64_then_65_rejects() -> None:
     try:
         start = inst.start_instance_response()
         assert start["max_emulate_actions_items"] == 64
-        inst._branch_manager.submit_many = _stop_at_submit  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.submit_many = _stop_at_submit  # type: ignore[method-assign]  # noqa: SLF001
 
         try:
             inst.emulate_actions(items=_root_items(start, 64, prefix="ok"), simulation_options=None)
@@ -154,7 +154,7 @@ def test_batch_capacity_boundary_is_explicitly_64_then_65_rejects() -> None:
             raise AssertionError("65 items must be rejected deterministically")
         assert observed_sizes == [64]
     finally:
-        inst._branch_manager.submit_many = original_submit_many  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.submit_many = original_submit_many  # type: ignore[method-assign]  # noqa: SLF001
         inst.close()
 
 
