@@ -420,13 +420,18 @@ class WholeRunInstance:
             phase.close()
             phase_folded = True
             self._combat_phase = None
-            auto = drain_trivial_reward_frontier(self._session)
-            self._action_prefix = list(auto.auto_action_ids)
-            self._maybe_capture_map_snapshot()
+            # The lease returns BEFORE the run is normalized, not after.  Draining the
+            # reward frontier steps the board, and nothing may hold a mutating
+            # capability while the access state is TRANSFERRING - that exclusion is the
+            # whole point of the transfer.  Both still sit inside this try, so a failure
+            # while normalizing poisons exactly as a failure before the commit would.
             lease = self._session.commit_lease_transfer(
                 transfer, LeaseState.RUN, self._session.lease_holder
             )
             self._session.accept_transferred_lease(lease)
+            auto = drain_trivial_reward_frontier(self._session)
+            self._action_prefix = list(auto.auto_action_ids)
+            self._maybe_capture_map_snapshot()
         except Exception:
             # A combat-completion Step has already changed the physical game.  Once any
             # following record/publication/normalization work fails, RUN is no longer a
@@ -515,6 +520,44 @@ class WholeRunInstance:
             ),
         }
 
+    def _record_root_commit(
+        self,
+        decision_point_id: str,
+        action_id: str,
+        *,
+        release_branches: bool,
+        issue_decision: bool,
+    ) -> dict:
+        """Book a committed root action and publish the decision that follows it.
+
+        Shared by the combat and non-combat commit paths, which differ only in who
+        already did these two things: a concluded combat released its branches inside
+        leave_combat_phase, and an entering combat had its decision issued by adoption.
+        """
+        self._root_branch_log.append(
+            {
+                "depth": len(self._root_branch_log),
+                "decision_point_id": decision_point_id,
+                "action_id": action_id,
+                "rng_id": ROOT_RNG_ID,
+            }
+        )
+        if release_branches:
+            self._cancel_and_release_all_branches()
+        self._maybe_capture_map_snapshot()
+        if issue_decision:
+            self._decision_points.issue(ROOT_BRANCH_ID)
+        view = self._root_view()
+        return {
+            "status": STATUS_COMPLETED,
+            **self._decision_response_fields(
+                ROOT_BRANCH_ID,
+                view,
+                branch_log=list(self._root_branch_log),
+                history=self._root_history,
+            ),
+        }
+
     def commit_action(self, decision_point_id: str, action_id: str) -> dict:
         self._ensure_mutable()
         self._decision_points.validate(ROOT_BRANCH_ID, decision_point_id)
@@ -525,12 +568,60 @@ class WholeRunInstance:
             )
         index = view.resolve_action_id(action_id)
         chosen = view.legal_actions_raw[index]
+        phase = self._combat_phase
+        entered_combat = False
+        if phase is not None:
+            # A combat Step advances an adopted live frame.  Everything that follows
+            # it is part of that transaction: a failure must fault the run rather than
+            # leave the retained frame out of sync with the physical game.
+            try:
+                # The adopted phase retains the combat decision frame, so it is the
+                # only safe executor while combat is live.  WholeRunSession remains
+                # the source of the root observation below.
+                phase.commit_root_action(chosen)
+                completion = phase.root_state.combat_completion
+                left_combat = completion is not None
+                if completion is not None:
+                    self.leave_combat_phase(completion)
+
+                # leave_combat_phase owns the branch release when it folds a
+                # completed combat phase back into Whole Run.
+                return self._record_root_commit(
+                    decision_point_id,
+                    action_id,
+                    release_branches=not left_combat,
+                    issue_decision=True,
+                )
+            except Exception as exc:  # noqa: BLE001
+                # CombatPhase marks the point at which its live Step has irreversibly
+                # advanced.  After that point, returning an ordinary emulator fault
+                # would leave its retained frame stale; poison the shared run instead.
+                if phase.root_commit_advanced() and not self._faulted:
+                    self._poison_combat_transaction(
+                        phase if self._combat_phase is phase else None
+                    )
+                return {
+                    "status": STATUS_FAULTED,
+                    "error": str(exc),
+                    "fault_kind": FAULT_EMULATOR_ERROR,
+                }
+
         try:
             if view.boundary == MAP_SELECT:
                 self._session.choose_room(chosen["action_id"])
                 self._room_id = chosen["action_id"]
-                auto = drain_trivial_reward_frontier(self._session)
-                self._action_prefix = list(auto.auto_action_ids)
+                # ChooseRoom supplies the live room context.  Adopt before any
+                # WholeRunSession mutation such as reward draining: a combat phase
+                # owns the newly entered combat board.
+                entered_combat = (
+                    self._session.get_room_context().get("room_type") == "CombatRoom"
+                )
+                if entered_combat:
+                    self._action_prefix = []
+                    self.enter_combat_phase()
+                else:
+                    auto = drain_trivial_reward_frontier(self._session)
+                    self._action_prefix = list(auto.auto_action_ids)
             else:
                 self._session.step(chosen["action_id"])
                 self._action_prefix.append(chosen["action_id"])
@@ -543,29 +634,14 @@ class WholeRunInstance:
                 "fault_kind": FAULT_EMULATOR_ERROR,
             }
 
-        depth = len(self._root_branch_log)
-        self._root_branch_log.append(
-            {
-                "depth": depth,
-                "decision_point_id": decision_point_id,
-                "action_id": action_id,
-                "rng_id": ROOT_RNG_ID,
-            }
+        # Adoption already issued the first combat decision.  Every other
+        # successful root commit advances exactly one root decision.
+        return self._record_root_commit(
+            decision_point_id,
+            action_id,
+            release_branches=True,
+            issue_decision=not entered_combat,
         )
-
-        self._cancel_and_release_all_branches()
-        self._maybe_capture_map_snapshot()
-        self._decision_points.issue(ROOT_BRANCH_ID)
-        view = self._root_view()
-        return {
-            "status": STATUS_COMPLETED,
-            **self._decision_response_fields(
-                ROOT_BRANCH_ID,
-                view,
-                branch_log=list(self._root_branch_log),
-                history=self._root_history,
-            ),
-        }
 
     def emulate_action(
         self,

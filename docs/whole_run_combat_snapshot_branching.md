@@ -141,9 +141,20 @@ leave_combat_phase
   1. GameAccess: COMBAT → TRANSFERRING
   2. 戦闘終了レコード（2.6）を取り込む
   3. 公開 branch を解放・tombstone 化 → その後に phase を畳む（順序は逆にしない）
-  4. Whole Run の root を正規化。drain_trivial_reward_frontier はここで走る
-  5. GameAccess: TRANSFERRING → RUN（確定）
+  4. GameAccess: TRANSFERRING → RUN（確定）
+  5. Whole Run の root を正規化。drain_trivial_reward_frontier はここで走る
 ```
+
+**4 と 5 の順序は入れ替えられない。** 当初この 2 つは逆に書いてあったが、
+それは実装できない。`drain_trivial_reward_frontier` は `session.step()` を呼ぶ
+**変異**であり（`Run/reward_auto_progress.py`）、`TRANSFERRING` 中は誰も変異能力を
+持てない。それこそが移譲状態の存在理由である。lease を返してから正規化する。
+正規化は同じトランザクションの中に留まるので、そこでの失敗は確定前の失敗と
+同じく `POISONED` へ落ちる。
+
+この誤りは戦闘終了のたびに出るわけではない。`drain_trivial_reward_frontier` は
+**選択肢が 1 つのときだけ**盤面を進めるので、報酬画面に複数の選択肢があれば
+変異が起きず素通りする。決定的だが、条件が揃った戦闘でだけ表面化する。
 
 **物理的な `Step` は成功したが記帳・publish 前に失敗した場合**は、上のどちらでもない。
 lease を返せばランが未分類の状態から再開し、保持すれば死んだランが漏れる。
