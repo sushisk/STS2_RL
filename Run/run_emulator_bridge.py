@@ -94,6 +94,14 @@ def legal_action_to_dict(action) -> dict:
         "label": str(action.Label),
         "is_available": bool(action.IsAvailable),
         "parameters": to_plain(action.Parameters),
+        # The Combat bridge has always carried this; this one did not, and the two describe
+        # the same LegalAction. A replay prefix recorded through a Run-level view therefore
+        # held SemanticAction(action_type, "") while the same action re-offered by Combat
+        # carried its real key, and SemanticAction.resolve matches on both fields - so the
+        # branch faulted with "did not resolve against any of N legal action(s)". Potions are
+        # where it showed: the Emulator gives every potion "{index}:{ENTRY}", while End Turn
+        # and skip/confirm are genuinely keyless and so matched by accident.
+        "semantic_key": str(action.SemanticKey),
     }
 
 

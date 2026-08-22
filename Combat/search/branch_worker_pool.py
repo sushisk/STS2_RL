@@ -54,6 +54,10 @@ from search.decision_context import (
     replay_decision_context,
     search_root,
 )
+from search.replay_draw_restore import (
+    visible_draw_tracking_reasons,
+    visible_draw_transition_evidence_from_committed_transition,
+)
 
 if False:  # pragma: no cover - type-checking-only without importing at runtime.
     from combat_state_snapshot import CombatStateSnapshot
@@ -453,15 +457,25 @@ def _build_success_result(
     worker_id: int,
     worker_generation: int,
     state_epoch: int,
+    pre_state,
     next_state,
     signature: DecisionSignature,
 ) -> BranchResult:
     boundary = signature.boundary
+    draw_evidence = visible_draw_transition_evidence_from_committed_transition(
+        next_state,
+        work_item.decision_context.replay_prefix,
+        pre_battle_state=pre_state,
+    )
     entry = ReplayPrefixEntry(
         semantic_action=work_item.candidate.semantic_action,
         expected_signature=signature,
         target_index=work_item.candidate.target_index,
         target_enemy_index=work_item.candidate.target_enemy_index,
+        visible_draw_constraints=draw_evidence.constraints,
+        visible_draw_tracking_blocked=draw_evidence.blocks_later_pinning,
+        visible_draw_tracking_error=draw_evidence.tracking_error,
+        visible_draw_tracking_reason=draw_evidence.tracking_reason,
     )
     if boundary == BOUNDARY_STABLE:
         return BranchResult(
@@ -558,6 +572,15 @@ class _WorkerRuntime:
                             "step_index": replay_outcome.step_index,
                             "detail": replay_outcome.detail,
                             "diverged_fields": replay_outcome.diverged_fields,
+                            "diverged_values": replay_outcome.diverged_values,
+                            "replay_action": replay_outcome.replay_action,
+                            "visible_draw_tracking_blocked": any(
+                                entry.visible_draw_tracking_blocked
+                                for entry in work_item.decision_context.replay_prefix
+                            ),
+                            "visible_draw_tracking_reasons": visible_draw_tracking_reasons(
+                                work_item.decision_context.replay_prefix
+                            ),
                             # API.instance_combat._finalize_branch_result reads "message" for the
                             # RPC-visible "error" field; without this key it always falls back to
                             # the generic "branch execution faulted" string and the stage/detail/
@@ -565,7 +588,9 @@ class _WorkerRuntime:
                             "message": (
                                 f"replay_mismatch at stage={replay_outcome.stage} "
                                 f"step_index={replay_outcome.step_index}: {replay_outcome.detail} "
-                                f"diverged_fields={replay_outcome.diverged_fields}"
+                                f"diverged_fields={replay_outcome.diverged_fields} "
+                                f"diverged_values={replay_outcome.diverged_values} "
+                                f"replay_action={replay_outcome.replay_action}"
                             ),
                         },
                     )
@@ -600,6 +625,7 @@ class _WorkerRuntime:
                 self.worker_id,
                 self.worker_generation,
                 self.state_epoch,
+                state,
                 next_state,
                 signature,
             )

@@ -37,6 +37,7 @@ from search.decision_context import (  # noqa: E402
     ReplayPrefixEntry,
     ReplaySuccess,
     SemanticAction,
+    _replay_divergence_values,
     boundary_of_battle_state,
     candidate_multiset,
     replay_decision_context,
@@ -217,6 +218,28 @@ def test_candidate_multiset_preserves_duplicates():
     # A naive `set()` over the same keys would have collapsed the duplicate away - assert
     # the multiset actually carries MORE total count than the deduplicated key set would.
     assert sum(as_dict.values()) > len(set(k for k, _ in multiset))
+
+
+def test_replay_divergence_values_reports_collection_difference_by_side():
+    # Pending, not Stable: candidate_semantic_keys (with choice_scope and choice_kind) only
+    # exists at a published choice, and DecisionSignature refuses a Stable signature that
+    # carries them. That constraint is also what the field list of a real divergence tells
+    # you - these three moving together means the boundary itself changed.
+    expected = _base_pending_signature(
+        candidate_semantic_keys=((('card', '0:STRIKE_IRONCLAD'), 2), (('card', '2:DEFEND_IRONCLAD'), 1)),
+    )
+    observed = _base_pending_signature(
+        candidate_semantic_keys=((('card', '0:STRIKE_IRONCLAD'), 1), (('card', '1:BASH'), 1)),
+    )
+
+    values = _replay_divergence_values(observed, expected, ["candidate_semantic_keys"])
+
+    assert values == {
+        "candidate_semantic_keys": {
+            "expected_only": [(('card', '0:STRIKE_IRONCLAD'), 1), (('card', '2:DEFEND_IRONCLAD'), 1)],
+            "observed_only": [(('card', '1:BASH'), 1)],
+        }
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -539,6 +562,14 @@ def test_replay_decision_context_detects_tampered_expected_signature_as_mismatch
     assert outcome.stage == "signature"
     assert outcome.step_index == 0
     assert "resolved_semantic_key" in outcome.diverged_fields
+    assert outcome.diverged_values["resolved_semantic_key"] == {
+        "expected": "DEFEND_IRONCLAD",
+        "observed": "0:STRIKE_IRONCLAD",
+    }
+    assert outcome.replay_action == {
+        "action_type": "card",
+        "semantic_key": "0:STRIKE_IRONCLAD",
+    }
 
 
 def test_replay_decision_context_surfaces_real_restore_rejection_uncaught():

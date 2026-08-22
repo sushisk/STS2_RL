@@ -32,6 +32,7 @@ from API.combat_phase import (
 )
 from API.dto import (
     FAULT_EMULATOR_ERROR,
+    FAULT_REPLAY_UNSUPPORTED_PINNED_DRAW_MATERIALIZATION,
     ROOT_BRANCH_ID,
     ROOT_RNG_ID,
     STATUS_CANCELLED,
@@ -47,6 +48,7 @@ from API.identifiers import BranchIdRegistry, DecisionPointRegistry
 from API.masking import build_masked_emulator_dto, mask_legal_actions
 from API.terminal_outcome import require_terminal_outcome
 from API.validation import RequestRejected
+from search.rng_hypothesis import PinnedDrawMaterializationRefused
 
 _AMBIGUOUS_ACTION_INDEX = -1
 
@@ -337,7 +339,12 @@ class CombatInstance:
         try:
             prepared: list[tuple] = []
             for admitted_item in admitted:
-                work_item = self._phase.build_work_item(admitted_item.parent_view.decision_context, admitted_item.candidate, admitted_item.parent_branch_id, admitted_item.decision_point_id, admitted_item.rng_id)
+                try:
+                    work_item = self._phase.build_work_item(admitted_item.parent_view.decision_context, admitted_item.candidate, admitted_item.parent_branch_id, admitted_item.decision_point_id, admitted_item.rng_id)
+                except PinnedDrawMaterializationRefused as exc:
+                    raise RequestRejected(
+                        str(exc), fault_kind=FAULT_REPLAY_UNSUPPORTED_PINNED_DRAW_MATERIALIZATION
+                    ) from exc
                 parent_internal_id = None if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].internal_id
                 parent_history = self._root_history if admitted_item.parent_branch_id == ROOT_BRANCH_ID else self._bookkeeping[admitted_item.parent_branch_id].history
                 parent_log = list(self._root_branch_log) if admitted_item.parent_branch_id == ROOT_BRANCH_ID else list(self._bookkeeping[admitted_item.parent_branch_id].branch_log)
