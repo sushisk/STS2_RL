@@ -104,6 +104,28 @@ class CombatStartReplayRoot:
     scenario_spec: dict
 
 
+@dataclass(frozen=True)
+class RoomEntryReplayRoot:
+    """Run boundary used to rebuild a combat whose first board is Pending.
+
+    ``map_snapshot`` is deliberately retained as the identity input (rather than a
+    digest): the worker must give the run emulator the exact saved JSON, and the room
+    id alone is not sufficient to identify the run state that produced the combat.
+    """
+
+    map_snapshot: str
+    room_id: int
+
+    @property
+    def is_combat_start(self) -> bool:
+        return True
+
+
+# The plan calls the same value an ``RoomEntryAnchor`` at the CombatPhase boundary.
+# Keep that name available without introducing a second wire type.
+RoomEntryAnchor = RoomEntryReplayRoot
+
+
 class SearchRoot(Protocol):
     """The root operations shared by local search and spawned workers."""
 
@@ -114,6 +136,9 @@ class SearchRoot(Protocol):
     def identity_payload(self) -> str: ...
 
     def ipc_payload(self) -> Any: ...
+
+
+ROOM_ENTRY_REPLAY_MAX_STEPS = 400
 
 
 @dataclass(frozen=True)
@@ -127,6 +152,30 @@ class _CombatStartSearchRoot:
     def identity_payload(self) -> str:
         return json.dumps(
             {"scenario_spec": self.root.scenario_spec},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+
+    def ipc_payload(self) -> Any:
+        return self.root
+
+
+@dataclass(frozen=True)
+class _RoomEntrySearchRoot:
+    root: RoomEntryReplayRoot
+    is_combat_start: bool = True
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        # Kept as a worker-side operation: LiveCombatSession intentionally has no
+        # run-level load_state/choose_room API.
+        from search.branch_worker_pool import RoomEntryWorkerBootstrap
+
+        return RoomEntryWorkerBootstrap(session).bootstrap(self.root)
+
+    def identity_payload(self) -> str:
+        return json.dumps(
+            {"map_snapshot": self.root.map_snapshot, "room_id": self.root.room_id},
             sort_keys=True,
             separators=(",", ":"),
             ensure_ascii=True,
@@ -223,6 +272,8 @@ def search_root(root: Any) -> SearchRoot:
 
     if isinstance(root, CombatStartReplayRoot):
         return _CombatStartSearchRoot(root)
+    if isinstance(root, RoomEntryReplayRoot):
+        return _RoomEntrySearchRoot(root)
     if isinstance(root, str) or isinstance(root, dict):
         return _JsonSearchRoot(root)
     if dataclasses.is_dataclass(root):
@@ -674,8 +725,46 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
     from live_combat_session import LiveCombatSession  # noqa: F401 - documents the expected type, avoids a hard import cycle
 
     _raise_if_root_snapshot_not_restore_eligible(context.root_snapshot)
-    state = search_root(context.root_snapshot).bootstrap(session)
+    adapted_root = search_root(context.root_snapshot)
+    state = adapted_root.bootstrap(session)
     last_observed: "Optional[DecisionSignature]" = None
+
+    # Unlike the legacy empty-prefix restore case, a room-entry bootstrap must verify
+    # the complete observed DecisionSignature: this is what detects an opening draw or
+    # intent divergence instead of assuming the two measured relic cases are a proof.
+    if isinstance(context.root_snapshot, RoomEntryReplayRoot):
+        expected_root = context.current_context_signature
+        legal_actions = state._cached_legal_actions or session.get_legal_actions()  # noqa: SLF001
+        try:
+            root_action = expected_root.semantic_action.resolve(legal_actions)
+        except SemanticActionUnresolvedError as exc:
+            return ReplayMismatch(
+                step_index=None,
+                stage="context_signature",
+                detail=f"room-entry root action was not resolvable: {exc}",
+            )
+        observed_root = DecisionSignature.from_battle_state(
+            state,
+            semantic_action=expected_root.semantic_action,
+            resolved_action=root_action,
+        )
+        if not observed_root.matches_for_replay(expected_root):
+            return ReplayMismatch(
+                step_index=None,
+                stage="context_signature",
+                detail="room-entry bootstrap diverged from root DecisionSignature",
+                diverged_fields=observed_root.diff_for_replay(expected_root),
+            )
+
+    if isinstance(context.root_snapshot, RoomEntryReplayRoot) and len(context.replay_prefix) > ROOM_ENTRY_REPLAY_MAX_STEPS:
+        return ReplayMismatch(
+            step_index=ROOM_ENTRY_REPLAY_MAX_STEPS,
+            stage="replay_bound",
+            detail=(
+                f"room-entry replay prefix exceeded the maximum of "
+                f"{ROOM_ENTRY_REPLAY_MAX_STEPS} steps"
+            ),
+        )
 
     for index, entry in enumerate(context.replay_prefix):
         legal_actions = state._cached_legal_actions or session.get_legal_actions()  # noqa: SLF001
