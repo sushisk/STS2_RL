@@ -30,7 +30,7 @@ from combat_state_snapshot import (
     SerializableRngSnapshot,
     canonical_json,
 )
-from search.decision_context import CombatStartReplayRoot, DecisionContext
+from search.decision_context import CombatStartReplayRoot, DecisionContext, search_root
 from search.replay_draw_restore import (
     ObservableCardKey,
     card_id_from_observable_key,
@@ -541,7 +541,7 @@ def apply_hypothesis_to_context(
     never part of the proof. Hidden gameplay-state ambiguity rejects materialization
     rather than guessing a concrete copy.
     """
-    if isinstance(decision_context.root_snapshot, CombatStartReplayRoot):
+    if search_root(decision_context.root_snapshot).is_combat_start:
         raise TypeError("Genesis hypotheses must use derive_combat_start_replay_roots()")
 
     constraints = _pinned_prefix_visible_draw_constraints(decision_context)

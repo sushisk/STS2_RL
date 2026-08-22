@@ -42,7 +42,6 @@ from search.decision_context import (
     BOUNDARY_PENDING,
     BOUNDARY_STABLE,
     BOUNDARY_TERMINAL,
-    CombatStartReplayRoot,
     DecisionContext,
     DecisionSignature,
     ReplayMismatch,
@@ -51,6 +50,7 @@ from search.decision_context import (
     append_replay_prefix_entry,
     boundary_of_battle_state,
     replay_decision_context,
+    search_root,
 )
 
 if False:  # pragma: no cover - type-checking-only without importing at runtime.
@@ -113,52 +113,12 @@ def derive_context_id(context: DecisionContext) -> str:
 
 
 def _snapshot_identity_json(snapshot: Any) -> str:
-    from combat_state_snapshot import canonical_json
-
-    if isinstance(snapshot, CombatStartReplayRoot):
-        # A Combat Start Replay Root is already plain JSON-safe data (a scenario spec
-        # dict, never a captured Snapshot) - no volatile-metadata stripping applies.
-        return json.dumps(
-            {"scenario_spec": snapshot.scenario_spec}, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        )
-    if dataclasses.is_dataclass(snapshot):
-        return canonical_json(dataclasses.asdict(snapshot), exclude_volatile=True)
-    if isinstance(snapshot, str):
-        try:
-            return canonical_json(json.loads(snapshot), exclude_volatile=True)
-        except json.JSONDecodeError:
-            return _json_digest(repr(snapshot), length=64)
-    if isinstance(snapshot, dict):
-        return canonical_json(snapshot, exclude_volatile=True)
-    if hasattr(snapshot, "GetType") and str(snapshot.GetType().FullName) == "Sts2Emulator.Dto.Snapshot.CombatStateSnapshot":
-        from emulator_bridge import ensure_loaded
-
-        text = str(ensure_loaded()["JsonSerializer"].Serialize(snapshot))
-        payload = json.loads(text)
-        return canonical_json(payload, exclude_volatile=True)
-    return _json_digest(repr(snapshot), length=64)
+    return search_root(snapshot).identity_payload()
 
 
 def _snapshot_ipc_json(snapshot: Any) -> Any:
     """Return a Queue-picklable snapshot payload for spawned worker processes."""
-    from combat_state_snapshot import canonical_json
-
-    if isinstance(snapshot, CombatStartReplayRoot):
-        # Already a plain dict-of-primitives - trivially picklable, no CLR object
-        # involved, nothing to canonicalize away (there is no volatile capture metadata
-        # on a scenario spec).
-        return snapshot
-    if isinstance(snapshot, str):
-        return snapshot
-    if dataclasses.is_dataclass(snapshot):
-        return canonical_json(dataclasses.asdict(snapshot), exclude_volatile=False)
-    if isinstance(snapshot, dict):
-        return canonical_json(snapshot, exclude_volatile=False)
-    if hasattr(snapshot, "GetType") and str(snapshot.GetType().FullName) == "Sts2Emulator.Dto.Snapshot.CombatStateSnapshot":
-        from emulator_bridge import ensure_loaded
-
-        return str(ensure_loaded()["JsonSerializer"].Serialize(snapshot))
-    return snapshot
+    return search_root(snapshot).ipc_payload()
 
 
 def _work_item_for_ipc(work_item: WorkItem) -> WorkItem:

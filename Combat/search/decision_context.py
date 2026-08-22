@@ -25,7 +25,7 @@ import json
 import dataclasses
 from collections import Counter
 from dataclasses import dataclass, field, fields
-from typing import TYPE_CHECKING, Optional
+from typing import Any, TYPE_CHECKING, Optional, Protocol
 
 from battle_emulator import BattleState, is_action_continuation_pending_choice, pending_choice_metadata
 from search.replay_draw_restore import VisibleDrawConstraints
@@ -102,6 +102,144 @@ class CombatStartReplayRoot:
     object."""
 
     scenario_spec: dict
+
+
+class SearchRoot(Protocol):
+    """The root operations shared by local search and spawned workers."""
+
+    is_combat_start: bool
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState": ...
+
+    def identity_payload(self) -> str: ...
+
+    def ipc_payload(self) -> Any: ...
+
+
+@dataclass(frozen=True)
+class _CombatStartSearchRoot:
+    root: CombatStartReplayRoot
+    is_combat_start: bool = True
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.start_combat(self.root.scenario_spec)
+
+    def identity_payload(self) -> str:
+        return json.dumps(
+            {"scenario_spec": self.root.scenario_spec},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+
+    def ipc_payload(self) -> Any:
+        return self.root
+
+
+@dataclass(frozen=True)
+class _JsonSearchRoot:
+    root: str | dict
+    is_combat_start: bool = False
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.restore_snapshot(self.root)
+
+    def identity_payload(self) -> str:
+        from combat_state_snapshot import canonical_json
+
+        if isinstance(self.root, str):
+            try:
+                return canonical_json(json.loads(self.root), exclude_volatile=True)
+            except json.JSONDecodeError:
+                return _root_digest(repr(self.root))
+        return canonical_json(self.root, exclude_volatile=True)
+
+    def ipc_payload(self) -> Any:
+        return self.root
+
+
+@dataclass(frozen=True)
+class _DataclassSearchRoot:
+    root: Any
+    is_combat_start: bool = False
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.restore_snapshot(self.root)
+
+    def identity_payload(self) -> str:
+        from combat_state_snapshot import canonical_json
+
+        return canonical_json(dataclasses.asdict(self.root), exclude_volatile=True)
+
+    def ipc_payload(self) -> Any:
+        from combat_state_snapshot import canonical_json
+
+        return canonical_json(dataclasses.asdict(self.root), exclude_volatile=False)
+
+
+@dataclass(frozen=True)
+class _ObjectSearchRoot:
+    root: Any
+    is_combat_start: bool = False
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.restore_snapshot(self.root)
+
+    def _is_clr_snapshot(self) -> bool:
+        return (
+            hasattr(self.root, "GetType")
+            and str(self.root.GetType().FullName) == "Sts2Emulator.Dto.Snapshot.CombatStateSnapshot"
+        )
+
+    def _serialized_payload(self) -> Any:
+        from emulator_bridge import ensure_loaded
+
+        return json.loads(str(ensure_loaded()["JsonSerializer"].Serialize(self.root)))
+
+    def identity_payload(self) -> str:
+        from combat_state_snapshot import canonical_json
+
+        if not self._is_clr_snapshot():
+            return _root_digest(repr(self.root))
+        return canonical_json(self._serialized_payload(), exclude_volatile=True)
+
+    def ipc_payload(self) -> Any:
+        if not self._is_clr_snapshot():
+            return self.root
+        from emulator_bridge import ensure_loaded
+
+        return str(ensure_loaded()["JsonSerializer"].Serialize(self.root))
+
+
+def _root_digest(value: str, *, length: int = 64) -> str:
+    import hashlib
+
+    text = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:length]
+
+
+def search_root(root: Any) -> SearchRoot:
+    """Adapt every supported DecisionContext root at the sole type boundary."""
+
+    if isinstance(root, CombatStartReplayRoot):
+        return _CombatStartSearchRoot(root)
+    if isinstance(root, str) or isinstance(root, dict):
+        return _JsonSearchRoot(root)
+    if dataclasses.is_dataclass(root):
+        from combat_state_snapshot import CombatStateSnapshot
+
+        # Named, not "any dataclass". The whole point of this function is that adding a
+        # root kind is a decision made here; a generic dataclass arm would silently hand
+        # a new kind restore_snapshot() and snapshot serialization, which is the failure
+        # this collapse exists to prevent - it would just happen in one place instead of
+        # ten. A new dataclass root must add its own arm above.
+        if not isinstance(root, CombatStateSnapshot):
+            raise TypeError(
+                f"unsupported DecisionContext root {type(root).__name__!r}: add an arm to "
+                "search_root() saying how to bootstrap, identify and ship it"
+            )
+        return _DataclassSearchRoot(root)
+    return _ObjectSearchRoot(root)
 
 
 @dataclass(frozen=True)
@@ -349,7 +487,7 @@ class DecisionContext:
       Evaluation Segment (no Stable boundary has ever been reached yet), this field
       instead holds a `CombatStartReplayRoot` - see that type's own docstring for why a
       Combat Start Replay Root, not a captured Pending Snapshot, is used. Every consumer
-      of this field must branch on `isinstance(root_snapshot, CombatStartReplayRoot)`.
+      of this field must use `search_root(root_snapshot)`.
     * `replay_prefix` - ordered `ReplayPrefixEntry` list from the Stable Root to here;
       resets to empty at every Stable capture (DC_STABLE/DC_PENDING; NOTE_REPLAY_VS_PLAN).
     * `plan_path` - ordered `ReplayPrefixEntry` list from the SEARCH START to here; never
@@ -495,7 +633,7 @@ def _root_snapshot_capture_boundary(root_snapshot) -> "Optional[str]":
 
 
 def _raise_if_root_snapshot_not_restore_eligible(root_snapshot) -> None:
-    if isinstance(root_snapshot, CombatStartReplayRoot):
+    if search_root(root_snapshot).is_combat_start:
         # Nothing to Restore-eligibility-check: a Combat Start Replay Root is never
         # Captured/Restored at all - see that type's own docstring.
         return
@@ -536,12 +674,7 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
     from live_combat_session import LiveCombatSession  # noqa: F401 - documents the expected type, avoids a hard import cycle
 
     _raise_if_root_snapshot_not_restore_eligible(context.root_snapshot)
-    if isinstance(context.root_snapshot, CombatStartReplayRoot):
-        # Start-of-Combat Pending's own Bootstrap: re-run the SAME combat start, never
-        # Restore - there is no prior Stable boundary to Restore from at all.
-        state = session.start_combat(context.root_snapshot.scenario_spec)
-    else:
-        state = session.restore_snapshot(context.root_snapshot)
+    state = search_root(context.root_snapshot).bootstrap(session)
     last_observed: "Optional[DecisionSignature]" = None
 
     for index, entry in enumerate(context.replay_prefix):

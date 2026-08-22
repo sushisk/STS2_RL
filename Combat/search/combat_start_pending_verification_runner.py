@@ -47,6 +47,7 @@ from search.decision_context import (  # noqa: E402
     DecisionSignature,
     SemanticAction,
     boundary_of_battle_state,
+    search_root,
 )
 from search.fault_taxonomy import BRANCH_FAULT_KINDS, classify_fault  # noqa: E402
 
@@ -135,9 +136,9 @@ def _branch_candidates_for_relic(relic: str, pipeline: CandidatePipelineSuccess)
 
 
 def _invalid_scenario_work_item(work_item: WorkItem) -> WorkItem:
-    root = work_item.decision_context.root_snapshot
-    assert isinstance(root, CombatStartReplayRoot)
-    invalid_spec = dict(root.scenario_spec)
+    root = search_root(work_item.decision_context.root_snapshot)
+    assert root.is_combat_start
+    invalid_spec = dict(root.root.scenario_spec)
     invalid_spec["character_id"] = "NOT_A_REAL_CHARACTER"
     invalid_context = dataclasses.replace(
         work_item.decision_context,

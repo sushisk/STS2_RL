@@ -26,7 +26,7 @@ import dataclasses
 
 from search.branch_worker_pool import WorkItem
 from search.candidate_pipeline import PipelineCandidateRef
-from search.decision_context import CombatStartReplayRoot, DecisionContext
+from search.decision_context import CombatStartReplayRoot, DecisionContext, search_root
 from search.rng_hypothesis import (
     apply_hypothesis_to_context,
     compute_public_multiset,
@@ -46,7 +46,7 @@ def build_single_hypothesis_work_item(
     (0-based) for `candidate`, leaving `decision_context`/`candidate` themselves
     untouched.
     """
-    is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
+    is_combat_start = search_root(decision_context.root_snapshot).is_combat_start
     count = hypothesis_index + 1
     if is_combat_start:
         derived = derive_combat_start_replay_roots(decision_context.root_snapshot, count=count)[hypothesis_index]
