@@ -103,6 +103,8 @@ def _instance(phase: _Phase, *, max_branches: int = 2) -> WholeRunInstance:
     instance._root_branch_log = []  # noqa: SLF001
     instance._session = _Session()  # noqa: SLF001
     instance._faulted = False  # noqa: SLF001
+    instance._map_snapshot = None  # noqa: SLF001
+    instance._room_id = None  # noqa: SLF001
     # Any attempt to take the pre-S7 route makes the test fail immediately.
     instance._pool = SimpleNamespace(dispatch_choice_work_items=lambda *_: (_ for _ in ()).throw(AssertionError("whole-room prefix replay used")))  # noqa: SLF001
     return instance

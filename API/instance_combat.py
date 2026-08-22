@@ -456,10 +456,12 @@ class CombatInstance:
             raise RequestRejected(f"unknown branch_id {public_branch_id!r}")
         return book.internal_id
 
-    @staticmethod
-    def _require_branchable(view: _DecisionView) -> None:
+    def _require_branchable(self, view: _DecisionView) -> None:
         if view.decision_context is None:
-            raise RequestRejected(ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR)
+            raise RequestRejected(
+                self._phase.root_branching_unavailable_reason
+                or ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
+            )
 
     def _compact_bookkeeping_for_release(self, public_branch_id: str) -> None:
         """Retain only the lightweight public-to-internal tombstone for a released Branch."""

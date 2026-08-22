@@ -208,6 +208,8 @@ def _event_instance(pool) -> WholeRunInstance:
     instance._lease_registry = object()  # noqa: SLF001
     instance._pool = pool  # noqa: SLF001
     instance._faulted = False  # noqa: SLF001
+    instance._map_snapshot = None  # noqa: SLF001
+    instance._room_id = None  # noqa: SLF001
     instance._combat_phase = None  # noqa: SLF001
     instance._event_rng_registry = SimpleNamespace(  # noqa: SLF001
         prepare_state=lambda key, state, rng_id: dict(state),

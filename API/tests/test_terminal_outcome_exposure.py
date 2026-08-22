@@ -398,6 +398,8 @@ def _whole_run_stub_instance(outcome: object) -> WholeRunInstance:
     # to be set here by hand. _faulted gates every mutating operation, and _combat_phase
     # decides whether a branch is delegated to an adopted CombatPhase.
     inst._faulted = False  # noqa: SLF001
+    inst._map_snapshot = None  # noqa: SLF001
+    inst._room_id = None  # noqa: SLF001
     inst._combat_phase = None  # noqa: SLF001
     parent_view = _View(
         legal_actions_raw=[{"action_id": 7}],

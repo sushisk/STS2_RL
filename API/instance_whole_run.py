@@ -17,7 +17,7 @@ from battle_emulator import CombatCompletion
 from game_access import LeaseState
 from live_combat_session import LiveCombatSession
 from reward_auto_progress import drain_trivial_reward_frontier
-from whole_run_session import EVENT_CHOICE, MAP_SELECT, RUN_TERMINAL, WholeRunSession
+from whole_run_session import EVENT_CHOICE, MAP_SELECT, PENDING_CHOICE, RUN_TERMINAL, WholeRunSession
 from worker_pool import (
     BranchResult,
     ChoiceWorkItem,
@@ -39,6 +39,7 @@ from API.dto import (
     STATUS_FAULTED,
     STATUS_RELEASED,
 )
+from search.decision_context import BOUNDARY_PENDING as COMBAT_BOUNDARY_PENDING
 from API.combat_phase import CombatPhase
 from API.combat_phase import DEFAULT_MAX_TIME_MS, ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
 from API.history_builder import HistoryBuilder
@@ -239,6 +240,19 @@ def _faulted_branch_result(
     return result
 
 
+def _whole_run_boundary(boundary: str) -> str:
+    """Say a boundary in Whole Run's words, not Combat search's.
+
+    The two layers spell the same thing differently: a published choice is "pending"
+    inside the search code (decision_context.BOUNDARY_PENDING) and "pending_choice" on
+    the Whole Run wire (whole_run_session.PENDING_CHOICE). Root decisions come from the
+    run's own observation and already use the public spelling; delegated branch results
+    come from the phase and would otherwise carry the internal one, leaving Training
+    with two words for one boundary depending on where the decision came from.
+    """
+    return PENDING_CHOICE if boundary == COMBAT_BOUNDARY_PENDING else boundary
+
+
 class WholeRunInstance:
     instance_type = "whole_run"
 
@@ -420,6 +434,8 @@ class WholeRunInstance:
                 request_timeout_s=self._request_timeout_s,
                 max_branches=self.max_branches,
                 worker_pool_backend=None,
+                map_snapshot=self._map_snapshot,
+                room_id=self._room_id,
             )
             # This is deliberately before the lease commit: adoption and the first
             # published root decision become visible together only after commit succeeds.
@@ -1276,7 +1292,7 @@ class WholeRunInstance:
             "masked_emulator_dto": build_masked_emulator_dto(
                 engine_state,
                 extra={
-                    "boundary": view.boundary,
+                    "boundary": _whole_run_boundary(view.boundary),
                     "legal_actions": mask_legal_actions(view.legal_actions_raw),
                     "room_context": room_context,
                     "history": history.to_public_list(),
@@ -1341,7 +1357,10 @@ class WholeRunInstance:
             parent_id = item["parent_branch_id"]
             view = self._combat_phase_view_for(parent_id)
             if view.decision_context is None:
-                raise RequestRejected(ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR)
+                raise RequestRejected(
+                    phase.root_branching_unavailable_reason
+                    or ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
+                )
             if parent_id != ROOT_BRANCH_ID:
                 parent_book = self._bookkeeping[parent_id]
                 if item["rng_id"] != parent_book.rng_id:

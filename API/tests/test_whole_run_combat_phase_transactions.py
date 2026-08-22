@@ -118,6 +118,8 @@ def _instance() -> WholeRunInstance:
     instance._combat_phase = None  # noqa: SLF001
     instance._last_combat_completion = None  # noqa: SLF001
     instance._faulted = False  # noqa: SLF001
+    instance._map_snapshot = None  # noqa: SLF001
+    instance._room_id = None  # noqa: SLF001
     instance.max_branches = 4
     instance._combat_worker_count = 2  # noqa: SLF001
     instance._request_timeout_s = 60.0  # noqa: SLF001

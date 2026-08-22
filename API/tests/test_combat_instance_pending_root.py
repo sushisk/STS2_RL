@@ -14,6 +14,7 @@ for _p in (_ROOT / "Combat", _ROOT / "Run", _ROOT):
 from API.instance_combat import CombatInstance  # noqa: E402
 from API.combat_phase import (  # noqa: E402
     CombatPhase,
+    ROOT_BRANCHING_UNAVAILABLE_NO_ROOM_ENTRY_ANCHOR,
     ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR,
 )
 from API.history_builder import HistoryBuilder  # noqa: E402
@@ -178,7 +179,11 @@ def test_unanchored_root_branch_request_is_rejected_with_specific_reason() -> No
                 simulation_options=None,
             )
         except RequestRejected as exc:
-            assert exc.error == ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
+            # This phase is adopted (whole-run shaped) and was given no map snapshot,
+            # so the refusal names that specific cause rather than the generic "no
+            # anchor". The two are kept apart on purpose: with a map snapshot this
+            # combat would now be branchable, and the counts must be separable.
+            assert exc.error == ROOT_BRANCHING_UNAVAILABLE_NO_ROOM_ENTRY_ANCHOR
         else:
             raise AssertionError("unanchored root Branch request must be rejected")
         # The refused id is burned, exactly as every other refusal after registration

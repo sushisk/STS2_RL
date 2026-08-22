@@ -118,7 +118,11 @@ class RoomEntryReplayRoot:
 
     @property
     def is_combat_start(self) -> bool:
-        return True
+        # No prior Stable boundary, like a combat start - but NOT re-seedable the way one
+        # is. Genesis hypotheses are derived by rewriting scenario_spec["seed"], and a map
+        # snapshot has no scenario spec, so claiming to be a combat start sends this root
+        # down a path that reads an attribute it does not have.
+        return False
 
 
 # The plan calls the same value an ``RoomEntryAnchor`` at the CombatPhase boundary.
@@ -130,6 +134,7 @@ class SearchRoot(Protocol):
     """The root operations shared by local search and spawned workers."""
 
     is_combat_start: bool
+    supports_hypotheses: bool = True
 
     def bootstrap(self, session: "LiveCombatSession") -> "BattleState": ...
 
@@ -145,6 +150,7 @@ ROOM_ENTRY_REPLAY_MAX_STEPS = 400
 class _CombatStartSearchRoot:
     root: CombatStartReplayRoot
     is_combat_start: bool = True
+    supports_hypotheses: bool = True
 
     def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
         return session.start_combat(self.root.scenario_spec)
@@ -164,7 +170,14 @@ class _CombatStartSearchRoot:
 @dataclass(frozen=True)
 class _RoomEntrySearchRoot:
     root: RoomEntryReplayRoot
-    is_combat_start: bool = True
+    # A room-entry root has no prior Stable boundary, like a combat start, but it is
+    # NOT re-seedable the way one is: genesis hypotheses are derived by rewriting
+    # scenario_spec['seed'], and a map snapshot has no scenario spec. It cannot take
+    # the belief path either, which reads root_snapshot.Rng off a captured snapshot.
+    # So it supports no alternative hypothesis at all - only the line actually
+    # observed, which is all the room-entry stretch needs before the anchor swaps.
+    is_combat_start: bool = False
+    supports_hypotheses: bool = False
 
     def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
         # Kept as a worker-side operation: LiveCombatSession intentionally has no
@@ -189,6 +202,7 @@ class _RoomEntrySearchRoot:
 class _JsonSearchRoot:
     root: str | dict
     is_combat_start: bool = False
+    supports_hypotheses: bool = True
 
     def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
         return session.restore_snapshot(self.root)
@@ -211,6 +225,7 @@ class _JsonSearchRoot:
 class _DataclassSearchRoot:
     root: Any
     is_combat_start: bool = False
+    supports_hypotheses: bool = True
 
     def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
         return session.restore_snapshot(self.root)
@@ -230,6 +245,7 @@ class _DataclassSearchRoot:
 class _ObjectSearchRoot:
     root: Any
     is_combat_start: bool = False
+    supports_hypotheses: bool = True
 
     def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
         return session.restore_snapshot(self.root)
@@ -555,7 +571,7 @@ class DecisionContext:
       actually decided (TO_RNG in the snapshot-replay diagram) - always `None` here.
     """
 
-    root_snapshot: "CombatStateSnapshot | CombatStartReplayRoot"
+    root_snapshot: "CombatStateSnapshot | CombatStartReplayRoot | RoomEntryReplayRoot"
     replay_prefix: "list[ReplayPrefixEntry]"
     plan_path: "list[ReplayPrefixEntry]"
     current_decision_result: "BattleState"
@@ -576,6 +592,23 @@ class DecisionContext:
         and Main must never treat it as (or store it into) a Held Stable Snapshot."""
         return cls(
             root_snapshot=combat_start_replay_root,
+            replay_prefix=[],
+            plan_path=[],
+            current_decision_result=current_decision_result,
+            current_context_signature=current_context_signature,
+            search_hypothesis_id=None,
+        )
+
+    @classmethod
+    def from_room_entry_pending(
+        cls,
+        room_entry_root: "RoomEntryReplayRoot",
+        current_decision_result: "BattleState",
+        current_context_signature: DecisionSignature,
+    ) -> "DecisionContext":
+        """Build the context for a combat adopted while its opening choice is pending."""
+        return cls(
+            root_snapshot=room_entry_root,
             replay_prefix=[],
             plan_path=[],
             current_decision_result=current_decision_result,
@@ -896,6 +929,25 @@ def build_decision_context_from_held_stable(
 
     context = DecisionContext.from_main_stable_capture(
         held_stable_snapshot, current_result, current_context_signature
+    )
+    if replay_prefix:
+        context = dataclasses.replace(context, replay_prefix=list(replay_prefix))
+    return context
+
+
+def build_decision_context_from_room_entry(
+    room_entry_root: "RoomEntryReplayRoot",
+    replay_prefix: "list[ReplayPrefixEntry]",
+    current_result: "BattleState",
+) -> DecisionContext:
+    """Build a room-entry context, retaining the actions replayed from that root."""
+    current_context_signature = (
+        replay_prefix[-1].expected_signature
+        if replay_prefix
+        else _representative_signature_for_empty_prefix(current_result)
+    )
+    context = DecisionContext.from_room_entry_pending(
+        room_entry_root, current_result, current_context_signature
     )
     if replay_prefix:
         context = dataclasses.replace(context, replay_prefix=list(replay_prefix))

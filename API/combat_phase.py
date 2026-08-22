@@ -15,11 +15,13 @@ from search.decision_context import (
     BOUNDARY_STABLE,
     DecisionContext,
     DecisionSignature,
+    RoomEntryReplayRoot,
     ReplayPrefixEntry,
     SemanticAction,
     append_replay_prefix_entry,
     boundary_of_battle_state,
     build_decision_context_from_held_stable,
+    build_decision_context_from_room_entry,
     start_new_replay_prefix_from_stable,
 )
 from search.replay_draw_restore import visible_draw_transition_evidence_from_committed_transition
@@ -36,6 +38,9 @@ START_PENDING_UNSUPPORTED = (
 )
 ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR = (
     "root is not branchable: no stable snapshot anchor is established"
+)
+ROOT_BRANCHING_UNAVAILABLE_NO_ROOM_ENTRY_ANCHOR = (
+    "root is not branchable: combat entered pending without map snapshot and room id"
 )
 
 
@@ -66,6 +71,8 @@ class CombatPhase:
         request_timeout_s: float,
         max_branches: int,
         worker_pool_backend: str | None,
+        map_snapshot: str | None = None,
+        room_id: int | None = None,
     ) -> None:
         session = LiveCombatSession()
         root_state = session.start_combat(scenario_spec)
@@ -76,6 +83,8 @@ class CombatPhase:
             request_timeout_s=request_timeout_s,
             max_branches=max_branches,
             worker_pool_backend=worker_pool_backend,
+            map_snapshot=map_snapshot,
+            room_id=room_id,
         )
 
     @classmethod
@@ -88,6 +97,8 @@ class CombatPhase:
         request_timeout_s: float,
         max_branches: int,
         worker_pool_backend: str | None,
+        map_snapshot: str | None = None,
+        room_id: int | None = None,
     ) -> "CombatPhase":
         """Take ownership of an already-live combat without reconstructing its board."""
         phase = cls.__new__(cls)
@@ -98,6 +109,9 @@ class CombatPhase:
             request_timeout_s=request_timeout_s,
             max_branches=max_branches,
             worker_pool_backend=worker_pool_backend,
+            map_snapshot=map_snapshot,
+            room_id=room_id,
+            adopted_into_run=True,
         )
         return phase
 
@@ -110,14 +124,24 @@ class CombatPhase:
         request_timeout_s: float,
         max_branches: int,
         worker_pool_backend: str | None,
+        map_snapshot: str | None = None,
+        room_id: int | None = None,
+        adopted_into_run: bool = False,
     ) -> None:
         self._session = session
         self._root_state = root_state
+        # Which refusal a pending root deserves depends on this: a standalone Combat has
+        # no map to be missing, so telling its caller about a map snapshot would be
+        # describing a thing that does not exist in its world.
+        self._adopted_into_run = adopted_into_run
         self._held_stable_snapshot: Optional[CombatStateSnapshot] = None
+        self._held_room_entry_root: RoomEntryReplayRoot | None = None
         self._replay_prefix: list[ReplayPrefixEntry] = []
         root_boundary = boundary_of_battle_state(self._root_state)
         if root_boundary == BOUNDARY_STABLE:
             self._establish_stable_anchor()
+        elif map_snapshot is not None and room_id is not None:
+            self._held_room_entry_root = RoomEntryReplayRoot(map_snapshot=map_snapshot, room_id=int(room_id))
         # Reserved for future true/root draw-hypothesis bookkeeping; current branch
         # decision logic still uses Training-provided rng_id mappings exclusively.
         self.true_draw_hypothesis_index = 0
@@ -134,6 +158,7 @@ class CombatPhase:
 
     def _establish_stable_anchor(self) -> None:
         self._held_stable_snapshot = self._session.capture_snapshot()
+        self._held_room_entry_root = None
         self._replay_prefix = start_new_replay_prefix_from_stable()
 
     @property
@@ -151,11 +176,18 @@ class CombatPhase:
         elif not legal:
             raise RuntimeError("non-terminal combat state has no cached legal actions")
         boundary = boundary_of_battle_state(self._root_state)
-        if self._held_stable_snapshot is None:
+        if self._held_stable_snapshot is not None:
+            context = build_decision_context_from_held_stable(
+                self._held_stable_snapshot, self._replay_prefix, self._root_state
+            )
+        elif self._held_room_entry_root is not None:
+            context = build_decision_context_from_room_entry(
+                self._held_room_entry_root,
+                self._replay_prefix,
+                self._root_state,
+            )
+        else:
             return legal, None, boundary
-        context = build_decision_context_from_held_stable(
-            self._held_stable_snapshot, self._replay_prefix, self._root_state
-        )
         return legal, context, boundary
 
     @property
@@ -164,9 +196,11 @@ class CombatPhase:
 
     @property
     def root_branching_unavailable_reason(self) -> str | None:
-        if self._held_stable_snapshot is None:
-            return ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
-        return None
+        if self._held_stable_snapshot is not None or self._held_room_entry_root is not None:
+            return None
+        if self._adopted_into_run:
+            return ROOT_BRANCHING_UNAVAILABLE_NO_ROOM_ENTRY_ANCHOR
+        return ROOT_BRANCHING_UNAVAILABLE_NO_STABLE_ANCHOR
 
     def commit_root_action(self, chosen: dict) -> None:
         self._root_commit_advanced = False
@@ -192,7 +226,7 @@ class CombatPhase:
         if boundary == BOUNDARY_STABLE:
             self._establish_stable_anchor()
         elif boundary == BOUNDARY_PENDING:
-            if self._held_stable_snapshot is not None:
+            if self._held_stable_snapshot is not None or self._held_room_entry_root is not None:
                 draw_evidence = visible_draw_transition_evidence_from_committed_transition(
                     next_state, self._replay_prefix, pre_battle_state=pre_state,
                 )
