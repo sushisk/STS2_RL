@@ -46,7 +46,7 @@ def _item(start: dict, branch_id: str) -> dict:
 
 def test_submitted_batch_failure_permanently_consumes_public_branch_id() -> None:
     inst = CombatInstance("branch-id-lifetime", _combat_config(), worker_count=1)
-    original_poll = inst._branch_manager.poll  # noqa: SLF001
+    original_poll = inst._phase._branch_manager.poll  # noqa: SLF001
 
     def _fail_poll(*args, **kwargs):
         raise RuntimeError("synthetic coordinator failure after submit")
@@ -54,7 +54,7 @@ def test_submitted_batch_failure_permanently_consumes_public_branch_id() -> None
     try:
         start = inst.start_instance_response()
         item = _item(start, "burned-after-submit")
-        inst._branch_manager.poll = _fail_poll  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.poll = _fail_poll  # type: ignore[method-assign]  # noqa: SLF001
 
         with pytest.raises(RuntimeError, match="synthetic coordinator failure"):
             inst.emulate_actions(items=[item], simulation_options=None)
@@ -62,12 +62,12 @@ def test_submitted_batch_failure_permanently_consumes_public_branch_id() -> None
         # Failure atomicity restores live execution/bookkeeping state, but public IDs are
         # intentionally monotonic once manager submission has occurred. Reusing the ID
         # must be rejected rather than silently aliasing a prior failed attempt.
-        assert inst._branch_manager.active_branch_count() == 0  # noqa: SLF001
+        assert inst._phase._branch_manager.active_branch_count() == 0  # noqa: SLF001
         assert inst._branch_ids.is_known("burned-after-submit")  # noqa: SLF001
 
-        inst._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
         with pytest.raises(RequestRejected, match="already used"):
             inst.emulate_actions(items=[item], simulation_options=None)
     finally:
-        inst._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
         inst.close()

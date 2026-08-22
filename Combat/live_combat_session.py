@@ -46,6 +46,7 @@ import re
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from game_access import GameAccess, GameAccessError, GameLease, LeaseState, process_game_access
 from battle_emulator import (
     BattleEmulator,
     BattleState,
@@ -60,7 +61,6 @@ from emulator_bridge import (
     legal_actions_to_list,
     restore_snapshot as bridge_restore_snapshot,
     restore_snapshot_json as bridge_restore_snapshot_json,
-    shared_game_instance,
     to_plain,
     validate_restore_snapshot as bridge_validate_restore_snapshot,
     validate_restore_snapshot_json as bridge_validate_restore_snapshot_json,
@@ -239,14 +239,19 @@ class SnapshotRestoreMissingMoveError(RuntimeError):
     still the Emulator's own `UNSET_MOVE` sentinel - i.e. this state descends from a
     Snapshot Restore whose enemies never got a Move established.
 
-    Root cause (confirmed empirically, not speculative): `SnapshotRestorer` deliberately
-    never touches `Intent`/calls `RollMove()` (a Restore fresh-start hook it must never
-    invoke - see `Combat/tests/test_restore_snapshot_phase3c1.py::
-    _strip_known_restore_boundary_diffs`'s own docstring), so EVERY Snapshot restored
-    through `restore_snapshot()`/`restore_snapshot_json()` currently comes back with
-    every enemy's Move unset, and it stays unset through any further card-play Steps
-    from that same branch (nothing else in this engine sets it either). Actually ending
-    such a turn makes the underlying C# monster-move state machine hang inside
+    **The "EVERY restore comes back unset" claim this docstring used to make is no
+    longer true.** Measured 2026-08-21 against the current Emulator: capture at a stable
+    Combat decision, restore, and the enemies come back with exactly the Intents they had
+    (`TACKLE_MOVE`/4, `STICKY_SHOT`, `TACKLE_MOVE`/3 - identical before and after), no
+    living enemy with an unset Move, and End Turn on the restored board succeeds and
+    advances the turn normally (hp 80 -> 73, turn 1 -> 2, enemies rolling on to their next
+    Moves). Whatever gap produced the original finding has since been closed on the
+    Emulator side.
+
+    The check is kept as a fail-fast guard for the case it describes, because that case
+    is genuinely unrecoverable and expensive: if a living enemy's Move IS the Emulator's
+    `UNSET_MOVE` sentinel, ending the turn makes the C# monster-move state machine hang
+    inside
     `GameInstance.WaitUntilChoiceOrSettled()` for ~15s before surfacing only as a generic
     `TimeoutException` ("Timed out waiting for the next decision point or settlement") -
     the real cause (`InvalidOperationException("No move has been set for the monster")`,
@@ -255,13 +260,13 @@ class SnapshotRestoreMissingMoveError(RuntimeError):
     with the actual cause and the specific enemies affected - instead of a caller (e.g. a
     Branch Worker) burning a full `request_timeout_s` discovering it the hard way.
 
-    This is a genuine Emulator (`SnapshotRestorer`) scope gap, not something the RL side
-    can fix by itself - only detect and report clearly. Fixing it for real (making
-    Restore establish a real Move, or exposing a supported RL-callable re-roll) requires
-    Emulator-side work; see `docs/contracts/combat_state_contract.v0.5.md`'s
-    known-limitations section. The engine itself is never touched by this check (raised
-    before any CLR call), so unlike an actual engine fault this does NOT mark the session
-    faulted - `battle_state` remains valid for any non-End-Turn action.
+    The engine itself is never touched by this check (raised before any CLR call), so
+    unlike an actual engine fault this does NOT mark the session faulted - `battle_state`
+    remains valid for any non-End-Turn action.
+
+    Do not read this class as "restored boards cannot end their turn". They can; that is
+    measured above. Reading the old wording that way is what nearly sank the Whole Run
+    combat-branching design, whose leaves are scored by forcing exactly this action.
     """
 
     fault_kind = "snapshot_restore_missing_monster_move"
@@ -446,11 +451,23 @@ class LiveCombatSession:
     every real (committed) decision. Construct one per episode (mirrors CombatEnv's own
     per-episode lifetime), not one per process."""
 
-    def __init__(self, repo_root: "Any | None" = None, use_legal_action_cache: bool = True) -> None:
+    def __init__(
+        self,
+        repo_root: "Any | None" = None,
+        use_legal_action_cache: bool = True,
+        whole_run_mode: bool = False,
+    ) -> None:
         ensure_loaded(repo_root)
         self._repo_root = repo_root
-        self._emulator = BattleEmulator(repo_root=repo_root, use_legal_action_cache=use_legal_action_cache)
-        self._game = None
+        self._emulator = BattleEmulator(
+            repo_root=repo_root,
+            use_legal_action_cache=use_legal_action_cache,
+            whole_run_mode=whole_run_mode,
+        )
+        self._access: GameAccess | None = None
+        self._game = self._initial_game()
+        self._lease_holder = object()
+        self._lease: GameLease | None = None
         self._current_frame: "DecisionFrame | None" = None
         self.last_step_resynchronized: bool = False
         self.resynchronize_count: int = 0
@@ -461,6 +478,93 @@ class LiveCombatSession:
         # the C# design exactly: "Resetが試みられた"ではなく"Resetが成功した"でのみ解除).
         self._session_faulted: bool = False
         self.last_fault_context: "ActionFaultContext | None" = None
+
+    def _mutating_game(self):
+        assert self._access is not None
+        if self._lease is None:
+            self._lease = self._access.claim(self._lease_holder, LeaseState.COMBAT)
+        return self._access.mutating_game(self._lease)
+
+    @property
+    def lease_holder(self) -> object:
+        """The opaque holder used when a transfer commits this session to COMBAT."""
+        return self._lease_holder
+
+    def accept_transferred_lease(self, lease: GameLease) -> None:
+        """Install the COMBAT lease made by ``GameAccess.commit`` without claiming.
+
+        Adoption is intentionally possible while the access state is TRANSFERRING.  The
+        session receives no mutable capability until this method is given the committed
+        COMBAT lease, so no caller can supersede the hand-off by calling ``claim``.
+        """
+        assert self._access is not None
+        if lease.state is not LeaseState.COMBAT or lease.holder is not self._lease_holder:
+            raise GameAccessError("LiveCombatSession received a lease for the wrong holder/state")
+        self._access.mutating_game(lease)
+        self._lease = lease
+
+    def begin_lease_transfer(self) -> GameLease:
+        """Withdraw the current COMBAT lease before returning control to Whole Run."""
+        assert self._access is not None
+        if self._lease is None:
+            raise GameAccessError("LiveCombatSession has no COMBAT lease to transfer")
+        transfer = self._access.begin(self._lease)
+        self._lease = None
+        return transfer
+
+    def _initial_game(self):
+        self._access = process_game_access(lambda: ensure_loaded(self._repo_root)["GameInstance"]())
+        return self._access.observation_game()
+
+    def adopt_current_combat(self) -> BattleState:
+        """Observe the live whole-run combat without reset/restore or a lease claim."""
+        self._game = self._initial_game()
+        obs = self._game.GetObservation()
+        state = to_plain(obs.State)
+        enemy_max_hps = {
+            enemy["index"]: enemy["maxHp"]
+            for enemy in state.get("enemies") or []
+            if enemy.get("index") is not None and enemy.get("maxHp") is not None
+        }
+        legal_actions = legal_actions_to_list(self._game.GetLegalActions())
+        try:
+            turn_number = state["turnNumber"]
+        except KeyError as exc:
+            raise RuntimeError(
+                "cannot adopt current combat: adopted state has no turnNumber "
+                f"(state keys: {sorted(state)})"
+            ) from exc
+        if turn_number is None:
+            # Null turnNumber is the schema's marker for a non-combat observation, so this
+            # names what was adopted instead of dumping the whole board: engine_state
+            # carries the full hand, piles and enemies and runs to several KB.
+            raise RuntimeError(
+                "cannot adopt current combat: adopted state has a null turnNumber, which "
+                "the combat state schema uses for a non-combat observation "
+                f"(state keys: {sorted(state)})"
+            )
+        turn = int(turn_number)
+        battle_state = self._emulator._wrap(  # noqa: SLF001 - established live-session boundary
+            obs,
+            turn=turn,
+            enemy_max_hps=enemy_max_hps,
+            legal_actions=legal_actions,
+        )
+        self._current_frame = battle_state.decision_frame
+        return battle_state
+
+    def close(self) -> None:
+        """Deterministically releases this session's current lease, if it still owns it."""
+        lease, self._lease = self._lease, None
+        if lease is None:
+            return
+        try:
+            assert self._access is not None
+            self._access.release(lease)
+        except GameAccessError:
+            # A newer instance may have superseded this session.  Its lease must not
+            # be released by cleanup of this stale session.
+            pass
 
     def _ensure_session_not_faulted(self) -> None:
         if self._session_faulted:
@@ -478,7 +582,7 @@ class LiveCombatSession:
         call this again for the same episode; use `step()` for every subsequent
         decision."""
         scenario = build_scenario_from_spec(scenario_spec)
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         try:
             reset_result = self._game.ResetFromScenario(scenario)
         except _quiescent_exception_type() as exc:  # noqa: BLE001 - re-raised as our own type below
@@ -496,18 +600,22 @@ class LiveCombatSession:
 
     def validate_restore_snapshot(self, snapshot) -> RestoreValidationResult:
         """Side-effect-free Restore dry run through the public CLR API."""
-        game = self._game or shared_game_instance(self._repo_root)
+        game = self._game or self._observation_game()
         return _restore_validation_result_from_clr(bridge_validate_restore_snapshot(game, snapshot))
 
     def validate_restore_snapshot_json(self, json_text: str) -> RestoreValidationResult:
         """Side-effect-free Restore dry run through the public CLR JSON API."""
-        game = self._game or shared_game_instance(self._repo_root)
+        game = self._game or self._observation_game()
         return _restore_validation_result_from_clr(bridge_validate_restore_snapshot_json(game, json_text))
 
     def get_restore_capabilities(self) -> RestoreCapabilities:
         """Returns the live CLR Restore capability contract as a Python dataclass."""
-        game = self._game or shared_game_instance(self._repo_root)
+        game = self._game or self._observation_game()
         return _restore_capabilities_from_clr(bridge_get_restore_capabilities(game))
+
+    def _observation_game(self):
+        assert self._access is not None
+        return self._access.observation_game()
 
     def _wrap_restore_result(self, result) -> BattleState:
         obs = result.Observation
@@ -529,15 +637,13 @@ class LiveCombatSession:
         """Shared tail of `restore_snapshot()`/`restore_snapshot_json()`: wraps the CLR
         restore result and commits it as this session's current frame.
 
-        Deliberately does NOT check for `SnapshotRestoreMissingMoveError` here - per that
-        exception's own docstring, `Intent`/Move is unconditionally absent on EVERY
-        Snapshot Restore result (a Restore-wide Emulator gap, not specific to any one
-        Snapshot), so checking at Restore time would reject every restore outright,
-        including the overwhelming majority that never end the turn from this exact
-        state (card-play evaluation, Branch Worker candidate scoring, etc.) and are
-        entirely unaffected by it. The check instead runs in `step()`, gated on the
-        specific action that actually triggers the hang (`action_type == "system"`,
-        i.e. End Turn) - see `step()`'s own docstring.
+        Deliberately does NOT check for `SnapshotRestoreMissingMoveError` here. Restored
+        boards come back with their Intents intact (measured; see that exception's own
+        docstring), and even if one did not, rejecting at Restore time would reject the
+        restores that never end the turn from this exact state - card-play evaluation,
+        Branch Worker candidate scoring - along with it. The check instead runs in
+        `step()`, gated on the one action that could trigger the hang
+        (`action_type == "system"`, i.e. End Turn).
         """
         battle_state = self._wrap_restore_result(result)
         self._current_frame = battle_state.decision_frame
@@ -551,7 +657,7 @@ class LiveCombatSession:
         `CombatStateSnapshot` DTOs are converted by the bridge through the existing
         canonical JSON serializer rather than a second parser.
         """
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         try:
             result = bridge_restore_snapshot(self._game, snapshot)
         except _snapshot_restore_rejected_exception_type() as exc:  # noqa: BLE001
@@ -565,7 +671,7 @@ class LiveCombatSession:
 
     def restore_snapshot_json(self, json_text: str) -> BattleState:
         """Restores from canonical Snapshot JSON through the public CLR JSON API."""
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         try:
             result = bridge_restore_snapshot_json(self._game, json_text)
         except _snapshot_restore_rejected_exception_type() as exc:  # noqa: BLE001
@@ -595,7 +701,7 @@ class LiveCombatSession:
         episode-start call is a follow-up, not attempted in this pass, per this task's
         own note against adding cleverness to a correctness-critical path without
         separate verification."""
-        self._game = shared_game_instance(self._repo_root)
+        self._game = self._mutating_game()
         scenario = build_scenario_from_state(battle_state.engine_state, battle_state.shuffle_rng_seed)
         try:
             self._game.ResetFromScenario(scenario)
@@ -687,7 +793,7 @@ class LiveCombatSession:
         it. See module docstring - a deliberate, counted fallback, not a silent one."""
         scenario = build_scenario_from_state(battle_state.engine_state, battle_state.shuffle_rng_seed)
         try:
-            self._game.ResetFromScenario(scenario)
+            self._mutating_game().ResetFromScenario(scenario)
         except _quiescent_exception_type() as exc:  # noqa: BLE001
             raise QuiescentBoundaryViolation(str(exc)) from exc
         self.last_step_resynchronized = True
@@ -771,12 +877,13 @@ class LiveCombatSession:
                 raise SnapshotRestoreMissingMoveError(missing)
 
         self.last_step_resynchronized = False
+        game = self._mutating_game()
         if not self._is_still_current():
             self._resynchronize(battle_state)
 
         try:
             next_state = self._emulator.step_live_action(
-                self._game, battle_state, action, target_index=target_index, target_enemy_index=target_enemy_index
+                game, battle_state, action, target_index=target_index, target_enemy_index=target_enemy_index
             )
         except _quiescent_exception_type() as exc:  # noqa: BLE001
             raise QuiescentBoundaryViolation(str(exc)) from exc
@@ -795,9 +902,9 @@ class LiveCombatSession:
             if continuation_steps > MAX_CONTINUATION_STEPS:
                 raise RuntimeError("ActionContinuation did not resolve within 50 continuation steps.")
             legal = self._emulator.enumerate_legal_actions(next_state)
-            continuation_action = resolver(self._game, next_state, legal, continuation_deadline)
+            continuation_action = resolver(game, next_state, legal, continuation_deadline)
             try:
-                next_state = self._emulator.step_live_action(self._game, next_state, continuation_action)
+                next_state = self._emulator.step_live_action(game, next_state, continuation_action)
             except _quiescent_exception_type() as exc:  # noqa: BLE001
                 raise QuiescentBoundaryViolation(str(exc)) from exc
             except _action_faulted_exception_type() as exc:  # noqa: BLE001

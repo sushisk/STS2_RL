@@ -20,8 +20,10 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env", _COMBAT_DIR /
         sys.path.insert(0, str(_p))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from API.instance_combat import DEFAULT_ALC_WORKER_COUNT, CombatInstance  # noqa: E402
+from API.combat_phase import DEFAULT_ALC_WORKER_COUNT  # noqa: E402
+from API.instance_combat import CombatInstance  # noqa: E402
 import emulator_bridge  # noqa: E402
+import game_access  # noqa: E402
 from search.alc_worker_pool import AlcBranchWorkerPool  # noqa: E402
 from search.branch_manager import BranchManager  # noqa: E402
 from search.branch_worker_pool import (  # noqa: E402
@@ -150,8 +152,8 @@ def test_alc_pool_bootstrap_steps_sibling_branches_on_independent_sessions():
 def test_alc_pool_parallel_execute_keeps_results_on_their_own_isolated_sessions():
     """Drives raw pool.execute() from concurrent Python threads.
 
-    The shared/default-ALC GameInstance guard is a proxy: after the main-thread context
-    is built, this test replaces emulator_bridge._shared_instance with a sentinel. ALC
+    The process-wide GameAccess guard is a proxy: after the main-thread context
+    is built, this test replaces game_access._process_game_access with a sentinel. ALC
     worker execution should use IsolatedGameSession objects only, so the sentinel must
     remain untouched while every result comes back with its own combat_session_id.
     """
@@ -175,8 +177,8 @@ def test_alc_pool_parallel_execute_keeps_results_on_their_own_isolated_sessions(
     ]
 
     sentinel = object()
-    old_shared_instance = emulator_bridge._shared_instance  # noqa: SLF001
-    emulator_bridge._shared_instance = sentinel  # noqa: SLF001
+    old_process_game_access = game_access._process_game_access  # noqa: SLF001
+    game_access._process_game_access = sentinel  # noqa: SLF001
     try:
         with AlcBranchWorkerPool(worker_count=4, request_timeout_s=120.0) as pool:
             with ThreadPoolExecutor(max_workers=4) as executor:
@@ -190,8 +192,8 @@ def test_alc_pool_parallel_execute_keeps_results_on_their_own_isolated_sessions(
                 ]
                 results = [future.result() for future in as_completed(futures)]
     finally:
-        assert emulator_bridge._shared_instance is sentinel  # noqa: SLF001
-        emulator_bridge._shared_instance = old_shared_instance  # noqa: SLF001
+        assert game_access._process_game_access is sentinel  # noqa: SLF001
+        game_access._process_game_access = old_process_game_access  # noqa: SLF001
 
     assert len(results) == 4
     assert {r.status for r in results} == {BRANCH_STATUS_SUCCESS}, [r.diagnostics for r in results]
@@ -214,7 +216,7 @@ def test_alc_pool_repeated_respawn_exceeding_threshold_raises():
 def test_combat_instance_can_opt_into_alc_pool():
     inst = CombatInstance("alc-instance", {"instance_type": "combat", **_simple_spec(enemy_hp=20)}, worker_count=1, worker_pool_backend="alc")
     try:
-        assert isinstance(inst._pool, AlcBranchWorkerPool)  # noqa: SLF001
+        assert isinstance(inst._phase._pool, AlcBranchWorkerPool)  # noqa: SLF001
         response = inst.start_instance_response()
         assert response["status"] == "completed"
         decision_point_id = response["decision_point_id"]
@@ -239,8 +241,8 @@ def test_combat_instance_can_opt_into_alc_pool():
 def test_combat_instance_alc_default_worker_count_is_bounded():
     inst = CombatInstance("alc-capacity", {"instance_type": "combat", **_simple_spec(enemy_hp=20)}, worker_pool_backend="alc", max_branches=6)
     try:
-        assert isinstance(inst._pool, AlcBranchWorkerPool)  # noqa: SLF001
-        assert inst._pool.worker_count == DEFAULT_ALC_WORKER_COUNT  # noqa: SLF001
+        assert isinstance(inst._phase._pool, AlcBranchWorkerPool)  # noqa: SLF001
+        assert inst._phase._pool.worker_count == DEFAULT_ALC_WORKER_COUNT  # noqa: SLF001
     finally:
         inst.close()
 
@@ -254,8 +256,8 @@ def test_combat_instance_alc_explicit_worker_count_can_match_max_branches():
         max_branches=6,
     )
     try:
-        assert isinstance(inst._pool, AlcBranchWorkerPool)  # noqa: SLF001
-        assert inst._pool.worker_count == 6  # noqa: SLF001
+        assert isinstance(inst._phase._pool, AlcBranchWorkerPool)  # noqa: SLF001
+        assert inst._phase._pool.worker_count == 6  # noqa: SLF001
     finally:
         inst.close()
 

@@ -17,6 +17,7 @@ for _p in (_COMBAT_DIR, _COMBAT_DIR / "data", _COMBAT_DIR / "env", _COMBAT_DIR /
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from emulator_bridge import to_plain  # noqa: E402
+from battle_emulator import BattleState, CombatCompletion  # noqa: E402
 from live_combat_session import LiveCombatSession  # noqa: E402
 from search.branch_worker_pool import BranchWorkerPool  # noqa: E402
 from search.search_coordinator import SearchCoordinatorConfig  # noqa: E402
@@ -24,6 +25,7 @@ from search.shadow_adapter import (  # noqa: E402
     ShadowAction,
     ShadowComparisonResult,
     _actions_agree,
+    _old_path_restore_compatible_state,
     compare_paths,
     run_new_path,
     run_old_path,
@@ -104,6 +106,26 @@ def test_shadow_action_equality_uses_semantics_not_action_id_or_label():
     assert not _actions_agree(old, different)
     assert not _actions_agree(old, None)
     assert _actions_agree(None, None)
+
+
+def test_old_path_restore_copy_preserves_combat_completion():
+    completion = CombatCompletion(
+        live_observation_state={"room": "reward"},
+        live_observation_is_terminal=False,
+        live_observation_outcome="in_progress",
+        transition_kind="combat_completed",
+    )
+    state = BattleState(
+        engine_state={"enemies": []},
+        is_terminal=True,
+        outcome="victory",
+        turn=1,
+        combat_completion=completion,
+    )
+
+    restored = _old_path_restore_compatible_state(state)
+
+    assert restored.combat_completion is completion
 
 
 def test_run_old_path_real_restore_snapshot_produces_chosen_action():

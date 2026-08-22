@@ -33,6 +33,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+from game_access import LeaseState
+
 from search.candidate_pipeline import (
     CandidatePipelineResult,
     PipelineCandidateRef,
@@ -42,7 +44,6 @@ from search.decision_context import (
     BOUNDARY_PENDING,
     BOUNDARY_STABLE,
     BOUNDARY_TERMINAL,
-    CombatStartReplayRoot,
     DecisionContext,
     DecisionSignature,
     ReplayMismatch,
@@ -51,6 +52,7 @@ from search.decision_context import (
     append_replay_prefix_entry,
     boundary_of_battle_state,
     replay_decision_context,
+    search_root,
 )
 
 if False:  # pragma: no cover - type-checking-only without importing at runtime.
@@ -67,6 +69,68 @@ EXECUTION_MODE_VALUES = frozenset({EXECUTION_MODE_BOOTSTRAP_STEP, EXECUTION_MODE
 
 BRANCH_STATUS_SUCCESS = "success"
 BRANCH_STATUS_FAULT = "fault"
+
+
+class RoomEntryWorkerBootstrap:
+    """Own the run/combat seam for a room-entry replay.
+
+    ``LiveCombatSession`` remains combat-only.  This helper briefly owns a
+    ``WholeRunSession`` to load the map boundary and enter the selected room, wraps the
+    resulting real CLR observation as a combat ``BattleState``, then transfers the
+    process-local lease to the live combat session.  ALC workers continue to use their
+    ``IsolatedLiveCombatSession`` path and never claim this process lease.
+    """
+
+    def __init__(self, combat_session) -> None:
+        self.combat_session = combat_session
+
+    def bootstrap(self, root):
+        if hasattr(self.combat_session, "_isolated_session"):
+            raise RuntimeError(
+                "room-entry bootstrap requires a WholeRunSession in the worker process; "
+                "an IsolatedLiveCombatSession must be supplied an isolated run bootstrap"
+            )
+
+        from whole_run_session import WholeRunSession
+        from emulator_bridge import legal_actions_to_list, to_plain
+
+        run_session = WholeRunSession(repo_root=self.combat_session._repo_root)  # noqa: SLF001
+        transfer = None
+        try:
+            run_session.load_state(root.map_snapshot)
+            entered = run_session.choose_room(root.room_id)
+            if not entered.get("is_combat"):
+                raise RuntimeError(
+                    f"room-entry root selected non-combat room {root.room_id}: {entered.get('room_type')!r}"
+                )
+
+            game = run_session._game  # noqa: SLF001 - the wrapper intentionally owns this seam
+            obs = game.GetObservation()
+            plain_state = to_plain(obs.State)
+            enemy_max_hps = {enemy["index"]: enemy["maxHp"] for enemy in plain_state.get("enemies") or []}
+            legal_actions = legal_actions_to_list(game.GetLegalActions())
+            state = self.combat_session._emulator._wrap(  # noqa: SLF001
+                obs,
+                turn=int(getattr(obs, "Turn", 1) or 1),
+                enemy_max_hps=enemy_max_hps,
+                legal_actions=legal_actions,
+            )
+
+            transfer = run_session.begin_lease_transfer()
+            combat_lease = run_session.commit_lease_transfer(
+                transfer, LeaseState.COMBAT, self.combat_session.lease_holder
+            )
+            self.combat_session.accept_transferred_lease(combat_lease)
+            transfer = None
+            self.combat_session._current_frame = state.decision_frame  # noqa: SLF001
+            self.combat_session._session_faulted = False  # noqa: SLF001
+            return state
+        except BaseException:
+            if transfer is not None:
+                run_session.rollback_lease_transfer(transfer)
+            raise
+        finally:
+            run_session.close()
 
 
 def _json_digest(payload: Any, *, length: int = 16) -> str:
@@ -113,52 +177,12 @@ def derive_context_id(context: DecisionContext) -> str:
 
 
 def _snapshot_identity_json(snapshot: Any) -> str:
-    from combat_state_snapshot import canonical_json
-
-    if isinstance(snapshot, CombatStartReplayRoot):
-        # A Combat Start Replay Root is already plain JSON-safe data (a scenario spec
-        # dict, never a captured Snapshot) - no volatile-metadata stripping applies.
-        return json.dumps(
-            {"scenario_spec": snapshot.scenario_spec}, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        )
-    if dataclasses.is_dataclass(snapshot):
-        return canonical_json(dataclasses.asdict(snapshot), exclude_volatile=True)
-    if isinstance(snapshot, str):
-        try:
-            return canonical_json(json.loads(snapshot), exclude_volatile=True)
-        except json.JSONDecodeError:
-            return _json_digest(repr(snapshot), length=64)
-    if isinstance(snapshot, dict):
-        return canonical_json(snapshot, exclude_volatile=True)
-    if hasattr(snapshot, "GetType") and str(snapshot.GetType().FullName) == "Sts2Emulator.Dto.Snapshot.CombatStateSnapshot":
-        from emulator_bridge import ensure_loaded
-
-        text = str(ensure_loaded()["JsonSerializer"].Serialize(snapshot))
-        payload = json.loads(text)
-        return canonical_json(payload, exclude_volatile=True)
-    return _json_digest(repr(snapshot), length=64)
+    return search_root(snapshot).identity_payload()
 
 
 def _snapshot_ipc_json(snapshot: Any) -> Any:
     """Return a Queue-picklable snapshot payload for spawned worker processes."""
-    from combat_state_snapshot import canonical_json
-
-    if isinstance(snapshot, CombatStartReplayRoot):
-        # Already a plain dict-of-primitives - trivially picklable, no CLR object
-        # involved, nothing to canonicalize away (there is no volatile capture metadata
-        # on a scenario spec).
-        return snapshot
-    if isinstance(snapshot, str):
-        return snapshot
-    if dataclasses.is_dataclass(snapshot):
-        return canonical_json(dataclasses.asdict(snapshot), exclude_volatile=False)
-    if isinstance(snapshot, dict):
-        return canonical_json(snapshot, exclude_volatile=False)
-    if hasattr(snapshot, "GetType") and str(snapshot.GetType().FullName) == "Sts2Emulator.Dto.Snapshot.CombatStateSnapshot":
-        from emulator_bridge import ensure_loaded
-
-        return str(ensure_loaded()["JsonSerializer"].Serialize(snapshot))
-    return snapshot
+    return search_root(snapshot).ipc_payload()
 
 
 def _work_item_for_ipc(work_item: WorkItem) -> WorkItem:

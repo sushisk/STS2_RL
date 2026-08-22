@@ -26,7 +26,7 @@ import dataclasses
 
 from search.branch_worker_pool import WorkItem
 from search.candidate_pipeline import PipelineCandidateRef
-from search.decision_context import CombatStartReplayRoot, DecisionContext
+from search.decision_context import CombatStartReplayRoot, DecisionContext, search_root
 from search.rng_hypothesis import (
     apply_hypothesis_to_context,
     compute_public_multiset,
@@ -46,7 +46,19 @@ def build_single_hypothesis_work_item(
     (0-based) for `candidate`, leaving `decision_context`/`candidate` themselves
     untouched.
     """
-    is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
+    root = search_root(decision_context.root_snapshot)
+    if not root.supports_hypotheses:
+        # A room-entry root can be re-entered but not re-seeded: it has no scenario
+        # spec to vary and no captured Rng to draw beliefs from. Only the observed
+        # line exists, so anything but the root hypothesis is a request we cannot
+        # honour - say so rather than deriving something that is not that line.
+        if hypothesis_index != 0:
+            raise ValueError(
+                f"root {type(decision_context.root_snapshot).__name__} supports only the "
+                f"observed line; hypothesis_index={hypothesis_index} has no meaning for it"
+            )
+        return WorkItem.from_candidate_ref(decision_context, candidate, work_kind=work_kind)
+    is_combat_start = root.is_combat_start
     count = hypothesis_index + 1
     if is_combat_start:
         derived = derive_combat_start_replay_roots(decision_context.root_snapshot, count=count)[hypothesis_index]

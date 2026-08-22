@@ -24,8 +24,6 @@ DEFAULT_REPO_ROOT = Path(r"C:\STS2_Emulator")
 _EMULATOR_REPO_ROOT_ENV = "STS2_EMULATOR_REPO_ROOT"
 
 _types: dict[str, Any] | None = None
-_shared_instance = None
-
 
 def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
     """Bootstraps pythonnet/CoreCLR and returns the CLR types this package needs.
@@ -111,11 +109,9 @@ def ensure_loaded(repo_root: Path | None = None) -> dict[str, Any]:
 
 def shared_game_instance(repo_root: Path | None = None):
     """The one and only live GameInstance for this process."""
-    global _shared_instance
-    types = ensure_loaded(repo_root)
-    if _shared_instance is None:
-        _shared_instance = types["GameInstance"]()
-    return _shared_instance
+    from game_access import process_game_access
+
+    return process_game_access(lambda: ensure_loaded(repo_root)["GameInstance"]()).observation_game()
 
 
 def str_list(items):

@@ -11,6 +11,7 @@ for _p in (_ROOT / "Combat", _ROOT):
         sys.path.insert(0, str(_p))
 
 from API.instance_combat import CombatInstance, _BranchBookkeeping  # noqa: E402
+from API.combat_phase import CombatPhase  # noqa: E402
 
 
 class _FakeBranchManager:
@@ -50,7 +51,8 @@ def test_root_commit_cleanup_releases_terminal_and_active_speculative_branches()
     terminal = _book("internal-terminal", terminal=True, view=None)
     active = _book("internal-active", terminal=False, view=object())
 
-    inst._branch_manager = manager  # type: ignore[assignment]  # noqa: SLF001
+    inst._phase = object.__new__(CombatPhase)  # type: ignore[assignment]  # noqa: SLF001
+    inst._phase._branch_manager = manager  # noqa: SLF001
     inst._decision_points = decision_points  # type: ignore[assignment]  # noqa: SLF001
     inst._bookkeeping = {  # noqa: SLF001
         "terminal": terminal,

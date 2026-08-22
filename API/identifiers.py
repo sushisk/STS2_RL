@@ -130,6 +130,13 @@ class DecisionPointRegistry:
     def clear(self, branch_id: str) -> None:
         self._current.pop(branch_id, None)
 
+    def restore_current(self, branch_id: str, decision_point_id: Optional[str]) -> None:
+        """Restore one current id after an unpublished transaction rolls back."""
+        if decision_point_id is None:
+            self._current.pop(branch_id, None)
+        else:
+            self._current[branch_id] = decision_point_id
+
 
 @dataclass
 class RngHypothesisTable:

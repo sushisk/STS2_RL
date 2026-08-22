@@ -192,7 +192,7 @@ def test_atomic_rejection_leaves_no_partial_branches() -> None:
         assert not inst._branch_ids.is_known("b1")  # noqa: SLF001
         assert not inst._branch_ids.is_known("b2")  # noqa: SLF001
         assert inst._bookkeeping == {}  # noqa: SLF001
-        assert inst._branch_manager.active_branch_count() == 0  # noqa: SLF001
+        assert inst._phase._branch_manager.active_branch_count() == 0  # noqa: SLF001
         root_again = inst.get_decision("root")
         assert root_again["decision_point_id"] == dp_root
     finally:
@@ -242,7 +242,7 @@ def test_mixed_execution_outcome_flows_through_emulate_actions() -> None:
     try:
         start = inst.start_instance_response()
         legal = start["masked_emulator_dto"]["legal_actions"]
-        original_poll = inst._branch_manager.poll  # noqa: SLF001
+        original_poll = inst._phase._branch_manager.poll  # noqa: SLF001
 
         def _mixed_poll(*args, **kwargs):
             results = original_poll(*args, **kwargs)
@@ -261,7 +261,7 @@ def test_mixed_execution_outcome_flows_through_emulate_actions() -> None:
             )
             return results
 
-        inst._branch_manager.poll = _mixed_poll  # noqa: SLF001
+        inst._phase._branch_manager.poll = _mixed_poll  # noqa: SLF001
         try:
             response = inst.emulate_actions(
                 items=[
@@ -283,7 +283,7 @@ def test_mixed_execution_outcome_flows_through_emulate_actions() -> None:
                 simulation_options=None,
             )
         finally:
-            inst._branch_manager.poll = original_poll  # noqa: SLF001
+            inst._phase._branch_manager.poll = original_poll  # noqa: SLF001
 
         assert response["status"] == "completed", response
         assert response["branch_results"]["healthy"]["status"] == "completed", response
@@ -298,7 +298,7 @@ def test_missing_poll_result_quarantines_entire_batch() -> None:
     try:
         start = inst.start_instance_response()
         legal = start["masked_emulator_dto"]["legal_actions"]
-        original_poll = inst._branch_manager.poll  # noqa: SLF001
+        original_poll = inst._phase._branch_manager.poll  # noqa: SLF001
 
         # Simulate the true invariant breach: poll returns before resolving anything,
         # leaving both manager records queued. emulate_actions must not translate that
@@ -306,7 +306,7 @@ def test_missing_poll_result_quarantines_entire_batch() -> None:
         def _missing_poll(*args, **kwargs):
             return {}
 
-        inst._branch_manager.poll = _missing_poll  # noqa: SLF001
+        inst._phase._branch_manager.poll = _missing_poll  # noqa: SLF001
         try:
             try:
                 inst.emulate_actions(
@@ -333,13 +333,13 @@ def test_missing_poll_result_quarantines_entire_batch() -> None:
             else:
                 raise AssertionError("missing poll result must fail the whole batch")
         finally:
-            inst._branch_manager.poll = original_poll  # noqa: SLF001
+            inst._phase._branch_manager.poll = original_poll  # noqa: SLF001
 
-        assert inst._branch_manager.active_branch_count() == 0  # noqa: SLF001
-        assert {record.state for record in inst._branch_manager._records.values()} == {"released"}  # noqa: SLF001
+        assert inst._phase._branch_manager.active_branch_count() == 0  # noqa: SLF001
+        assert {record.state for record in inst._phase._branch_manager._records.values()} == {"released"}  # noqa: SLF001
         assert inst._bookkeeping == {}  # noqa: SLF001
-        assert inst._rng_table._index_by_key == {}  # noqa: SLF001
-        assert inst._rng_table._next_index_by_parent_decision == {}  # noqa: SLF001
+        assert inst._phase._rng_table._index_by_key == {}  # noqa: SLF001
+        assert inst._phase._rng_table._next_index_by_parent_decision == {}  # noqa: SLF001
 
         # IDs were committed before the invariant failure, so they stay burned but no
         # longer expose a contradictory public running/completed state.
@@ -364,10 +364,10 @@ def test_parallel_dispatch_queues_all_items_before_single_poll() -> None:
         legal = start["masked_emulator_dto"]["legal_actions"]
         observed_queued_snapshot = {}
         observed_worker_ids: set[int] = set()
-        original_poll = inst._branch_manager.poll  # noqa: SLF001
+        original_poll = inst._phase._branch_manager.poll  # noqa: SLF001
 
         def _spying_poll(*args, **kwargs):
-            for branch_id, record in inst._branch_manager._records.items():  # noqa: SLF001
+            for branch_id, record in inst._phase._branch_manager._records.items():  # noqa: SLF001
                 observed_queued_snapshot[branch_id] = record.state
             results = original_poll(*args, **kwargs)
             observed_worker_ids.update(
@@ -375,7 +375,7 @@ def test_parallel_dispatch_queues_all_items_before_single_poll() -> None:
             )
             return results
 
-        inst._branch_manager.poll = _spying_poll  # noqa: SLF001
+        inst._phase._branch_manager.poll = _spying_poll  # noqa: SLF001
         try:
             response = inst.emulate_actions(
                 items=[
@@ -397,7 +397,7 @@ def test_parallel_dispatch_queues_all_items_before_single_poll() -> None:
                 simulation_options=None,
             )
         finally:
-            inst._branch_manager.poll = original_poll  # noqa: SLF001
+            inst._phase._branch_manager.poll = original_poll  # noqa: SLF001
 
         assert response["status"] == "completed", response
         assert len(observed_queued_snapshot) == 2

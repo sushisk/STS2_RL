@@ -25,7 +25,7 @@ import json
 import dataclasses
 from collections import Counter
 from dataclasses import dataclass, field, fields
-from typing import TYPE_CHECKING, Optional
+from typing import Any, TYPE_CHECKING, Optional, Protocol
 
 from battle_emulator import BattleState, is_action_continuation_pending_choice, pending_choice_metadata
 from search.replay_draw_restore import VisibleDrawConstraints
@@ -102,6 +102,211 @@ class CombatStartReplayRoot:
     object."""
 
     scenario_spec: dict
+
+
+@dataclass(frozen=True)
+class RoomEntryReplayRoot:
+    """Run boundary used to rebuild a combat whose first board is Pending.
+
+    ``map_snapshot`` is deliberately retained as the identity input (rather than a
+    digest): the worker must give the run emulator the exact saved JSON, and the room
+    id alone is not sufficient to identify the run state that produced the combat.
+    """
+
+    map_snapshot: str
+    room_id: int
+
+    @property
+    def is_combat_start(self) -> bool:
+        # No prior Stable boundary, like a combat start - but NOT re-seedable the way one
+        # is. Genesis hypotheses are derived by rewriting scenario_spec["seed"], and a map
+        # snapshot has no scenario spec, so claiming to be a combat start sends this root
+        # down a path that reads an attribute it does not have.
+        return False
+
+
+# The plan calls the same value an ``RoomEntryAnchor`` at the CombatPhase boundary.
+# Keep that name available without introducing a second wire type.
+RoomEntryAnchor = RoomEntryReplayRoot
+
+
+class SearchRoot(Protocol):
+    """The root operations shared by local search and spawned workers."""
+
+    is_combat_start: bool
+    supports_hypotheses: bool = True
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState": ...
+
+    def identity_payload(self) -> str: ...
+
+    def ipc_payload(self) -> Any: ...
+
+
+ROOM_ENTRY_REPLAY_MAX_STEPS = 400
+
+
+@dataclass(frozen=True)
+class _CombatStartSearchRoot:
+    root: CombatStartReplayRoot
+    is_combat_start: bool = True
+    supports_hypotheses: bool = True
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.start_combat(self.root.scenario_spec)
+
+    def identity_payload(self) -> str:
+        return json.dumps(
+            {"scenario_spec": self.root.scenario_spec},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+
+    def ipc_payload(self) -> Any:
+        return self.root
+
+
+@dataclass(frozen=True)
+class _RoomEntrySearchRoot:
+    root: RoomEntryReplayRoot
+    # A room-entry root has no prior Stable boundary, like a combat start, but it is
+    # NOT re-seedable the way one is: genesis hypotheses are derived by rewriting
+    # scenario_spec['seed'], and a map snapshot has no scenario spec. It cannot take
+    # the belief path either, which reads root_snapshot.Rng off a captured snapshot.
+    # So it supports no alternative hypothesis at all - only the line actually
+    # observed, which is all the room-entry stretch needs before the anchor swaps.
+    is_combat_start: bool = False
+    supports_hypotheses: bool = False
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        # Kept as a worker-side operation: LiveCombatSession intentionally has no
+        # run-level load_state/choose_room API.
+        from search.branch_worker_pool import RoomEntryWorkerBootstrap
+
+        return RoomEntryWorkerBootstrap(session).bootstrap(self.root)
+
+    def identity_payload(self) -> str:
+        return json.dumps(
+            {"map_snapshot": self.root.map_snapshot, "room_id": self.root.room_id},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+
+    def ipc_payload(self) -> Any:
+        return self.root
+
+
+@dataclass(frozen=True)
+class _JsonSearchRoot:
+    root: str | dict
+    is_combat_start: bool = False
+    supports_hypotheses: bool = True
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.restore_snapshot(self.root)
+
+    def identity_payload(self) -> str:
+        from combat_state_snapshot import canonical_json
+
+        if isinstance(self.root, str):
+            try:
+                return canonical_json(json.loads(self.root), exclude_volatile=True)
+            except json.JSONDecodeError:
+                return _root_digest(repr(self.root))
+        return canonical_json(self.root, exclude_volatile=True)
+
+    def ipc_payload(self) -> Any:
+        return self.root
+
+
+@dataclass(frozen=True)
+class _DataclassSearchRoot:
+    root: Any
+    is_combat_start: bool = False
+    supports_hypotheses: bool = True
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.restore_snapshot(self.root)
+
+    def identity_payload(self) -> str:
+        from combat_state_snapshot import canonical_json
+
+        return canonical_json(dataclasses.asdict(self.root), exclude_volatile=True)
+
+    def ipc_payload(self) -> Any:
+        from combat_state_snapshot import canonical_json
+
+        return canonical_json(dataclasses.asdict(self.root), exclude_volatile=False)
+
+
+@dataclass(frozen=True)
+class _ObjectSearchRoot:
+    root: Any
+    is_combat_start: bool = False
+    supports_hypotheses: bool = True
+
+    def bootstrap(self, session: "LiveCombatSession") -> "BattleState":
+        return session.restore_snapshot(self.root)
+
+    def _is_clr_snapshot(self) -> bool:
+        return (
+            hasattr(self.root, "GetType")
+            and str(self.root.GetType().FullName) == "Sts2Emulator.Dto.Snapshot.CombatStateSnapshot"
+        )
+
+    def _serialized_payload(self) -> Any:
+        from emulator_bridge import ensure_loaded
+
+        return json.loads(str(ensure_loaded()["JsonSerializer"].Serialize(self.root)))
+
+    def identity_payload(self) -> str:
+        from combat_state_snapshot import canonical_json
+
+        if not self._is_clr_snapshot():
+            return _root_digest(repr(self.root))
+        return canonical_json(self._serialized_payload(), exclude_volatile=True)
+
+    def ipc_payload(self) -> Any:
+        if not self._is_clr_snapshot():
+            return self.root
+        from emulator_bridge import ensure_loaded
+
+        return str(ensure_loaded()["JsonSerializer"].Serialize(self.root))
+
+
+def _root_digest(value: str, *, length: int = 64) -> str:
+    import hashlib
+
+    text = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:length]
+
+
+def search_root(root: Any) -> SearchRoot:
+    """Adapt every supported DecisionContext root at the sole type boundary."""
+
+    if isinstance(root, CombatStartReplayRoot):
+        return _CombatStartSearchRoot(root)
+    if isinstance(root, RoomEntryReplayRoot):
+        return _RoomEntrySearchRoot(root)
+    if isinstance(root, str) or isinstance(root, dict):
+        return _JsonSearchRoot(root)
+    if dataclasses.is_dataclass(root):
+        from combat_state_snapshot import CombatStateSnapshot
+
+        # Named, not "any dataclass". The whole point of this function is that adding a
+        # root kind is a decision made here; a generic dataclass arm would silently hand
+        # a new kind restore_snapshot() and snapshot serialization, which is the failure
+        # this collapse exists to prevent - it would just happen in one place instead of
+        # ten. A new dataclass root must add its own arm above.
+        if not isinstance(root, CombatStateSnapshot):
+            raise TypeError(
+                f"unsupported DecisionContext root {type(root).__name__!r}: add an arm to "
+                "search_root() saying how to bootstrap, identify and ship it"
+            )
+        return _DataclassSearchRoot(root)
+    return _ObjectSearchRoot(root)
 
 
 @dataclass(frozen=True)
@@ -349,7 +554,7 @@ class DecisionContext:
       Evaluation Segment (no Stable boundary has ever been reached yet), this field
       instead holds a `CombatStartReplayRoot` - see that type's own docstring for why a
       Combat Start Replay Root, not a captured Pending Snapshot, is used. Every consumer
-      of this field must branch on `isinstance(root_snapshot, CombatStartReplayRoot)`.
+      of this field must use `search_root(root_snapshot)`.
     * `replay_prefix` - ordered `ReplayPrefixEntry` list from the Stable Root to here;
       resets to empty at every Stable capture (DC_STABLE/DC_PENDING; NOTE_REPLAY_VS_PLAN).
     * `plan_path` - ordered `ReplayPrefixEntry` list from the SEARCH START to here; never
@@ -366,7 +571,7 @@ class DecisionContext:
       actually decided (TO_RNG in the snapshot-replay diagram) - always `None` here.
     """
 
-    root_snapshot: "CombatStateSnapshot | CombatStartReplayRoot"
+    root_snapshot: "CombatStateSnapshot | CombatStartReplayRoot | RoomEntryReplayRoot"
     replay_prefix: "list[ReplayPrefixEntry]"
     plan_path: "list[ReplayPrefixEntry]"
     current_decision_result: "BattleState"
@@ -387,6 +592,23 @@ class DecisionContext:
         and Main must never treat it as (or store it into) a Held Stable Snapshot."""
         return cls(
             root_snapshot=combat_start_replay_root,
+            replay_prefix=[],
+            plan_path=[],
+            current_decision_result=current_decision_result,
+            current_context_signature=current_context_signature,
+            search_hypothesis_id=None,
+        )
+
+    @classmethod
+    def from_room_entry_pending(
+        cls,
+        room_entry_root: "RoomEntryReplayRoot",
+        current_decision_result: "BattleState",
+        current_context_signature: DecisionSignature,
+    ) -> "DecisionContext":
+        """Build the context for a combat adopted while its opening choice is pending."""
+        return cls(
+            root_snapshot=room_entry_root,
             replay_prefix=[],
             plan_path=[],
             current_decision_result=current_decision_result,
@@ -495,7 +717,7 @@ def _root_snapshot_capture_boundary(root_snapshot) -> "Optional[str]":
 
 
 def _raise_if_root_snapshot_not_restore_eligible(root_snapshot) -> None:
-    if isinstance(root_snapshot, CombatStartReplayRoot):
+    if search_root(root_snapshot).is_combat_start:
         # Nothing to Restore-eligibility-check: a Combat Start Replay Root is never
         # Captured/Restored at all - see that type's own docstring.
         return
@@ -536,13 +758,46 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
     from live_combat_session import LiveCombatSession  # noqa: F401 - documents the expected type, avoids a hard import cycle
 
     _raise_if_root_snapshot_not_restore_eligible(context.root_snapshot)
-    if isinstance(context.root_snapshot, CombatStartReplayRoot):
-        # Start-of-Combat Pending's own Bootstrap: re-run the SAME combat start, never
-        # Restore - there is no prior Stable boundary to Restore from at all.
-        state = session.start_combat(context.root_snapshot.scenario_spec)
-    else:
-        state = session.restore_snapshot(context.root_snapshot)
+    adapted_root = search_root(context.root_snapshot)
+    state = adapted_root.bootstrap(session)
     last_observed: "Optional[DecisionSignature]" = None
+
+    # Unlike the legacy empty-prefix restore case, a room-entry bootstrap must verify
+    # the complete observed DecisionSignature: this is what detects an opening draw or
+    # intent divergence instead of assuming the two measured relic cases are a proof.
+    if isinstance(context.root_snapshot, RoomEntryReplayRoot):
+        expected_root = context.current_context_signature
+        legal_actions = state._cached_legal_actions or session.get_legal_actions()  # noqa: SLF001
+        try:
+            root_action = expected_root.semantic_action.resolve(legal_actions)
+        except SemanticActionUnresolvedError as exc:
+            return ReplayMismatch(
+                step_index=None,
+                stage="context_signature",
+                detail=f"room-entry root action was not resolvable: {exc}",
+            )
+        observed_root = DecisionSignature.from_battle_state(
+            state,
+            semantic_action=expected_root.semantic_action,
+            resolved_action=root_action,
+        )
+        if not observed_root.matches_for_replay(expected_root):
+            return ReplayMismatch(
+                step_index=None,
+                stage="context_signature",
+                detail="room-entry bootstrap diverged from root DecisionSignature",
+                diverged_fields=observed_root.diff_for_replay(expected_root),
+            )
+
+    if isinstance(context.root_snapshot, RoomEntryReplayRoot) and len(context.replay_prefix) > ROOM_ENTRY_REPLAY_MAX_STEPS:
+        return ReplayMismatch(
+            step_index=ROOM_ENTRY_REPLAY_MAX_STEPS,
+            stage="replay_bound",
+            detail=(
+                f"room-entry replay prefix exceeded the maximum of "
+                f"{ROOM_ENTRY_REPLAY_MAX_STEPS} steps"
+            ),
+        )
 
     for index, entry in enumerate(context.replay_prefix):
         legal_actions = state._cached_legal_actions or session.get_legal_actions()  # noqa: SLF001
@@ -674,6 +929,25 @@ def build_decision_context_from_held_stable(
 
     context = DecisionContext.from_main_stable_capture(
         held_stable_snapshot, current_result, current_context_signature
+    )
+    if replay_prefix:
+        context = dataclasses.replace(context, replay_prefix=list(replay_prefix))
+    return context
+
+
+def build_decision_context_from_room_entry(
+    room_entry_root: "RoomEntryReplayRoot",
+    replay_prefix: "list[ReplayPrefixEntry]",
+    current_result: "BattleState",
+) -> DecisionContext:
+    """Build a room-entry context, retaining the actions replayed from that root."""
+    current_context_signature = (
+        replay_prefix[-1].expected_signature
+        if replay_prefix
+        else _representative_signature_for_empty_prefix(current_result)
+    )
+    context = DecisionContext.from_room_entry_pending(
+        room_entry_root, current_result, current_context_signature
     )
     if replay_prefix:
         context = dataclasses.replace(context, replay_prefix=list(replay_prefix))

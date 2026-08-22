@@ -64,8 +64,8 @@ def _assert_closed(inst: CombatInstance) -> None:
 
 def test_cancel_cleanup_failure_closes_instance() -> None:
     inst = CombatInstance("cleanup-cancel-failure", _combat_config(), worker_count=2)
-    original_poll = inst._branch_manager.poll  # noqa: SLF001
-    original_cancel = inst._branch_manager.cancel_branches  # noqa: SLF001
+    original_poll = inst._phase._branch_manager.poll  # noqa: SLF001
+    original_cancel = inst._phase._branch_manager.cancel_branches  # noqa: SLF001
 
     def _poll_failure(*args, **kwargs):
         raise RuntimeError("synthetic poll failure")
@@ -74,8 +74,8 @@ def test_cancel_cleanup_failure_closes_instance() -> None:
         raise RuntimeError("synthetic cancel cleanup failure")
 
     start = inst.start_instance_response()
-    inst._branch_manager.poll = _poll_failure  # type: ignore[method-assign]  # noqa: SLF001
-    inst._branch_manager.cancel_branches = _cancel_failure  # type: ignore[method-assign]  # noqa: SLF001
+    inst._phase._branch_manager.poll = _poll_failure  # type: ignore[method-assign]  # noqa: SLF001
+    inst._phase._branch_manager.cancel_branches = _cancel_failure  # type: ignore[method-assign]  # noqa: SLF001
     try:
         try:
             inst.emulate_actions(items=_items(start), simulation_options=None)
@@ -85,15 +85,15 @@ def test_cancel_cleanup_failure_closes_instance() -> None:
             raise AssertionError("cleanup failure must fail closed")
         _assert_closed(inst)
     finally:
-        inst._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
-        inst._branch_manager.cancel_branches = original_cancel  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.cancel_branches = original_cancel  # type: ignore[method-assign]  # noqa: SLF001
         inst.close()
 
 
 def test_release_cleanup_failure_closes_instance() -> None:
     inst = CombatInstance("cleanup-release-failure", _combat_config(), worker_count=2)
-    original_poll = inst._branch_manager.poll  # noqa: SLF001
-    original_release = inst._branch_manager.release_branches  # noqa: SLF001
+    original_poll = inst._phase._branch_manager.poll  # noqa: SLF001
+    original_release = inst._phase._branch_manager.release_branches  # noqa: SLF001
 
     def _poll_failure(*args, **kwargs):
         raise RuntimeError("synthetic poll failure")
@@ -102,8 +102,8 @@ def test_release_cleanup_failure_closes_instance() -> None:
         raise RuntimeError("synthetic release cleanup failure")
 
     start = inst.start_instance_response()
-    inst._branch_manager.poll = _poll_failure  # type: ignore[method-assign]  # noqa: SLF001
-    inst._branch_manager.release_branches = _release_failure  # type: ignore[method-assign]  # noqa: SLF001
+    inst._phase._branch_manager.poll = _poll_failure  # type: ignore[method-assign]  # noqa: SLF001
+    inst._phase._branch_manager.release_branches = _release_failure  # type: ignore[method-assign]  # noqa: SLF001
     try:
         try:
             inst.emulate_actions(items=_items(start), simulation_options=None)
@@ -113,6 +113,6 @@ def test_release_cleanup_failure_closes_instance() -> None:
             raise AssertionError("cleanup failure must fail closed")
         _assert_closed(inst)
     finally:
-        inst._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
-        inst._branch_manager.release_branches = original_release  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.poll = original_poll  # type: ignore[method-assign]  # noqa: SLF001
+        inst._phase._branch_manager.release_branches = original_release  # type: ignore[method-assign]  # noqa: SLF001
         inst.close()

@@ -14,6 +14,7 @@ Run: `python test_battle_emulator_transition_outcome.py`.
 
 from __future__ import annotations
 
+import copy
 import sys
 import traceback
 from pathlib import Path
@@ -23,6 +24,7 @@ for _p in (_COMBAT_DIR,):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+from battle_emulator import BattleEmulator, BattleState  # noqa: E402
 from live_combat_session import LiveCombatSession  # noqa: E402
 
 
@@ -105,6 +107,96 @@ def test_non_concluding_step_leaves_state_non_terminal():
 
     assert next_state.is_terminal is False
     assert next_state.outcome == "in_progress"
+
+
+class _Observation:
+    def __init__(self, state: dict, *, is_terminal: bool, outcome: str = "in_progress"):
+        self.State = _State(state)
+        self.IsTerminal = is_terminal
+        self.Outcome = outcome
+        self.CombatSessionId = "test-combat"
+        self.StepIndex = 2
+
+
+class _State:
+    """Minimal CLR-dictionary shape accepted by emulator_bridge.to_plain()."""
+
+    def __init__(self, values: dict):
+        self._values = values
+        self.Keys = list(values)
+        self.Values = list(values.values())
+
+    def __getitem__(self, key):
+        return self._values[key]
+
+
+class _Game:
+    def __init__(self, result):
+        self._result = result
+
+    def Step(self, action_id):  # noqa: N802
+        return self._result
+
+
+def _completion_result(*, live_terminal: bool):
+    final_observation = _Observation({"enemies": []}, is_terminal=True, outcome="victory")
+    live_observation = _Observation({"room": "reward"}, is_terminal=live_terminal)
+    transition = type("Transition", (), {"Kind": "combat_completed", "FinalObservation": final_observation})()
+    return type("Result", (), {"Observation": live_observation, "Transition": transition, "LegalActions": []})(), transition, live_observation
+
+
+def _pre_completion_state() -> BattleState:
+    return BattleState(engine_state={"enemies": [{"hp": 1}]}, is_terminal=False, outcome="in_progress", turn=1)
+
+
+def test_completion_handoff_survives_shuffle_seed_and_clone():
+    result, transition, live_observation = _completion_result(live_terminal=True)
+    emulator = object.__new__(BattleEmulator)
+    emulator.whole_run_mode = False
+    completed = emulator.step_live_action(_Game(result), _pre_completion_state(), {"action_id": 1, "action_type": "card"})
+
+    assert completed.combat_completion.live_observation_state == {"room": "reward"}
+    assert completed.combat_completion.live_observation_is_terminal is True
+    assert completed.combat_completion.live_observation_outcome == "in_progress"
+    assert completed.combat_completion.transition_kind == "combat_completed"
+    assert emulator.with_shuffle_seed(completed, 123).combat_completion is completed.combat_completion
+    assert emulator.clone_state(completed).combat_completion is completed.combat_completion
+
+
+def test_completion_handoff_allows_deepcopy_of_battle_state():
+    result, _, _ = _completion_result(live_terminal=True)
+    emulator = object.__new__(BattleEmulator)
+    emulator.whole_run_mode = False
+    completed = emulator.step_live_action(_Game(result), _pre_completion_state(), {"action_id": 1, "action_type": "card"})
+
+    copied = copy.deepcopy(completed)
+
+    assert copied == completed
+    assert copied.combat_completion is not completed.combat_completion
+
+
+def test_legacy_mode_still_asserts_when_completion_live_observation_is_not_terminal():
+    result, _, _ = _completion_result(live_terminal=False)
+    emulator = object.__new__(BattleEmulator)
+    emulator.whole_run_mode = False
+
+    try:
+        emulator.step_live_action(_Game(result), _pre_completion_state(), {"action_id": 1, "action_type": "card"})
+    except AssertionError:
+        return
+    raise AssertionError("legacy no-map mode must retain its terminal completion assertion")
+
+
+def test_whole_run_mode_keeps_final_combat_state_and_live_handoff_distinct():
+    result, transition, live_observation = _completion_result(live_terminal=False)
+    emulator = object.__new__(BattleEmulator)
+    emulator.whole_run_mode = True
+    completed = emulator.step_live_action(_Game(result), _pre_completion_state(), {"action_id": 1, "action_type": "card"})
+
+    assert completed.engine_state == {"enemies": []}
+    assert completed.combat_completion.live_observation_state == {"room": "reward"}
+    assert completed.combat_completion.live_observation_is_terminal is False
+    assert completed.combat_completion.transition_kind == "combat_completed"
 
 
 def _run_all() -> int:

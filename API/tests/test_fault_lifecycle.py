@@ -133,11 +133,11 @@ def test_holder_lease_invalidated_on_cancel():
         em = inst.emulate_action(parent_branch_id="root", branch_id="b1", rng_id=1, decision_point_id=dp0, action_id=potion_id, simulation_options=None)
         assert em["status"] == "completed", em
 
-        registry_size_before = len(inst._lease_registry._leases)  # noqa: SLF001
+        registry_size_before = len(inst._phase._lease_registry._leases)  # noqa: SLF001
         assert registry_size_before >= 1, "a Pending boundary must have established a real Lease"
 
         inst.cancel_branches(["b1"])
-        registry_size_after = len(inst._lease_registry._leases)  # noqa: SLF001
+        registry_size_after = len(inst._phase._lease_registry._leases)  # noqa: SLF001
         assert registry_size_after == 0, "Cancelling the Lease-holding Branch must invalidate its Lease"
     finally:
         inst.close()
@@ -167,10 +167,10 @@ def test_close_instance_is_idempotent_via_server():
 
 def test_close_instance_releases_all_worker_processes():
     inst = CombatInstance("f4", _combat_config(), worker_count=2)
-    worker_ids = list(inst._pool.worker_ids)  # noqa: SLF001
+    worker_ids = list(inst._phase._pool.worker_ids)  # noqa: SLF001
     inst.close()
     for worker_id in worker_ids:
-        assert not inst._pool.is_worker_alive(worker_id), f"worker {worker_id} must be terminated after close()"  # noqa: SLF001
+        assert not inst._phase._pool.is_worker_alive(worker_id), f"worker {worker_id} must be terminated after close()"  # noqa: SLF001
 
 
 def test_training_disconnect_without_explicit_close_instance_still_cleans_up():

@@ -30,7 +30,7 @@ from search.branch_worker_pool import (
 from search.candidate_pipeline import CandidatePipelineSuccess, NoViableCandidates, PipelineCandidateRef
 from search.candidate_pipeline import build_candidate_pipeline_result
 from search.candidate_pipeline import build_candidate_pipeline_result_for_explicit_candidates
-from search.decision_context import CombatStartReplayRoot, DecisionContext
+from search.decision_context import DecisionContext, search_root
 from search.fault_taxonomy import (
     MainCombatFaultOutcome,
     aggregate_hypothesis_results,
@@ -165,7 +165,7 @@ def _check_main_invariant(
     if live_identity != expected_identity:
         mismatches.append("state_identity")
 
-    if isinstance(original_context.root_snapshot, CombatStartReplayRoot):
+    if search_root(original_context.root_snapshot).is_combat_start:
         # Start-of-Combat Pending: the ONLY valid "still matches" state is that Main has
         # NOT captured a real Held Stable Snapshot while this Search call was in flight -
         # per NOTE_NO_HELD_SNAPSHOT_AT_GENESIS, a Start-of-Combat Pending must never be
@@ -246,7 +246,7 @@ def _hypothesis_work_items_with_coverage(
     *,
     config: SearchCoordinatorConfig,
 ) -> tuple[list[WorkItem], CoverageAssessment]:
-    is_combat_start = isinstance(decision_context.root_snapshot, CombatStartReplayRoot)
+    is_combat_start = search_root(decision_context.root_snapshot).is_combat_start
     coverage = CoverageAssessment(
         is_complete=True,
         uncertain_sources=(),
