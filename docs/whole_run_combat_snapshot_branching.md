@@ -270,14 +270,90 @@ root が分岐可能か    ← アンカー必須
 クライアントが投げ続けることになり、容量・branch ライフサイクルに
 「まだ分岐できない」をエラーとして表現させることになる。
 
-該当するのは、戦闘がプレイヤーの選択で始まる場合である。`GAMBLING_CHIPS` は
-`AfterPlayerTurnStart` でターン 1 に手札選択を要求する
-（`MegaCrit.Sts2.Core.Models.Relics/GamblingChip.cs:16-26`）。`pending_choice` の snapshot は
+該当するのは、戦闘がプレイヤーの選択で始まる場合である。`pending_choice` の snapshot は
 restore できない（`unsupported_capture_boundary:published_target`）ため、
-開始時点で restore 可能なアンカーが無い。
+**戦闘スナップショットでは**開始時点にアンカーを張れない。
+
+実測で確認した実例は 2 つあり、**性質が異なる**（2026-08-22）。
+
+| relic | 開始 boundary | 選択提示時の手札 | draw の関与 |
+|---|---|---|---|
+| `GAMBLING_CHIP` | `pending_choice` | 5 枚 | **あり**（引いた後に提示） |
+| `TOOLBOX` | `pending_choice` | 0 枚 | なし（引く前に提示） |
+
+`GAMBLING_CHIP` は `AfterPlayerTurnStart` でターン 1 に手札選択を要求する
+（`MegaCrit.Sts2.Core.Models.Relics/GamblingChip.cs:16-26`）。
+**relic id は単数形である。** クラス名が `GamblingChip` であり、複数形 `GAMBLING_CHIPS` は
+このビルドで認識されず `DEPRECATED_RELIC` に落ちる。本仕様は当初その綴りを書いており、
+それで再現を試すと relic が装備されないまま「発火しない」という誤った結論になる。
 
 これは `CombatInstance` 側の既知の未対応事項と同じである
 （`API/instance_combat.py:85-88`、解法の在り処も併記）。
+**ただし Whole Run では 2.8b の部屋入口アンカーによって解消できる。**
+
+### 2.8b 部屋入口アンカー（開始時 `pending_choice` の解法）
+
+戦闘スナップショットが張れないなら、**アンカーを戦闘の外へ 1 段動かす。**
+Whole Run は地図境界で `save_state()` を取り、どの部屋を選んだかを知っている
+（`API/instance_whole_run.py` の `_map_snapshot` / `_room_id`）。この 2 つがあれば
+worker は `load_state(map_snapshot)` → `choose_room(room_id)` で**戦闘開始直後の盤面**を
+作れる。復元できない snapshot を必要としない。
+
+**成立の根拠（実測、2026-08-22）**
+
+| 確認項目 | 結果 |
+|---|---|
+| 敵の初手が RNG 非依存 | `MonsterMoveStateMachine` は初期状態を構築時に確定し、`RollMove` は rng を使わない。`_performedFirstMove` が false の間は `GetNextState(owner, rng)` に到達しない（`MonsterMoveStateMachine.cs:20-28, 34-41, 60`）。BYGONE_EFFIGY / FLYCONID で 4 回ずつ同一 |
+| 同一プロセスでの再入 | 敵・HP・初手 Intent・初期手札・山札枚数まで一致 |
+| **別プロセス**での再入 | 同上、完全一致（spawn した子で検証） |
+| `pending_choice` 始まり（draw 関与、`GAMBLING_CHIP`） | 一致 |
+| `pending_choice` 始まり（draw 非関与、`TOOLBOX`） | 一致 |
+
+初期 draw は snapshot の RNG 状態から決定的に再現されるため、**初期手札を pin する必要はない。**
+既存のドロー固定（`ReplayPrefixEntry.visible_draw_constraints`）が要るのは、
+分岐が root から分かれた**後**の引きであり、それは現行機構の担当のままである。
+
+**アンカーは 2 種類になる。** `CombatPhase` は次のどちらかを持つ。
+
+```
+StableSnapshotAnchor(snapshot, replay_prefix)   既存。restore して再生する
+RoomEntryAnchor(map_snapshot, room_id, replay_prefix)
+                                                 新規。load_state + choose_room して再生する
+```
+
+**切り替えの規則**
+
+- adopt 時、盤面が `stable` なら従来どおり `StableSnapshotAnchor` を張る
+- adopt 時、盤面が `pending_choice` なら `RoomEntryAnchor` を張る。
+  コントローラ（`WholeRunInstance`）が `_map_snapshot` と `_room_id` を渡す
+- root が最初の `stable` に到達した時点で `StableSnapshotAnchor` へ**張り替える**。
+  以後 `RoomEntryAnchor` は使わない
+
+張り替える理由は 2 つある。復元 1 回で済む方が安く、部屋入口再生は毎 branch で
+`load_state` + `choose_room` を伴う。そして既存経路は S1–S7 で検証済みである。
+**部屋入口アンカーは、他に手が無い区間だけの手段**であり、既定の経路にしない。
+
+**分岐要求への影響**
+
+2.8 の「まだ分岐できない」は、`RoomEntryAnchor` を持てる場合には**発生しない。**
+拒否が残るのは、コントローラが `_map_snapshot` / `_room_id` を持たないときだけである
+（ランの最初の部屋など、地図境界を経ずに戦闘へ入った場合）。拒否理由は区別できるようにし、
+どちらで拒否されたかを数えられる形にする。
+
+**やってはならないこと**
+
+- 部屋入口アンカーを、`StableSnapshotAnchor` が張れる場面の代替に使わない
+- 部屋入口再生が食い違ったときに黙って別経路へ落とさない。**大声で落とす。**
+  これは 2.9 の prefix 経路と同じ失敗（別 RNG の別ゲームを掴む）を招く形である
+- 部屋全体の行動列を再生しない。再生するのは**戦闘に入ってからの行動列だけ**であり、
+  root が最初の `stable` に着くまでの区間なので通常は 0〜1 手である
+
+**2.9b との関係**
+
+`RoomEntryAnchor` はラン状態そのものを持つので、原理的には戦闘終了後も継続できる。
+しかし**分岐は戦闘境界で終端する規則は変えない**（2.9b）。アンカーの種類によって
+到達範囲が変わると、Training から見た branch の意味論が 2 つになるためである。
+緩和するならアンカー種別と無関係に、別途決める。
 
 ### 2.9b 分岐は戦闘境界で終端する（制約）
 
@@ -524,6 +600,33 @@ adopted モードで `ResetFromScenario` が一度も呼ばれない。
 
 **受け入**: 戦闘分岐が `load_state` / `choose_room` / 部屋全体の prefix 再生を行わない。
 戦闘終了後も全エンドポイントが一貫した応答を返す。広告した上限を超えない。
+
+### S8. 部屋入口アンカー（2.8b）
+
+S1–S7 完了後の追加手順。開始時 `pending_choice` の戦闘で分岐できるようにする。
+
+- `CombatPhase` のアンカーを 2 種類にする。`StableSnapshotAnchor` /
+  `RoomEntryAnchor(map_snapshot, room_id, replay_prefix)`。
+  **どちらを持つかは 1 箇所で判断し、branch 発行側は種類を意識しない**
+- `WholeRunInstance.enter_combat_phase` が adopt 時に `_map_snapshot` / `_room_id` を渡す。
+  盤面が `stable` なら従来どおりで、渡した値は使われない
+- worker 側は `RoomEntryAnchor` を受けたら `load_state` → `choose_room` →
+  **戦闘に入ってからの行動列だけ**を再生する。部屋全体の再生はしない
+- root が最初の `stable` に到達したら `StableSnapshotAnchor` へ張り替える
+- 2.8 の分岐拒否は、アンカーを張れない場合だけに縮む。拒否理由を
+  「地図境界の情報が無い」と「開始 pending でアンカー未確立」で区別する
+
+**受け入**:
+
+- `GAMBLING_CHIP`（draw 関与）と `TOOLBOX`（draw 非関与）を注入した戦闘で、
+  root の最初の決定から分岐でき、branch 結果が使えること
+- 部屋入口再生が別プロセスで root と同一の盤面を作ること（fake ではなく実プロセスで）
+- 最初の `stable` 到達後は `RoomEntryAnchor` が使われないこと
+- 再生が食い違った場合に**黙って別経路へ落ちない**こと
+
+**注意**: この手順のテストは stub で固めてはならない。S5 は偽の session で緑になった一方、
+実配線ではランを完走できなかった（`Game access is TRANSFERRING`）。
+本手順は再現性そのものが主張なので、実プロセス・実 Emulator で確かめる。
 
 ## 4. テスト
 
