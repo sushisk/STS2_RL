@@ -31,6 +31,8 @@ from worker_pool import (
 from API.dto import (
     FAULT_EMULATOR_ERROR,
     FAULT_RNG_HYPOTHESIS_UNSUPPORTED_AT_BOUNDARY,
+    FAULT_REPLAY_UNSUPPORTED_DRAW_PILE_CONSUMPTION,
+    FAULT_REPLAY_UNSUPPORTED_PINNED_DRAW_MATERIALIZATION,
     FAULT_TASK_TIMEOUT,
     ROOT_BRANCH_ID,
     ROOT_RNG_ID,
@@ -48,6 +50,8 @@ from API.masking import build_masked_emulator_dto, mask_legal_actions
 from API.terminal_outcome import VALID_WHOLE_RUN_TERMINAL_OUTCOMES, require_terminal_outcome
 from API.validation import RequestRejected
 from API.whole_run_event_rng import EventRngHypothesisRegistry
+from search.rng_hypothesis import unpinned_draw_pile_consumer
+from search.rng_hypothesis import PinnedDrawMaterializationRefused
 
 
 logger = logging.getLogger(__name__)
@@ -1370,6 +1374,14 @@ class WholeRunInstance:
                     )
             self._decision_points.validate(parent_id, item["decision_point_id"])
             chosen = self._resolve_chosen_action(view, item["action_id"])
+            semantic_key = chosen.get("semantic_key", "")
+            card_id = str(semantic_key).split(":", 1)[-1] if semantic_key else ""
+            if unpinned_draw_pile_consumer(card_id):
+                raise RequestRejected(
+                    f"cannot branch across {card_id}: Emulator consumes a draw-pile card "
+                    "without a visible Hand draw, so replay order is unpinned",
+                    fault_kind=FAULT_REPLAY_UNSUPPORTED_DRAW_PILE_CONSUMPTION,
+                )
             admitted.append((item, view, chosen))
 
         # Reserve before asking CombatPhase to allocate a work item/worker.  Any error
@@ -1390,7 +1402,12 @@ class WholeRunInstance:
                     "depth": len(parent_log), "decision_point_id": item["decision_point_id"],
                     "action_id": item["action_id"], "rng_id": item["rng_id"],
                 }]
-                work_item = phase.build_work_item(view.decision_context, chosen, parent_id, item["decision_point_id"], item["rng_id"])
+                try:
+                    work_item = phase.build_work_item(view.decision_context, chosen, parent_id, item["decision_point_id"], item["rng_id"])
+                except PinnedDrawMaterializationRefused as exc:
+                    raise RequestRejected(
+                        str(exc), fault_kind=FAULT_REPLAY_UNSUPPORTED_PINNED_DRAW_MATERIALIZATION
+                    ) from exc
                 prepared.append((item, view, chosen, work_item, parent_internal_id, branch_log, parent_history.fork()))
             internal_ids = list(phase.submit_many([(work, parent) for _, _, _, work, parent, _, _ in prepared]))
             for entry, internal_id in zip(prepared, internal_ids, strict=True):

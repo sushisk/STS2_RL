@@ -238,6 +238,7 @@ class CombatPhase:
                     visible_draw_constraints=draw_evidence.constraints,
                     visible_draw_tracking_blocked=draw_evidence.blocks_later_pinning,
                     visible_draw_tracking_error=draw_evidence.tracking_error,
+                    visible_draw_tracking_reason=draw_evidence.tracking_reason,
                 )
                 self._replay_prefix = append_replay_prefix_entry(self._replay_prefix, entry)
 

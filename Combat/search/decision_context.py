@@ -520,6 +520,32 @@ class DecisionSignature:
         return not self.diff_for_replay(other)
 
 
+def _replay_divergence_values(
+    observed: "DecisionSignature",
+    expected: "DecisionSignature",
+    diverged_fields: "list[str]",
+) -> "dict[str, dict[str, Any]]":
+    """Return only compared values for fields already reported as divergent."""
+    values: dict[str, dict[str, Any]] = {}
+    for name in diverged_fields:
+        observed_value = getattr(observed, name)
+        expected_value = getattr(expected, name)
+        if name == "candidate_semantic_keys":
+            # This field is already a count map, serialized as ((key, count), ...) pairs.
+            # Counting the pairs themselves treats (STRIKE, 2) and (STRIKE, 1) as unrelated
+            # elements, so subtraction reports both sides in full and never says the thing
+            # worth knowing: one side had one more STRIKE. Rebuild the counts per key.
+            expected_counts = Counter(dict(expected_value or ()))
+            observed_counts = Counter(dict(observed_value or ()))
+            values[name] = {
+                "expected_only": sorted((expected_counts - observed_counts).items()),
+                "observed_only": sorted((observed_counts - expected_counts).items()),
+            }
+        else:
+            values[name] = {"expected": expected_value, "observed": observed_value}
+    return values
+
+
 # ---------------------------------------------------------------------------
 # Decision Context (DC_DEF)
 # ---------------------------------------------------------------------------
@@ -536,6 +562,7 @@ class ReplayPrefixEntry:
     visible_draw_constraints: VisibleDrawConstraints = ()
     visible_draw_tracking_blocked: bool = False
     visible_draw_tracking_error: "Optional[str]" = None
+    visible_draw_tracking_reason: "Optional[dict[str, Any]]" = None
 
 
 @dataclass
@@ -698,6 +725,8 @@ class ReplayMismatch:
     stage: str  # "resolve" | "signature" | "context_signature"
     detail: str
     diverged_fields: "list[str]" = field(default_factory=list)
+    diverged_values: "dict[str, dict[str, Any]]" = field(default_factory=dict)
+    replay_action: "Optional[dict[str, str]]" = None
 
 
 ReplayOutcome = "ReplaySuccess | ReplayMismatch"
@@ -822,11 +851,19 @@ def replay_decision_context(session: "LiveCombatSession", context: "DecisionCont
             target_enemy_index=entry.target_enemy_index,
         )
         if not observed.matches_for_replay(entry.expected_signature):
+            diverged_fields = observed.diff_for_replay(entry.expected_signature)
             return ReplayMismatch(
                 step_index=index,
                 stage="signature",
                 detail=f"observed post-step signature diverged from replay prefix entry {index}",
-                diverged_fields=observed.diff_for_replay(entry.expected_signature),
+                diverged_fields=diverged_fields,
+                diverged_values=_replay_divergence_values(
+                    observed, entry.expected_signature, diverged_fields
+                ),
+                replay_action={
+                    "action_type": entry.semantic_action.action_type,
+                    "semantic_key": entry.semantic_action.semantic_key,
+                },
             )
         last_observed = observed
 

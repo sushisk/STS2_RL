@@ -60,6 +60,11 @@ _PUBLIC_FAULT_DIAGNOSTIC_KEYS = (
     "actual_choice_kind",
     "actual_room_context",
     "expected_position",
+    "diverged_fields",
+    "diverged_values",
+    "replay_action",
+    "visible_draw_tracking_blocked",
+    "visible_draw_tracking_reasons",
 )
 
 

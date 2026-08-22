@@ -10,15 +10,21 @@ import pytest
 _COMBAT_DIR = Path(__file__).resolve().parents[1]
 if str(_COMBAT_DIR) not in sys.path:
     sys.path.insert(0, str(_COMBAT_DIR))
+_REPO_DIR = _COMBAT_DIR.parent
+if str(_REPO_DIR) not in sys.path:
+    sys.path.insert(0, str(_REPO_DIR))
 
 from battle_emulator import BattleState
 from combat_state_snapshot import CardInstanceSnapshot, LocalCostModifierSnapshot, SerializableRngSnapshot
+from live_combat_session import LiveCombatSession
 from search.replay_draw_restore import (
     card_id_from_observable_key,
     observable_card_key_from_public,
+    visible_draw_tracking_reasons,
     visible_draw_transition_evidence_from_committed_transition,
 )
 from search.rng_hypothesis import (
+    PinnedDrawMaterializationRefused,
     SearchHypothesisId,
     _draw_pile_instances_for_hypothesis,
     _pinned_prefix_visible_draw_constraints,
@@ -129,6 +135,79 @@ def test_acrobatics_shape_uses_drawpile_diff_and_appended_hand_suffix() -> None:
     assert [key[5] for _offset, key in result.constraints[:2]] == [True, False]
 
 
+def test_end_turn_shape_replaces_hand_then_appends_drawn_hand() -> None:
+    old_hand = [_public("STRIKE"), _public("DEFEND")]
+    drawn = [_public("A"), _public("B"), _public("C")]
+    pre = _state(hand=old_hand, draw=drawn)
+    post = _state(hand=drawn, draw=[])
+
+    result = _evidence(pre, post)
+
+    assert result.blocks_later_pinning is False
+    assert result.tracking_error is None
+    assert [offset for offset, _key in result.constraints] == [0, 1, 2]
+    assert [card_id_from_observable_key(key) for _offset, key in result.constraints] == ["A", "B", "C"]
+
+
+def test_real_emulator_thinking_ahead_pins_draw_order_before_choice() -> None:
+    """THINKING_AHEAD's pending hand is the ordered draw result, not an unordered set."""
+    spec = {
+        "character_id": "SILENT",
+        "player_hp": 70,
+        "player_max_hp": 70,
+        "hand_cards": [
+            {"card_id": "THINKING_AHEAD", "is_upgraded": False},
+            {"card_id": "NEUTRALIZE", "is_upgraded": False},
+            {"card_id": "SURVIVOR", "is_upgraded": False},
+            {"card_id": "ACROBATICS", "is_upgraded": False},
+            {"card_id": "BACKFLIP", "is_upgraded": False},
+        ],
+        "draw_pile_cards": [
+            {"card_id": "DOUBT", "is_upgraded": False},
+            {"card_id": "DEFEND_SILENT", "is_upgraded": False},
+            {"card_id": "STRIKE_SILENT", "is_upgraded": False},
+        ],
+        "discard_pile_cards": [],
+        "exhaust_pile_cards": [],
+        "enemies": [{"monster_id": "LOUSE_PROGENITOR", "hp": 100}],
+        "seed": 1,
+    }
+    session = LiveCombatSession()
+    before = session.start_combat(spec)
+    thinking_ahead = next(
+        action
+        for action in before._cached_legal_actions
+        if action["action_type"] == "card"
+        and action["parameters"].get("cardId") == "THINKING_AHEAD"
+    )
+    after = session.step(before, thinking_ahead, stop_at_pending=True)
+
+    assert [card["id"] for card in after.engine_state["hand"]][-2:] == ["DOUBT", "DEFEND_SILENT"]
+    assert [card["id"] for card in after.engine_state["drawPile"]] == ["STRIKE_SILENT"]
+    evidence = visible_draw_transition_evidence_from_committed_transition(
+        after, [], pre_battle_state=before
+    )
+    assert [card_id_from_observable_key(key) for _offset, key in evidence.constraints] == [
+        "DOUBT",
+        "DEFEND_SILENT",
+    ]
+    assert evidence.blocks_later_pinning is False
+
+    choice = next(
+        action for action in after._cached_legal_actions
+        if action["action_type"] == "choice_card"
+    )
+    chosen = session.step(after, choice, stop_at_pending=True)
+    returned = chosen.engine_state["drawPile"][0]["id"]
+    evidence = visible_draw_transition_evidence_from_committed_transition(
+        chosen, [], pre_battle_state=after
+    )
+    assert [card_id_from_observable_key(key) for _offset, key in evidence.constraints] == [
+        returned
+    ]
+    assert evidence.blocks_later_pinning is False
+
+
 def test_pending_choice_semantics_and_options_are_not_safety_inputs() -> None:
     h = _public("H")
     a = _public("A")
@@ -184,13 +263,41 @@ def test_non_preserving_pre_hand_prefix_fails_closed() -> None:
     assert result.blocks_later_pinning is True
 
 
-def test_transition_requires_exactly_one_pre_hand_card_consumed() -> None:
+def test_unchanged_pre_hand_draw_is_a_supported_transfer() -> None:
     h = _public("H")
     a = _public("A")
     pre = _state(hand=[h], draw=[a])
     post = _state(hand=[h, a], draw=[], options=[h, a])
 
     result = _evidence(pre, post)
+    assert [offset for offset, _key in result.constraints] == [0]
+    assert card_id_from_observable_key(result.constraints[0][1]) == "A"
+    assert result.blocks_later_pinning is False
+
+
+def test_hand_to_draw_pile_top_transfer_is_pinned_from_public_state() -> None:
+    returned = _public("RETURNED")
+    h = _public("H")
+    tail = _public("TAIL")
+    pre = _state(hand=[h, returned], draw=[tail])
+    post = _state(hand=[h], draw=[returned, tail])
+
+    result = _evidence(pre, post)
+
+    assert [offset for offset, _key in result.constraints] == [0]
+    assert card_id_from_observable_key(result.constraints[0][1]) == "RETURNED"
+    assert result.blocks_later_pinning is False
+
+
+def test_ambiguous_duplicate_hand_return_blocks_tracking() -> None:
+    first = _public("RETURNED")
+    second = _public("RETURNED")
+    tail = _public("TAIL")
+    pre = _state(hand=[first, second], draw=[tail])
+    post = _state(hand=[first], draw=[second, tail])
+
+    result = _evidence(pre, post)
+
     assert result.constraints == ()
     assert result.blocks_later_pinning is True
 
@@ -274,6 +381,59 @@ def test_unaccounted_drawpile_mutation_blocks_later_root_relative_pinning() -> N
     assert later.blocks_later_pinning is True
 
 
+def test_unsupported_shape_records_machine_readable_shape_and_delta() -> None:
+    pre = _state(hand=[_public("PREPARED")], draw=[_public("INJURY"), _public("STRIKE_SILENT")])
+    post = _state(hand=[], draw=[_public("STRIKE_SILENT")], options=[])
+
+    result = _evidence(pre, post)
+
+    assert result.tracking_reason == {
+        "code": "unsupported_transition_shape",
+        "check": "hand_draw_or_hand_return_to_draw_top",
+        "failed_checks": ["hand_draw", "hand_return_to_draw_top"],
+        "shape": {
+            "pre": {"draw": 2, "hand": 1},
+            "post": {"draw": 1, "hand": 0},
+            "draw_multiset_delta": {
+                "removed": {"INJURY": 1},
+                "added": {},
+            },
+        },
+    }
+
+
+def test_tracking_reasons_aggregate_all_blocked_prefix_shapes() -> None:
+    first = _evidence(
+        _state(hand=[_public("PREPARED")], draw=[_public("INJURY")]),
+        _state(hand=[], draw=[]),
+    )
+    second = _evidence(
+        _state(hand=[_public("ACROBATICS")], draw=[_public("STRIKE_SILENT")]),
+        _state(hand=[], draw=[]),
+    )
+    entries = [
+        _entry(blocked=True, error="first",),
+        SimpleNamespace(
+            visible_draw_tracking_blocked=True,
+            visible_draw_tracking_reason=first.tracking_reason,
+        ),
+        SimpleNamespace(
+            visible_draw_tracking_blocked=True,
+            visible_draw_tracking_reason=second.tracking_reason,
+        ),
+    ]
+
+    reasons = visible_draw_tracking_reasons(entries)
+
+    assert len(reasons) == 2
+    assert {reason["count"] for reason in reasons} == {1}
+    # dicts are not orderable, so compare the set of removals rather than sorting them
+    assert {
+        tuple(sorted(reason["shape"]["draw_multiset_delta"]["removed"].items()))
+        for reason in reasons
+    } == {(("INJURY", 1),), (("STRIKE_SILENT", 1),)}
+
+
 def test_zero_draw_transition_does_not_block_cursor() -> None:
     a = _public("A")
     pre = _state(hand=[_public("PLAYED"), _public("H")], draw=[a])
@@ -344,9 +504,26 @@ def test_hidden_gameplay_state_ambiguity_fails_closed() -> None:
     ])
     key = observable_card_key_from_public(_public("A", cost=0))
     assert key is not None
-    with pytest.raises(ValueError, match="hidden gameplay states"):
+    with pytest.raises(PinnedDrawMaterializationRefused, match="observable_key=.*hidden_state_count=2") as exc_info:
         _draw_pile_instances_for_hypothesis(
             root,
             ("A", "A"),
             pinned_observable_keys=((0, key),),
+        )
+    assert exc_info.value.fault_kind == "replay_unsupported_pinned_draw_materialization"
+
+
+def test_pinned_materialization_refusals_are_named_for_prefix_and_missing_key() -> None:
+    root = _root([_card("i-a", "A")])
+    key = observable_card_key_from_public(_public("A"))
+    missing_key = observable_card_key_from_public(_public("B"))
+    assert key is not None and missing_key is not None
+
+    with pytest.raises(PinnedDrawMaterializationRefused, match=r"offsets=\[1\]"):
+        _draw_pile_instances_for_hypothesis(
+            root, ("A",), pinned_observable_keys=((1, key),)
+        )
+    with pytest.raises(PinnedDrawMaterializationRefused, match="observable_key=.*required_count=1.*available_count=0"):
+        _draw_pile_instances_for_hypothesis(
+            root, ("A",), pinned_observable_keys=((0, missing_key),)
         )

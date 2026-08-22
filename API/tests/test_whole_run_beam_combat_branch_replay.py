@@ -138,6 +138,25 @@ def _raw_diagnostics():
         "actual_choice_scope": "TopLevel",
         "actual_choice_kind": "target",
         "actual_room_context": {"room_type": "CombatRoom"},
+        "diverged_fields": ["boundary", "candidate_semantic_keys"],
+        "diverged_values": {
+            "boundary": {"expected": "stable", "observed": "pending_choice"},
+            "candidate_semantic_keys": {"expected_only": [], "observed_only": [["card", "0:STRIKE_IRONCLAD"]]},
+        },
+        "replay_action": {"action_type": "card", "semantic_key": "0:STRIKE_IRONCLAD"},
+        "visible_draw_tracking_blocked": True,
+        "visible_draw_tracking_reasons": [
+            {
+                "count": 2,
+                "code": "unsupported_transition_shape",
+                "failed_checks": ["hand_draw", "hand_return_to_draw_top"],
+                "shape": {
+                    "pre": {"draw": 2, "hand": 1},
+                    "post": {"draw": 1, "hand": 0},
+                    "draw_multiset_delta": {"removed": {"INJURY": 1}, "added": {}},
+                },
+            }
+        ],
         "actual_legal_actions": [_card(0)],
         "actual_observation": {
             "boundary": "pending_choice",
@@ -204,6 +223,11 @@ def test_the_public_boundary_fields_cross_unchanged():
         "actual_choice_scope",
         "actual_choice_kind",
         "actual_room_context",
+        "diverged_fields",
+        "diverged_values",
+        "replay_action",
+        "visible_draw_tracking_blocked",
+        "visible_draw_tracking_reasons",
     ):
         assert public[key] == raw[key]
 

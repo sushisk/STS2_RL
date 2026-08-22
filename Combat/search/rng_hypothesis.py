@@ -49,6 +49,35 @@ HYPOTHESIS_MODE_INDEPENDENT = "independent"
 HYPOTHESIS_MODES = frozenset({HYPOTHESIS_MODE_STANDARD, HYPOTHESIS_MODE_INDEPENDENT})
 
 
+class PinnedDrawMaterializationRefused(ValueError):
+    """A public draw pin cannot be materialized without guessing hidden state."""
+
+    fault_kind = "replay_unsupported_pinned_draw_materialization"
+
+# The five Emulator call sites of CardPileCmd.AutoPlayFromDrawPile, verified against
+# MegaCrit.Sts2.Core.Models.Cards/{Cascade,Havoc,IAmInvincible}.cs, DistilledChaos.cs and
+# MayhemPower.cs. Each consumes a draw-pile card without it ever appearing in Hand, so the
+# visible-prefix pinning has nothing to constrain and a branch would replay a different
+# game than the one it reports.
+#
+# This list is a copy of a fact that lives in the Emulator, and nothing here notices when
+# that fact changes: a new card calling AutoPlayFromDrawPile diverges silently, exactly as
+# HAVOC did. The signature diagnostics are what caught it - a mismatch names the replayed
+# action - so the recovery path is the same, not a silent wrong answer. Re-derive the list
+# with: grep -rl AutoPlayFromDrawPile Sts2Emulator/Imported/Source/
+UNPINNED_DRAW_PILE_CONSUMERS = frozenset({
+    "CASCADE",
+    "HAVOC",
+    "I_AM_INVINCIBLE",
+    "DISTILLED_CHAOS",
+    "MAYHEM",
+})
+
+
+def unpinned_draw_pile_consumer(card_id: object) -> bool:
+    return str(card_id).upper() in UNPINNED_DRAW_PILE_CONSUMERS
+
+
 @dataclass(frozen=True)
 class SearchHypothesisId:
     """RNG component plus one Hypothetical OrderedDrawPile identity.
@@ -413,19 +442,25 @@ def _draw_pile_instances_for_hypothesis(
 
     offsets = [offset for offset, _key in pinned_observable_keys]
     if offsets != list(range(len(offsets))):
-        raise ValueError("pinned draw constraints must be an ordered contiguous prefix")
+        raise PinnedDrawMaterializationRefused(
+            "pinned draw constraints must be an ordered contiguous prefix; "
+            f"got offsets={offsets!r}"
+        )
 
     pinned_keys = tuple(key for _offset, key in pinned_observable_keys)
     for key, count in Counter(pinned_keys).items():
         matches = [card for card in root_cards if observable_card_key_from_snapshot(card) == key]
         if len(matches) < count:
-            raise ValueError(
-                "pinned observable card state is absent from the root DrawPile in the required count"
+            raise PinnedDrawMaterializationRefused(
+                "pinned observable card state is absent from the root DrawPile in the required count; "
+                f"observable_key={key!r}, required_count={count}, available_count={len(matches)}"
             )
-        if len({snapshot_card_replay_internal_key(card) for card in matches}) != 1:
-            raise ValueError(
+        hidden_states = {snapshot_card_replay_internal_key(card) for card in matches}
+        if len(hidden_states) != 1:
+            raise PinnedDrawMaterializationRefused(
                 "pinned observable card state maps to multiple hidden gameplay states; "
-                "public evidence is insufficient for safe replay materialization"
+                "public evidence is insufficient for safe replay materialization; "
+                f"observable_key={key!r}, hidden_state_count={len(hidden_states)}"
             )
 
     used_instance_ids: set[str] = set()

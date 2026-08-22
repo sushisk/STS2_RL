@@ -480,6 +480,9 @@ def _run_exec_loop(loop_state: MainLoopState) -> "Union[str, MainCombatFaultOutc
             visible_draw_tracking_error=(
                 draw_evidence.tracking_error if draw_evidence is not None else None
             ),
+            visible_draw_tracking_reason=(
+                draw_evidence.tracking_reason if draw_evidence is not None else None
+            ),
         )
         loop_state.replay_prefix = append_replay_prefix_entry(loop_state.replay_prefix, entry)
         loop_state.planned_sequence = loop_state.planned_sequence[1:]
